@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hash Generator — Codepackr</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+ <a href="../index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+ <nav class="main-nav"><a href="../index.html#formatters">Formatters</a><a href="../index.html#encoders">Encoders</a><a href="../index.html#validators">Validators</a><a href="../index.html#utils">Utilities</a></nav>
+</div></header>
+<div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;">
+ <div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div>
+</div>
+<div class="tool-page">
+ <div class="tool-page-header">
+ <div class="breadcrumb"><a href="../index.html">Home</a> › Hash Generator</div>
+ <h1>Hash Generator</h1><p>Generate SHA-1, SHA-256, SHA-384, SHA-512 hashes using the Web Crypto API.</p>
+ </div>
+ <div class="ws-toolbar">
+ <div class="tabs">
+ <button class="tab active" id="hexBtn" onclick="setFmt('hex',this)">Hex</button>
+ <button class="tab" onclick="setFmt('b64',this)">Base64</button>
+ </div>
+ <div style="margin-left:auto">
+ <button class="btn btn-accent" onclick="generateAll()">⚡ Generate Hashes</button>
+ </div>
+ </div>
+ <div class="ws-panel" style="margin-bottom:16px">
+ <div class="ws-panel-header"><span class="ws-panel-title">Input Text</span></div>
+ <textarea class="ws-textarea" id="inp" placeholder="Enter text to hash…" oninput="generateAll()" spellcheck="false" style="min-height:120px"></textarea>
+ </div>
+ <div style="display:grid;gap:12px" id="hashGrid">
+ <div style="color:var(--text-dim);text-align:center;padding:30px">Type text above to generate hashes</div>
+ </div>
+</div>
+<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="../index.html" style="color:var(--accent)">← All Tools</a></div></footer>
+<div class="toast" id="_toast"></div>
+<script>function toast(msg,type){var el=document.getElementById('_toast');el.textContent=msg;el.className='toast'+(type?' t-'+type:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
+var _fmt='hex';
+function setFmt(f,btn){_fmt=f;document.querySelectorAll('.ws-toolbar .tab').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');generateAll();}
+async function hashBuf(algo,msg){
+ var enc=new TextEncoder();
+ var buf=await crypto.subtle.digest(algo,enc.encode(msg));
+ return buf;
+}
+function bufToHex(buf){return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');}
+function bufToB64(buf){var bin=String.fromCharCode.apply(null,new Uint8Array(buf));return btoa(bin);}
+async function generateAll(){
+ var v=document.getElementById('inp').value;
+ var algos=[
+{name:'SHA-1',algo:'SHA-1',color:'#ffc84a'},
+{name:'SHA-256',algo:'SHA-256',color:'var(--accent2)'},
+{name:'SHA-384',algo:'SHA-384',color:'var(--accent)'},
+{name:'SHA-512',algo:'SHA-512',color:'var(--accent3)'}
+ ];
+ var grid=document.getElementById('hashGrid');
+ if(!v.trim()){
+ grid.innerHTML='<div style="color:var(--text-dim);text-align:center;padding:30px">Type text above to generate hashes</div>';
+ return;
+}
+ grid.innerHTML=algos.map(function(a){
+ return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px">'
++'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
++'<span style="font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:'+a.color+'">'+a.name+'</span>'
++'<button class="btn-icon" id="cpbtn-'+a.name.replace(/-/g,'')+'" onclick="copyHashById(\'hashval-'+a.name.replace(/-/g,'')+'\')">⧉</button>'
++'</div>'
++'<div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);word-break:break-all" id="hashval-'+a.name.replace(/-/g,'')+'">Computing…</div>'
++'</div>';
+}).join('');
+ for(var i=0;i<algos.length;i++){
+ try{
+ var buf=await hashBuf(algos[i].algo,v);
+ var result=_fmt==='hex'?bufToHex(buf):bufToB64(buf);
+ var el=document.getElementById('hashval-'+algos[i].name.replace(/-/g,''));
+ if(el){el.textContent=result;el.style.color='var(--text)';}
+}catch(err){
+ var el2=document.getElementById('hashval-'+algos[i].name.replace(/-/g,''));
+ if(el2){el2.textContent='Error:'+err.message;el2.style.color='var(--accent3)';}
+}
+}
+}
+function copyHashById(id){
+ var el=document.getElementById(id);
+ if(!el||el.textContent==='Computing…')return;
+ navigator.clipboard.writeText(el.textContent).then(function(){toast('Hash copied!','ok');});
+}
+(function(){var tools=[{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'html-formatter.html',l:'HTML'},{h:'css-formatter.html',l:'CSS'},{h:'base64.html',l:'Base64'},{h:'url-encode.html',l:'URL'},{h:'regex-tester.html',l:'Regex'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'},{h:'lorem-ipsum.html',l:'Lorem'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='hash-generator.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();</script>
+</body></html>

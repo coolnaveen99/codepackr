@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Free online JSON formatter — beautify, minify and validate JSON data.">
+<title>JSON Formatter — Codepackr</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+ <a href="../index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+ <nav class="main-nav"><a href="../index.html#formatters">Formatters</a><a href="../index.html#encoders">Encoders</a><a href="../index.html#validators">Validators</a></nav>
+</div></header>
+<div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;">
+ <div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;align-items:center;min-height:44px;" id="toolNav"></div>
+</div>
+<div class="tool-page">
+ <div class="tool-page-header">
+ <div class="breadcrumb"><a href="../index.html">Home</a> › <a href="../index.html#formatters">Formatters</a> › JSON Formatter</div>
+ <h1>JSON Formatter</h1>
+ <p>Beautify, minify and validate JSON data in one click.</p>
+ </div>
+ <div class="ws-toolbar">
+ <div class="tabs">
+ <button class="tab active" onclick="doFormat('pretty',this)">Beautify</button>
+ <button class="tab" onclick="doFormat('mini',this)">Minify</button>
+ <button class="tab" onclick="doFormat('sort',this)">Sort Keys</button>
+ </div>
+ <select class="select" id="indentSel">
+ <option value="2">2 spaces</option>
+ <option value="4">4 spaces</option>
+ <option value="tab">Tabs</option>
+ </select>
+ <div style="margin-left:auto;display:flex;gap:8px">
+ <button class="btn btn-secondary btn-sm" onclick="clearAll()">⟳ Clear</button>
+ <button class="btn btn-accent" onclick="doFormat('pretty',null)">⚡ Format <kbd style="font-size:0.7rem;opacity:0.7">Ctrl+↵</kbd></button>
+ </div>
+ </div>
+ <div id="statusEl" style="display:none" class="status-bar"></div>
+ <div class="tool-workspace">
+ <div class="ws-panel">
+ <div class="ws-panel-header">
+ <span class="ws-panel-title">Input JSON</span>
+ <div class="ws-panel-actions">
+ <button class="btn-icon" onclick="document.getElementById('fJson').click()">📁</button>
+ <button class="btn-icon" onclick="document.getElementById('inp').value='';setStatus()">✕</button>
+ </div>
+ </div>
+ <textarea class="ws-textarea" id="inp" placeholder='{"key": "value"}' spellcheck="false"></textarea>
+ </div>
+ <div class="ws-panel">
+ <div class="ws-panel-header">
+ <span class="ws-panel-title">Output</span>
+ <div class="ws-panel-actions">
+ <button class="btn-icon" onclick="copyOut()" title="Copy">⧉</button>
+ <button class="btn-icon" onclick="downloadOut()" title="Download">↓</button>
+ </div>
+ </div>
+ <div class="output-content" id="out" style="min-height:320px"></div>
+ </div>
+ </div>
+ <input type="file" id="fJson" style="display:none" accept=".json,.txt" onchange="loadFile(event)">
+ <div class="about-box"><h2>About JSON Formatter</h2><p>Paste any JSON data and instantly beautify it with proper indentation, or minify it to remove whitespace for production use. The Sort Keys option alphabetizes all object keys recursively. Validation errors are shown with the exact line and character position.</p></div>
+ <div class="related-tools"><h2>Related Tools</h2><div class="tools-grid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">
+ <a href="diff-checker.html" class="tool-card"><div class="tool-icon ti-diff">≠</div><div class="tool-info"><h3>Diff Checker</h3><p>Compare text and code</p></div><div class="tool-arrow">→</div></a>
+ <a href="json-validator.html" class="tool-card"><div class="tool-icon ti-json">✓</div><div class="tool-info"><h3>JSON Validator</h3><p>Strict JSON validation</p></div><div class="tool-arrow">→</div></a>
+ </div></div>
+</div>
+<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="../index.html" style="color:var(--accent)">← All Tools</a></div></footer>
+<div class="toast" id="_toast"></div>
+<script>function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
+function setStatus(msg,type){var el=document.getElementById('statusEl');if(!msg){el.style.display='none';return;}el.className='status-bar status-'+type;el.textContent=(type==='valid'?'✓ ':type==='invalid'?'✗ ':'ℹ ')+msg;el.style.display='flex';}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function sortKeys(obj){if(Array.isArray(obj))return obj.map(sortKeys);if(obj&&typeof obj==='object'){return Object.keys(obj).sort().reduce(function(a,k){a[k]=sortKeys(obj[k]);return a;},{});}return obj;}
+function syntaxHL(json){return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,function(m){var cls='color:#ffc84a';if(/^"/.test(m)){cls=/:$/.test(m)?'color:var(--accent2)':'color:#a8d8a8';}else if(/true|false/.test(m))cls='color:var(--accent)';else if(/null/.test(m))cls='color:var(--accent3)';return'<span style="'+cls+'">'+esc(m)+'</span>';});}
+function doFormat(mode){
+ var v=document.getElementById('inp').value.trim();
+ if(!v){setStatus('Input is empty','info');return;}
+ try{
+ var obj=JSON.parse(v);
+ var ind=document.getElementById('indentSel').value;
+ var indVal=ind==='tab'?'\t':parseInt(ind);
+ if(mode==='sort')obj=sortKeys(obj);
+ var out=mode==='mini'?JSON.stringify(obj):JSON.stringify(obj,null,indVal);
+ document.getElementById('out').innerHTML='<code>'+syntaxHL(esc(out))+'</code>';
+ setStatus('Valid JSON — '+out.length+' chars','valid');
+}catch(e){setStatus(e.message,'invalid');}
+}
+function clearAll(){document.getElementById('inp').value='';document.getElementById('out').innerHTML='';setStatus();}
+function copyOut(){var c=document.getElementById('out').textContent;if(!c)return;navigator.clipboard.writeText(c).then(function(){toast('Copied!','ok');});}
+function downloadOut(){var c=document.getElementById('out').textContent;if(!c)return;var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:'application/json'}));a.download='formatted.json';a.click();toast('Downloaded','ok');}
+function loadFile(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){document.getElementById('inp').value=e.target.result;doFormat('pretty');};r.readAsText(f);ev.target.value='';}
+document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();doFormat('pretty');}});
+(function(){var tools=[{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'html-formatter.html',l:'HTML'},{h:'css-formatter.html',l:'CSS'},{h:'base64.html',l:'Base64'},{h:'url-encode.html',l:'URL'},{h:'regex-tester.html',l:'Regex'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'},{h:'lorem-ipsum.html',l:'Lorem'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='json-formatter.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();
+;</script>
+</body></html>

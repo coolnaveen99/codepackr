@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON ↔ XML Converter — Codepackr</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+ <a href="../index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+ <nav class="main-nav"><a href="../index.html#formatters">Formatters</a><a href="../index.html#encoders">Encoders</a><a href="../index.html#validators">Validators</a><a href="../index.html#utils">Utilities</a></nav>
+</div></header>
+<div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;">
+ <div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div>
+</div>
+<div class="tool-page">
+ <div class="tool-page-header">
+ <div class="breadcrumb"><a href="../index.html">Home</a> › Converters › JSON ↔ XML</div>
+ <h1>JSON ↔ XML Converter</h1>
+ <p>Convert JSON to XML or XML to JSON instantly in your browser.</p>
+ </div>
+ <div class="ws-toolbar">
+ <div class="tabs" id="dirTab">
+ <button class="tab active" onclick="setDir('json2xml',this)">JSON → XML</button>
+ <button class="tab" onclick="setDir('xml2json',this)">XML → JSON</button>
+ </div>
+ <div style="margin-left:auto;display:flex;gap:8px">
+ <button class="btn btn-secondary btn-sm" onclick="clearAll()">⟳ Clear</button>
+ <button class="btn btn-accent" onclick="convert()">⚡ Convert</button>
+ </div>
+ </div>
+ <div id="statusEl" style="display:none" class="status-bar"></div>
+ <div class="tool-workspace">
+ <div class="ws-panel">
+ <div class="ws-panel-header">
+ <span class="ws-panel-title" id="inLabel">JSON Input</span>
+ <div class="ws-panel-actions">
+ <button class="btn-icon" onclick="document.getElementById('fIn').click()">📁</button>
+ <button class="btn-icon" onclick="document.getElementById('inp').value=''">✕</button>
+ </div>
+ </div>
+ <textarea class="ws-textarea" id="inp" placeholder="Paste JSON or XML here…" spellcheck="false" style="min-height:360px"></textarea>
+ </div>
+ <div class="ws-panel">
+ <div class="ws-panel-header">
+ <span class="ws-panel-title" id="outLabel">XML Output</span>
+ <div class="ws-panel-actions">
+ <button class="btn-icon" onclick="copyOut()" title="Copy">⧉</button>
+ <button class="btn-icon" onclick="downloadOut()" title="Download">↓</button>
+ </div>
+ </div>
+ <div class="output-content" id="out" style="min-height:360px;white-space:pre-wrap;word-break:break-word"></div>
+ </div>
+ </div>
+ <input type="file" id="fIn" style="display:none" onchange="loadFile(event)">
+ <div class="about-box" style="margin-top:20px">
+ <h2>About JSON ↔ XML Conversion</h2>
+ <p>JSON objects become XML elements. Arrays become repeated elements with the parent tag name. XML attributes are preserved as JSON properties prefixed with <code style="font-family:var(--font-mono);background:var(--surface2);padding:2px 5px;border-radius:4px">@</code>. Text content becomes a <code style="font-family:var(--font-mono);background:var(--surface2);padding:2px 5px;border-radius:4px">#text</code> property.</p>
+ </div>
+</div>
+<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="../index.html" style="color:var(--accent)">← All Tools</a></div></footer>
+<div class="toast" id="_toast"></div>
+<script>function toast(msg,type){var el=document.getElementById('_toast');el.textContent=msg;el.className='toast'+(type?' t-'+type:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
+function setStatus(msg,type){var el=document.getElementById('statusEl');if(!msg){el.style.display='none';return;}el.className='status-bar status-'+type;el.textContent=(type==='valid'?'✓ ':type==='invalid'?'✗ ':'ℹ ')+msg;el.style.display='flex';}
+var _dir='json2xml';
+function setDir(d,btn){
+ _dir=d;
+ document.querySelectorAll('#dirTab .tab').forEach(function(b){b.classList.remove('active');});
+ btn.classList.add('active');
+ document.getElementById('inLabel').textContent=d==='json2xml'?'JSON Input':'XML Input';
+ document.getElementById('outLabel').textContent=d==='json2xml'?'XML Output':'JSON Output';
+ document.getElementById('inp').placeholder=d==='json2xml'?'Paste JSON here…':'Paste XML here…';
+ document.getElementById('out').textContent='';
+ setStatus();
+}
+function jsonToXml(obj,tagName){
+ if(obj===null||obj===undefined)return'<'+tagName+'/>';
+ if(typeof obj!=='object'){return'<'+tagName+'>'+escXml(String(obj))+'</'+tagName+'>';}
+ if(Array.isArray(obj)){return obj.map(function(item){return jsonToXml(item,tagName);}).join('\n');}
+ var attrs='',children='';
+ Object.keys(obj).forEach(function(k){
+ var v=obj[k];
+ if(k.startsWith('@')){attrs+=' '+k.slice(1)+'="'+escXml(String(v))+'"';}
+ else if(k==='#text'){children+=escXml(String(v));}
+ else if(Array.isArray(v)){children+='\n'+v.map(function(item){return' '+jsonToXml(item,k);}).join('\n');}
+ else if(typeof v==='object'&&v!==null){children+='\n '+jsonToXml(v,k);}
+ else{children+='\n '+'<'+k+'>'+escXml(String(v))+'</'+k+'>';}
+});
+ if(!children.trim())return'<'+tagName+attrs+'/>';
+ return'<'+tagName+attrs+'>'+(children.includes('\n')?'\n'+children.trim()+'\n':''+children)+'</'+tagName+'>';
+}
+function escXml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function xmlToJson(node){
+ if(node.nodeType===3){var t=node.textContent.trim();return t||null;}
+ if(node.nodeType!==1)return null;
+ var obj={};
+ Array.from(node.attributes||[]).forEach(function(a){obj['@'+a.name]=a.value;});
+ var children=Array.from(node.childNodes);
+ if(children.length===1&&children[0].nodeType===3){
+ var txt=children[0].textContent.trim();
+ if(Object.keys(obj).length===0)return txt;
+ obj['#text']=txt;return obj;
+}
+ children.forEach(function(child){
+ if(child.nodeType!==1)return;
+ var val=xmlToJson(child);
+ var tag=child.tagName;
+ if(obj[tag]===undefined){obj[tag]=val;}
+ else if(Array.isArray(obj[tag])){obj[tag].push(val);}
+ else{obj[tag]=[obj[tag],val];}
+});
+ return obj;
+}
+function convert(){
+ var v=document.getElementById('inp').value.trim();
+ if(!v){setStatus('Input is empty','info');return;}
+ try{
+ if(_dir==='json2xml'){
+ var json=JSON.parse(v);
+ var keys=Object.keys(json);
+ var rootTag=keys.length===1?keys[0]:'root';
+ var data=keys.length===1?json[keys[0]]:json;
+ var xml='<?xml version="1.0" encoding="UTF-8"?>\n'+jsonToXml(data,rootTag);
+ document.getElementById('out').textContent=xml;
+ setStatus('Converted to XML — '+xml.length+' chars','valid');
+}else{
+ var parser=new DOMParser();
+ var doc=parser.parseFromString(v,'application/xml');
+ var err=doc.querySelector('parsererror');
+ if(err){setStatus('Invalid XML:'+err.textContent.split('\n')[0],'invalid');return;}
+ var result={};result[doc.documentElement.tagName]=xmlToJson(doc.documentElement);
+ var jsonOut=JSON.stringify(result,null,2);
+ document.getElementById('out').textContent=jsonOut;
+ setStatus('Converted to JSON — '+jsonOut.length+' chars','valid');
+}
+}catch(e){setStatus(e.message,'invalid');}
+}
+function clearAll(){document.getElementById('inp').value='';document.getElementById('out').textContent='';setStatus();}
+function copyOut(){var t=document.getElementById('out').textContent;if(!t)return;navigator.clipboard.writeText(t).then(function(){toast('Copied!','ok');});}
+function downloadOut(){var t=document.getElementById('out').textContent;if(!t)return;var ext=_dir==='json2xml'?'.xml':'.json';var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));a.download='converted'+ext;a.click();toast('Downloaded!','ok');}
+function loadFile(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){document.getElementById('inp').value=e.target.result;};r.readAsText(f);ev.target.value='';}
+(function(){var tools=[{h:'json-xml-converter.html',l:'JSON↔XML'},{h:'json-csv-converter.html',l:'JSON↔CSV'},{h:'csv-xml-converter.html',l:'CSV↔XML'},{h:'xsd-validator.html',l:'XSD Validator'},{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='json-xml-converter.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();</script>
+</body></html>

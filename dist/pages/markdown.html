@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markdown Preview — Codepackr</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+ <a href="../index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+ <nav class="main-nav"><a href="../index.html#formatters">Formatters</a><a href="../index.html#encoders">Encoders</a><a href="../index.html#validators">Validators</a><a href="../index.html#utils">Utilities</a></nav>
+</div></header>
+<div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;"><div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div></div>
+<div class="tool-page">
+ <div class="tool-page-header">
+ <div class="breadcrumb"><a href="../index.html">Home</a> › Markdown Preview</div>
+ <h1>Markdown Preview</h1><p>Write Markdown and see the rendered HTML preview in real time.</p>
+ </div>
+ <div class="ws-toolbar">
+ <div class="tabs" id="viewTab"><button class="tab active" onclick="setV('split',this)">Split</button><button class="tab" onclick="setV('edit',this)">Edit</button><button class="tab" onclick="setV('preview',this)">Preview</button></div>
+ <div style="margin-left:auto;display:flex;gap:8px"><button class="btn btn-secondary btn-sm" onclick="copyHtml()">Copy HTML</button></div>
+ </div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="mdGrid">
+ <div class="ws-panel" id="editPane"><div class="ws-panel-header"><span class="ws-panel-title">Markdown</span></div><textarea class="ws-textarea" id="inp" oninput="render()" spellcheck="false" style="min-height:500px"></textarea></div>
+ <div class="ws-panel" id="prevPane"><div class="ws-panel-header"><span class="ws-panel-title">Preview</span></div><div id="preview" style="padding:20px;min-height:500px;overflow-y:auto;font-size:0.9rem;line-height:1.8;color:var(--text)"></div></div>
+ </div>
+ <script>var _view='split';
+ function setV(v,btn){_view=v;document.querySelectorAll('#viewTab .tab').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');var g=document.getElementById('mdGrid');var ep=document.getElementById('editPane');var pp=document.getElementById('prevPane');if(v==='split'){g.style.gridTemplateColumns='1fr 1fr';ep.style.display='';pp.style.display='';}else if(v==='edit'){g.style.gridTemplateColumns='1fr';ep.style.display='';pp.style.display='none';}else{g.style.gridTemplateColumns='1fr';ep.style.display='none';pp.style.display='';}}
+ function md(t){
+ return t.replace(/^######(.*)/gm,'<h6>$1</h6>').replace(/^#####(.*)/gm,'<h5>$1</h5>').replace(/^####(.*)/gm,'<h4>$1</h4>').replace(/^###(.*)/gm,'<h3>$1</h3>').replace(/^##(.*)/gm,'<h2>$1</h2>').replace(/^#(.*)/gm,'<h1>$1</h1>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/```([\s\S]*?)```/g,'<pre style="background:var(--surface2);padding:14px;border-radius:8px;overflow-x:auto;font-family:var(--font-mono);font-size:0.82rem"><code>$1</code></pre>').replace(/`(.+?)`/g,'<code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:var(--font-mono);font-size:0.82rem">$1</code>').replace(/^>(.*)/gm,'<blockquote style="border-left:3px solid var(--accent);padding-left:16px;color:var(--text-muted);margin:8px 0">$1</blockquote>').replace(/^\-(.*)/gm,'<li>$1</li>').replace(/(<li>.*<\/li>)/gs,'<ul style="padding-left:20px;margin:8px 0">$1</ul>').replace(/\[(.+?)\]\((.+?)\)/g,'<a href="$2" style="color:var(--accent)" target="_blank">$1</a>').replace(/---/g,'<hr style="border:none;border-top:1px solid var(--border);margin:16px 0">').replace(/\n\n/g,'</p><p>').replace(/^(?!<)/gm,'<p>$&').replace(/(?<=>)$/gm,'$&</p>').replace(/<p><\/p>/g,'');
+}
+ function render(){document.getElementById('preview').innerHTML=md(document.getElementById('inp').value);}
+ function copyHtml(){navigator.clipboard.writeText(document.getElementById('preview').innerHTML).then(function(){toast('HTML copied!','ok');});}
+ render();
+ render();</script>
+</div>
+<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="../index.html" style="color:var(--accent)">← All Tools</a></div></footer>
+<div class="toast" id="_toast"></div>
+<script>function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
+(function(){var tools=[{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'html-formatter.html',l:'HTML'},{h:'css-formatter.html',l:'CSS'},{h:'base64.html',l:'Base64'},{h:'url-encode.html',l:'URL'},{h:'regex-tester.html',l:'Regex'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'},{h:'lorem-ipsum.html',l:'Lorem'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='markdown.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();</script>
+</body></html>

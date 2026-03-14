@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timestamp Converter — Codepackr</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+ <a href="../index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+ <nav class="main-nav"><a href="../index.html#formatters">Formatters</a><a href="../index.html#encoders">Encoders</a><a href="../index.html#validators">Validators</a><a href="../index.html#utils">Utilities</a></nav>
+</div></header>
+<div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;"><div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div></div>
+<div class="tool-page">
+ <div class="tool-page-header">
+ <div class="breadcrumb"><a href="../index.html">Home</a> › Timestamp Converter</div>
+ <h1>Timestamp Converter</h1><p>Convert between Unix timestamps and human-readable dates.</p>
+ </div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+ <div class="ws-panel" style="padding:20px">
+ <h3 style="font-size:0.85rem;font-weight:800;margin-bottom:16px;color:var(--accent2)">Unix → Human</h3>
+ <div style="margin-bottom:12px"><label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:6px">Unix Timestamp (seconds or ms)</label><input type="number" id="unixInp" placeholder="e.g. 1700000000" style="width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);font-family:var(--font-mono);font-size:0.88rem;padding:8px 12px;border-radius:var(--radius-sm);outline:none"></div>
+ <button class="btn btn-accent" style="width:100%;justify-content:center;margin-bottom:16px" onclick="unixToHuman()">Convert →</button>
+ <div id="humanOut" style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;font-family:var(--font-mono);font-size:0.82rem;color:var(--text-muted);min-height:80px"></div>
+ </div>
+ <div class="ws-panel" style="padding:20px">
+ <h3 style="font-size:0.85rem;font-weight:800;margin-bottom:16px;color:var(--accent)">Human → Unix</h3>
+ <div style="margin-bottom:12px"><label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:6px">Date & Time</label><input type="datetime-local" id="dtInp" style="width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);font-family:var(--font-mono);font-size:0.88rem;padding:8px 12px;border-radius:var(--radius-sm);outline:none"></div>
+ <button class="btn btn-accent" style="width:100%;justify-content:center;margin-bottom:16px" onclick="humanToUnix()">Convert →</button>
+ <div id="unixOut" style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;font-family:var(--font-mono);font-size:0.82rem;color:var(--text-muted);min-height:80px"></div>
+ </div>
+ </div>
+ <div style="margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px">
+ <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:0.8rem;font-weight:800">Current Time</span><button class="btn btn-secondary btn-sm" onclick="setNow()">Refresh</button></div>
+ <div id="nowOut" style="font-family:var(--font-mono);font-size:0.82rem;color:var(--text-muted)"></div>
+ </div>
+ <script>function unixToHuman(){var v=document.getElementById('unixInp').value;if(!v)return;var n=+v;if(n>1e10)n=Math.floor(n/1000);var d=new Date(n*1000);document.getElementById('humanOut').innerHTML='UTC:<strong style=\"color:var(--text)\">'+d.toUTCString()+'</strong><br>Local:<strong style=\"color:var(--text)\">'+d.toLocaleString()+'</strong><br>ISO:<strong style=\"color:var(--text)\">'+d.toISOString()+'</strong>';}
+ function humanToUnix(){var v=document.getElementById('dtInp').value;if(!v)return;var d=new Date(v);var ts=Math.floor(d.getTime()/1000);document.getElementById('unixOut').innerHTML='Seconds:<strong style=\"color:var(--text)\">'+ts+'</strong><br>Milliseconds:<strong style=\"color:var(--text)\">'+d.getTime()+'</strong>';}
+ function setNow(){var d=new Date();document.getElementById('nowOut').innerHTML='<div style=\"display:grid;grid-template-columns:1fr 1fr;gap:8px\"><div>Unix:<span style=\"color:var(--accent2)\">'+Math.floor(d.getTime()/1000)+'</span></div><div>UTC:<span style=\"color:var(--accent)\">'+d.toUTCString()+'</span></div></div>';}
+ document.getElementById('dtInp').value=new Date().toISOString().slice(0,16);
+ setNow();setInterval(setNow,1000);</script>
+</div>
+<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="../index.html" style="color:var(--accent)">← All Tools</a></div></footer>
+<div class="toast" id="_toast"></div>
+<script>function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
+(function(){var tools=[{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'html-formatter.html',l:'HTML'},{h:'css-formatter.html',l:'CSS'},{h:'base64.html',l:'Base64'},{h:'url-encode.html',l:'URL'},{h:'regex-tester.html',l:'Regex'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'},{h:'lorem-ipsum.html',l:'Lorem'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='timestamp.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();</script>
+</body></html>

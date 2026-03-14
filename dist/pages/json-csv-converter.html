@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON ↔ CSV Converter — Codepackr</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+ <a href="../index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+ <nav class="main-nav"><a href="../index.html#formatters">Formatters</a><a href="../index.html#encoders">Encoders</a><a href="../index.html#validators">Validators</a><a href="../index.html#utils">Utilities</a></nav>
+</div></header>
+<div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;">
+ <div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div>
+</div>
+<div class="tool-page">
+ <div class="tool-page-header">
+ <div class="breadcrumb"><a href="../index.html">Home</a> › Converters › JSON ↔ CSV</div>
+ <h1>JSON ↔ CSV Converter</h1>
+ <p>Convert JSON arrays to CSV spreadsheets or CSV data back to JSON.</p>
+ </div>
+ <div class="ws-toolbar">
+ <div class="tabs" id="dirTab">
+ <button class="tab active" onclick="setDir('json2csv',this)">JSON → CSV</button>
+ <button class="tab" onclick="setDir('csv2json',this)">CSV → JSON</button>
+ </div>
+ <select class="select" id="delimSel"><option value=",">Comma (,)</option><option value=";">Semicolon (;)</option><option value="|">Pipe (|)</option><option value="&#9;">Tab</option></select>
+ <div style="margin-left:auto;display:flex;gap:8px">
+ <button class="btn btn-secondary btn-sm" onclick="clearAll()">⟳ Clear</button>
+ <button class="btn btn-accent" onclick="convert()">⚡ Convert</button>
+ </div>
+ </div>
+ <div id="statusEl" style="display:none" class="status-bar"></div>
+ <div class="tool-workspace">
+ <div class="ws-panel">
+ <div class="ws-panel-header">
+ <span class="ws-panel-title" id="inLabel">JSON Input</span>
+ <div class="ws-panel-actions">
+ <button class="btn-icon" onclick="document.getElementById('fIn').click()">📁</button>
+ <button class="btn-icon" onclick="document.getElementById('inp').value=''">✕</button>
+ </div>
+ </div>
+ <textarea class="ws-textarea" id="inp" placeholder="Paste JSON array or CSV here…" spellcheck="false" style="min-height:360px"></textarea>
+ </div>
+ <div class="ws-panel">
+ <div class="ws-panel-header">
+ <span class="ws-panel-title" id="outLabel">CSV Output</span>
+ <div class="ws-panel-actions">
+ <button class="btn-icon" onclick="copyOut()">⧉</button>
+ <button class="btn-icon" onclick="downloadOut()">↓</button>
+ </div>
+ </div>
+ <div class="output-content" id="out" style="min-height:360px;white-space:pre-wrap;word-break:break-word"></div>
+ </div>
+ </div>
+ <input type="file" id="fIn" style="display:none" accept=".json,.csv,.txt" onchange="loadFile(event)">
+</div>
+<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="../index.html" style="color:var(--accent)">← All Tools</a></div></footer>
+<div class="toast" id="_toast"></div>
+<script>function toast(msg,type){var el=document.getElementById('_toast');el.textContent=msg;el.className='toast'+(type?' t-'+type:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
+function setStatus(msg,type){var el=document.getElementById('statusEl');if(!msg){el.style.display='none';return;}el.className='status-bar status-'+type;el.textContent=(type==='valid'?'✓ ':type==='invalid'?'✗ ':'ℹ ')+msg;el.style.display='flex';}
+var _dir='json2csv';
+function setDir(d,btn){
+ _dir=d;
+ document.querySelectorAll('#dirTab .tab').forEach(function(b){b.classList.remove('active');});
+ btn.classList.add('active');
+ document.getElementById('inLabel').textContent=d==='json2csv'?'JSON Input':'CSV Input';
+ document.getElementById('outLabel').textContent=d==='json2csv'?'CSV Output':'JSON Output';
+ document.getElementById('inp').placeholder=d==='json2csv'?'Paste JSON array of objects…':'Paste CSV data…';
+ document.getElementById('out').textContent='';setStatus();
+}
+function escCsv(val,delim){
+ var s=String(val===null||val===undefined?'':val);
+ if(s.includes(delim)||s.includes('"')||s.includes('\n')){return'"'+s.replace(/"/g,'""')+'"';}
+ return s;
+}
+function json2csv(arr,delim){
+ if(!Array.isArray(arr)||!arr.length)throw new Error('JSON must be a non-empty array of objects');
+ var keys=[];
+ arr.forEach(function(row){Object.keys(row).forEach(function(k){if(keys.indexOf(k)<0)keys.push(k);});});
+ var lines=[keys.map(function(k){return escCsv(k,delim);}).join(delim)];
+ arr.forEach(function(row){lines.push(keys.map(function(k){return escCsv(row[k],delim);}).join(delim));});
+ return lines.join('\n');
+}
+function csv2json(text,delim){
+ var lines=text.split('\n').filter(function(l){return l.trim();});
+ if(lines.length<2)throw new Error('CSV must have at least a header row and one data row');
+ function parseLine(line){
+ var result=[],cur='',inQ=false;
+ for(var i=0;i<line.length;i++){
+ var ch=line[i];
+ if(ch==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else{inQ=!inQ;}}
+ else if(ch===delim&&!inQ){result.push(cur.trim());cur='';}
+ else{cur+=ch;}
+}
+ result.push(cur.trim());
+ return result;
+}
+ var headers=parseLine(lines[0]);
+ var rows=[];
+ for(var i=1;i<lines.length;i++){
+ var vals=parseLine(lines[i]);
+ var obj={};
+ headers.forEach(function(h,idx){obj[h]=vals[idx]!==undefined?vals[idx]:'';});
+ rows.push(obj);
+}
+ return rows;
+}
+function convert(){
+ var v=document.getElementById('inp').value.trim();
+ var delim=document.getElementById('delimSel').value;
+ if(!v){setStatus('Input is empty','info');return;}
+ try{
+ if(_dir==='json2csv'){
+ var json=JSON.parse(v);
+ var csv=json2csv(json,delim);
+ document.getElementById('out').textContent=csv;
+ setStatus('Converted — '+(json.length)+' rows,'+csv.split('\n')[0].split(delim).length+' columns','valid');
+}else{
+ var rows=csv2json(v,delim);
+ var out=JSON.stringify(rows,null,2);
+ document.getElementById('out').textContent=out;
+ setStatus('Converted — '+rows.length+' records','valid');
+}
+}catch(e){setStatus(e.message,'invalid');}
+}
+function clearAll(){document.getElementById('inp').value='';document.getElementById('out').textContent='';setStatus();}
+function copyOut(){var t=document.getElementById('out').textContent;if(!t)return;navigator.clipboard.writeText(t).then(function(){toast('Copied!','ok');});}
+function downloadOut(){var t=document.getElementById('out').textContent;if(!t)return;var ext=_dir==='json2csv'?'.csv':'.json';var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));a.download='converted'+ext;a.click();toast('Downloaded!','ok');}
+function loadFile(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){document.getElementById('inp').value=e.target.result;};r.readAsText(f);ev.target.value='';}
+(function(){var tools=[{h:'json-xml-converter.html',l:'JSON↔XML'},{h:'json-csv-converter.html',l:'JSON↔CSV'},{h:'csv-xml-converter.html',l:'CSV↔XML'},{h:'xsd-validator.html',l:'XSD Validator'},{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='json-csv-converter.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();</script>
+</body></html>

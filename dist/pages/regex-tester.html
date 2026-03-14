@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Regex Tester — Codepackr</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+ <a href="../index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+ <nav class="main-nav"><a href="../index.html#formatters">Formatters</a><a href="../index.html#encoders">Encoders</a><a href="../index.html#validators">Validators</a><a href="../index.html#utils">Utilities</a></nav>
+</div></header>
+<div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;"><div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div></div>
+<div class="tool-page">
+ <div class="tool-page-header">
+ <div class="breadcrumb"><a href="../index.html">Home</a> › Regex Tester</div>
+ <h1>Regex Tester</h1><p>Test and debug regular expressions with live match highlighting.</p>
+ </div>
+ <div class="ws-toolbar">
+ <div style="display:flex;gap:8px;align-items:center;flex:1">
+ <span style="font-family:var(--font-mono);color:var(--text-muted)">/</span>
+ <input type="text" id="pat" placeholder="Pattern" style="flex:1;background:var(--surface);border:1px solid var(--border2);color:var(--text);font-family:var(--font-mono);font-size:0.85rem;padding:7px 12px;border-radius:var(--radius-sm);outline:none" oninput="run()">
+ <span style="font-family:var(--font-mono);color:var(--text-muted)">/</span>
+ <input type="text" id="flags" placeholder="flags" value="gm" style="width:80px;background:var(--surface);border:1px solid var(--border2);color:var(--text);font-family:var(--font-mono);font-size:0.85rem;padding:7px 12px;border-radius:var(--radius-sm);outline:none" oninput="run()">
+ </div>
+ </div>
+ <div id="statusEl" style="display:none" class="status-bar"></div>
+ <div class="tool-workspace" style="grid-template-columns:1fr">
+ <div class="ws-panel">
+ <div class="ws-panel-header"><span class="ws-panel-title">Test String</span></div>
+ <textarea class="ws-textarea" id="inp" placeholder="Enter test string…" oninput="run()" style="min-height:200px" spellcheck="false"></textarea>
+ </div>
+ </div>
+ <div class="output-area" style="margin-top:16px">
+ <div class="output-header"><span style="font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.04em">Matches</span><span id="matchCount" style="font-size:0.78rem;color:var(--text-muted)"></span></div>
+ <div class="output-content" id="out" style="min-height:120px"></div>
+ </div>
+ <script>function run(){
+ var pat=document.getElementById('pat').value;
+ var flags=document.getElementById('flags').value;
+ var inp=document.getElementById('inp').value;
+ var statusEl=document.getElementById('statusEl');
+ if(!pat){document.getElementById('out').innerHTML='<span style="color:var(--text-dim)">Enter a pattern above</span>';statusEl.style.display='none';document.getElementById('matchCount').textContent='';return;}
+ try{
+ var re=new RegExp(pat,flags);
+ var matches=[],m;
+ if(flags.includes('g')){while((m=re.exec(inp))!==null){matches.push(m);if(matches.length>500)break;}}
+ else{m=re.exec(inp);if(m)matches.push(m);}
+ document.getElementById('matchCount').textContent=matches.length+' match'+(matches.length!==1?'es':'');
+ statusEl.className='status-bar status-valid';statusEl.textContent='✓ Valid regex — '+matches.length+' match'+(matches.length!==1?'es':'');statusEl.style.display='flex';
+ if(!matches.length){document.getElementById('out').innerHTML='<span style="color:var(--text-muted)">No matches found</span>';return;}
+ var hl=inp;
+ var sorted=matches.slice().sort(function(a,b){return b.index-a.index;});
+ sorted.forEach(function(x){hl=hl.slice(0,x.index)+'<mark style="background:rgba(108,99,255,0.3);color:var(--text);border-radius:2px;padding:0 1px">'+hl.slice(x.index,x.index+x[0].length)+'</mark>'+hl.slice(x.index+x[0].length);});
+ document.getElementById('out').innerHTML='<div style="white-space:pre-wrap;font-family:var(--font-mono);font-size:0.82rem">'+hl+'</div>';
+}catch(e){statusEl.className='status-bar status-invalid';statusEl.textContent='✗ '+e.message;statusEl.style.display='flex';document.getElementById('out').innerHTML='';}
+}
+ run();</script>
+</div>
+<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="../index.html" style="color:var(--accent)">← All Tools</a></div></footer>
+<div class="toast" id="_toast"></div>
+<script>function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
+(function(){var tools=[{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'html-formatter.html',l:'HTML'},{h:'css-formatter.html',l:'CSS'},{h:'base64.html',l:'Base64'},{h:'url-encode.html',l:'URL'},{h:'regex-tester.html',l:'Regex'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'},{h:'lorem-ipsum.html',l:'Lorem'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='regex-tester.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();</script>
+</body></html>

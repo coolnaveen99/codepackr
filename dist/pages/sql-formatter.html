@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Formatter — Codepackr</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+ <a href="../index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+ <nav class="main-nav"><a href="../index.html#formatters">Formatters</a><a href="../index.html#encoders">Encoders</a><a href="../index.html#validators">Validators</a><a href="../index.html#utils">Utilities</a></nav>
+</div></header>
+<div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;"><div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div></div>
+<div class="tool-page">
+ <div class="tool-page-header">
+ <div class="breadcrumb"><a href="../index.html">Home</a> › SQL Formatter</div>
+ <h1>SQL Formatter</h1><p>Format SQL queries for readability.</p>
+ </div>
+ <div class="ws-toolbar">
+ <div style="margin-left:auto;display:flex;gap:8px"><button class="btn btn-secondary btn-sm" onclick="clearAll()">⟳ Clear</button><button class="btn btn-accent" onclick="doFmt()">⚡ Format</button></div>
+ </div>
+ <div class="tool-workspace">
+ <div class="ws-panel"><div class="ws-panel-header"><span class="ws-panel-title">Input SQL</span></div><textarea class="ws-textarea" id="inp" placeholder="Paste SQL here…" spellcheck="false" style="min-height:320px"></textarea></div>
+ <div class="ws-panel"><div class="ws-panel-header"><span class="ws-panel-title">Formatted SQL</span><div class="ws-panel-actions"><button class="btn-icon" onclick="navigator.clipboard.writeText(document.getElementById('out').textContent).then(function(){toast('Copied!','ok')})">⧉</button></div></div><div class="output-content" id="out" style="min-height:320px;white-space:pre-wrap"></div></div>
+ </div>
+ <script>function doFmt(){
+ var v=document.getElementById('inp').value.trim();if(!v)return;
+ var kw=['SELECT','FROM','WHERE','AND','OR','NOT','IN','IS','NULL','JOIN','LEFT JOIN','RIGHT JOIN','INNER JOIN','OUTER JOIN','ON','AS','ORDER BY','GROUP BY','HAVING','LIMIT','OFFSET','INSERT INTO','VALUES','UPDATE','SET','DELETE FROM','CREATE TABLE','DROP TABLE','ALTER TABLE','INDEX','UNION','ALL','DISTINCT','COUNT','SUM','AVG','MIN','MAX'];
+ var out=v;
+ kw.forEach(function(k){out=out.replace(new RegExp('\\b'+k+'\\b','gi'),k);});
+ out=out.replace(/\bSELECT\b/gi,'SELECT\n ').replace(/\bFROM\b/gi,'\nFROM\n ').replace(/\bWHERE\b/gi,'\nWHERE\n ').replace(/\bAND\b/gi,'\n AND').replace(/\bOR\b/gi,'\n OR').replace(/\bORDER BY\b/gi,'\nORDER BY\n ').replace(/\bGROUP BY\b/gi,'\nGROUP BY\n ').replace(/\bHAVING\b/gi,'\nHAVING\n ').replace(/\bJOIN\b/gi,'\nJOIN').replace(/\bLEFT JOIN\b/gi,'\nLEFT JOIN').replace(/\bINNER JOIN\b/gi,'\nINNER JOIN').replace(/,/g,',\n ').replace(/;/g,';\n').replace(/\n{3,}/g,'\n\n');
+ document.getElementById('out').textContent=out.trim();
+}
+ function clearAll(){document.getElementById('inp').value='';document.getElementById('out').textContent='';}</script>
+</div>
+<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="../index.html" style="color:var(--accent)">← All Tools</a></div></footer>
+<div class="toast" id="_toast"></div>
+<script>function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
+(function(){var tools=[{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'html-formatter.html',l:'HTML'},{h:'css-formatter.html',l:'CSS'},{h:'base64.html',l:'Base64'},{h:'url-encode.html',l:'URL'},{h:'regex-tester.html',l:'Regex'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'},{h:'lorem-ipsum.html',l:'Lorem'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='sql-formatter.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();</script>
+</body></html>

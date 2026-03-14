@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Formatter — Codepackr</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+ <a href="../index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+ <nav class="main-nav"><a href="../index.html#formatters">Formatters</a><a href="../index.html#encoders">Encoders</a><a href="../index.html#validators">Validators</a><a href="../index.html#utils">Utilities</a></nav>
+</div></header>
+<div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;"><div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div></div>
+<div class="tool-page">
+ <div class="tool-page-header">
+ <div class="breadcrumb"><a href="../index.html">Home</a> › HTML Formatter</div>
+ <h1>HTML Formatter</h1><p>Beautify and minify HTML markup.</p>
+ </div>
+ <div class="ws-toolbar">
+ <div class="tabs"><button class="tab active" onclick="doFmt('pretty',this)">Beautify</button><button class="tab" onclick="doFmt('mini',this)">Minify</button></div>
+ <select class="select" id="indSel"><option value="2">2 spaces</option><option value="4">4 spaces</option></select>
+ <div style="margin-left:auto;display:flex;gap:8px"><button class="btn btn-secondary btn-sm" onclick="clearAll()">⟳ Clear</button><button class="btn btn-accent" onclick="doFmt('pretty',null)">⚡ Format</button></div>
+ </div>
+ <div class="tool-workspace">
+ <div class="ws-panel"><div class="ws-panel-header"><span class="ws-panel-title">Input HTML</span></div><textarea class="ws-textarea" id="inp" placeholder="Paste HTML here…" spellcheck="false" style="min-height:320px"></textarea></div>
+ <div class="ws-panel"><div class="ws-panel-header"><span class="ws-panel-title">Output</span><div class="ws-panel-actions"><button class="btn-icon" onclick="navigator.clipboard.writeText(document.getElementById('out').textContent).then(function(){toast('Copied!','ok')})">⧉</button></div></div><div class="output-content" id="out" style="min-height:320px;white-space:pre-wrap"></div></div>
+ </div>
+ <script>function doFmt(mode){
+ var v=document.getElementById('inp').value.trim();if(!v)return;
+ if(mode==='mini'){document.getElementById('out').textContent=v.replace(/\s+/g,' ').replace(/></g,'><').trim();return;}
+ var ind=parseInt(document.getElementById('indSel').value);var sp=' '.repeat(ind);var d=0;
+ var out=v.replace(/></g,'>\n<').split('\n').map(function(l){l=l.trim();if(!l)return'';if(l.match(/^<\/[^>]+>/)&&d>0)d--;var line=sp.repeat(d)+l;if(l.match(/^<[^!?/][^>]*[^/]>$/)&&!l.match(/^<(br|hr|img|input|link|meta|area|base|col|embed|param|source|track|wbr)/i))d++;return line;}).filter(Boolean).join('\n');
+ document.getElementById('out').textContent=out;
+}
+ function clearAll(){document.getElementById('inp').value='';document.getElementById('out').textContent='';}</script>
+</div>
+<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="../index.html" style="color:var(--accent)">← All Tools</a></div></footer>
+<div class="toast" id="_toast"></div>
+<script>function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
+(function(){var tools=[{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'html-formatter.html',l:'HTML'},{h:'css-formatter.html',l:'CSS'},{h:'base64.html',l:'Base64'},{h:'url-encode.html',l:'URL'},{h:'regex-tester.html',l:'Regex'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'},{h:'lorem-ipsum.html',l:'Lorem'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='html-formatter.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();</script>
+</body></html>

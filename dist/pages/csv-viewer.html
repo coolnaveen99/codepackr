@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSV Viewer — Codepackr</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+ <a href="../index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+ <nav class="main-nav"><a href="../index.html#formatters">Formatters</a><a href="../index.html#encoders">Encoders</a><a href="../index.html#validators">Validators</a><a href="../index.html#utils">Utilities</a></nav>
+</div></header>
+<div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;"><div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div></div>
+<div class="tool-page">
+ <div class="tool-page-header">
+ <div class="breadcrumb"><a href="../index.html">Home</a> › CSV Viewer</div>
+ <h1>CSV Viewer</h1><p>View and explore CSV files as a formatted table.</p>
+ </div>
+ <div class="ws-toolbar">
+ <select class="select" id="delimSel"><option value=",">Comma</option><option value=";">Semicolon</option><option value="\t">Tab</option><option value="|">Pipe</option></select>
+ <div class="tabs"><button class="tab active" id="headerBtn" onclick="toggleHeader(this)">Has Header</button></div>
+ <div style="margin-left:auto;display:flex;gap:8px">
+ <button class="btn-icon" onclick="document.getElementById('fCsv').click()">📁 Upload</button>
+ <button class="btn btn-accent" onclick="parse()">⚡ View Table</button>
+ </div>
+ </div>
+ <div class="ws-panel" style="margin-bottom:16px"><div class="ws-panel-header"><span class="ws-panel-title">CSV Input</span></div><textarea class="ws-textarea" id="inp" placeholder="Paste CSV data here…" spellcheck="false" style="min-height:150px"></textarea></div>
+ <input type="file" id="fCsv" style="display:none" accept=".csv,.tsv,.txt" onchange="loadFile(event)">
+ <div id="tableWrap" style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)"></div>
+ <script>var _header=true;
+ function toggleHeader(btn){_header=!_header;btn.classList.toggle('active',_header);}
+ function parse(){
+ var v=document.getElementById('inp').value.trim();if(!v)return;
+ var delim=document.getElementById('delimSel').value;
+ var rows=v.split('\n').map(function(r){return r.split(delim).map(function(c){return c.trim().replace(/^["']|["']$/g,'');});});
+ if(!rows.length)return;
+ var html='<table style="width:100%;border-collapse:collapse;font-size:0.82rem;font-family:var(--font-mono)">';
+ var start=0;
+ if(_header){html+='<thead><tr>'+rows[0].map(function(c){return'<th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--border2);color:var(--accent2);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em">'+c+'</th>';}).join('')+'</tr></thead>';start=1;}
+ html+='<tbody>';
+ for(var i=start;i<rows.length;i++){var bg=i%2===0?'var(--surface)':'var(--surface2)';html+='<tr style="background:'+bg+'">'+rows[i].map(function(c){return'<td style="padding:7px 12px;border-bottom:1px solid var(--border);color:var(--text-muted)">'+c+'</td>';}).join('')+'</tr>';}
+ html+='</tbody></table>';
+ document.getElementById('tableWrap').innerHTML=html;
+}
+ function loadFile(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){document.getElementById('inp').value=e.target.result;parse();};r.readAsText(f);ev.target.value='';}</script>
+</div>
+<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="../index.html" style="color:var(--accent)">← All Tools</a></div></footer>
+<div class="toast" id="_toast"></div>
+<script>function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
+(function(){var tools=[{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'html-formatter.html',l:'HTML'},{h:'css-formatter.html',l:'CSS'},{h:'base64.html',l:'Base64'},{h:'url-encode.html',l:'URL'},{h:'regex-tester.html',l:'Regex'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'},{h:'lorem-ipsum.html',l:'Lorem'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='csv-viewer.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();</script>
+</body></html>

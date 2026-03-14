@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lorem Ipsum Generator — Codepackr</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+ <a href="../index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+ <nav class="main-nav"><a href="../index.html#formatters">Formatters</a><a href="../index.html#encoders">Encoders</a><a href="../index.html#validators">Validators</a><a href="../index.html#utils">Utilities</a></nav>
+</div></header>
+<div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;"><div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div></div>
+<div class="tool-page">
+ <div class="tool-page-header">
+ <div class="breadcrumb"><a href="../index.html">Home</a> › Lorem Ipsum Generator</div>
+ <h1>Lorem Ipsum Generator</h1><p>Generate placeholder lorem ipsum text for your designs.</p>
+ </div>
+ <div class="ws-toolbar">
+ <select class="select" id="typeSel"><option value="para">Paragraphs</option><option value="sent">Sentences</option><option value="words">Words</option></select>
+ <input type="number" id="countInp" value="3" min="1" max="50" style="width:70px;background:var(--surface);border:1px solid var(--border2);color:var(--text);font-family:var(--font-mono);font-size:0.85rem;padding:7px 10px;border-radius:var(--radius-sm);outline:none">
+ <div class="tabs"><button class="tab active" id="classicBtn" onclick="toggleClassic(this)">Classic Start</button></div>
+ <div style="margin-left:auto;display:flex;gap:8px">
+ <button class="btn btn-secondary btn-sm" onclick="copyOut()">⧉ Copy</button>
+ <button class="btn btn-accent" onclick="generate()">⚡ Generate</button>
+ </div>
+ </div>
+ <div class="output-area">
+ <div class="output-header"><span style="font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.04em">Output</span></div>
+ <div class="output-content" id="out" style="min-height:320px;white-space:pre-wrap"></div>
+ </div>
+ <script>var W='lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum'.split(' ');
+ var _classic=true;
+ function toggleClassic(btn){_classic=!_classic;btn.classList.toggle('active',_classic);}
+ function rw(){return W[Math.floor(Math.random()*W.length)];}
+ function sent(){var n=Math.floor(Math.random()*10)+5;var ws=[];for(var i=0;i<n;i++)ws.push(rw());return ws.join(' ').replace(/^./,function(c){return c.toUpperCase()})+'.';}
+ function para(){var n=Math.floor(Math.random()*4)+3;var ss=[];for(var i=0;i<n;i++)ss.push(sent());return ss.join(' ');}
+ function generate(){
+ var type=document.getElementById('typeSel').value;
+ var count=Math.min(parseInt(document.getElementById('countInp').value)||1,50);
+ var res=[];
+ if(type==='words'){var ws=[];for(var i=0;i<count;i++)ws.push(rw());res.push(ws.join(' '));}
+ else if(type==='sent'){for(var i=0;i<count;i++)res.push(sent());}
+ else{for(var i=0;i<count;i++)res.push(para());}
+ var out=res.join(type==='para'?'
+':' ');
+ if(_classic&&type!=='words')out='Lorem ipsum dolor sit amet,'+out.slice(out.indexOf(' ')+1);
+ document.getElementById('out').textContent=out;
+}
+ function copyOut(){var t=document.getElementById('out').textContent;if(!t)return;navigator.clipboard.writeText(t).then(function(){toast('Copied!','ok');});}
+ generate();</script>
+</div>
+<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="../index.html" style="color:var(--accent)">← All Tools</a></div></footer>
+<div class="toast" id="_toast"></div>
+<script>function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
+(function(){var tools=[{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'html-formatter.html',l:'HTML'},{h:'css-formatter.html',l:'CSS'},{h:'base64.html',l:'Base64'},{h:'url-encode.html',l:'URL'},{h:'regex-tester.html',l:'Regex'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'},{h:'lorem-ipsum.html',l:'Lorem'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='lorem-ipsum.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();</script>
+</body></html>

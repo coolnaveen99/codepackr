@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base64 Encoder / Decoder — Codepackr</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+ <a href="../index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+ <nav class="main-nav"><a href="../index.html#encoders">Encoders</a></nav>
+</div></header>
+<div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;"><div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;align-items:center;min-height:44px;" id="toolNav"></div></div>
+<div class="tool-page">
+ <div class="tool-page-header">
+ <div class="breadcrumb"><a href="../index.html">Home</a> › <a href="../index.html#encoders">Encoders</a> › Base64</div>
+ <h1>Base64 Encoder / Decoder</h1>
+ <p>Encode text or binary data to Base64, or decode Base64 back to plain text.</p>
+ </div>
+ <div class="ws-toolbar">
+ <div class="tabs" id="modeTab">
+ <button class="tab active" onclick="setMode('encode',this)">Encode</button>
+ <button class="tab" onclick="setMode('decode',this)">Decode</button>
+ </div>
+ <div class="tabs">
+ <button class="tab active" id="urlSafeBtn" onclick="toggleUrlSafe(this)">URL-safe</button>
+ </div>
+ <div style="margin-left:auto;display:flex;gap:8px">
+ <button class="btn btn-secondary btn-sm" onclick="clearAll()">⟳ Clear</button>
+ <button class="btn btn-accent" onclick="run()">⚡ Convert</button>
+ </div>
+ </div>
+ <div id="statusEl" style="display:none" class="status-bar"></div>
+ <div class="tool-workspace">
+ <div class="ws-panel">
+ <div class="ws-panel-header"><span class="ws-panel-title" id="inLabel">Plain Text</span>
+ <div class="ws-panel-actions"><button class="btn-icon" onclick="document.getElementById('fIn').click()">📁</button><button class="btn-icon" onclick="document.getElementById('inp').value=''">✕</button></div>
+ </div>
+ <textarea class="ws-textarea" id="inp" placeholder="Enter text to encode…" spellcheck="false"></textarea>
+ </div>
+ <div class="ws-panel">
+ <div class="ws-panel-header"><span class="ws-panel-title" id="outLabel">Base64</span>
+ <div class="ws-panel-actions"><button class="btn-icon" onclick="copyOut()" title="Copy">⧉</button></div>
+ </div>
+ <div class="output-content" id="out" style="min-height:320px;word-break:break-all"></div>
+ </div>
+ </div>
+ <input type="file" id="fIn" style="display:none" onchange="loadFile(event)">
+ <div class="about-box"><h2>About Base64</h2><p>Base64 encoding converts binary data to ASCII text using 64 printable characters. It's commonly used to embed binary data in JSON, HTML, CSS, and HTTP headers. URL-safe mode replaces <code>+</code> with <code>-</code> and <code>/</code> with <code>_</code> so the result can be used in URLs without encoding.</p></div>
+</div>
+<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="../index.html" style="color:var(--accent)">← All Tools</a></div></footer>
+<div class="toast" id="_toast"></div>
+<script>var _mode='encode',_urlSafe=true;
+function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
+function setStatus(msg,type){var el=document.getElementById('statusEl');if(!msg){el.style.display='none';return;}el.className='status-bar status-'+type;el.textContent=(type==='valid'?'✓ ':type==='invalid'?'✗ ':'ℹ ')+msg;el.style.display='flex';}
+function setMode(m,btn){_mode=m;document.querySelectorAll('#modeTab .tab').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');document.getElementById('inLabel').textContent=m==='encode'?'Plain Text':'Base64 Input';document.getElementById('outLabel').textContent=m==='encode'?'Base64 Output':'Plain Text';document.getElementById('inp').placeholder=m==='encode'?'Enter text to encode…':'Paste Base64 to decode…';}
+function toggleUrlSafe(btn){_urlSafe=!_urlSafe;btn.classList.toggle('active',_urlSafe);}
+function run(){
+ var v=document.getElementById('inp').value;
+ if(!v.trim()){setStatus('Input is empty','info');return;}
+ try{
+ var res;
+ if(_mode==='encode'){
+ res=btoa(unescape(encodeURIComponent(v)));
+ if(_urlSafe)res=res.replace(/\+/g,'-').replace(/\
+ setStatus('Encoded — '+res.length+' chars','valid');
+}else{
+ var inp=v.replace(/-/g,'+').replace(/_/g,'/');
+ while(inp.length%4)inp+='=';
+ res=decodeURIComponent(escape(atob(inp)));
+ setStatus('Decoded — '+res.length+' chars','valid');
+}
+ document.getElementById('out').textContent=res;
+}catch(e){setStatus('Error:'+e.message,'invalid');}
+}
+function clearAll(){document.getElementById('inp').value='';document.getElementById('out').textContent='';setStatus();}
+function copyOut(){var t=document.getElementById('out').textContent;if(!t)return;navigator.clipboard.writeText(t).then(function(){toast('Copied!','ok');});}
+function loadFile(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){document.getElementById('inp').value=e.target.result;run();};r.readAsText(f);ev.target.value='';}
+(function(){var tools=[{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'html-formatter.html',l:'HTML'},{h:'css-formatter.html',l:'CSS'},{h:'base64.html',l:'Base64'},{h:'url-encode.html',l:'URL'},{h:'regex-tester.html',l:'Regex'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'},{h:'lorem-ipsum.html',l:'Lorem'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='base64.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();</script>
+</body></html>

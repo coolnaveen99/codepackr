@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Free online diff checker — compare text and code side-by-side with line-by-line highlighting.">
+<title>Diff Checker — Codepackr</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+<header class="site-header">
+ <div class="header-inner">
+ <a href="../index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+ <nav class="main-nav">
+ <a href="../index.html#formatters">Formatters</a>
+ <a href="../index.html#encoders">Encoders</a>
+ <a href="../index.html#validators">Validators</a>
+ <a href="../index.html#utils">Utilities</a>
+ </nav>
+ </div>
+</header>
+<div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;">
+ <div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;align-items:center;min-height:44px;" id="toolNav"></div>
+</div>
+<div class="tool-page">
+ <div class="tool-page-header">
+ <div class="breadcrumb"><a href="../index.html">Home</a> › <a href="../index.html#validators">Validators</a> › Diff Checker</div>
+ <h1>Diff Checker</h1>
+ <p>Compare two texts or code snippets. Highlights added, removed, and changed lines.</p>
+ </div>
+ <div class="ws-toolbar">
+ <div class="tabs" id="modeTab">
+ <button class="tab active" onclick="setMode('text',this)">Text</button>
+ <button class="tab" onclick="setMode('code',this)">Code</button>
+ </div>
+ <select class="select" id="langSel" style="display:none">
+ <option value="">Auto</option>
+ <option value="js">JavaScript</option>
+ <option value="py">Python</option>
+ <option value="html">HTML</option>
+ <option value="css">CSS</option>
+ <option value="json">JSON</option>
+ <option value="sql">SQL</option>
+ <option value="bash">Bash</option>
+ </select>
+ <div class="tabs">
+ <button class="tab active" id="wsBtn" onclick="toggleOpt('ws',this)">Ignore WS</button>
+ <button class="tab active" id="wrapBtn" onclick="toggleOpt('wrap',this)">Wrap</button>
+ </div>
+ <div style="margin-left:auto;display:flex;gap:8px">
+ <button class="btn btn-secondary btn-sm" onclick="clearAll()">⟳ Clear</button>
+ <button class="btn btn-accent" onclick="runDiff()">⚡ Compare <kbd style="font-size:0.7rem;opacity:0.7">Ctrl+↵</kbd></button>
+ </div>
+ </div>
+ <div class="tool-workspace" style="margin-bottom:16px">
+ <div class="ws-panel">
+ <div class="ws-panel-header">
+ <span class="ws-panel-title" style="color:var(--accent3)">▪ Original</span>
+ <div class="ws-panel-actions">
+ <button class="btn-icon" title="Upload" onclick="document.getElementById('fA').click()">📁</button>
+ <button class="btn-icon" title="Clear" onclick="document.getElementById('origTA').value='';cnt('origTA','cntA')">✕</button>
+ </div>
+ </div>
+ <textarea class="ws-textarea" id="origTA" placeholder="Paste original text or code…" oninput="cnt('origTA','cntA')" spellcheck="false"></textarea>
+ <div style="padding:5px 14px;font-size:0.72rem;color:var(--text-dim);text-align:right;font-family:var(--font-mono)" id="cntA">0 lines</div>
+ </div>
+ <div class="ws-panel">
+ <div class="ws-panel-header">
+ <span class="ws-panel-title" style="color:var(--accent2)">▪ Modified</span>
+ <div class="ws-panel-actions">
+ <button class="btn-icon" title="Upload" onclick="document.getElementById('fB').click()">📁</button>
+ <button class="btn-icon" title="Clear" onclick="document.getElementById('modTA').value='';cnt('modTA','cntB')">✕</button>
+ </div>
+ </div>
+ <textarea class="ws-textarea" id="modTA" placeholder="Paste modified text or code…" oninput="cnt('modTA','cntB')" spellcheck="false"></textarea>
+ <div style="padding:5px 14px;font-size:0.72rem;color:var(--text-dim);text-align:right;font-family:var(--font-mono)" id="cntB">0 lines</div>
+ </div>
+ </div>
+ <input type="file" id="fA" style="display:none" onchange="loadFile(event,'origTA','cntA')">
+ <input type="file" id="fB" style="display:none" onchange="loadFile(event,'modTA','cntB')">
+ <div id="statsBar" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 18px;margin-bottom:14px;display:none;align-items:center;gap:14px;flex-wrap:wrap">
+ <div class="chips">
+ <span class="chip chip-add" id="sAdd">+0</span>
+ <span class="chip chip-del" id="sDel">−0</span>
+ <span class="chip chip-chg" id="sChg">~0</span>
+ </div>
+ <span style="font-size:0.78rem;color:var(--text-muted)">lines added / removed / changed</span>
+ <div style="margin-left:auto;display:flex;gap:8px">
+ <div class="tabs" id="viewTab">
+ <button class="tab active" onclick="setView('unified',this)">Unified</button>
+ <button class="tab" onclick="setView('split',this)">Split</button>
+ </div>
+ <button class="btn btn-secondary btn-sm" onclick="copyDiff()">Copy Diff</button>
+ <button class="btn btn-secondary btn-sm" onclick="exportDiff()">Export .diff</button>
+ </div>
+ </div>
+ <div class="diff-wrap" id="diffWrap">
+ <div class="diff-empty">
+ <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+ <h3>No comparison yet</h3>
+ <p>Paste text into both panels and click <strong>Compare</strong></p>
+ </div>
+ </div>
+ <div class="about-box">
+ <h2>About Diff Checker</h2>
+ <p>This tool computes a line-by-line diff using the LCS (Longest Common Subsequence) algorithm — the same approach used by Git. It highlights added lines in green, removed lines in red, and uses inline character-level highlighting to show exactly which characters changed within a modified line. Everything runs in your browser; no text is ever sent to a server.</p>
+ </div>
+ <div class="related-tools">
+ <h2>Related Tools</h2>
+ <div class="tools-grid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">
+ <a href="json-formatter.html" class="tool-card"><div class="tool-icon ti-json">{ }</div><div class="tool-info"><h3>JSON Formatter</h3><p>Beautify &amp; validate JSON</p></div><div class="tool-arrow">→</div></a>
+ <a href="regex-tester.html" class="tool-card"><div class="tool-icon ti-regex">.*</div><div class="tool-info"><h3>Regex Tester</h3><p>Test regular expressions</p></div><div class="tool-arrow">→</div></a>
+ <a href="markdown.html" class="tool-card"><div class="tool-icon ti-md">MD</div><div class="tool-info"><h3>Markdown Preview</h3><p>Write and preview Markdown</p></div><div class="tool-arrow">→</div></a>
+ </div>
+ </div>
+</div>
+<footer class="site-footer" style="margin-top:48px">
+ <div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px">
+ <div>© 2025 <span style="color:var(--accent2)">Codepackr</span> — All processing is client-side.</div>
+ <a href="../index.html" style="color:var(--accent)">← All Tools</a>
+ </div>
+</footer>
+<div class="toast" id="_toast"></div>
+<script>var _ws=true,_wrap=true,_view='unified',_diff=[],_mode='text';
+function cnt(tid,cid){
+ var v=document.getElementById(tid).value;
+ document.getElementById(cid).textContent=(v?v.split('\n').length:0)+' lines · '+v.length+' chars';
+}
+function toast(msg,t){
+ var el=document.getElementById('_toast');
+ el.textContent=msg;el.className='toast'+(t?' t-'+t:'');
+ el.classList.add('show');clearTimeout(el._t);
+ el._t=setTimeout(function(){el.classList.remove('show');},2400);
+}
+function loadFile(ev,tid,cid){
+ var f=ev.target.files[0];if(!f)return;
+ var r=new FileReader();
+ r.onload=function(e){document.getElementById(tid).value=e.target.result;cnt(tid,cid);toast('Loaded:'+f.name,'ok');};
+ r.readAsText(f);ev.target.value='';
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function setMode(m,btn){
+ _mode=m;
+ document.querySelectorAll('#modeTab .tab').forEach(function(b){b.classList.remove('active');});
+ btn.classList.add('active');
+ document.getElementById('langSel').style.display=m==='code'?'block':'none';
+}
+function toggleOpt(k,btn){
+ if(k==='ws'){_ws=!_ws;btn.classList.toggle('active',_ws);}
+ else{_wrap=!_wrap;btn.classList.toggle('active',_wrap);}
+ if(_diff.length)renderDiff(_diff);
+}
+function setView(v,btn){
+ _view=v;
+ document.querySelectorAll('#viewTab .tab').forEach(function(b){b.classList.remove('active');});
+ btn.classList.add('active');
+ if(_diff.length)renderDiff(_diff);
+}
+function clearAll(){
+ ['origTA','modTA'].forEach(function(id){document.getElementById(id).value='';});
+ cnt('origTA','cntA');cnt('modTA','cntB');
+ document.getElementById('statsBar').style.display='none';
+ document.getElementById('diffWrap').innerHTML='<div class="diff-empty"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><h3>No comparison yet</h3><p>Paste text into both panels and click<strong>Compare</strong></p></div>';
+ _diff=[];
+}
+function lcs(a,b){
+ var m=a.length,n=b.length,dp=[];
+ for(var i=0;i<=m;i++){dp[i]=new Int32Array(n+1);}
+ for(var i=1;i<=m;i++)for(var j=1;j<=n;j++)
+ dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]+1:Math.max(dp[i-1][j],dp[i][j-1]);
+ return dp;
+}
+function backtrack(dp,a,b,i,j,out){
+ if(i===0&&j===0)return;
+ if(i>0&&j>0&&a[i-1]===b[j-1]){backtrack(dp,a,b,i-1,j-1,out);out.push({t:'c',v:a[i-1]});}
+ else if(j>0&&(i===0||dp[i][j-1]>=dp[i-1][j])){backtrack(dp,a,b,i,j-1,out);out.push({t:'a',v:b[j-1]});}
+ else{backtrack(dp,a,b,i-1,j,out);out.push({t:'d',v:a[i-1]});}
+}
+function diffLines(t1,t2){
+ var a=t1.split('\n'),b=t2.split('\n');
+ if(_ws){a=a.map(function(l){return l.replace(/\s+/g,' ').trim();});b=b.map(function(l){return l.replace(/\s+/g,' ').trim();});}
+ if(a.length+b.length>6000){
+ var out=[],mx=Math.max(a.length,b.length);
+ for(var i=0;i<mx;i++){
+ if(i>=a.length)out.push({t:'a',v:b[i]});
+ else if(i>=b.length)out.push({t:'d',v:a[i]});
+ else if(a[i]===b[i])out.push({t:'c',v:a[i]});
+ else{out.push({t:'d',v:a[i]});out.push({t:'a',v:b[i]});}
+}
+ return out;
+}
+ var dp=lcs(a,b),out=[];
+ backtrack(dp,a,b,a.length,b.length,out);
+ return out;
+}
+function charDiff(del,add){
+ var a=del.split(''),b=add.split('');
+ if(a.length+b.length>600)return[esc(del),esc(add)];
+ var dp=lcs(a,b),out=[];
+ backtrack(dp,a,b,a.length,b.length,out);
+ var dh='',ah='';
+ out.forEach(function(x){
+ var v=esc(x.v);
+ if(x.t==='c'){dh+=v;ah+=v;}
+ else if(x.t==='d')dh+='<span class="ihl-d">'+v+'</span>';
+ else ah+='<span class="ihl-a">'+v+'</span>';
+});
+ return[dh,ah];
+}
+function runDiff(){
+ var orig=document.getElementById('origTA').value;
+ var mod=document.getElementById('modTA').value;
+ if(!orig.trim()&&!mod.trim()){toast('Enter text in both panels','err');return;}
+ var d=diffLines(orig,mod);
+ _diff=d;
+ var adds=0,dels=0,chgs=0,i=0;
+ while(i<d.length){
+ if(d[i].t==='d'&&i+1<d.length&&d[i+1].t==='a'){chgs++;i+=2;}
+ else if(d[i].t==='a'){adds++;i++;}
+ else if(d[i].t==='d'){dels++;i++;}
+ else i++;
+}
+ document.getElementById('sAdd').textContent='+'+adds;
+ document.getElementById('sDel').textContent='−'+dels;
+ document.getElementById('sChg').textContent='~'+chgs;
+ var sb=document.getElementById('statsBar');
+ sb.style.display='flex';
+ renderDiff(d);
+ document.getElementById('diffWrap').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function renderDiff(d){
+ if(_view==='unified')renderUnified(d);
+ else renderSplit(d);
+}
+function renderUnified(d){
+ var CTX=4,vis=new Set();
+ d.forEach(function(x,i){if(x.t!=='c')for(var k=Math.max(0,i-CTX);k<=Math.min(d.length-1,i+CTX);k++)vis.add(k);});
+ var all=d.every(function(x){return x.t==='c';});
+ if(all){document.getElementById('diffWrap').innerHTML='<div class="diff-empty"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><h3>Files are identical</h3><p>No differences found.</p></div>';return;}
+ var html='<div style="overflow-x:auto"><table class="diff-table"><tbody>',ln=1,rn=1,i=0;
+ while(i<d.length){
+ var x=d[i];
+ if(!vis.has(i)&&x.t==='c'){
+ var nv=-1;
+ for(var k=i;k<d.length;k++){if(vis.has(k)){nv=k;break;}}
+ if(nv>i)html+='<tr class="dsep"><td colspan="4">··· '+(nv-i)+' unchanged lines ···</td></tr>';
+ while(i<d.length&&!vis.has(i)){if(d[i].t==='c'){ln++;rn++;}else if(d[i].t==='d')ln++;else rn++;i++;}
+ continue;
+}
+ if(x.t==='c'){html+='<tr class="dc"><td class="ln">'+ln+'</td><td class="ln">'+rn+'</td><td class="ls"></td><td class="lc">'+esc(x.v)+'</td></tr>';ln++;rn++;i++;}
+ else if(x.t==='d'){
+ var dh=esc(x.v),ah=null;
+ if(i+1<d.length&&d[i+1].t==='a'){var p=charDiff(x.v,d[i+1].v);dh=p[0];ah=p[1];}
+ html+='<tr class="dd"><td class="ln">'+ln+'</td><td class="ln"></td><td class="ls">−</td><td class="lc">'+dh+'</td></tr>';ln++;i++;
+}else if(x.t==='a'){
+ var addh=esc(x.v);
+ if(i>0&&d[i-1].t==='d'){var p2=charDiff(d[i-1].v,x.v);addh=p2[1];}
+ html+='<tr class="da"><td class="ln"></td><td class="ln">'+rn+'</td><td class="ls">+</td><td class="lc">'+addh+'</td></tr>';rn++;i++;
+}
+}
+ html+='</tbody></table></div>';
+ if(_wrap)html=html.replace('class="diff-table"','class="diff-table" style="white-space:pre-wrap;word-break:break-all"');
+ document.getElementById('diffWrap').innerHTML=html;
+}
+function renderSplit(d){
+ var lr='',rr='',ln=1,rn=1,i=0;
+ while(i<d.length){
+ var x=d[i];
+ if(x.t==='c'){
+ var v=esc(x.v);
+ lr+='<tr class="spc"><td class="ln">'+ln+'</td><td>'+v+'</td></tr>';
+ rr+='<tr class="spc"><td class="ln">'+rn+'</td><td>'+v+'</td></tr>';
+ ln++;rn++;i++;
+}else if(x.t==='d'){
+ if(i+1<d.length&&d[i+1].t==='a'){
+ var p=charDiff(x.v,d[i+1].v);
+ lr+='<tr class="spd"><td class="ln">'+ln+'</td><td>'+p[0]+'</td></tr>';
+ rr+='<tr class="spa"><td class="ln">'+rn+'</td><td>'+p[1]+'</td></tr>';
+ ln++;rn++;i+=2;
+}else{
+ lr+='<tr class="spd"><td class="ln">'+ln+'</td><td>'+esc(x.v)+'</td></tr>';
+ rr+='<tr class="spe"><td class="ln"></td><td></td></tr>';
+ ln++;i++;
+}
+}else{
+ lr+='<tr class="spe"><td class="ln"></td><td></td></tr>';
+ rr+='<tr class="spa"><td class="ln">'+rn+'</td><td>'+esc(x.v)+'</td></tr>';
+ rn++;i++;
+}
+}
+ var ws=_wrap?'white-space:pre-wrap;word-break:break-all':'white-space:pre';
+ document.getElementById('diffWrap').innerHTML=
+ '<div class="split-view">'+
+ '<div class="split-pane"><div class="split-ph sph-d">◀ Original</div><div style="overflow-x:auto"><table class="split-table" style="'+ws+'"><tbody>'+lr+'</tbody></table></div></div>'+
+ '<div class="split-pane"><div class="split-ph sph-a">Modified ▶</div><div style="overflow-x:auto"><table class="split-table" style="'+ws+'"><tbody>'+rr+'</tbody></table></div></div>'+
+ '</div>';
+}
+function copyDiff(){
+ if(!_diff.length)return;
+ var t=_diff.map(function(x){return(x.t==='a'?'+':x.t==='d'?'-':' ')+x.v;}).join('\n');
+ navigator.clipboard.writeText(t).then(function(){toast('Diff copied!','ok');});
+}
+function exportDiff(){
+ if(!_diff.length){toast('Run a comparison first','err');return;}
+ var t=_diff.map(function(x){return(x.t==='a'?'+':x.t==='d'?'-':' ')+x.v;}).join('\n');
+ var a=document.createElement('a');
+ a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));
+ a.download='diff-output.diff';a.click();
+ toast('Exported!','ok');
+}
+document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runDiff();}});
+(function(){
+ var tools=[
+{h:'json-formatter.html',l:'JSON'},
+{h:'diff-checker.html',l:'Diff'},
+{h:'html-formatter.html',l:'HTML'},
+{h:'css-formatter.html',l:'CSS'},
+{h:'base64.html',l:'Base64'},
+{h:'url-encode.html',l:'URL'},
+{h:'regex-tester.html',l:'Regex'},
+{h:'hash-generator.html',l:'Hash'},
+{h:'uuid-generator.html',l:'UUID'},
+{h:'lorem-ipsum.html',l:'Lorem'},
+ ];
+ document.getElementById('toolNav').innerHTML=tools.map(function(t){
+ var active=t.h==='diff-checker.html';
+ return'<a href="'+t.h+'" class="tab'+(active?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';
+}).join('');
+})();
+cnt('origTA','cntA');cnt('modTA','cntB');</script>
+</body>
+</html>
