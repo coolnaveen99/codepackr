@@ -6,19 +6,19 @@
 <title>JSON ↔ CSV Converter — Codepackr</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/main.css">
+<link rel="stylesheet" href="css/main.css">
 </head>
 <body>
 <header class="site-header"><div class="header-inner">
- <a href="../index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
- <nav class="main-nav"><a href="../index.html#formatters">Formatters</a><a href="../index.html#encoders">Encoders</a><a href="../index.html#validators">Validators</a><a href="../index.html#utils">Utilities</a></nav>
+ <a href="index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+ <nav class="main-nav"><a href="index.html#formatters">Formatters</a><a href="index.html#encoders">Encoders</a><a href="index.html#validators">Validators</a><a href="index.html#utils">Utilities</a></nav>
 </div></header>
 <div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;">
  <div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div>
 </div>
 <div class="tool-page">
  <div class="tool-page-header">
- <div class="breadcrumb"><a href="../index.html">Home</a> › Converters › JSON ↔ CSV</div>
+ <div class="breadcrumb"><a href="index.html">Home</a> › Converters › JSON ↔ CSV</div>
  <h1>JSON ↔ CSV Converter</h1>
  <p>Convert JSON arrays to CSV spreadsheets or CSV data back to JSON.</p>
  </div>
@@ -58,7 +58,7 @@
  </div>
  <input type="file" id="fIn" style="display:none" accept=".json,.csv,.txt" onchange="loadFile(event)">
 </div>
-<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="../index.html" style="color:var(--accent)">← All Tools</a></div></footer>
+<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="index.html" style="color:var(--accent)">← All Tools</a></div></footer>
 <div class="toast" id="_toast"></div>
 <script>function toast(msg,type){var el=document.getElementById('_toast');el.textContent=msg;el.className='toast'+(type?' t-'+type:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
 function setStatus(msg,type){var el=document.getElementById('statusEl');if(!msg){el.style.display='none';return;}el.className='status-bar status-'+type;el.textContent=(type==='valid'?'✓ ':type==='invalid'?'✗ ':'ℹ ')+msg;el.style.display='flex';}

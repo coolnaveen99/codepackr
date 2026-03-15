@@ -6,17 +6,17 @@
 <title>XML Formatter — Codepackr</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/main.css">
+<link rel="stylesheet" href="css/main.css">
 </head>
 <body>
 <header class="site-header"><div class="header-inner">
- <a href="../index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
- <nav class="main-nav"><a href="../index.html#formatters">Formatters</a><a href="../index.html#encoders">Encoders</a><a href="../index.html#validators">Validators</a><a href="../index.html#utils">Utilities</a></nav>
+ <a href="index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+ <nav class="main-nav"><a href="index.html#formatters">Formatters</a><a href="index.html#encoders">Encoders</a><a href="index.html#validators">Validators</a><a href="index.html#utils">Utilities</a></nav>
 </div></header>
 <div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;"><div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div></div>
 <div class="tool-page">
  <div class="tool-page-header">
- <div class="breadcrumb"><a href="../index.html">Home</a> › XML Formatter</div>
+ <div class="breadcrumb"><a href="index.html">Home</a> › XML Formatter</div>
  <h1>XML Formatter</h1><p>Indent and prettify XML documents.</p>
  </div>
  <div class="ws-toolbar">
@@ -40,7 +40,7 @@
 }
  function clearAll(){document.getElementById('inp').value='';document.getElementById('out').textContent='';document.getElementById('statusEl').style.display='none';}</script>
 </div>
-<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="../index.html" style="color:var(--accent)">← All Tools</a></div></footer>
+<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="index.html" style="color:var(--accent)">← All Tools</a></div></footer>
 <div class="toast" id="_toast"></div>
 <script>function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
 (function(){var tools=[{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'html-formatter.html',l:'HTML'},{h:'css-formatter.html',l:'CSS'},{h:'base64.html',l:'Base64'},{h:'url-encode.html',l:'URL'},{h:'regex-tester.html',l:'Regex'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'},{h:'lorem-ipsum.html',l:'Lorem'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='xml-formatter.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();</script>
