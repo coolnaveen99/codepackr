@@ -78,6 +78,76 @@
  <a href="diff-checker.html" class="tool-card"><div class="tool-icon ti-diff">≠</div><div class="tool-info"><h3>Diff Checker</h3><p>Compare text and code</p></div><div class="tool-arrow">→</div></a>
  <a href="json-validator.html" class="tool-card"><div class="tool-icon ti-json">✓</div><div class="tool-info"><h3>JSON Validator</h3><p>Strict JSON validation</p></div><div class="tool-arrow">→</div></a>
  </div></div>
+
+
+<style>
+.seo-section{margin-top:36px;padding-top:0}
+.seo-section h2{font-size:1.1rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:14px;color:var(--text)}
+.seo-about{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px}
+.seo-about p{font-size:0.88rem;color:var(--text-muted);line-height:1.8}
+.use-cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:20px}
+.use-case{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:flex-start;gap:10px;font-size:0.83rem;color:var(--text-muted)}
+.use-case-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);flex-shrink:0;margin-top:6px}
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:20px}
+.tip-card{background:rgba(108,99,255,0.05);border:1px solid rgba(108,99,255,0.15);border-radius:var(--radius-sm);padding:12px 16px;font-size:0.83rem;color:var(--text-muted);line-height:1.6;display:flex;gap:10px;align-items:flex-start}
+.tip-icon{color:var(--accent);font-size:0.9rem;flex-shrink:0}
+.faq-list{display:grid;gap:10px}
+.faq-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.faq-q{padding:14px 18px;font-size:0.88rem;font-weight:700;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.faq-q:hover{background:var(--surface2)}
+.faq-a{padding:0 18px 14px;font-size:0.83rem;color:var(--text-muted);line-height:1.75;display:none}
+.faq-a.open{display:block}
+.faq-arrow{color:var(--text-dim);transition:transform 0.2s;font-size:0.8rem}
+.faq-arrow.open{transform:rotate(180deg)}
+</style>
+
+<div class="seo-section">
+  <div class="seo-about">
+    <h2>What is a JSON Formatter & Beautifier?</h2>
+    <p>A JSON Formatter (also called JSON Beautifier or JSON Prettifier) takes minified or unreadable JSON data and adds proper indentation, line breaks, and spacing to make it human-readable. It also validates your JSON and highlights syntax errors instantly.</p>
+  </div>
+
+  <h2>Common Use Cases</h2>
+  <div class="use-cases"><div class="use-case"><div class="use-case-dot"></div><span>Debugging API responses from REST or GraphQL APIs</span></div><div class="use-case"><div class="use-case-dot"></div><span>Reading minified JSON configuration files</span></div><div class="use-case"><div class="use-case-dot"></div><span>Formatting JSON before committing to version control</span></div><div class="use-case"><div class="use-case-dot"></div><span>Validating JSON data structures in development</span></div><div class="use-case"><div class="use-case-dot"></div><span>Converting JSON to a readable format for documentation</span></div></div>
+
+  <h2>Tips & Best Practices</h2>
+  <div class="tips-grid"><div class="tip-card"><span class="tip-icon">💡</span><span>Use 2-space indentation for web projects and 4-space for most other languages</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>The Sort Keys option helps you spot duplicate keys immediately</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>Minify JSON before sending API requests to reduce payload size</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>Valid JSON requires double quotes — single quotes will fail validation</span></div></div>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq-list"><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    What is JSON?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">JSON (JavaScript Object Notation) is a lightweight data format used to exchange data between servers and web applications. It uses key-value pairs and supports strings, numbers, booleans, arrays, and objects.</div>
+</div><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    Why is my JSON invalid?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">Common causes: missing quotes around keys, trailing commas after the last item, using single quotes instead of double quotes, or unescaped special characters in strings.</div>
+</div><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    What is the difference between JSON beautify and minify?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">Beautify adds whitespace and indentation to make JSON readable. Minify removes all unnecessary whitespace to make the file smaller and faster to transmit over networks.</div>
+</div><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    Is my JSON data safe?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">Yes — all processing happens entirely in your browser. Your JSON data is never sent to any server.</div>
+</div></div>
+</div>
+<script>
+function toggleFaq(el){
+  var ans=el.nextElementSibling;
+  var arr=el.querySelector('.faq-arrow');
+  var isOpen=ans.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.faq-a').forEach(function(a){a.classList.remove('open');});
+  document.querySelectorAll('.faq-arrow').forEach(function(a){a.classList.remove('open');});
+  if(!isOpen){ans.classList.add('open');arr.classList.add('open');}
+}
+</script>
+
 </div>
 <footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="index.html" style="color:var(--accent)">← All Tools</a></div></footer>
 <div class="toast" id="_toast"></div>

@@ -60,6 +60,76 @@
  </div>
  <input type="file" id="fIn" style="display:none" onchange="loadFile(event)">
  <div class="about-box"><h2>About Base64</h2><p>Base64 encoding converts binary data to ASCII text using 64 printable characters. It's commonly used to embed binary data in JSON, HTML, CSS, and HTTP headers. URL-safe mode replaces <code>+</code> with <code>-</code> and <code>/</code> with <code>_</code> so the result can be used in URLs without encoding.</p></div>
+
+
+<style>
+.seo-section{margin-top:36px;padding-top:0}
+.seo-section h2{font-size:1.1rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:14px;color:var(--text)}
+.seo-about{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px}
+.seo-about p{font-size:0.88rem;color:var(--text-muted);line-height:1.8}
+.use-cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:20px}
+.use-case{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:flex-start;gap:10px;font-size:0.83rem;color:var(--text-muted)}
+.use-case-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);flex-shrink:0;margin-top:6px}
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:20px}
+.tip-card{background:rgba(108,99,255,0.05);border:1px solid rgba(108,99,255,0.15);border-radius:var(--radius-sm);padding:12px 16px;font-size:0.83rem;color:var(--text-muted);line-height:1.6;display:flex;gap:10px;align-items:flex-start}
+.tip-icon{color:var(--accent);font-size:0.9rem;flex-shrink:0}
+.faq-list{display:grid;gap:10px}
+.faq-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.faq-q{padding:14px 18px;font-size:0.88rem;font-weight:700;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.faq-q:hover{background:var(--surface2)}
+.faq-a{padding:0 18px 14px;font-size:0.83rem;color:var(--text-muted);line-height:1.75;display:none}
+.faq-a.open{display:block}
+.faq-arrow{color:var(--text-dim);transition:transform 0.2s;font-size:0.8rem}
+.faq-arrow.open{transform:rotate(180deg)}
+</style>
+
+<div class="seo-section">
+  <div class="seo-about">
+    <h2>What is a Base64 Encoder & Decoder?</h2>
+    <p>Base64 is an encoding scheme that converts binary data into ASCII text using 64 printable characters (A-Z, a-z, 0-9, +, /). It is widely used to embed binary content such as images, files, and credentials into text-based formats like JSON, HTML, CSS, and HTTP headers.</p>
+  </div>
+
+  <h2>Common Use Cases</h2>
+  <div class="use-cases"><div class="use-case"><div class="use-case-dot"></div><span>Encoding images to embed directly in HTML or CSS</span></div><div class="use-case"><div class="use-case-dot"></div><span>Encoding API credentials for HTTP Basic Authentication</span></div><div class="use-case"><div class="use-case-dot"></div><span>Transmitting binary data in JSON payloads</span></div><div class="use-case"><div class="use-case-dot"></div><span>Storing binary data in databases as text</span></div><div class="use-case"><div class="use-case-dot"></div><span>Decoding Base64 JWT token payloads</span></div></div>
+
+  <h2>Tips & Best Practices</h2>
+  <div class="tips-grid"><div class="tip-card"><span class="tip-icon">💡</span><span>URL-safe Base64 replaces + with - and / with _ so the result can be used in URLs without percent-encoding</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>Base64 increases data size by approximately 33%</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>Base64 is encoding not encryption — do not use it to hide sensitive data</span></div></div>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq-list"><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    What is Base64 encoding?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">Base64 encoding converts binary data to a string of ASCII characters. It is used to safely transmit binary data through systems that only support text, such as email (MIME) or JSON APIs.</div>
+</div><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    Is Base64 the same as encryption?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">No. Base64 is encoding, not encryption. Anyone can decode a Base64 string instantly. Never use Base64 to protect sensitive data — use proper encryption like AES instead.</div>
+</div><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    What is URL-safe Base64?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">URL-safe Base64 replaces the + character with - and / with _ so the encoded string can be used in URLs and filenames without needing percent-encoding.</div>
+</div><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    Why does Base64 end with == signs?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">The = signs are padding characters added to make the Base64 string length a multiple of 4. They are required by the standard but can sometimes be stripped safely.</div>
+</div></div>
+</div>
+<script>
+function toggleFaq(el){
+  var ans=el.nextElementSibling;
+  var arr=el.querySelector('.faq-arrow');
+  var isOpen=ans.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.faq-a').forEach(function(a){a.classList.remove('open');});
+  document.querySelectorAll('.faq-arrow').forEach(function(a){a.classList.remove('open');});
+  if(!isOpen){ans.classList.add('open');arr.classList.add('open');}
+}
+</script>
+
 </div>
 <footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="index.html" style="color:var(--accent)">← All Tools</a></div></footer>
 <div class="toast" id="_toast"></div>

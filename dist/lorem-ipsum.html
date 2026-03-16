@@ -62,6 +62,71 @@
 }
  function copyOut(){var t=document.getElementById('out').textContent;if(!t)return;navigator.clipboard.writeText(t).then(function(){toast('Copied!','ok');});}
  generate();</script>
+
+
+<style>
+.seo-section{margin-top:36px;padding-top:0}
+.seo-section h2{font-size:1.1rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:14px;color:var(--text)}
+.seo-about{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px}
+.seo-about p{font-size:0.88rem;color:var(--text-muted);line-height:1.8}
+.use-cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:20px}
+.use-case{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:flex-start;gap:10px;font-size:0.83rem;color:var(--text-muted)}
+.use-case-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);flex-shrink:0;margin-top:6px}
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:20px}
+.tip-card{background:rgba(108,99,255,0.05);border:1px solid rgba(108,99,255,0.15);border-radius:var(--radius-sm);padding:12px 16px;font-size:0.83rem;color:var(--text-muted);line-height:1.6;display:flex;gap:10px;align-items:flex-start}
+.tip-icon{color:var(--accent);font-size:0.9rem;flex-shrink:0}
+.faq-list{display:grid;gap:10px}
+.faq-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.faq-q{padding:14px 18px;font-size:0.88rem;font-weight:700;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.faq-q:hover{background:var(--surface2)}
+.faq-a{padding:0 18px 14px;font-size:0.83rem;color:var(--text-muted);line-height:1.75;display:none}
+.faq-a.open{display:block}
+.faq-arrow{color:var(--text-dim);transition:transform 0.2s;font-size:0.8rem}
+.faq-arrow.open{transform:rotate(180deg)}
+</style>
+
+<div class="seo-section">
+  <div class="seo-about">
+    <h2>What is a Lorem Ipsum Generator?</h2>
+    <p>Lorem Ipsum is placeholder text used by designers, developers, and publishers to fill space in layouts before final content is ready. It has been the industry standard since the 1500s and is derived from Cicero's De Finibus Bonorum et Malorum written in 45 BC.</p>
+  </div>
+
+  <h2>Common Use Cases</h2>
+  <div class="use-cases"><div class="use-case"><div class="use-case-dot"></div><span>Filling content areas in website mockups and wireframes</span></div><div class="use-case"><div class="use-case-dot"></div><span>Testing typography and layout in UI designs</span></div><div class="use-case"><div class="use-case-dot"></div><span>Placeholder content for email templates</span></div><div class="use-case"><div class="use-case-dot"></div><span>Testing database fields and forms with realistic text length</span></div><div class="use-case"><div class="use-case-dot"></div><span>Print layout and graphic design previews</span></div></div>
+
+  <h2>Tips & Best Practices</h2>
+  <div class="tips-grid"><div class="tip-card"><span class="tip-icon">💡</span><span>Use paragraphs for body copy placeholders, sentences for captions, words for buttons and labels</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>The Classic Start option begins with the famous 'Lorem ipsum dolor sit amet' opening</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>Generate more paragraphs to test long-form content layouts</span></div></div>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq-list"><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    What does Lorem Ipsum mean?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">Lorem Ipsum is derived from Cicero's philosophical text and means roughly 'pain itself' in Latin. It was intentionally scrambled so it reads as random text without distracting from the design.</div>
+</div><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    Why use Lorem Ipsum instead of real text?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">Placeholder text prevents designers and reviewers from focusing on content instead of layout. It also avoids confidential or copyrighted content appearing in design mockups.</div>
+</div><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    Is Lorem Ipsum Latin?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">It is based on Latin but has been scrambled and is not grammatically correct Latin. It is simply used as realistic-looking dummy text.</div>
+</div></div>
+</div>
+<script>
+function toggleFaq(el){
+  var ans=el.nextElementSibling;
+  var arr=el.querySelector('.faq-arrow');
+  var isOpen=ans.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.faq-a').forEach(function(a){a.classList.remove('open');});
+  document.querySelectorAll('.faq-arrow').forEach(function(a){a.classList.remove('open');});
+  if(!isOpen){ans.classList.add('open');arr.classList.add('open');}
+}
+</script>
+
 </div>
 <footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="index.html" style="color:var(--accent)">← All Tools</a></div></footer>
 <div class="toast" id="_toast"></div>

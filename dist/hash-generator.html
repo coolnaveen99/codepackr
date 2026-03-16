@@ -47,6 +47,76 @@
  <div style="display:grid;gap:12px" id="hashGrid">
  <div style="color:var(--text-dim);text-align:center;padding:30px">Type text above to generate hashes</div>
  </div>
+
+
+<style>
+.seo-section{margin-top:36px;padding-top:0}
+.seo-section h2{font-size:1.1rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:14px;color:var(--text)}
+.seo-about{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px}
+.seo-about p{font-size:0.88rem;color:var(--text-muted);line-height:1.8}
+.use-cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:20px}
+.use-case{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:flex-start;gap:10px;font-size:0.83rem;color:var(--text-muted)}
+.use-case-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);flex-shrink:0;margin-top:6px}
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:20px}
+.tip-card{background:rgba(108,99,255,0.05);border:1px solid rgba(108,99,255,0.15);border-radius:var(--radius-sm);padding:12px 16px;font-size:0.83rem;color:var(--text-muted);line-height:1.6;display:flex;gap:10px;align-items:flex-start}
+.tip-icon{color:var(--accent);font-size:0.9rem;flex-shrink:0}
+.faq-list{display:grid;gap:10px}
+.faq-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.faq-q{padding:14px 18px;font-size:0.88rem;font-weight:700;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.faq-q:hover{background:var(--surface2)}
+.faq-a{padding:0 18px 14px;font-size:0.83rem;color:var(--text-muted);line-height:1.75;display:none}
+.faq-a.open{display:block}
+.faq-arrow{color:var(--text-dim);transition:transform 0.2s;font-size:0.8rem}
+.faq-arrow.open{transform:rotate(180deg)}
+</style>
+
+<div class="seo-section">
+  <div class="seo-about">
+    <h2>What is a Hash Generator — SHA-256, SHA-512, SHA-1?</h2>
+    <p>A cryptographic hash function takes an input and produces a fixed-length string (hash) that uniquely represents the data. Even a single character change completely changes the hash output. Hashes are one-way — you cannot reverse a hash back to the original data.</p>
+  </div>
+
+  <h2>Common Use Cases</h2>
+  <div class="use-cases"><div class="use-case"><div class="use-case-dot"></div><span>Verifying file integrity after download</span></div><div class="use-case"><div class="use-case-dot"></div><span>Storing passwords securely in databases (with salting)</span></div><div class="use-case"><div class="use-case-dot"></div><span>Creating digital signatures and checksums</span></div><div class="use-case"><div class="use-case-dot"></div><span>Verifying API request authenticity</span></div><div class="use-case"><div class="use-case-dot"></div><span>Blockchain and cryptocurrency applications</span></div></div>
+
+  <h2>Tips & Best Practices</h2>
+  <div class="tips-grid"><div class="tip-card"><span class="tip-icon">💡</span><span>SHA-256 is the industry standard for most security applications</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>SHA-512 offers stronger security but produces a longer hash</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>Never use MD5 or SHA-1 for security purposes — they are broken</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>Always add a salt when hashing passwords to prevent rainbow table attacks</span></div></div>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq-list"><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    What is SHA-256?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">SHA-256 is a cryptographic hash function from the SHA-2 family. It produces a 256-bit (64 character hex) hash. It is used in SSL certificates, Bitcoin, file verification, and password storage.</div>
+</div><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    Can I reverse a hash back to the original text?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">No — hash functions are one-way. You cannot reverse SHA-256 back to the original input. This is what makes them useful for password storage.</div>
+</div><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    Which hash algorithm should I use?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">Use SHA-256 for most purposes. Use SHA-512 for extra security. Never use MD5 or SHA-1 for security — they have known vulnerabilities.</div>
+</div><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    Is my data sent to a server?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">No — all hashing runs entirely in your browser using the Web Crypto API. Your data never leaves your device.</div>
+</div></div>
+</div>
+<script>
+function toggleFaq(el){
+  var ans=el.nextElementSibling;
+  var arr=el.querySelector('.faq-arrow');
+  var isOpen=ans.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.faq-a').forEach(function(a){a.classList.remove('open');});
+  document.querySelectorAll('.faq-arrow').forEach(function(a){a.classList.remove('open');});
+  if(!isOpen){ans.classList.add('open');arr.classList.add('open');}
+}
+</script>
+
 </div>
 <footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="index.html" style="color:var(--accent)">← All Tools</a></div></footer>
 <div class="toast" id="_toast"></div>

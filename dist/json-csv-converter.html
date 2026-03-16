@@ -67,6 +67,66 @@
  </div>
  </div>
  <input type="file" id="fIn" style="display:none" accept=".json,.csv,.txt" onchange="loadFile(event)">
+
+
+<style>
+.seo-section{margin-top:36px;padding-top:0}
+.seo-section h2{font-size:1.1rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:14px;color:var(--text)}
+.seo-about{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px}
+.seo-about p{font-size:0.88rem;color:var(--text-muted);line-height:1.8}
+.use-cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:20px}
+.use-case{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:flex-start;gap:10px;font-size:0.83rem;color:var(--text-muted)}
+.use-case-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);flex-shrink:0;margin-top:6px}
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:20px}
+.tip-card{background:rgba(108,99,255,0.05);border:1px solid rgba(108,99,255,0.15);border-radius:var(--radius-sm);padding:12px 16px;font-size:0.83rem;color:var(--text-muted);line-height:1.6;display:flex;gap:10px;align-items:flex-start}
+.tip-icon{color:var(--accent);font-size:0.9rem;flex-shrink:0}
+.faq-list{display:grid;gap:10px}
+.faq-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.faq-q{padding:14px 18px;font-size:0.88rem;font-weight:700;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.faq-q:hover{background:var(--surface2)}
+.faq-a{padding:0 18px 14px;font-size:0.83rem;color:var(--text-muted);line-height:1.75;display:none}
+.faq-a.open{display:block}
+.faq-arrow{color:var(--text-dim);transition:transform 0.2s;font-size:0.8rem}
+.faq-arrow.open{transform:rotate(180deg)}
+</style>
+
+<div class="seo-section">
+  <div class="seo-about">
+    <h2>What is a JSON to CSV Converter & CSV to JSON Converter?</h2>
+    <p>This bidirectional converter transforms JSON arrays of objects into CSV spreadsheets and converts CSV data back to JSON. Perfect for preparing data exports, working with spreadsheet tools, and data analysis workflows.</p>
+  </div>
+
+  <h2>Common Use Cases</h2>
+  <div class="use-cases"><div class="use-case"><div class="use-case-dot"></div><span>Converting API JSON responses to CSV for Excel or Google Sheets</span></div><div class="use-case"><div class="use-case-dot"></div><span>Importing CSV data into applications as JSON</span></div><div class="use-case"><div class="use-case-dot"></div><span>Preparing data exports for reporting tools</span></div><div class="use-case"><div class="use-case-dot"></div><span>Converting database exports between formats</span></div><div class="use-case"><div class="use-case-dot"></div><span>Processing data for machine learning datasets</span></div></div>
+
+  <h2>Tips & Best Practices</h2>
+  <div class="tips-grid"><div class="tip-card"><span class="tip-icon">💡</span><span>Your JSON must be an array of objects (not a single object) for CSV conversion</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>Fields containing commas or newlines are automatically quoted</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>The converter preserves all column headers from JSON keys</span></div></div>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq-list"><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    What JSON structure works for CSV conversion?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">JSON must be an array of objects where each object represents a row: [{"name":"Alice","age":28},{"name":"Bob","age":34}]</div>
+</div><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    Can I choose a different delimiter than comma?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">Yes — the toolbar has a delimiter selector with comma, semicolon, pipe, and tab options.</div>
+</div></div>
+</div>
+<script>
+function toggleFaq(el){
+  var ans=el.nextElementSibling;
+  var arr=el.querySelector('.faq-arrow');
+  var isOpen=ans.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.faq-a').forEach(function(a){a.classList.remove('open');});
+  document.querySelectorAll('.faq-arrow').forEach(function(a){a.classList.remove('open');});
+  if(!isOpen){ans.classList.add('open');arr.classList.add('open');}
+}
+</script>
+
 </div>
 <footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="index.html" style="color:var(--accent)">← All Tools</a></div></footer>
 <div class="toast" id="_toast"></div>

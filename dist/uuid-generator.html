@@ -53,6 +53,76 @@
  <div style="color:var(--text-dim);text-align:center;padding:40px 20px">Click <strong style="color:var(--text)">⚡ Generate</strong> to create UUIDs</div>
  </div>
  </div>
+
+
+<style>
+.seo-section{margin-top:36px;padding-top:0}
+.seo-section h2{font-size:1.1rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:14px;color:var(--text)}
+.seo-about{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px}
+.seo-about p{font-size:0.88rem;color:var(--text-muted);line-height:1.8}
+.use-cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:20px}
+.use-case{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:flex-start;gap:10px;font-size:0.83rem;color:var(--text-muted)}
+.use-case-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);flex-shrink:0;margin-top:6px}
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:20px}
+.tip-card{background:rgba(108,99,255,0.05);border:1px solid rgba(108,99,255,0.15);border-radius:var(--radius-sm);padding:12px 16px;font-size:0.83rem;color:var(--text-muted);line-height:1.6;display:flex;gap:10px;align-items:flex-start}
+.tip-icon{color:var(--accent);font-size:0.9rem;flex-shrink:0}
+.faq-list{display:grid;gap:10px}
+.faq-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.faq-q{padding:14px 18px;font-size:0.88rem;font-weight:700;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.faq-q:hover{background:var(--surface2)}
+.faq-a{padding:0 18px 14px;font-size:0.83rem;color:var(--text-muted);line-height:1.75;display:none}
+.faq-a.open{display:block}
+.faq-arrow{color:var(--text-dim);transition:transform 0.2s;font-size:0.8rem}
+.faq-arrow.open{transform:rotate(180deg)}
+</style>
+
+<div class="seo-section">
+  <div class="seo-about">
+    <h2>What is a UUID Generator — Version 4 (Random)?</h2>
+    <p>A UUID (Universally Unique Identifier) is a 128-bit identifier standardised by RFC 4122. Version 4 UUIDs are randomly generated using cryptographically secure random numbers. With 122 bits of randomness, the probability of generating a duplicate is astronomically low — around 1 in 5.3×10³⁶.</p>
+  </div>
+
+  <h2>Common Use Cases</h2>
+  <div class="use-cases"><div class="use-case"><div class="use-case-dot"></div><span>Database primary keys for distributed systems</span></div><div class="use-case"><div class="use-case-dot"></div><span>Session tokens and authentication identifiers</span></div><div class="use-case"><div class="use-case-dot"></div><span>File naming to avoid conflicts across systems</span></div><div class="use-case"><div class="use-case-dot"></div><span>Message IDs in event-driven architectures</span></div><div class="use-case"><div class="use-case-dot"></div><span>Unique identifiers in APIs and microservices</span></div></div>
+
+  <h2>Tips & Best Practices</h2>
+  <div class="tips-grid"><div class="tip-card"><span class="tip-icon">💡</span><span>UUID v4 is the most commonly used version for general-purpose unique IDs</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>Use lowercase UUIDs for database storage — they are more portable</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>Strip hyphens for compact storage (32 chars instead of 36)</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>UUID v4 does not encode any timestamp or machine info — it is purely random</span></div></div>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq-list"><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    What is a UUID?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">UUID stands for Universally Unique Identifier. It is a 128-bit label used to uniquely identify objects in computer systems without a central authority.</div>
+</div><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    What is the difference between UUID v1 and v4?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">UUID v1 is based on the current timestamp and MAC address. UUID v4 is completely random. v4 is preferred for privacy and security because it reveals no information about when or where it was generated.</div>
+</div><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    Can two UUIDs ever be the same?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">In theory yes, but the probability is so low it is considered impossible in practice. UUID v4 has 2^122 possible values — roughly 5.3 undecillion unique IDs.</div>
+</div><div class="faq-item">
+  <div class="faq-q" onclick="toggleFaq(this)">
+    Are these UUIDs cryptographically secure?<span class="faq-arrow">▼</span>
+  </div>
+  <div class="faq-a">Yes — this tool uses the browser's Web Crypto API (crypto.getRandomValues) which is cryptographically secure.</div>
+</div></div>
+</div>
+<script>
+function toggleFaq(el){
+  var ans=el.nextElementSibling;
+  var arr=el.querySelector('.faq-arrow');
+  var isOpen=ans.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.faq-a').forEach(function(a){a.classList.remove('open');});
+  document.querySelectorAll('.faq-arrow').forEach(function(a){a.classList.remove('open');});
+  if(!isOpen){ans.classList.add('open');arr.classList.add('open');}
+}
+</script>
+
 </div>
 <footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="index.html" style="color:var(--accent)">← All Tools</a></div></footer>
 <div class="toast" id="_toast"></div>
