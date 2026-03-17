@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7368262160205015" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-D7Y6XGCNL1"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-D7Y6XGCNL1');</script>
+<meta charset="UTF-8">
+<meta name="msvalidate.01" content="BC8B27F46BBCD43F50A45F870843689D"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Free online Cron Expression editor and tester — build, validate and preview next run times for cron jobs.">
+<title>Cron Expression Builder &amp; Tester — Codepackr</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+  <a href="index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+  <nav class="main-nav"><a href="index.html#formatters">Formatters</a><a href="index.html#encoders">Encoders</a><a href="index.html#validators">Validators</a><a href="index.html#utils">Utilities</a></nav>
+</div></header>
+<div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;">
+  <div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div>
+</div>
+<div class="tool-page">
+  <div class="tool-page-header">
+    <div class="breadcrumb"><a href="index.html">Home</a> &rsaquo; <a href="index.html#utils">Utilities</a> &rsaquo; Cron Expression</div>
+    <h1>Cron Expression Builder &amp; Tester</h1>
+    <p>Build, validate and preview cron expressions. See the next 10 scheduled run times instantly.</p>
+  </div>
+
+  <!-- Expression input -->
+  <div class="ws-panel" style="margin-bottom:16px">
+    <div class="ws-panel-header">
+      <span class="ws-panel-title">Cron Expression</span>
+      <div class="ws-panel-actions">
+        <button class="btn-icon" onclick="copyExpr()" title="Copy">&#9415;</button>
+      </div>
+    </div>
+    <div style="padding:16px">
+      <input type="text" id="cronInp" value="* * * * *" oninput="parseCron()" spellcheck="false"
+        style="width:100%;background:var(--surface2);border:2px solid var(--border2);color:var(--text);font-family:var(--font-mono);font-size:1.3rem;padding:12px 16px;border-radius:var(--radius-sm);outline:none;letter-spacing:0.1em;transition:border-color 0.2s">
+      <div style="display:flex;gap:0;margin-top:8px">
+        <div style="flex:1;text-align:center;font-size:0.72rem;color:var(--text-dim);font-family:var(--font-mono)">Minute<br>0-59</div>
+        <div style="flex:1;text-align:center;font-size:0.72rem;color:var(--text-dim);font-family:var(--font-mono)">Hour<br>0-23</div>
+        <div style="flex:1;text-align:center;font-size:0.72rem;color:var(--text-dim);font-family:var(--font-mono)">Day<br>1-31</div>
+        <div style="flex:1;text-align:center;font-size:0.72rem;color:var(--text-dim);font-family:var(--font-mono)">Month<br>1-12</div>
+        <div style="flex:1;text-align:center;font-size:0.72rem;color:var(--text-dim);font-family:var(--font-mono)">Weekday<br>0-7</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="statusEl" style="display:none;margin-bottom:14px" class="status-bar"></div>
+
+  <!-- Presets -->
+  <div style="margin-bottom:16px">
+    <div style="font-size:0.78rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">Common Presets</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px" id="presets"></div>
+  </div>
+
+  <!-- Builder -->
+  <div class="ws-panel" style="margin-bottom:16px">
+    <div class="ws-panel-header"><span class="ws-panel-title">Visual Builder</span></div>
+    <div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px">
+      <div>
+        <label style="font-size:0.78rem;color:var(--text-muted);display:block;margin-bottom:6px">Minute (0-59)</label>
+        <input type="text" id="bMin" value="*" oninput="buildFromParts()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--font-mono);font-size:0.9rem;padding:7px 10px;border-radius:var(--radius-sm);outline:none">
+        <div style="font-size:0.7rem;color:var(--text-dim);margin-top:3px">* = every minute, */5 = every 5 min</div>
+      </div>
+      <div>
+        <label style="font-size:0.78rem;color:var(--text-muted);display:block;margin-bottom:6px">Hour (0-23)</label>
+        <input type="text" id="bHour" value="*" oninput="buildFromParts()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--font-mono);font-size:0.9rem;padding:7px 10px;border-radius:var(--radius-sm);outline:none">
+        <div style="font-size:0.7rem;color:var(--text-dim);margin-top:3px">0 = midnight, 12 = noon</div>
+      </div>
+      <div>
+        <label style="font-size:0.78rem;color:var(--text-muted);display:block;margin-bottom:6px">Day of Month (1-31)</label>
+        <input type="text" id="bDay" value="*" oninput="buildFromParts()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--font-mono);font-size:0.9rem;padding:7px 10px;border-radius:var(--radius-sm);outline:none">
+        <div style="font-size:0.7rem;color:var(--text-dim);margin-top:3px">1-31 or * for every day</div>
+      </div>
+      <div>
+        <label style="font-size:0.78rem;color:var(--text-muted);display:block;margin-bottom:6px">Month (1-12)</label>
+        <input type="text" id="bMonth" value="*" oninput="buildFromParts()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--font-mono);font-size:0.9rem;padding:7px 10px;border-radius:var(--radius-sm);outline:none">
+        <div style="font-size:0.7rem;color:var(--text-dim);margin-top:3px">1=Jan, 12=Dec</div>
+      </div>
+      <div>
+        <label style="font-size:0.78rem;color:var(--text-muted);display:block;margin-bottom:6px">Day of Week (0-7)</label>
+        <input type="text" id="bWeek" value="*" oninput="buildFromParts()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--font-mono);font-size:0.9rem;padding:7px 10px;border-radius:var(--radius-sm);outline:none">
+        <div style="font-size:0.7rem;color:var(--text-dim);margin-top:3px">0=Sun, 1=Mon, 7=Sun</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Description + Next runs -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <div class="output-area">
+      <div class="output-header"><span style="font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.04em">Human Description</span></div>
+      <div id="cronDesc" style="padding:16px;font-size:0.9rem;color:var(--text);min-height:80px;line-height:1.7"></div>
+    </div>
+    <div class="output-area">
+      <div class="output-header"><span style="font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.04em">Next 10 Run Times</span></div>
+      <div id="nextRuns" style="padding:14px;font-family:var(--font-mono);font-size:0.8rem;min-height:80px"></div>
+    </div>
+  </div>
+
+  <!-- Reference -->
+  <div class="about-box">
+    <h2>Cron Expression Reference</h2>
+    <p>A cron expression has 5 fields separated by spaces: <code style="font-family:var(--font-mono);background:var(--surface2);padding:2px 6px;border-radius:4px">MINUTE HOUR DAY MONTH WEEKDAY</code></p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:12px">
+      <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px 14px;font-size:0.82rem"><strong>*</strong> — every value<br><strong>*/n</strong> — every n values<br><strong>n,m</strong> — specific values</div>
+      <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px 14px;font-size:0.82rem"><strong>n-m</strong> — range of values<br><strong>n-m/s</strong> — range with step<br><strong>0-7</strong> — Sun=0 or 7, Mon=1</div>
+      <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px 14px;font-size:0.82rem"><strong>@yearly</strong> — 0 0 1 1 *<br><strong>@monthly</strong> — 0 0 1 * *<br><strong>@weekly</strong> — 0 0 * * 0</div>
+      <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px 14px;font-size:0.82rem"><strong>@daily</strong> — 0 0 * * *<br><strong>@hourly</strong> — 0 * * * *<br><strong>@reboot</strong> — at startup</div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer" style="margin-top:48px">
+  <div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px">
+    <div>&copy; 2025 <span style="color:var(--accent2)">Codepackr</span></div>
+    <a href="index.html" style="color:var(--accent)">&larr; All Tools</a>
+  </div>
+</footer>
+<div class="toast" id="_toast"></div>
+
+<script>
+function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
+function setStatus(msg,type){var el=document.getElementById('statusEl');if(!msg){el.style.display='none';return;}el.className='status-bar status-'+type;el.textContent=(type==='valid'?'\u2713 ':type==='invalid'?'\u2717 ':'\u2139 ')+msg;el.style.display='flex';}
+
+var PRESETS=[
+  {label:'Every minute',expr:'* * * * *'},
+  {label:'Every hour',expr:'0 * * * *'},
+  {label:'Every day at midnight',expr:'0 0 * * *'},
+  {label:'Every day at noon',expr:'0 12 * * *'},
+  {label:'Every Monday 9am',expr:'0 9 * * 1'},
+  {label:'Every weekday 8am',expr:'0 8 * * 1-5'},
+  {label:'Every 5 minutes',expr:'*/5 * * * *'},
+  {label:'Every 15 minutes',expr:'*/15 * * * *'},
+  {label:'Every Sunday midnight',expr:'0 0 * * 0'},
+  {label:'1st of month midnight',expr:'0 0 1 * *'},
+  {label:'Every 6 hours',expr:'0 */6 * * *'},
+  {label:'Twice daily',expr:'0 6,18 * * *'},
+];
+
+(function(){
+  var c=document.getElementById('presets');
+  PRESETS.forEach(function(p){
+    var btn=document.createElement('button');
+    btn.className='btn btn-secondary btn-sm';
+    btn.style.fontSize='0.78rem';
+    btn.textContent=p.label;
+    btn.onclick=function(){
+      document.getElementById('cronInp').value=p.expr;
+      parseCron();
+      syncBuilder(p.expr);
+    };
+    c.appendChild(btn);
+  });
+})();
+
+function buildFromParts(){
+  var min=document.getElementById('bMin').value||'*';
+  var hour=document.getElementById('bHour').value||'*';
+  var day=document.getElementById('bDay').value||'*';
+  var month=document.getElementById('bMonth').value||'*';
+  var week=document.getElementById('bWeek').value||'*';
+  var expr=min+' '+hour+' '+day+' '+month+' '+week;
+  document.getElementById('cronInp').value=expr;
+  parseCron();
+}
+
+function syncBuilder(expr){
+  var p=expr.trim().split(/\s+/);
+  if(p.length>=5){
+    document.getElementById('bMin').value=p[0];
+    document.getElementById('bHour').value=p[1];
+    document.getElementById('bDay').value=p[2];
+    document.getElementById('bMonth').value=p[3];
+    document.getElementById('bWeek').value=p[4];
+  }
+}
+
+function validatePart(val,min,max){
+  if(val==='*')return true;
+  if(/^\*\/\d+$/.test(val)){var s=parseInt(val.split('/')[1]);return s>=1&&s<=(max-min+1);}
+  if(/^\d+$/.test(val)){var n=parseInt(val);return n>=min&&n<=max;}
+  if(/^\d+-\d+$/.test(val)){var p=val.split('-');return parseInt(p[0])>=min&&parseInt(p[1])<=max&&parseInt(p[0])<=parseInt(p[1]);}
+  if(/^\d+(,\d+)+$/.test(val)){return val.split(',').every(function(v){var n=parseInt(v);return n>=min&&n<=max;});}
+  if(/^\d+-\d+\/\d+$/.test(val))return true;
+  return false;
+}
+
+function descPart(val,unit,names){
+  if(val==='*')return'every '+unit;
+  if(/^\*\/(\d+)$/.test(val)){var s=val.match(/\*\/(\d+)/)[1];return'every '+s+' '+unit+'s';}
+  if(/^\d+$/.test(val)){var n=parseInt(val);return names&&names[n]?names[n]:'at '+unit+' '+val;}
+  if(/^\d+-\d+$/.test(val)){var p=val.split('-');return unit+' '+p[0]+' through '+p[1];}
+  if(/^\d+(,\d+)+$/.test(val)){return 'at '+unit+' '+val.split(',').join(' and ');}
+  return val;
+}
+
+var MONTHS=['','January','February','March','April','May','June','July','August','September','October','November','December'];
+var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+function parseCron(){
+  var expr=document.getElementById('cronInp').value.trim();
+  var inp=document.getElementById('cronInp');
+
+  // Handle @aliases
+  var aliases={'@yearly':'0 0 1 1 *','@annually':'0 0 1 1 *','@monthly':'0 0 1 * *','@weekly':'0 0 * * 0','@daily':'0 0 * * *','@midnight':'0 0 * * *','@hourly':'0 * * * *'};
+  if(aliases[expr]){expr=aliases[expr];document.getElementById('cronInp').value=expr;}
+
+  var parts=expr.split(/\s+/);
+  if(parts.length!==5){
+    setStatus('Cron expression must have exactly 5 fields','invalid');
+    inp.style.borderColor='var(--accent3)';
+    document.getElementById('cronDesc').textContent='';
+    document.getElementById('nextRuns').innerHTML='';
+    return;
+  }
+
+  var ranges=[[0,59],[0,23],[1,31],[1,12],[0,7]];
+  var valid=parts.every(function(p,i){return validatePart(p,ranges[i][0],ranges[i][1]);});
+  if(!valid){
+    setStatus('Invalid cron expression — check value ranges','invalid');
+    inp.style.borderColor='var(--accent3)';
+    return;
+  }
+
+  inp.style.borderColor='var(--accent2)';
+  setStatus('Valid cron expression','valid');
+  syncBuilder(expr);
+
+  // Human description
+  var desc='Runs '+descPart(parts[0],'minute')+', '+descPart(parts[1],'hour')+', '+descPart(parts[2],'day of month')+', '+descPart(parts[3],'month',MONTHS)+', '+descPart(parts[4],'day of week',DAYS)+'.';
+  document.getElementById('cronDesc').textContent=desc;
+
+  // Next run times (simple simulation)
+  var runs=getNextRuns(parts,10);
+  document.getElementById('nextRuns').innerHTML=runs.map(function(d){
+    return'<div style="padding:3px 0;border-bottom:1px solid var(--border);color:var(--text)">'+d.toLocaleString()+'</div>';
+  }).join('');
+}
+
+function matchesPart(val,n,min,max){
+  if(val==='*')return true;
+  if(/^\*\/(\d+)$/.test(val)){var s=parseInt(val.match(/\*\/(\d+)/)[1]);return(n-min)%s===0;}
+  if(/^\d+$/.test(val))return parseInt(val)===n;
+  if(/^\d+-\d+$/.test(val)){var p=val.split('-');return n>=parseInt(p[0])&&n<=parseInt(p[1]);}
+  if(/^\d+(,\d+)+$/.test(val))return val.split(',').map(Number).includes(n);
+  if(/^\d+-\d+\/\d+$/.test(val)){var pp=val.split(/[-/]/);var s2=parseInt(pp[2]);for(var i=parseInt(pp[0]);i<=parseInt(pp[1]);i+=s2)if(i===n)return true;return false;}
+  return false;
+}
+
+function getNextRuns(parts,count){
+  var results=[];
+  var now=new Date();
+  var d=new Date(now.getFullYear(),now.getMonth(),now.getDate(),now.getHours(),now.getMinutes()+1,0);
+  var max=now.getTime()+365*24*60*60*1000*2;
+  while(results.length<count&&d.getTime()<max){
+    var min=d.getMinutes(),hour=d.getHours(),day=d.getDate(),month=d.getMonth()+1,dow=d.getDay();
+    if(matchesPart(parts[3],month,1,12)&&matchesPart(parts[2],day,1,31)&&(matchesPart(parts[4],dow,0,7)||matchesPart(parts[4],dow===0?7:dow,0,7))&&matchesPart(parts[1],hour,0,23)&&matchesPart(parts[0],min,0,59)){
+      results.push(new Date(d));
+    }
+    d=new Date(d.getTime()+60000);
+  }
+  return results;
+}
+
+function copyExpr(){
+  var v=document.getElementById('cronInp').value;
+  navigator.clipboard.writeText(v).then(function(){toast('Copied!','ok');});
+}
+
+parseCron();
+
+(function(){var tools=[{h:'cron-expression.html',l:'Cron'},{h:'uuid-generator.html',l:'UUID'},{h:'timestamp.html',l:'Timestamp'},{h:'json-formatter.html',l:'JSON'},{h:'regex-tester.html',l:'Regex'},{h:'diff-checker.html',l:'Diff'}];var nav=document.getElementById('toolNav');if(nav)nav.innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='cron-expression.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();
+</script>
+<!-- Buy Me a Coffee -->
+<div style="position:fixed;bottom:24px;right:24px;z-index:9999">
+  <a href="https://buymeacoffee.com/YOUR_BMC_USERNAME" target="_blank"
+     style="display:flex;align-items:center;gap:8px;padding:10px 18px;background:#FFDD00;color:#000;border-radius:50px;font-family:var(--font-ui);font-size:0.85rem;font-weight:800;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,0.15);transition:transform 0.2s"
+     onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+    <span style="font-size:1.1rem">&#9749;</span> Buy me a coffee
+  </a>
+</div>
+</body>
+</html>

@@ -1,278 +1,287 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7368262160205015" crossorigin="anonymous"></script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-D7Y6XGCNL1"></script>
-
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-D7Y6XGCNL1');
-</script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7368262160205015" crossorigin="anonymous"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-D7Y6XGCNL1');</script>
 <meta charset="UTF-8">
-<meta name="msvalidate.01" content="BC8B27F46BBCD43F50A45F870843689D" /><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="msvalidate.01" content="BC8B27F46BBCD43F50A45F870843689D" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Free online XSD Validator — validate XML documents against XSD schema, check well-formedness and structure.">
 <title>XSD Validator — Codepackr</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
-<header class="site-header"><div class="header-inner">
- <a href="index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
- <nav class="main-nav"><a href="index.html#formatters">Formatters</a><a href="index.html#encoders">Encoders</a><a href="index.html#validators">Validators</a><a href="index.html#utils">Utilities</a></nav>
-</div></header>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+    <nav class="main-nav">
+      <a href="index.html#formatters">Formatters</a>
+      <a href="index.html#encoders">Encoders</a>
+      <a href="index.html#validators">Validators</a>
+      <a href="index.html#utils">Utilities</a>
+    </nav>
+  </div>
+</header>
 <div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;">
- <div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div>
+  <div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div>
 </div>
 <div class="tool-page">
- <div class="tool-page-header">
- <div class="breadcrumb"><a href="index.html">Home</a> › Validators › XSD Validator</div>
- <h1>XSD Validator</h1>
- <p>Validate XML documents against an XSD schema. Checks well-formedness and schema compliance.</p>
- </div>
- <div class="ws-toolbar">
- <div class="tabs" id="modeTab">
- <button class="tab active" onclick="setMode('wellformed',this)">Well-formedness Check</button>
- <button class="tab" onclick="setMode('xsd',this)">XSD Schema Validation</button>
- </div>
- <div style="margin-left:auto;display:flex;gap:8px">
- <button class="btn btn-secondary btn-sm" onclick="clearAll()">⟳ Clear</button>
- <button class="btn btn-accent" onclick="validate()">⚡ Validate</button>
- </div>
- </div>
- <div id="statusEl" style="display:none;margin-bottom:14px" class="status-bar"></div>
- <div id="xsdPanel" style="display:none;margin-bottom:14px">
- <div class="ws-panel">
- <div class="ws-panel-header">
- <span class="ws-panel-title" style="color:var(--accent)">XSD Schema</span>
- <div class="ws-panel-actions">
- <button class="btn-icon" onclick="document.getElementById('fXsd').click()">📁 Upload XSD</button>
- <button class="btn-icon" onclick="document.getElementById('xsdInp').value=''">✕</button>
- </div>
- </div>
- <textarea class="ws-textarea" id="xsdInp" placeholder="Paste XSD schema here or upload a .xsd file…" spellcheck="false" style="min-height:180px"></textarea>
- </div>
- <input type="file" id="fXsd" style="display:none" accept=".xsd,.xml" onchange="loadXsd(event)">
- </div>
- <div class="ws-panel" style="margin-bottom:14px">
- <div class="ws-panel-header">
- <span class="ws-panel-title" style="color:var(--accent2)">XML Document</span>
- <div class="ws-panel-actions">
- <button class="btn-icon" onclick="document.getElementById('fXml').click()">📁 Upload XML</button>
- <button class="btn-icon" onclick="document.getElementById('xmlInp').value='';clearResults()">✕</button>
- </div>
- </div>
- <textarea class="ws-textarea" id="xmlInp" placeholder="Paste XML document to validate…" spellcheck="false" style="min-height:280px"></textarea>
- </div>
- <input type="file" id="fXml" style="display:none" accept=".xml,.txt" onchange="loadXml(event)">
- <div id="results"></div>
- <div id="xsdNote" class="about-box" style="display:none;margin-top:16px">
- <h2>⚠ Browser XSD Limitation</h2>
- <p>Full XSD schema validation requires a server-side XML processor (like Java's JAXB, .NET's XmlSchema, or libxml2) because browsers do not expose a native XSD validation API. This tool performs <strong>structural XSD validation</strong> in the browser: it checks that every required element and attribute defined in the schema is present, data types are consistent, and no undefined elements appear. For strict production-grade XSD validation, use a server-side tool.</p>
- </div>
- <div class="about-box" style="margin-top:16px">
- <h2>About XSD Validation</h2>
- <p>XSD (XML Schema Definition) defines the structure, data types, and constraints of an XML document. Well-formedness checks that XML is syntactically correct (properly nested tags, valid attributes, correct encoding). Schema validation additionally checks that the content matches the rules defined in the XSD — required elements, data types, value restrictions, and more.</p>
- </div>
-
-
-<style>
-.seo-section{margin-top:36px;padding-top:0}
-.seo-section h2{font-size:1.1rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:14px;color:var(--text)}
-.seo-about{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px}
-.seo-about p{font-size:0.88rem;color:var(--text-muted);line-height:1.8}
-.use-cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:20px}
-.use-case{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:flex-start;gap:10px;font-size:0.83rem;color:var(--text-muted)}
-.use-case-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);flex-shrink:0;margin-top:6px}
-.tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:20px}
-.tip-card{background:rgba(108,99,255,0.05);border:1px solid rgba(108,99,255,0.15);border-radius:var(--radius-sm);padding:12px 16px;font-size:0.83rem;color:var(--text-muted);line-height:1.6;display:flex;gap:10px;align-items:flex-start}
-.tip-icon{color:var(--accent);font-size:0.9rem;flex-shrink:0}
-.faq-list{display:grid;gap:10px}
-.faq-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
-.faq-q{padding:14px 18px;font-size:0.88rem;font-weight:700;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
-.faq-q:hover{background:var(--surface2)}
-.faq-a{padding:0 18px 14px;font-size:0.83rem;color:var(--text-muted);line-height:1.75;display:none}
-.faq-a.open{display:block}
-.faq-arrow{color:var(--text-dim);transition:transform 0.2s;font-size:0.8rem}
-.faq-arrow.open{transform:rotate(180deg)}
-</style>
-
-<div class="seo-section">
-  <div class="seo-about">
-    <h2>What is a XSD Validator — XML Schema Validation?</h2>
-    <p>An XSD (XML Schema Definition) validator checks that an XML document conforms to the rules defined in an XSD schema. It verifies required elements, data types, attribute constraints, and document structure beyond basic well-formedness.</p>
+  <div class="tool-page-header">
+    <div class="breadcrumb"><a href="index.html">Home</a> &rsaquo; <a href="index.html#validators">Validators</a> &rsaquo; XSD Validator</div>
+    <h1>XSD Validator</h1>
+    <p>Validate XML documents for well-formedness and structural correctness. Optionally validate against an XSD schema.</p>
   </div>
 
-  <h2>Common Use Cases</h2>
-  <div class="use-cases"><div class="use-case"><div class="use-case-dot"></div><span>Validating XML messages before sending to partner systems</span></div><div class="use-case"><div class="use-case-dot"></div><span>Checking XML configuration files against their schema</span></div><div class="use-case"><div class="use-case-dot"></div><span>Verifying SOAP request/response compliance</span></div><div class="use-case"><div class="use-case-dot"></div><span>Validating XML data exports from enterprise systems</span></div><div class="use-case"><div class="use-case-dot"></div><span>Testing XML document structure in development</span></div></div>
+  <div class="ws-toolbar">
+    <div class="tabs" id="modeTab">
+      <button class="tab active" onclick="setMode('wellformed',this)">Well-formedness Check</button>
+      <button class="tab" onclick="setMode('xsd',this)">XSD Schema Validation</button>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button class="btn btn-secondary btn-sm" onclick="clearAll()">&#10227; Clear</button>
+      <button class="btn btn-accent" onclick="validate()">&#9889; Validate</button>
+    </div>
+  </div>
 
-  <h2>Tips & Best Practices</h2>
-  <div class="tips-grid"><div class="tip-card"><span class="tip-icon">💡</span><span>Start with well-formedness check first — fix any parse errors before schema validation</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>Upload both the XSD and XML files using the file upload buttons</span></div><div class="tip-card"><span class="tip-icon">💡</span><span>Schema validation checks element names, required fields, and data types</span></div></div>
+  <div id="statusEl" style="display:none;margin-bottom:14px" class="status-bar"></div>
 
-  <h2>Frequently Asked Questions</h2>
-  <div class="faq-list"><div class="faq-item">
-  <div class="faq-q" onclick="toggleFaq(this)">
-    What is XSD?<span class="faq-arrow">▼</span>
+  <!-- XSD Schema panel -->
+  <div id="xsdPanel" style="display:none;margin-bottom:14px">
+    <div class="ws-panel">
+      <div class="ws-panel-header">
+        <span class="ws-panel-title" style="color:var(--accent)">XSD Schema</span>
+        <div class="ws-panel-actions">
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('fXsd').click()">&#128193; Upload XSD</button>
+          <button class="btn-icon" onclick="document.getElementById('xsdInp').value=''">&#10005;</button>
+        </div>
+      </div>
+      <textarea class="ws-textarea" id="xsdInp" placeholder="Paste your XSD schema here, or upload a .xsd file..." spellcheck="false" style="min-height:180px"></textarea>
+    </div>
+    <input type="file" id="fXsd" style="display:none" accept=".xsd,.xml" onchange="loadXsd(event)">
   </div>
-  <div class="faq-a">XSD (XML Schema Definition) is a language for describing the structure and constraints of XML documents. It defines which elements and attributes are allowed, their data types, and whether they are required or optional.</div>
-</div><div class="faq-item">
-  <div class="faq-q" onclick="toggleFaq(this)">
-    What is the difference between well-formed and valid XML?<span class="faq-arrow">▼</span>
+
+  <!-- XML input -->
+  <div class="ws-panel" style="margin-bottom:14px">
+    <div class="ws-panel-header">
+      <span class="ws-panel-title" style="color:var(--accent2)">XML Document</span>
+      <div class="ws-panel-actions">
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('fXml').click()">&#128193; Upload XML</button>
+        <button class="btn-icon" onclick="document.getElementById('xmlInp').value='';clearResults()">&#10005;</button>
+      </div>
+    </div>
+    <textarea class="ws-textarea" id="xmlInp" placeholder="Paste your XML document here, or upload a .xml file..." spellcheck="false" style="min-height:300px"></textarea>
   </div>
-  <div class="faq-a">Well-formed XML follows basic XML syntax rules (proper nesting, closed tags). Valid XML is well-formed AND conforms to a specific schema (DTD or XSD).</div>
-</div><div class="faq-item">
-  <div class="faq-q" onclick="toggleFaq(this)">
-    Why does my valid XML fail schema validation?<span class="faq-arrow">▼</span>
+  <input type="file" id="fXml" style="display:none" accept=".xml,.txt" onchange="loadXml(event)">
+
+  <!-- Results area -->
+  <div id="results"></div>
+
+  <div id="xsdNote" style="display:none;margin-top:14px" class="about-box">
+    <h2>&#9888; About Browser XSD Validation</h2>
+    <p>Full XSD schema validation (data types, restrictions, complex type inheritance) requires a server-side XML processor. This tool performs structural XSD validation in the browser: checking that all required elements defined in the schema are present in the XML document, and no undefined elements appear. For strict production XSD validation, use Java's JAXB, .NET XmlSchema, or libxml2.</p>
   </div>
-  <div class="faq-a">Common causes: wrong namespace declarations, element name mismatches (XML is case-sensitive), missing required attributes, or data type violations.</div>
-</div></div>
+
+  <div class="about-box" style="margin-top:16px">
+    <h2>About XSD Validation</h2>
+    <p>XSD (XML Schema Definition) defines the structure, data types and constraints of an XML document. Well-formedness checks basic XML syntax. Schema validation additionally checks content against the XSD rules.</p>
+  </div>
 </div>
-<script>
-function toggleFaq(el){
-  var ans=el.nextElementSibling;
-  var arr=el.querySelector('.faq-arrow');
-  var isOpen=ans.classList.contains('open');
-  // Close all
-  document.querySelectorAll('.faq-a').forEach(function(a){a.classList.remove('open');});
-  document.querySelectorAll('.faq-arrow').forEach(function(a){a.classList.remove('open');});
-  if(!isOpen){ans.classList.add('open');arr.classList.add('open');}
-}
-</script>
 
-</div>
-<footer class="site-footer" style="margin-top:48px"><div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px"><div>© 2025 <span style="color:var(--accent2)">Codepackr</span></div><a href="index.html" style="color:var(--accent)">← All Tools</a></div></footer>
+<footer class="site-footer" style="margin-top:48px">
+  <div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px">
+    <div>&copy; 2025 <span style="color:var(--accent2)">Codepackr</span></div>
+    <a href="index.html" style="color:var(--accent)">&larr; All Tools</a>
+  </div>
+</footer>
 <div class="toast" id="_toast"></div>
-<script>function toast(msg,type){var el=document.getElementById('_toast');el.textContent=msg;el.className='toast'+(type?' t-'+type:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
-function setStatus(msg,type){var el=document.getElementById('statusEl');if(!msg){el.style.display='none';return;}el.className='status-bar status-'+type;el.innerHTML=(type==='valid'?'✓ ':type==='invalid'?'✗ ':'ℹ ')+msg;el.style.display='flex';}
+
+<script>
+function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
+function setStatus(msg,type){var el=document.getElementById('statusEl');if(!msg){el.style.display='none';return;}el.className='status-bar status-'+type;el.innerHTML=(type==='valid'?'&#10003; ':type==='invalid'?'&#10007; ':'&#8505; ')+msg;el.style.display='flex';}
 function clearResults(){document.getElementById('results').innerHTML='';setStatus();}
+
 var _mode='wellformed';
 function setMode(m,btn){
- _mode=m;
- document.querySelectorAll('#modeTab .tab').forEach(function(b){b.classList.remove('active');});
- btn.classList.add('active');
- document.getElementById('xsdPanel').style.display=m==='xsd'?'block':'none';
- document.getElementById('xsdNote').style.display=m==='xsd'?'block':'none';
- clearResults();
+  _mode=m;
+  document.querySelectorAll('#modeTab .tab').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('xsdPanel').style.display=m==='xsd'?'block':'none';
+  document.getElementById('xsdNote').style.display=m==='xsd'?'block':'none';
+  clearResults();
 }
+
 function parseXml(text){
- var parser=new DOMParser();
- var doc=parser.parseFromString(text,'application/xml');
- var err=doc.querySelector('parsererror');
- if(err)throw new Error(err.textContent.replace(/\s+/g,' ').trim().substring(0,200));
- return doc;
+  var p=new DOMParser();
+  var doc=p.parseFromString(text,'application/xml');
+  var err=doc.querySelector('parsererror');
+  if(err){
+    var msg=err.textContent.trim().split('\n')[0].substring(0,300);
+    throw new Error(msg);
+  }
+  return doc;
 }
-function parseXsdSchema(xsdText){
- var doc=parseXml(xsdText);
- var ns='http:
- var schema={elements:{},required:[]};
- function processElement(el,path){
- var name=el.getAttribute('name');
- if(!name)return;
- var fullPath=path?path+'/'+name:name;
- var minOccurs=el.getAttribute('minOccurs');
- if(minOccurs===null)minOccurs='1';
- if(parseInt(minOccurs)>0)schema.required.push(fullPath);
- schema.elements[name]={
- type:el.getAttribute('type')||'',
- minOccurs:minOccurs,
- maxOccurs:el.getAttribute('maxOccurs')||'1'
-};
- Array.from(el.getElementsByTagNameNS(ns,'element')).forEach(function(child){processElement(child,fullPath);});
-}
- Array.from(doc.getElementsByTagNameNS(ns,'element')).forEach(function(el){
- if(el.parentElement&&el.parentElement.localName==='schema')processElement(el,'');
-});
- return schema;
-}
-function validateXmlAgainstSchema(xmlDoc,schema){
- var errors=[];
- var warnings=[];
- function checkNode(node,path){
- if(node.nodeType!==1)return;
- var tag=node.localName;
- var nodePath=path?path+'/'+tag:tag;
- if(schema.elements[tag]===undefined&&Object.keys(schema.elements).length>0){
- warnings.push('Unknown element:&lt;'+tag+'&gt;at '+nodePath);
-}
- Array.from(node.children).forEach(function(child){checkNode(child,nodePath);});
-}
- checkNode(xmlDoc.documentElement,'');
- return{errors:errors,warnings:warnings};
-}
-function validate(){
- var xmlText=document.getElementById('xmlInp').value.trim();
- if(!xmlText){setStatus('Please paste an XML document','info');return;}
- var results=document.getElementById('results');
- var xmlDoc;
- try{
- xmlDoc=parseXml(xmlText);
-}catch(e){
- setStatus('XML is NOT well-formed','invalid');
- results.innerHTML=makeErrorCard('Well-formedness Error',[e.message]);
- return;
-}
- if(_mode==='wellformed'){
- setStatus('XML is well-formed ✓','valid');
- var info=collectXmlInfo(xmlDoc);
- results.innerHTML=makeInfoCard(info);
- return;
-}
- var xsdText=document.getElementById('xsdInp').value.trim();
- if(!xsdText){setStatus('Please paste an XSD schema','info');return;}
- var schema;
- try{schema=parseXsdSchema(xsdText);}
- catch(e){setStatus('XSD parse error:'+e.message,'invalid');return;}
- var vResult=validateXmlAgainstSchema(xmlDoc,schema);
- var allErrors=vResult.errors.concat(vResult.warnings);
- if(vResult.errors.length===0&&vResult.warnings.length===0){
- setStatus('XML is valid against the provided XSD schema','valid');
- results.innerHTML=makeInfoCard(collectXmlInfo(xmlDoc))+'<div style="margin-top:12px;padding:14px;background:rgba(0,229,195,0.07);border:1px solid rgba(0,229,195,0.2);border-radius:var(--radius);color:var(--accent2);font-size:0.83rem">✓ No schema violations found</div>';
-}else if(vResult.errors.length>0){
- setStatus(vResult.errors.length+' validation error'+(vResult.errors.length>1?'s':''),'invalid');
- results.innerHTML=makeErrorCard('Schema Errors',vResult.errors)+makeWarnCard('Warnings',vResult.warnings);
-}else{
- setStatus(vResult.warnings.length+' warning'+(vResult.warnings.length>1?'s':'')+'(no hard errors)','info');
- results.innerHTML=makeInfoCard(collectXmlInfo(xmlDoc))+makeWarnCard('Warnings',vResult.warnings);
-}
-}
+
 function collectXmlInfo(doc){
- var root=doc.documentElement;
- var allEls=doc.getElementsByTagName('*');
- return{
- rootElement:root.tagName,
- totalElements:allEls.length,
- maxDepth:getMaxDepth(root,0),
- hasDeclaration:doc.xmlVersion?true:false,
- encoding:doc.xmlEncoding||'UTF-8',
- namespaces:root.namespaceURI||'none'
-};
+  var root=doc.documentElement;
+  var all=doc.getElementsByTagName('*');
+  var depth=getDepth(root,0);
+  return {
+    'Root element': '&lt;'+root.tagName+'&gt;',
+    'Total elements': all.length,
+    'Max nesting depth': depth,
+    'XML encoding': doc.xmlEncoding||'UTF-8',
+    'Has namespace': root.namespaceURI?'Yes ('+root.namespaceURI+')':'No',
+    'Child elements': root.children.length
+  };
 }
-function getMaxDepth(node,d){var max=d;Array.from(node.children).forEach(function(c){var cd=getMaxDepth(c,d+1);if(cd>max)max=cd;});return max;}
+
+function getDepth(node,d){
+  var m=d;
+  Array.from(node.children).forEach(function(c){var cd=getDepth(c,d+1);if(cd>m)m=cd;});
+  return m;
+}
+
 function makeInfoCard(info){
- return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">'
-+'<div style="font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--accent2);margin-bottom:12px">Document Info</div>'
-+'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">'
-+Object.entries(info).map(function(e){return'<div><div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:3px">'+e[0]+'</div><div style="font-family:var(--font-mono);font-size:0.82rem;color:var(--text)">'+e[1]+'</div></div>';}).join('')
-+'</div></div>';
+  return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">'
+    +'<div style="font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--accent2);margin-bottom:12px">Document Information</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">'
+    +Object.entries(info).map(function(e){
+      return'<div><div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:3px">'+e[0]+'</div>'
+        +'<div style="font-family:var(--font-mono);font-size:0.82rem;color:var(--text)">'+e[1]+'</div></div>';
+    }).join('')
+    +'</div></div>';
 }
+
 function makeErrorCard(title,msgs){
- if(!msgs.length)return'';
- return'<div style="background:rgba(255,101,132,0.07);border:1px solid rgba(255,101,132,0.2);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">'
-+'<div style="font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--accent3);margin-bottom:12px">'+title+'</div>'
-+msgs.map(function(m){return'<div style="font-family:var(--font-mono);font-size:0.8rem;color:var(--accent3);padding:4px 0;border-bottom:1px solid rgba(255,101,132,0.1)">'+m+'</div>';}).join('')
-+'</div>';
+  if(!msgs||!msgs.length)return'';
+  return'<div style="background:rgba(232,68,90,0.06);border:1px solid rgba(232,68,90,0.2);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">'
+    +'<div style="font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--accent3);margin-bottom:12px">&#10007; '+title+'</div>'
+    +msgs.map(function(m){return'<div style="font-family:var(--font-mono);font-size:0.8rem;color:var(--accent3);padding:5px 0;border-bottom:1px solid rgba(232,68,90,0.1)">'+m+'</div>';}).join('')
+    +'</div>';
 }
+
 function makeWarnCard(title,msgs){
- if(!msgs.length)return'';
- return'<div style="background:rgba(255,200,74,0.07);border:1px solid rgba(255,200,74,0.2);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">'
-+'<div style="font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#ffc84a;margin-bottom:12px">'+title+'</div>'
-+msgs.map(function(m){return'<div style="font-family:var(--font-mono);font-size:0.8rem;color:#ffc84a;padding:4px 0;border-bottom:1px solid rgba(255,200,74,0.1)">'+m+'</div>';}).join('')
-+'</div>';
+  if(!msgs||!msgs.length)return'';
+  return'<div style="background:rgba(255,196,74,0.06);border:1px solid rgba(255,196,74,0.25);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">'
+    +'<div style="font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#c87800;margin-bottom:12px">&#9888; '+title+'</div>'
+    +msgs.map(function(m){return'<div style="font-family:var(--font-mono);font-size:0.8rem;color:#c87800;padding:5px 0;border-bottom:1px solid rgba(255,196,74,0.15)">'+m+'</div>';}).join('')
+    +'</div>';
 }
-function clearAll(){document.getElementById('xmlInp').value='';document.getElementById('xsdInp').value='';clearResults();}
-function loadXml(ev){var f=ev.target.files[0];if(!f)return;new FileReader().onload=function(e){document.getElementById('xmlInp').value=e.target.result;};(function(r){r.onload=function(e){document.getElementById('xmlInp').value=e.target.result;toast('Loaded:'+f.name,'ok');};r.readAsText(f);})(new FileReader());ev.target.value='';}
-function loadXsd(ev){var f=ev.target.files[0];if(!f)return;(function(r){r.onload=function(e){document.getElementById('xsdInp').value=e.target.result;toast('XSD loaded:'+f.name,'ok');};r.readAsText(f);})(new FileReader());ev.target.value='';}
-(function(){var tools=[{h:'json-xml-converter.html',l:'JSON↔XML'},{h:'json-csv-converter.html',l:'JSON↔CSV'},{h:'csv-xml-converter.html',l:'CSV↔XML'},{h:'xsd-validator.html',l:'XSD Validator'},{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='xsd-validator.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();</script>
-</body></html>
+
+function makeSuccessCard(msg){
+  return'<div style="background:rgba(0,184,156,0.06);border:1px solid rgba(0,184,156,0.2);border-radius:var(--radius);padding:14px 20px;margin-bottom:12px;color:var(--accent2);font-size:0.85rem;font-weight:600">&#10003; '+msg+'</div>';
+}
+
+// Basic XSD structural check
+function validateAgainstXsd(xmlDoc, xsdText){
+  var errors=[], warnings=[];
+  var xsdDoc;
+  try{xsdDoc=parseXml(xsdText);}catch(e){return{errors:['XSD parse error: '+e.message],warnings:[]};}
+
+  var ns='http://www.w3.org/2001/XMLSchema';
+  // Collect declared element names from XSD
+  var declared={};
+  var required=[];
+  var xsdEls=xsdDoc.getElementsByTagNameNS(ns,'element');
+  Array.from(xsdEls).forEach(function(el){
+    var name=el.getAttribute('name');
+    if(!name)return;
+    declared[name]=true;
+    var minOccurs=el.getAttribute('minOccurs');
+    if(minOccurs===null||parseInt(minOccurs)>0) required.push(name);
+  });
+
+  if(!Object.keys(declared).length){
+    warnings.push('No element declarations found in XSD schema. Check namespace: should be xmlns="http://www.w3.org/2001/XMLSchema"');
+    return{errors:errors,warnings:warnings};
+  }
+
+  // Check XML elements against declared
+  var xmlEls=xmlDoc.getElementsByTagName('*');
+  var found={};
+  Array.from(xmlEls).forEach(function(el){
+    var tag=el.localName;
+    found[tag]=true;
+    if(Object.keys(declared).length>0 && declared[tag]===undefined){
+      warnings.push('Element &lt;'+tag+'&gt; not declared in XSD schema');
+    }
+  });
+
+  // Check required elements
+  required.forEach(function(name){
+    if(!found[name]){
+      errors.push('Required element &lt;'+name+'&gt; not found in XML document');
+    }
+  });
+
+  return{errors:errors, warnings:warnings};
+}
+
+function validate(){
+  var xmlText=document.getElementById('xmlInp').value.trim();
+  if(!xmlText){setStatus('Please paste an XML document to validate','info');return;}
+
+  var results=document.getElementById('results');
+
+  // Step 1: Well-formedness check
+  var xmlDoc;
+  try{
+    xmlDoc=parseXml(xmlText);
+  }catch(e){
+    setStatus('XML is NOT well-formed','invalid');
+    results.innerHTML=makeErrorCard('Well-formedness Error',[e.message.replace(/</g,'&lt;').replace(/>/g,'&gt;')]);
+    return;
+  }
+
+  var info=collectXmlInfo(xmlDoc);
+
+  if(_mode==='wellformed'){
+    setStatus('XML is well-formed &#10003;','valid');
+    results.innerHTML=makeSuccessCard('This XML document is well-formed. All tags are properly nested and closed.')+makeInfoCard(info);
+    return;
+  }
+
+  // Step 2: XSD validation
+  var xsdText=document.getElementById('xsdInp').value.trim();
+  if(!xsdText){setStatus('Please paste an XSD schema in the field above','info');return;}
+
+  var vResult=validateAgainstXsd(xmlDoc, xsdText);
+
+  if(vResult.errors.length===0&&vResult.warnings.length===0){
+    setStatus('XML is valid &#10003; — no schema violations found','valid');
+    results.innerHTML=makeSuccessCard('XML is well-formed and passes structural schema validation.')+makeInfoCard(info);
+  }else if(vResult.errors.length>0){
+    setStatus(vResult.errors.length+' validation error'+(vResult.errors.length>1?'s':''),'invalid');
+    results.innerHTML=makeErrorCard('Schema Validation Errors',vResult.errors)+makeWarnCard('Warnings',vResult.warnings)+makeInfoCard(info);
+  }else{
+    setStatus(vResult.warnings.length+' warning'+(vResult.warnings.length>1?'s':'')+' (no hard errors)','info');
+    results.innerHTML=makeSuccessCard('Well-formed. Minor schema warnings found.')+makeWarnCard('Schema Warnings',vResult.warnings)+makeInfoCard(info);
+  }
+}
+
+function clearAll(){
+  document.getElementById('xmlInp').value='';
+  if(document.getElementById('xsdInp'))document.getElementById('xsdInp').value='';
+  clearResults();
+}
+function loadXml(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){document.getElementById('xmlInp').value=e.target.result;toast('Loaded: '+f.name,'ok');};r.readAsText(f);ev.target.value='';}
+function loadXsd(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){document.getElementById('xsdInp').value=e.target.result;toast('XSD loaded: '+f.name,'ok');};r.readAsText(f);ev.target.value='';}
+
+(function(){var tools=[{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'xsd-validator.html',l:'XSD'},{h:'regex-tester.html',l:'Regex'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'}];var nav=document.getElementById('toolNav');if(nav)nav.innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='xsd-validator.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();
+</script>
+<!-- Buy Me a Coffee -->
+<div style="position:fixed;bottom:24px;right:24px;z-index:9999">
+  <a href="https://buymeacoffee.com/YOUR_BMC_USERNAME" target="_blank"
+     style="display:flex;align-items:center;gap:8px;padding:10px 18px;background:#FFDD00;color:#000;border-radius:50px;font-family:var(--font-ui);font-size:0.85rem;font-weight:800;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,0.15);transition:transform 0.2s"
+     onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+    <span style="font-size:1.1rem">&#9749;</span> Buy me a coffee
+  </a>
+</div>
+</body>
+</html>

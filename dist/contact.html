@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7368262160205015" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-D7Y6XGCNL1"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-D7Y6XGCNL1');</script>
+<meta charset="UTF-8">
+<meta name="msvalidate.01" content="BC8B27F46BBCD43F50A45F870843689D"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Contact Codepackr — Report a bug, suggest a tool, or just say hello.">
+<title>Contact — Codepackr</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<style>
+.contact-wrap{max-width:680px;margin:0 auto}
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-size:0.82rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.02em}
+.form-input{width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);font-family:var(--font-ui);font-size:0.88rem;padding:10px 14px;border-radius:var(--radius-sm);outline:none;transition:border-color 0.2s}
+.form-input:focus{border-color:var(--accent)}
+.form-textarea{min-height:140px;resize:vertical}
+.submit-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),#4a42c0);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font-ui);font-size:0.92rem;font-weight:700;cursor:pointer;transition:all 0.2s}
+.submit-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px var(--accent-glow)}
+.success-msg{display:none;background:rgba(0,184,156,0.08);border:1px solid rgba(0,184,156,0.2);border-radius:var(--radius);padding:20px 24px;text-align:center;color:var(--accent2)}
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px;margin-bottom:14px;display:flex;align-items:flex-start;gap:14px}
+.info-icon{width:40px;height:40px;border-radius:10px;background:rgba(91,82,232,0.1);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+</style>
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+  <a href="index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+  <nav class="main-nav"><a href="index.html#formatters">Formatters</a><a href="index.html#encoders">Encoders</a><a href="index.html#validators">Validators</a><a href="index.html#utils">Utilities</a></nav>
+  <div class="header-actions" style="display:flex;align-items:center;gap:10px">
+    <button class="hamburger" id="hamburgerBtn" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</div></header>
+
+<div class="tool-page">
+  <div class="contact-wrap">
+    <div class="tool-page-header">
+      <div class="breadcrumb"><a href="index.html">Home</a> &rsaquo; Contact</div>
+      <h1>Contact Us</h1>
+      <p>Have a suggestion, found a bug, or want to request a new tool? We&rsquo;d love to hear from you!</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:28px">
+      <div class="info-card">
+        <div class="info-icon">&#128736;</div>
+        <div><div style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:3px">Report a Bug</div><div style="font-size:0.78rem;color:var(--text-muted)">Something not working? Let us know.</div></div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">&#128161;</div>
+        <div><div style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:3px">Suggest a Tool</div><div style="font-size:0.78rem;color:var(--text-muted)">Want a new tool added? Tell us!</div></div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">&#128140;</div>
+        <div><div style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:3px">General Feedback</div><div style="font-size:0.78rem;color:var(--text-muted)">Any thoughts or improvements.</div></div>
+      </div>
+    </div>
+
+    <!-- SUCCESS MESSAGE -->
+    <div class="success-msg" id="successMsg">
+      <div style="font-size:2rem;margin-bottom:8px">&#10003;</div>
+      <div style="font-size:1rem;font-weight:700;margin-bottom:6px">Message sent!</div>
+      <div style="font-size:0.85rem">Thank you for reaching out. We&rsquo;ll get back to you within 24&ndash;48 hours.</div>
+    </div>
+
+    <!-- CONTACT FORM — using Formspree (free, no backend needed) -->
+    <!-- IMPORTANT: Replace YOUR_FORM_ID below with your Formspree form ID -->
+    <!-- Steps: 1. Go to formspree.io  2. Sign up free  3. Create new form  4. Copy form ID -->
+    <div id="contactForm" class="ws-panel">
+      <div class="ws-panel-header"><span class="ws-panel-title">Send a Message</span></div>
+      <div style="padding:20px">
+        <form id="cForm" action="https://formspree.io/f/xnjgovzw" method="POST" onsubmit="submitForm(event)">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="form-group">
+              <label class="form-label" for="fname">Your Name *</label>
+              <input class="form-input" type="text" id="fname" name="name" placeholder="John Doe" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="femail">Email Address *</label>
+              <input class="form-input" type="email" id="femail" name="email" placeholder="john@example.com" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fsubject">Subject *</label>
+            <select class="form-input" id="fsubject" name="subject" required>
+              <option value="">Select a topic...</option>
+              <option value="bug">Bug Report</option>
+              <option value="feature">Feature / Tool Request</option>
+              <option value="feedback">General Feedback</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fmsg">Message *</label>
+            <textarea class="form-input form-textarea" id="fmsg" name="message" placeholder="Describe your bug, suggestion, or feedback..." required></textarea>
+          </div>
+          <div id="formError" style="display:none;color:var(--accent3);font-size:0.82rem;margin-bottom:12px;padding:10px;background:rgba(232,68,90,0.08);border-radius:var(--radius-sm)"></div>
+          <button type="submit" class="submit-btn" id="submitBtn">&#9993; Send Message</button>
+          <div style="font-size:0.75rem;color:var(--text-dim);text-align:center;margin-top:10px">Powered by Formspree &mdash; your message goes directly to our inbox</div>
+        </form>
+      </div>
+    </div>
+
+    
+  </div>
+</div>
+
+<footer class="site-footer" style="margin-top:48px">
+  <div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px">
+    <div>&copy; 2025 <span style="color:var(--accent2)">Codepackr</span></div>
+    <a href="index.html" style="color:var(--accent)">&larr; All Tools</a>
+  </div>
+</footer>
+<div class="toast" id="_toast"></div>
+<script>
+function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
+function toggleMenu(){var m=document.getElementById("mobileMenu");if(m)m.classList.toggle("open");}
+
+async function submitForm(e){
+  e.preventDefault();
+  var btn=document.getElementById('submitBtn');
+  var errEl=document.getElementById('formError');
+  btn.textContent='Sending…';
+  btn.disabled=true;
+  errEl.style.display='none';
+
+  var fd=new FormData();
+  fd.append('name', document.getElementById('fname').value);
+  fd.append('email', document.getElementById('femail').value);
+  fd.append('_replyto', document.getElementById('femail').value);
+  fd.append('_subject', 'Codepackr: '+document.getElementById('fsubject').value);
+  fd.append('message', 'Topic: '+document.getElementById('fsubject').value+'
+
+'+document.getElementById('fmsg').value);
+
+  try{
+    var res = await fetch('https://formspree.io/f/xnjgovzw', {
+      method: 'POST',
+      body: fd,
+      headers: { 'Accept': 'application/json' }
+    });
+    var json = await res.json();
+    if(res.ok){
+      document.getElementById('contactForm').style.display='none';
+      document.getElementById('successMsg').style.display='block';
+      document.getElementById('successMsg').scrollIntoView({behavior:'smooth'});
+    } else {
+      var msg = json.errors ? json.errors.map(function(x){return x.message;}).join(', ') : 'Error '+res.status;
+      throw new Error(msg);
+    }
+  } catch(err){
+    errEl.textContent = '✗ '+err.message+'. Please try again.';
+    errEl.style.display = 'block';
+    btn.textContent = '✉ Send Message';
+    btn.disabled = false;
+  }
+}
+  }catch(err){
+    errEl.textContent='Failed to send: '+err.message+'. Please email us directly.';
+    errEl.style.display='block';
+    btn.textContent='\u2709 Send Message';btn.disabled=false;
+  }
+}
+</script>
+<!-- Buy Me a Coffee -->
+<div style="position:fixed;bottom:24px;right:24px;z-index:9999">
+  <a href="https://buymeacoffee.com/YOUR_BMC_USERNAME" target="_blank"
+     style="display:flex;align-items:center;gap:8px;padding:10px 18px;background:#FFDD00;color:#000;border-radius:50px;font-family:var(--font-ui);font-size:0.85rem;font-weight:800;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,0.15);transition:transform 0.2s"
+     onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+    <span style="font-size:1.1rem">&#9749;</span> Buy me a coffee
+  </a>
+</div>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7368262160205015" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-D7Y6XGCNL1"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-D7Y6XGCNL1');</script>
+<meta charset="UTF-8">
+<meta name="msvalidate.01" content="BC8B27F46BBCD43F50A45F870843689D"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Free online scientific calculator — standard and scientific modes with history, memory, and keyboard support.">
+<title>Scientific Calculator — Codepackr</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<style>
+.calc-wrap{max-width:420px;margin:0 auto}
+.calc-display{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px;min-height:90px}
+.calc-expr{font-family:var(--font-mono);font-size:0.82rem;color:var(--text-muted);min-height:20px;word-break:break-all}
+.calc-val{font-family:var(--font-mono);font-size:2rem;font-weight:700;color:var(--text);text-align:right;word-break:break-all;line-height:1.2;margin-top:4px}
+.calc-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.cb{padding:14px 8px;border-radius:var(--radius-sm);border:none;font-family:var(--font-mono);font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.12s;background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.cb:hover{background:var(--surface2);transform:scale(0.97)}
+.cb:active{transform:scale(0.93)}
+.cb-op{background:rgba(91,82,232,0.1);color:var(--accent);border-color:rgba(91,82,232,0.2)}
+.cb-op:hover{background:rgba(91,82,232,0.18)}
+.cb-eq{background:var(--accent);color:#fff;border-color:var(--accent);font-size:1.1rem}
+.cb-eq:hover{background:#4a42c0;transform:scale(0.97)}
+.cb-clear{background:rgba(232,68,90,0.1);color:var(--accent3);border-color:rgba(232,68,90,0.2)}
+.cb-clear:hover{background:rgba(232,68,90,0.18)}
+.cb-sci{background:rgba(0,184,156,0.08);color:var(--accent2);border-color:rgba(0,184,156,0.2);font-size:0.78rem}
+.cb-sci:hover{background:rgba(0,184,156,0.15)}
+.calc-tabs{display:flex;gap:6px;margin-bottom:12px}
+.calc-tab{padding:6px 16px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface);color:var(--text-muted);font-family:var(--font-ui);font-size:0.82rem;font-weight:700;cursor:pointer}
+.calc-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.history-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-top:16px;overflow:hidden}
+.history-item{display:flex;justify-content:space-between;padding:8px 16px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:0.82rem;cursor:pointer}
+.history-item:hover{background:var(--surface2)}
+.history-item:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+<header class="site-header"><div class="header-inner">
+  <a href="index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+  <nav class="main-nav"><a href="index.html#formatters">Formatters</a><a href="index.html#encoders">Encoders</a><a href="index.html#validators">Validators</a><a href="index.html#utils">Utilities</a></nav>
+  <div class="header-actions" style="display:flex;align-items:center;gap:10px">
+    <button class="hamburger" id="hamburgerBtn" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</div></header>
+<div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;">
+  <div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div>
+</div>
+
+<div class="tool-page">
+  <div class="tool-page-header">
+    <div class="breadcrumb"><a href="index.html">Home</a> &rsaquo; <a href="index.html#utils">Utilities</a> &rsaquo; Calculator</div>
+    <h1>Scientific Calculator</h1>
+    <p>Standard and scientific calculator with history, memory and full keyboard support.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:420px 1fr;gap:24px;align-items:start">
+  <div>
+    <div class="calc-tabs">
+      <button class="calc-tab active" onclick="setCalcMode('standard',this)">Standard</button>
+      <button class="calc-tab" onclick="setCalcMode('scientific',this)">Scientific</button>
+    </div>
+
+    <div class="calc-wrap">
+      <div class="calc-display">
+        <div class="calc-expr" id="calcExpr"></div>
+        <div class="calc-val" id="calcVal">0</div>
+      </div>
+
+      <!-- Standard buttons -->
+      <div class="calc-btns" id="standardBtns">
+        <button class="cb cb-clear" onclick="clearCalc()">AC</button>
+        <button class="cb cb-op" onclick="toggleSign()">&plusmn;</button>
+        <button class="cb cb-op" onclick="percent()">%</button>
+        <button class="cb cb-op" onclick="appendOp('/')">&#247;</button>
+
+        <button class="cb" onclick="appendNum('7')">7</button>
+        <button class="cb" onclick="appendNum('8')">8</button>
+        <button class="cb" onclick="appendNum('9')">9</button>
+        <button class="cb cb-op" onclick="appendOp('*')">&times;</button>
+
+        <button class="cb" onclick="appendNum('4')">4</button>
+        <button class="cb" onclick="appendNum('5')">5</button>
+        <button class="cb" onclick="appendNum('6')">6</button>
+        <button class="cb cb-op" onclick="appendOp('-')">&minus;</button>
+
+        <button class="cb" onclick="appendNum('1')">1</button>
+        <button class="cb" onclick="appendNum('2')">2</button>
+        <button class="cb" onclick="appendNum('3')">3</button>
+        <button class="cb cb-op" onclick="appendOp('+')">+</button>
+
+        <button class="cb" onclick="appendNum('0')" style="grid-column:span 2">0</button>
+        <button class="cb" onclick="appendDot()">.</button>
+        <button class="cb cb-eq" onclick="calculate()">=</button>
+      </div>
+
+      <!-- Scientific buttons (hidden by default) -->
+      <div class="calc-btns" id="scientificBtns" style="display:none;margin-top:8px">
+        <button class="cb cb-sci" onclick="sciFunc('sin')">sin</button>
+        <button class="cb cb-sci" onclick="sciFunc('cos')">cos</button>
+        <button class="cb cb-sci" onclick="sciFunc('tan')">tan</button>
+        <button class="cb cb-sci" onclick="sciFunc('log')">log</button>
+        <button class="cb cb-sci" onclick="sciFunc('ln')">ln</button>
+        <button class="cb cb-sci" onclick="sciFunc('sqrt')">&radic;</button>
+        <button class="cb cb-sci" onclick="sciFunc('sq')">x&sup2;</button>
+        <button class="cb cb-sci" onclick="sciFunc('pow')">x&sup;y</button>
+        <button class="cb cb-sci" onclick="appendNum('Math.PI')">&#960;</button>
+        <button class="cb cb-sci" onclick="appendNum('Math.E')">e</button>
+        <button class="cb cb-sci" onclick="sciFunc('abs')">&vert;x&vert;</button>
+        <button class="cb cb-sci" onclick="sciFunc('fact')">n!</button>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div style="font-size:0.82rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">History</div>
+    <div class="history-wrap" id="historyWrap">
+      <div style="padding:20px;text-align:center;color:var(--text-dim);font-size:0.82rem">Calculations will appear here</div>
+    </div>
+    <button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="clearHistory()">Clear History</button>
+
+    <div style="margin-top:20px;font-size:0.82rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">Keyboard Shortcuts</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px">
+      <div style="display:grid;gap:6px;font-size:0.8rem;color:var(--text-muted)">
+        <div style="display:flex;justify-content:space-between"><span>Numbers &amp; operators</span><span style="font-family:var(--font-mono)">0-9, +, -, *, /</span></div>
+        <div style="display:flex;justify-content:space-between"><span>Calculate</span><span style="font-family:var(--font-mono)">Enter</span></div>
+        <div style="display:flex;justify-content:space-between"><span>Clear</span><span style="font-family:var(--font-mono)">Escape</span></div>
+        <div style="display:flex;justify-content:space-between"><span>Backspace</span><span style="font-family:var(--font-mono)">Backspace</span></div>
+        <div style="display:flex;justify-content:space-between"><span>Decimal</span><span style="font-family:var(--font-mono)">.</span></div>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<footer class="site-footer" style="margin-top:48px">
+  <div class="footer-bottom" style="max-width:1400px;margin:0 auto;border-top:none;padding:20px 28px">
+    <div>&copy; 2025 <span style="color:var(--accent2)">Codepackr</span></div>
+    <a href="index.html" style="color:var(--accent)">&larr; All Tools</a>
+  </div>
+</footer>
+<div class="toast" id="_toast"></div>
+
+<script>
+function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
+function toggleMenu(){var m=document.getElementById("mobileMenu");if(m)m.classList.toggle("open");}
+
+var expr='', val='0', history=[], memory=0, lastResult=null;
+
+function updateDisplay(){
+  document.getElementById('calcExpr').textContent=expr;
+  document.getElementById('calcVal').textContent=val;
+}
+
+function appendNum(n){
+  if(n==='Math.PI'){val=String(Math.PI);expr='\u03c0';updateDisplay();return;}
+  if(n==='Math.E'){val=String(Math.E);expr='e';updateDisplay();return;}
+  if(val==='0'&&n!=='.'){val=n;}else{val+=n;}
+  expr+=n;
+  updateDisplay();
+}
+
+function appendDot(){
+  if(val.includes('.')){return;}
+  val+='.'; expr+='.'; updateDisplay();
+}
+
+function appendOp(op){
+  if(expr&&/[+\-*\/]$/.test(expr)){expr=expr.slice(0,-1);}
+  expr+=val+op; val='0'; updateDisplay();
+}
+
+function clearCalc(){expr='';val='0';updateDisplay();}
+
+function toggleSign(){
+  if(val!=='0'){val=String(-parseFloat(val));updateDisplay();}
+}
+
+function percent(){
+  val=String(parseFloat(val)/100); updateDisplay();
+}
+
+function sciFunc(fn){
+  var n=parseFloat(val);
+  var res;
+  try{
+    if(fn==='sin')res=Math.sin(n*Math.PI/180);
+    else if(fn==='cos')res=Math.cos(n*Math.PI/180);
+    else if(fn==='tan')res=Math.tan(n*Math.PI/180);
+    else if(fn==='log')res=Math.log10(n);
+    else if(fn==='ln')res=Math.log(n);
+    else if(fn==='sqrt')res=Math.sqrt(n);
+    else if(fn==='sq')res=n*n;
+    else if(fn==='pow'){appendOp('**');return;}
+    else if(fn==='abs')res=Math.abs(n);
+    else if(fn==='fact'){
+      if(n<0||n>170||n!==Math.floor(n)){toast('Invalid input for factorial','');return;}
+      res=1;for(var i=2;i<=n;i++)res*=i;
+    }
+    if(res===undefined)return;
+    var exprLabel=fn+'('+val+')';
+    addHistory(exprLabel, formatNum(res));
+    expr='';val=formatNum(res);
+    updateDisplay();
+  }catch(e){val='Error';updateDisplay();}
+}
+
+function formatNum(n){
+  if(isNaN(n))return'Error';
+  if(!isFinite(n))return'Infinity';
+  var s=parseFloat(n.toPrecision(12));
+  return String(s);
+}
+
+function calculate(){
+  if(!expr){return;}
+  try{
+    var e=expr+val;
+    var result=Function('"use strict";return('+e+')')();
+    var r=formatNum(result);
+    addHistory(e,'='+r);
+    expr='';val=r;lastResult=r;
+    updateDisplay();
+  }catch(e){val='Error';updateDisplay();}
+}
+
+function addHistory(e,r){
+  history.unshift({expr:e,result:r});
+  if(history.length>20)history.pop();
+  renderHistory();
+}
+
+function renderHistory(){
+  var hw=document.getElementById('historyWrap');
+  if(!history.length){hw.innerHTML='<div style="padding:20px;text-align:center;color:var(--text-dim);font-size:0.82rem">Calculations will appear here</div>';return;}
+  hw.innerHTML=history.map(function(h){
+    return'<div class="history-item" onclick="recallHistory(\''+h.result.replace('=','')+'\')"><span style="color:var(--text-muted)">'+h.expr+'</span><span style="color:var(--accent2);font-weight:700">'+h.result+'</span></div>';
+  }).join('');
+}
+
+function recallHistory(v){val=v;expr='';updateDisplay();}
+function clearHistory(){history=[];renderHistory();}
+
+function setCalcMode(mode,btn){
+  document.querySelectorAll('.calc-tab').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('scientificBtns').style.display=mode==='scientific'?'grid':'none';
+}
+
+// Keyboard support
+document.addEventListener('keydown',function(e){
+  if(e.key>='0'&&e.key<='9'){appendNum(e.key);}
+  else if(e.key==='+'){appendOp('+');}
+  else if(e.key==='-'){appendOp('-');}
+  else if(e.key==='*'){appendOp('*');}
+  else if(e.key==='/'){e.preventDefault();appendOp('/');}
+  else if(e.key==='Enter'||e.key==='='){calculate();}
+  else if(e.key==='Escape'){clearCalc();}
+  else if(e.key==='.'){appendDot();}
+  else if(e.key==='Backspace'){
+    if(val.length>1){val=val.slice(0,-1);}else{val='0';}
+    if(expr.length>0)expr=expr.slice(0,-1);
+    updateDisplay();
+  }
+});
+
+(function(){var tools=[{h:'calculator.html',l:'\u2211 Calc'},{h:'cron-expression.html',l:'Cron'},{h:'uuid-generator.html',l:'UUID'},{h:'timestamp.html',l:'Timestamp'},{h:'color-converter.html',l:'Color'},{h:'json-formatter.html',l:'JSON'}];var nav=document.getElementById('toolNav');if(nav)nav.innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='calculator.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();
+</script>
+</body>
+</html>
