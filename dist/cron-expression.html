@@ -16,10 +16,142 @@
 <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-<header class="site-header"><div class="header-inner">
-  <a href="index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
-  <nav class="main-nav"><a href="index.html#formatters">Formatters</a><a href="index.html#encoders">Encoders</a><a href="index.html#validators">Validators</a><a href="index.html#utils">Utilities</a></nav>
-</div></header>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+    <nav class="main-nav">
+      <div class="nav-item">
+        <a href="index.html#formatters">Formatters <span class="nav-arrow">&#9660;</span></a>
+        <div class="nav-dropdown">
+          <a href="json-formatter.html"><span class="dd-icon ti-json">{ }</span>JSON Formatter</a>
+          <a href="html-formatter.html"><span class="dd-icon ti-html">&lt;/&gt;</span>HTML Formatter</a>
+          <a href="css-formatter.html"><span class="dd-icon ti-css">#</span>CSS Formatter</a>
+          <a href="sql-formatter.html"><span class="dd-icon ti-sql">SQL</span>SQL Formatter</a>
+          <a href="xml-formatter.html"><span class="dd-icon ti-xml">XML</span>XML Formatter</a>
+          <a href="js-minifier.html"><span class="dd-icon ti-js">JS</span>JS Minifier</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="index.html#encoders">Encoders <span class="nav-arrow">&#9660;</span></a>
+        <div class="nav-dropdown">
+          <a href="base64.html"><span class="dd-icon ti-b64">B64</span>Base64 Encoder</a>
+          <a href="url-encode.html"><span class="dd-icon ti-url">URL</span>URL Encoder</a>
+          <a href="hash-generator.html"><span class="dd-icon ti-hash">#!</span>Hash Generator</a>
+          <a href="jwt-decoder.html"><span class="dd-icon ti-jwt">JWT</span>JWT Decoder</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="index.html#validators">Validators <span class="nav-arrow">&#9660;</span></a>
+        <div class="nav-dropdown">
+          <a href="diff-checker.html"><span class="dd-icon ti-diff">&#8800;</span>Diff Checker</a>
+          <a href="regex-tester.html"><span class="dd-icon ti-regex">.*</span>Regex Tester</a>
+          <a href="json-validator.html"><span class="dd-icon ti-json">&#10003;</span>JSON Validator</a>
+          <a href="xsd-validator.html"><span class="dd-icon ti-xml">XSD</span>XSD Validator</a>
+          <a href="csv-viewer.html"><span class="dd-icon ti-csv">CSV</span>CSV Viewer</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="index.html#converters">Converters <span class="nav-arrow">&#9660;</span></a>
+        <div class="nav-dropdown">
+          <a href="json-xml-converter.html"><span class="dd-icon ti-xml">&#8596;</span>JSON &#8596; XML</a>
+          <a href="json-csv-converter.html"><span class="dd-icon ti-csv">&#8596;</span>JSON &#8596; CSV</a>
+          <a href="csv-xml-converter.html"><span class="dd-icon ti-xml">&#8644;</span>CSV &#8596; XML</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="index.html#utils">Utilities <span class="nav-arrow">&#9660;</span></a>
+        <div class="nav-dropdown">
+          <a href="uuid-generator.html"><span class="dd-icon ti-uuid">UUID</span>UUID Generator</a>
+          <a href="lorem-ipsum.html"><span class="dd-icon ti-lorem">Aa</span>Lorem Ipsum</a>
+          <a href="markdown.html"><span class="dd-icon ti-md">MD</span>Markdown Preview</a>
+          <a href="color-converter.html"><span class="dd-icon ti-color">&#127912;</span>Color Converter</a>
+          <a href="timestamp.html"><span class="dd-icon ti-ts">&#9201;</span>Timestamp</a>
+          <a href="cron-expression.html"><span class="dd-icon ti-ts">&#9200;</span>Cron Expression</a>
+          <a href="calculator.html"><span class="dd-icon ti-js">&#8721;</span>Calculator</a>
+        </div>
+      </div>
+    </nav>
+    <div class="header-actions" style="display:flex;align-items:center;gap:8px;margin-left:auto">
+      <div class="search-wrap">
+        <input type="search" id="globalSearch" placeholder="Search tools..." autocomplete="off" oninput="doSearch(this.value)">
+        <span class="search-icon">&#8981;</span>
+        <div class="search-results" id="searchResults"></div>
+      </div>
+      <a href="contact.html" style="padding:6px 12px;border-radius:6px;font-size:0.82rem;color:var(--text-muted);text-decoration:none;border:1px solid var(--border);white-space:nowrap;font-weight:600">Contact</a>
+      <button class="hamburger" id="hamburgerBtn" onclick="toggleMenu()" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-section">Formatters</div>
+  <a href="json-formatter.html">JSON Formatter</a>
+  <a href="html-formatter.html">HTML Formatter</a>
+  <a href="css-formatter.html">CSS Formatter</a>
+  <a href="sql-formatter.html">SQL Formatter</a>
+  <a href="xml-formatter.html">XML Formatter</a>
+  <a href="js-minifier.html">JS Minifier</a>
+  <div class="mobile-section">Encoders</div>
+  <a href="base64.html">Base64 Encoder</a>
+  <a href="url-encode.html">URL Encoder</a>
+  <a href="hash-generator.html">Hash Generator</a>
+  <a href="jwt-decoder.html">JWT Decoder</a>
+  <div class="mobile-section">Validators</div>
+  <a href="diff-checker.html">Diff Checker</a>
+  <a href="regex-tester.html">Regex Tester</a>
+  <a href="xsd-validator.html">XSD Validator</a>
+  <a href="csv-viewer.html">CSV Viewer</a>
+  <div class="mobile-section">Converters</div>
+  <a href="json-xml-converter.html">JSON &#8596; XML</a>
+  <a href="json-csv-converter.html">JSON &#8596; CSV</a>
+  <a href="csv-xml-converter.html">CSV &#8596; XML</a>
+  <div class="mobile-section">Utilities</div>
+  <a href="uuid-generator.html">UUID Generator</a>
+  <a href="lorem-ipsum.html">Lorem Ipsum</a>
+  <a href="cron-expression.html">Cron Expression</a>
+  <a href="calculator.html">Calculator</a>
+  <a href="contact.html">Contact Us</a>
+</div>
+<script>
+function toggleMenu(){var m=document.getElementById("mobileMenu");m.classList.toggle("open");}
+document.addEventListener("click",function(e){
+  if(!e.target.closest(".hamburger")&&!e.target.closest(".mobile-menu")){
+    var m=document.getElementById("mobileMenu");if(m)m.classList.remove("open");
+  }
+});
+function doSearch(q){
+  var res=document.getElementById("searchResults");
+  if(!q.trim()){res.classList.remove("open");return;}
+  var tools=[
+    {t:"JSON Formatter",h:"json-formatter.html"},{t:"Diff Checker",h:"diff-checker.html"},
+    {t:"Base64 Encoder",h:"base64.html"},{t:"URL Encoder",h:"url-encode.html"},
+    {t:"Hash Generator",h:"hash-generator.html"},{t:"JWT Decoder",h:"jwt-decoder.html"},
+    {t:"Regex Tester",h:"regex-tester.html"},{t:"UUID Generator",h:"uuid-generator.html"},
+    {t:"Lorem Ipsum",h:"lorem-ipsum.html"},{t:"Markdown Preview",h:"markdown.html"},
+    {t:"Color Converter",h:"color-converter.html"},{t:"Timestamp",h:"timestamp.html"},
+    {t:"CSV Viewer",h:"csv-viewer.html"},{t:"HTML Formatter",h:"html-formatter.html"},
+    {t:"CSS Formatter",h:"css-formatter.html"},{t:"SQL Formatter",h:"sql-formatter.html"},
+    {t:"XML Formatter",h:"xml-formatter.html"},{t:"JS Minifier",h:"js-minifier.html"},
+    {t:"JSON Validator",h:"json-validator.html"},{t:"XSD Validator",h:"xsd-validator.html"},
+    {t:"JSON to XML",h:"json-xml-converter.html"},{t:"JSON to CSV",h:"json-csv-converter.html"},
+    {t:"CSV to XML",h:"csv-xml-converter.html"},{t:"Cron Expression",h:"cron-expression.html"},
+    {t:"Calculator",h:"calculator.html"},{t:"Contact",h:"contact.html"}
+  ];
+  var q2=q.toLowerCase();
+  var m=tools.filter(function(x){return x.t.toLowerCase().includes(q2);}).slice(0,6);
+  if(!m.length){res.classList.remove("open");return;}
+  res.innerHTML=m.map(function(x){
+    return'<a class="search-result-item" href="'+x.h+'"><div class="sri-text"><h4>'+x.t+'</h4></div></a>';
+  }).join("");
+  res.classList.add("open");
+}
+document.addEventListener("click",function(e){
+  if(!e.target.closest(".search-wrap")){
+    var r=document.getElementById("searchResults");if(r)r.classList.remove("open");
+  }
+});
+</script>
 <div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;">
   <div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div>
 </div>
@@ -277,13 +409,5 @@ parseCron();
 
 (function(){var tools=[{h:'cron-expression.html',l:'Cron'},{h:'uuid-generator.html',l:'UUID'},{h:'timestamp.html',l:'Timestamp'},{h:'json-formatter.html',l:'JSON'},{h:'regex-tester.html',l:'Regex'},{h:'diff-checker.html',l:'Diff'}];var nav=document.getElementById('toolNav');if(nav)nav.innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='cron-expression.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();
 </script>
-<!-- Buy Me a Coffee -->
-<div style="position:fixed;bottom:24px;right:24px;z-index:9999">
-  <a href="https://buymeacoffee.com/YOUR_BMC_USERNAME" target="_blank"
-     style="display:flex;align-items:center;gap:8px;padding:10px 18px;background:#FFDD00;color:#000;border-radius:50px;font-family:var(--font-ui);font-size:0.85rem;font-weight:800;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,0.15);transition:transform 0.2s"
-     onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-    <span style="font-size:1.1rem">&#9749;</span> Buy me a coffee
-  </a>
-</div>
 </body>
 </html>

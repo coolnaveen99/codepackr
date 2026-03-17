@@ -41,13 +41,74 @@
 </style>
 </head>
 <body>
-<header class="site-header"><div class="header-inner">
-  <a href="index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
-  <nav class="main-nav"><a href="index.html#formatters">Formatters</a><a href="index.html#encoders">Encoders</a><a href="index.html#validators">Validators</a><a href="index.html#utils">Utilities</a></nav>
-  <div class="header-actions" style="display:flex;align-items:center;gap:10px">
-    <button class="hamburger" id="hamburgerBtn" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><div class="logo-mark">{ }</div>Code<span>packr</span></a>
+    <nav class="main-nav">
+      <div class="nav-item">
+        <a href="index.html#formatters">Formatters <span class="nav-arrow">&#9660;</span></a>
+        <div class="nav-dropdown">
+          <a href="json-formatter.html"><span class="dd-icon ti-json">{ }</span>JSON Formatter</a>
+          <a href="html-formatter.html"><span class="dd-icon ti-html">&lt;/&gt;</span>HTML Formatter</a>
+          <a href="css-formatter.html"><span class="dd-icon ti-css">#</span>CSS Formatter</a>
+          <a href="sql-formatter.html"><span class="dd-icon ti-sql">SQL</span>SQL Formatter</a>
+          <a href="xml-formatter.html"><span class="dd-icon ti-xml">XML</span>XML Formatter</a>
+          <a href="js-minifier.html"><span class="dd-icon ti-js">JS</span>JS Minifier</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="index.html#encoders">Encoders <span class="nav-arrow">&#9660;</span></a>
+        <div class="nav-dropdown">
+          <a href="base64.html"><span class="dd-icon ti-b64">B64</span>Base64 Encoder</a>
+          <a href="url-encode.html"><span class="dd-icon ti-url">URL</span>URL Encoder</a>
+          <a href="hash-generator.html"><span class="dd-icon ti-hash">#!</span>Hash Generator</a>
+          <a href="jwt-decoder.html"><span class="dd-icon ti-jwt">JWT</span>JWT Decoder</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="index.html#validators">Validators <span class="nav-arrow">&#9660;</span></a>
+        <div class="nav-dropdown">
+          <a href="diff-checker.html"><span class="dd-icon ti-diff">&#8800;</span>Diff Checker</a>
+          <a href="regex-tester.html"><span class="dd-icon ti-regex">.*</span>Regex Tester</a>
+          <a href="json-validator.html"><span class="dd-icon ti-json">&#10003;</span>JSON Validator</a>
+          <a href="xsd-validator.html"><span class="dd-icon ti-xml">XSD</span>XSD Validator</a>
+          <a href="csv-viewer.html"><span class="dd-icon ti-csv">CSV</span>CSV Viewer</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="index.html#converters">Converters <span class="nav-arrow">&#9660;</span></a>
+        <div class="nav-dropdown">
+          <a href="json-xml-converter.html"><span class="dd-icon ti-xml">&#8596;</span>JSON &#8596; XML</a>
+          <a href="json-csv-converter.html"><span class="dd-icon ti-csv">&#8596;</span>JSON &#8596; CSV</a>
+          <a href="csv-xml-converter.html"><span class="dd-icon ti-xml">&#8644;</span>CSV &#8596; XML</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="index.html#utils">Utilities <span class="nav-arrow">&#9660;</span></a>
+        <div class="nav-dropdown">
+          <a href="uuid-generator.html"><span class="dd-icon ti-uuid">UUID</span>UUID Generator</a>
+          <a href="lorem-ipsum.html"><span class="dd-icon ti-lorem">Aa</span>Lorem Ipsum</a>
+          <a href="markdown.html"><span class="dd-icon ti-md">MD</span>Markdown Preview</a>
+          <a href="color-converter.html"><span class="dd-icon ti-color">&#127912;</span>Color Converter</a>
+          <a href="timestamp.html"><span class="dd-icon ti-ts">&#9201;</span>Timestamp</a>
+          <a href="cron-expression.html"><span class="dd-icon ti-ts">&#9200;</span>Cron Expression</a>
+          <a href="calculator.html"><span class="dd-icon ti-js">&#8721;</span>Calculator</a>
+        </div>
+      </div>
+    </nav>
+    <div class="header-actions" style="display:flex;align-items:center;gap:8px;margin-left:auto">
+      <div class="search-wrap">
+        <input type="search" id="globalSearch" placeholder="Search tools..." autocomplete="off" oninput="doSearch(this.value)">
+        <span class="search-icon">&#8981;</span>
+        <div class="search-results" id="searchResults"></div>
+      </div>
+      <a href="contact.html" style="padding:6px 12px;border-radius:6px;font-size:0.82rem;color:var(--text-muted);text-decoration:none;border:1px solid var(--border);white-space:nowrap;font-weight:600">Contact</a>
+      <button class="hamburger" id="hamburgerBtn" onclick="toggleMenu()" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
-</div></header>
+</header>
 <div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;">
   <div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div>
 </div>
