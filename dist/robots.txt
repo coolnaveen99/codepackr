@@ -1,5 +1,3 @@
 User-agent: *
 Allow: /
-Disallow: /dist/
-Disallow: /src/
-Sitemap: https://yoursite.com/sitemap.xml
+Sitemap: https://codepackr.com/sitemap.xml

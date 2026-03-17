@@ -13,7 +13,21 @@
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7368262160205015" crossorigin="anonymous"></script>
 <meta charset="UTF-8">
 <meta name="msvalidate.01" content="BC8B27F46BBCD43F50A45F870843689D" /><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JWT Decoder — Codepackr</title>
+<title>JWT Decoder — Decode & Inspect JWT Tokens — Codepackr</title>
+<meta name="description" content="Free online JWT decoder. Paste any JSON Web Token to instantly decode and inspect its header, payload and signature. Checks expiry, all in your browser.">
+<meta name="keywords" content="jwt decoder, json web token decoder, decode jwt, jwt inspector, jwt token parser, jwt online">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://codepackr.com/jwt-decoder.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Codepackr">
+<meta property="og:title" content="JWT Decoder — Decode & Inspect JWT Tokens — Codepackr">
+<meta property="og:description" content="Free online JWT decoder. Paste any JSON Web Token to instantly decode and inspect its header, payload and signature. Checks expiry, all in your browser.">
+<meta property="og:url" content="https://codepackr.com/jwt-decoder.html">
+<meta property="og:image" content="https://codepackr.com/og-image.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JWT Decoder — Decode & Inspect JWT Tokens — Codepackr">
+<meta name="twitter:description" content="Free online JWT decoder. Paste any JSON Web Token to instantly decode and inspect its header, payload and signature. Checks expiry, all in your browser.">
+<meta name="twitter:image" content="https://codepackr.com/og-image.png">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="shortcut icon" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -184,8 +198,9 @@ document.addEventListener("click",function(e){
  s.className='status-bar status-valid';s.textContent='✓ Valid JWT structure';s.style.display='flex';
  var now=Math.floor(Date.now()/1000);var expInfo='';
  if(payload.exp){expInfo=payload.exp<now?'<div style=\"margin-top:8px;padding:6px 10px;background:rgba(255,101,132,0.1);border-radius:6px;color:var(--accent3);font-size:0.75rem\">⚠ Token expired</div>':'<div style=\"margin-top:8px;padding:6px 10px;background:rgba(0,229,195,0.1);border-radius:6px;color:var(--accent2);font-size:0.75rem\">✓ Not expired</div>';}
- function card(title,color,obj,extra){return'<div style=\"background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden\"><div style=\"padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:'+color+'\">'+title+'</div><div style=\"padding:14px;font-family:var(--font-mono);font-size:0.78rem;line-height:1.8;white-space:pre-wrap;word-break:break-all\">'+JSON.stringify(obj,null,2)+(extra||'')+'</div></div>';}
- p.innerHTML=card('Header','var(--accent)',header)+card('Payload','var(--accent2)',payload,expInfo)+'<div style=\"background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden\"><div style=\"padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:#ffc84a\">Signature</div><div style=\"padding:14px;font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);word-break:break-all\">'+parts[2]+'</div></div>';
+ function jesc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+ function card(title,color,obj,extra){return'<div style=\"background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden\"><div style=\"padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:'+color+'\">'+title+'</div><div style=\"padding:14px;font-family:var(--font-mono);font-size:0.78rem;line-height:1.8;white-space:pre-wrap;word-break:break-all\">'+jesc(JSON.stringify(obj,null,2))+(extra||'')+'</div></div>';}
+ p.innerHTML=card('Header','var(--accent)',header)+card('Payload','var(--accent2)',payload,expInfo)+'<div style=\"background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden\"><div style=\"padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:#ffc84a\">Signature</div><div style=\"padding:14px;font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);word-break:break-all\">'+jesc(parts[2])+'</div></div>';
 }catch(e){s.className='status-bar status-invalid';s.textContent='✗ '+e.message;s.style.display='flex';}
 }
  function clearAll(){document.getElementById('inp').value='';document.getElementById('statusEl').style.display='none';document.getElementById('parts').innerHTML='';}</script>

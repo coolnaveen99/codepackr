@@ -13,7 +13,21 @@
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7368262160205015" crossorigin="anonymous"></script>
 <meta charset="UTF-8">
 <meta name="msvalidate.01" content="BC8B27F46BBCD43F50A45F870843689D" /><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Regex Tester — Codepackr</title>
+<title>Regex Tester — Test Regular Expressions Online — Codepackr</title>
+<meta name="description" content="Free online regex tester. Write and test regular expressions with live match highlighting. Supports JavaScript regex flags: g, i, m, s. Instant feedback.">
+<meta name="keywords" content="regex tester, regular expression tester, test regex online, regex checker, regex debugger, regexp tester">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://codepackr.com/regex-tester.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Codepackr">
+<meta property="og:title" content="Regex Tester — Test Regular Expressions Online — Codepackr">
+<meta property="og:description" content="Free online regex tester. Write and test regular expressions with live match highlighting. Supports JavaScript regex flags: g, i, m, s. Instant feedback.">
+<meta property="og:url" content="https://codepackr.com/regex-tester.html">
+<meta property="og:image" content="https://codepackr.com/og-image.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Regex Tester — Test Regular Expressions Online — Codepackr">
+<meta name="twitter:description" content="Free online regex tester. Write and test regular expressions with live match highlighting. Supports JavaScript regex flags: g, i, m, s. Instant feedback.">
+<meta name="twitter:image" content="https://codepackr.com/og-image.png">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="shortcut icon" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -184,7 +198,8 @@ document.addEventListener("click",function(e){
  <div class="output-header"><span style="font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.04em">Matches</span><span id="matchCount" style="font-size:0.78rem;color:var(--text-muted)"></span></div>
  <div class="output-content" id="out" style="min-height:120px"></div>
  </div>
- <script>function run(){
+ <script>function escR(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function run(){
  var pat=document.getElementById('pat').value;
  var flags=document.getElementById('flags').value;
  var inp=document.getElementById('inp').value;
@@ -198,9 +213,16 @@ document.addEventListener("click",function(e){
  document.getElementById('matchCount').textContent=matches.length+' match'+(matches.length!==1?'es':'');
  statusEl.className='status-bar status-valid';statusEl.textContent='✓ Valid regex — '+matches.length+' match'+(matches.length!==1?'es':'');statusEl.style.display='flex';
  if(!matches.length){document.getElementById('out').innerHTML='<span style="color:var(--text-muted)">No matches found</span>';return;}
- var hl=inp;
+ var hl=escR(inp);
  var sorted=matches.slice().sort(function(a,b){return b.index-a.index;});
- sorted.forEach(function(x){hl=hl.slice(0,x.index)+'<mark style="background:rgba(108,99,255,0.3);color:var(--text);border-radius:2px;padding:0 1px">'+hl.slice(x.index,x.index+x[0].length)+'</mark>'+hl.slice(x.index+x[0].length);});
+ var raw=inp;
+ sorted.forEach(function(x){
+   var before=escR(raw.slice(0,x.index));
+   var match=escR(raw.slice(x.index,x.index+x[0].length));
+   var after=escR(raw.slice(x.index+x[0].length));
+   hl=before+'<mark style="background:rgba(108,99,255,0.3);color:var(--text);border-radius:2px;padding:0 1px">'+match+'</mark>'+after;
+   raw=raw.slice(0,x.index)+'\x00'.repeat(x[0].length)+raw.slice(x.index+x[0].length);
+ });
  document.getElementById('out').innerHTML='<div style="white-space:pre-wrap;font-family:var(--font-mono);font-size:0.82rem">'+hl+'</div>';
 }catch(e){statusEl.className='status-bar status-invalid';statusEl.textContent='✗ '+e.message;statusEl.style.display='flex';document.getElementById('out').innerHTML='';}
 }
