@@ -339,6 +339,16 @@ document.addEventListener("click",function(e){
  <div class="tool-info"><h3>Timestamp Converter</h3><p>Unix ↔ human-readable dates</p></div>
  <div class="tool-arrow">→</div>
  </a>
+ <a href="cron-expression.html" class="tool-card">
+ <div class="tool-icon ti-ts" style="background:rgba(91,82,232,0.12);color:var(--accent)">&#9200;</div>
+ <div class="tool-info"><h3>Cron Expression</h3><p>Build and test cron job schedules</p></div>
+ <div class="tool-arrow">&rarr;</div>
+ </a>
+ <a href="calculator.html" class="tool-card">
+ <div class="tool-icon ti-js" style="background:rgba(91,82,232,0.12);color:var(--accent)">&#8721;</div>
+ <div class="tool-info"><h3>Scientific Calculator</h3><p>Standard and scientific modes</p></div>
+ <div class="tool-arrow">&rarr;</div>
+ </a>
  </div>
  </section>
 </main>
@@ -414,5 +424,23 @@ function searchTools(q){
  res.classList.add('open');
 }
 document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))document.getElementById('searchResults').classList.remove('open');});</script>
+
+<script>
+// Dropdown click support (for touch/tablet/keyboard users)
+document.querySelectorAll('.nav-item').forEach(function(item) {
+  item.addEventListener('click', function(e) {
+    // If clicking the top-level link (not a dropdown item)
+    if (e.target.closest('.nav-dropdown')) return;
+    var isOpen = item.classList.contains('open');
+    // Close all others
+    document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('open'); });
+    if (!isOpen) item.classList.add('open');
+    e.stopPropagation();
+  });
+});
+document.addEventListener('click', function() {
+  document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('open'); });
+});
+</script>
 </body>
 </html>

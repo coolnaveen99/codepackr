@@ -326,4 +326,22 @@ function copyOut(){var t=document.getElementById('out').textContent;if(!t)return
 function downloadOut(){var t=document.getElementById('out').textContent;if(!t)return;var ext=_dir==='csv2xml'?'.xml':'.csv';var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));a.download='converted'+ext;a.click();toast('Downloaded!','ok');}
 function loadFile(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){document.getElementById('inp').value=e.target.result;};r.readAsText(f);ev.target.value='';}
 (function(){var tools=[{h:'json-xml-converter.html',l:'JSON↔XML'},{h:'json-csv-converter.html',l:'JSON↔CSV'},{h:'csv-xml-converter.html',l:'CSV↔XML'},{h:'xsd-validator.html',l:'XSD Validator'},{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='csv-xml-converter.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();</script>
+
+<script>
+// Dropdown click support (for touch/tablet/keyboard users)
+document.querySelectorAll('.nav-item').forEach(function(item) {
+  item.addEventListener('click', function(e) {
+    // If clicking the top-level link (not a dropdown item)
+    if (e.target.closest('.nav-dropdown')) return;
+    var isOpen = item.classList.contains('open');
+    // Close all others
+    document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('open'); });
+    if (!isOpen) item.classList.add('open');
+    e.stopPropagation();
+  });
+});
+document.addEventListener('click', function() {
+  document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('open'); });
+});
+</script>
 </body></html>

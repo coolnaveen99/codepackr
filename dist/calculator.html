@@ -232,8 +232,10 @@ function appendDot(){
 }
 
 function appendOp(op){
-  if(expr&&/[+\-*\/]$/.test(expr)){expr=expr.slice(0,-1);}
-  expr+=val+op; val='0'; updateDisplay();
+  if(expr&&/[+\-*/]$/.test(expr)){expr=expr.slice(0,-1);}
+  expr+=val+op;
+  val='0';
+  updateDisplay();
 }
 
 function clearCalc(){expr='';val='0';updateDisplay();}
@@ -279,15 +281,34 @@ function formatNum(n){
 }
 
 function calculate(){
-  if(!expr){return;}
+  if(!expr&&val==='0'){return;}
   try{
-    var e=expr+val;
-    var result=Function('"use strict";return('+e+')')();
+    // Build full expression: if expr ends with operator, append current val
+    var fullExpr=expr?expr+val:val;
+    // Replace display symbols with JS operators
+    fullExpr=fullExpr
+      .replace(/×/g,'*')
+      .replace(/÷/g,'/')
+      .replace(/−/g,'-')
+      .replace(/π/g,'Math.PI')
+      .replace(/Math\.PI/g,String(Math.PI))
+      .replace(/Math\.E/g,String(Math.E));
+    // Safety check - only allow numbers and basic operators
+    if(!/^[0-9+\-*/().% 	
+]*$/.test(fullExpr.replace(/Math\.\w+/g,'0'))){
+      throw new Error('Invalid expression');
+    }
+    var result=Function('"use strict";return('+fullExpr+')')();
+    if(result===undefined||result===null)throw new Error('Invalid');
     var r=formatNum(result);
-    addHistory(e,'='+r);
+    addHistory(fullExpr,'= '+r);
     expr='';val=r;lastResult=r;
     updateDisplay();
-  }catch(e){val='Error';updateDisplay();}
+  }catch(e){
+    val='Error';
+    updateDisplay();
+    setTimeout(function(){val='0';expr='';updateDisplay();},1500);
+  }
 }
 
 function addHistory(e,r){
@@ -331,6 +352,24 @@ document.addEventListener('keydown',function(e){
 });
 
 (function(){var tools=[{h:'calculator.html',l:'\u2211 Calc'},{h:'cron-expression.html',l:'Cron'},{h:'uuid-generator.html',l:'UUID'},{h:'timestamp.html',l:'Timestamp'},{h:'color-converter.html',l:'Color'},{h:'json-formatter.html',l:'JSON'}];var nav=document.getElementById('toolNav');if(nav)nav.innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='calculator.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();
+</script>
+
+<script>
+// Dropdown click support (for touch/tablet/keyboard users)
+document.querySelectorAll('.nav-item').forEach(function(item) {
+  item.addEventListener('click', function(e) {
+    // If clicking the top-level link (not a dropdown item)
+    if (e.target.closest('.nav-dropdown')) return;
+    var isOpen = item.classList.contains('open');
+    // Close all others
+    document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('open'); });
+    if (!isOpen) item.classList.add('open');
+    e.stopPropagation();
+  });
+});
+document.addEventListener('click', function() {
+  document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('open'); });
+});
 </script>
 </body>
 </html>

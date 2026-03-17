@@ -64,7 +64,8 @@
   opacity: 0.5;
   transition: transform 0.2s;
 }
-.nav-item:hover .nav-arrow {
+.nav-item:hover .nav-arrow,
+.nav-item.open .nav-arrow {
   transform: rotate(180deg);
 }
 .nav-dropdown {
@@ -85,7 +86,8 @@
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.nav-item:hover .nav-dropdown {
+.nav-item:hover .nav-dropdown,
+.nav-item.open .nav-dropdown {
   display: block;
 }
 .nav-dropdown a {

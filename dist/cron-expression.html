@@ -409,5 +409,23 @@ parseCron();
 
 (function(){var tools=[{h:'cron-expression.html',l:'Cron'},{h:'uuid-generator.html',l:'UUID'},{h:'timestamp.html',l:'Timestamp'},{h:'json-formatter.html',l:'JSON'},{h:'regex-tester.html',l:'Regex'},{h:'diff-checker.html',l:'Diff'}];var nav=document.getElementById('toolNav');if(nav)nav.innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='cron-expression.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();
 </script>
+
+<script>
+// Dropdown click support (for touch/tablet/keyboard users)
+document.querySelectorAll('.nav-item').forEach(function(item) {
+  item.addEventListener('click', function(e) {
+    // If clicking the top-level link (not a dropdown item)
+    if (e.target.closest('.nav-dropdown')) return;
+    var isOpen = item.classList.contains('open');
+    // Close all others
+    document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('open'); });
+    if (!isOpen) item.classList.add('open');
+    e.stopPropagation();
+  });
+});
+document.addEventListener('click', function() {
+  document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('open'); });
+});
+</script>
 </body>
 </html>

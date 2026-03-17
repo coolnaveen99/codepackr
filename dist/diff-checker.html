@@ -536,5 +536,23 @@ document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key
 }).join('');
 })();
 cnt('origTA','cntA');cnt('modTA','cntB');</script>
+
+<script>
+// Dropdown click support (for touch/tablet/keyboard users)
+document.querySelectorAll('.nav-item').forEach(function(item) {
+  item.addEventListener('click', function(e) {
+    // If clicking the top-level link (not a dropdown item)
+    if (e.target.closest('.nav-dropdown')) return;
+    var isOpen = item.classList.contains('open');
+    // Close all others
+    document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('open'); });
+    if (!isOpen) item.classList.add('open');
+    e.stopPropagation();
+  });
+});
+document.addEventListener('click', function() {
+  document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('open'); });
+});
+</script>
 </body>
 </html>
