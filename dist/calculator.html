@@ -209,7 +209,7 @@ var current = '0';     // what's shown on display
 var stored  = null;    // stored number for operation
 var operator = null;   // pending operator: + - * /
 var justCalc = false;  // did we just hit equals?
-var history  = [];
+var calcHistory = [];
 
 // ── Display ─────────────────────────────────────────────────────────────
 function render() {
@@ -333,18 +333,18 @@ function doSci(fn) {
 
 // ── History ─────────────────────────────────────────────────────────────
 function addHist(expr, result) {
-  history.unshift({ expr: expr, result: fmt(result) });
-  if (history.length > 30) history.pop();
+  calcHistory.unshift({ expr: expr, result: fmt(result) });
+  if (calcHistory.length > 30) calcHistory.pop();
   renderHist();
 }
 
 function renderHist() {
   var p = document.getElementById('histPanel');
-  if (!history.length) {
+  if (!calcHistory.length) {
     p.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-dim);font-size:0.82rem">No history yet</div>';
     return;
   }
-  p.innerHTML = history.map(function(h, i) {
+  p.innerHTML = calcHistory.map(function(h, i) {
     return '<div class="hist-item" onclick="recallHist(' + i + ')">'
       + '<span style="color:var(--text-muted)">' + h.expr + '</span>'
       + '<span style="color:var(--accent2);font-weight:700">= ' + h.result + '</span>'
@@ -358,7 +358,7 @@ function recallHist(i) {
   render();
 }
 
-function clearHist() { history = []; renderHist(); }
+function clearHist() { calcHistory = []; renderHist(); }
 
 // ── Mode toggle ──────────────────────────────────────────────────────────
 function setMode(mode, btn) {
