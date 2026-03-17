@@ -252,21 +252,4 @@ function toggleFaq(el){
 <script>function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
 (function(){var tools=[{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'html-formatter.html',l:'HTML'},{h:'css-formatter.html',l:'CSS'},{h:'base64.html',l:'Base64'},{h:'url-encode.html',l:'URL'},{h:'regex-tester.html',l:'Regex'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'},{h:'lorem-ipsum.html',l:'Lorem'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='js-minifier.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();</script>
 
-<script>
-// Dropdown click support (for touch/tablet/keyboard users)
-document.querySelectorAll('.nav-item').forEach(function(item) {
-  item.addEventListener('click', function(e) {
-    // If clicking the top-level link (not a dropdown item)
-    if (e.target.closest('.nav-dropdown')) return;
-    var isOpen = item.classList.contains('open');
-    // Close all others
-    document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('open'); });
-    if (!isOpen) item.classList.add('open');
-    e.stopPropagation();
-  });
-});
-document.addEventListener('click', function() {
-  document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('open'); });
-});
-</script>
 </body></html>

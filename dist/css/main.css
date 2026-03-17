@@ -53,6 +53,7 @@
   cursor: pointer;
   transition: all 0.18s;
   white-space: nowrap;
+  text-decoration: none;
 }
 .nav-item > a:hover,
 .nav-item:hover > a {
@@ -63,60 +64,79 @@
   font-size: 0.6rem;
   opacity: 0.5;
   transition: transform 0.2s;
+  pointer-events: none;
 }
-.nav-item:hover .nav-arrow,
-.nav-item.open .nav-arrow {
+.nav-item:hover .nav-arrow {
   transform: rotate(180deg);
 }
+/* The dropdown panel itself */
 .nav-dropdown {
   position: absolute;
-  top: calc(100% + 6px);
+  top: 100%;
   left: 0;
-  min-width: 210px;
+  min-width: 200px;
   background: var(--surface);
   border: 1px solid var(--border2);
   border-radius: 10px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.12);
-  display: none;
-  z-index: 999;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.13);
+  z-index: 9999;
   padding: 5px;
-  animation: fadeIn 0.15s ease;
+  /* Hidden by default */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
 }
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* Show on hover — use a bridge gap so mouse can travel to dropdown */
+.nav-item:hover .nav-dropdown {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(2px);
 }
-.nav-item:hover .nav-dropdown,
-.nav-item.open .nav-dropdown {
+/* Bridge between trigger and dropdown to prevent gap-triggered close */
+.nav-item::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 8px;
+  display: none;
+}
+.nav-item:hover::after {
   display: block;
 }
+/* Dropdown links */
 .nav-dropdown a {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
+  display: block;
+  padding: 9px 12px;
   border-radius: 7px;
-  font-size: 0.82rem;
+  font-size: 0.83rem;
   font-weight: 600;
   color: var(--text-muted);
-  transition: all 0.15s;
   text-decoration: none;
+  transition: all 0.12s;
+  cursor: pointer;
+  white-space: nowrap;
 }
 .nav-dropdown a:hover {
   background: var(--surface2);
   color: var(--text);
 }
 .dd-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
-  display: flex;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
   font-family: var(--font-mono);
-  flex-shrink: 0;
+  margin-right: 8px;
+  vertical-align: middle;
 }
 
 /* ══ HAMBURGER MENU ══ */
@@ -167,9 +187,7 @@
   margin-top: 4px;
 }
 .mobile-menu a {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: block;
   padding: 9px 20px;
   font-size: 0.85rem;
   color: var(--text-muted);
