@@ -80,6 +80,7 @@
           <a href="color-converter.html"><span class="dd-icon ti-color">&#127912;</span>Color Converter</a>
           <a href="timestamp.html"><span class="dd-icon ti-ts">&#9201;</span>Timestamp</a>
           <a href="cron-expression.html"><span class="dd-icon ti-ts">&#9200;</span>Cron Expression</a>
+          <a href="text-tools.html"><span class="dd-icon ti-md">Tx</span>Text Tools</a>
           <a href="calculator.html"><span class="dd-icon ti-js">&#8721;</span>Calculator</a>
         </div>
       </div>
@@ -133,31 +134,112 @@ document.addEventListener("click",function(e){
     var m=document.getElementById("mobileMenu");if(m)m.classList.remove("open");
   }
 });
+var _SI=[{t:'JSON Formatter',d:'Beautify & validate JSON',h:'json-formatter.html',k:'json formatter beautify & validate json json format pretty print beautify minify validate'},
+{t:'JSON Minify',d:'Compress JSON to single line',h:'json-formatter.html',k:'json minify compress json to single line json minify compress single line compact'},
+{t:'JSON Validate',d:'Check JSON syntax errors',h:'json-formatter.html',k:'json validate check json syntax errors json validate check syntax errors lint'},
+{t:'HTML Formatter',d:'Beautify & minify HTML markup',h:'html-formatter.html',k:'html formatter beautify & minify html markup html format beautify minify pretty print'},
+{t:'HTML Minify',d:'Compress HTML markup',h:'html-formatter.html',k:'html minify compress html markup html minify compress'},
+{t:'CSS Formatter',d:'Prettify and compress stylesheets',h:'css-formatter.html',k:'css formatter prettify and compress stylesheets css format beautify minify stylesheet'},
+{t:'CSS Minify',d:'Compress CSS to single line',h:'css-formatter.html',k:'css minify compress css to single line css minify compress single line'},
+{t:'SQL Formatter',d:'Format SQL queries for readability',h:'sql-formatter.html',k:'sql formatter format sql queries for readability sql format query beautify indent'},
+{t:'XML Formatter',d:'Indent and prettify XML documents',h:'xml-formatter.html',k:'xml formatter indent and prettify xml documents xml format beautify indent pretty print'},
+{t:'JS Minifier',d:'Compress JavaScript for production',h:'js-minifier.html',k:'js minifier compress javascript for production javascript js minify compress uglify'},
+{t:'Base64 Encoder',d:'Encode text or file to Base64',h:'base64.html',k:'base64 encoder encode text or file to base64 base64 encode binary text file'},
+{t:'Base64 Decoder',d:'Decode Base64 back to text',h:'base64.html',k:'base64 decoder decode base64 back to text base64 decode binary text'},
+{t:'Base64 Image',d:'Encode image to Base64 data URI',h:'base64.html',k:'base64 image encode image to base64 data uri base64 image encode data uri png jpg'},
+{t:'URL Encoder',d:'Encode special characters in URLs',h:'url-encode.html',k:'url encoder encode special characters in urls url encode percent encoding special characters'},
+{t:'URL Decoder',d:'Decode percent-encoded URLs',h:'url-encode.html',k:'url decoder decode percent-encoded urls url decode percent encoding unescape'},
+{t:'Hash Generator',d:'Generate MD5, SHA-1, SHA-256 hashes',h:'hash-generator.html',k:'hash generator generate md5, sha-1, sha-256 hashes hash md5 sha1 sha256 sha512 checksum hmac'},
+{t:'MD5 Hash',d:'Generate MD5 checksum',h:'hash-generator.html',k:'md5 hash generate md5 checksum md5 hash checksum'},
+{t:'SHA-256 Hash',d:'Generate SHA-256 hash',h:'hash-generator.html',k:'sha-256 hash generate sha-256 hash sha256 sha-256 hash'},
+{t:'SHA-512 Hash',d:'Generate SHA-512 hash',h:'hash-generator.html',k:'sha-512 hash generate sha-512 hash sha512 sha-512 hash'},
+{t:'JWT Decoder',d:'Decode & inspect JWT tokens',h:'jwt-decoder.html',k:'jwt decoder decode & inspect jwt tokens jwt json web token decode header payload signature'},
+{t:'JWT Header Decode',d:'View JWT header claims',h:'jwt-decoder.html',k:'jwt header decode view jwt header claims jwt header algorithm alg typ'},
+{t:'JWT Payload Decode',d:'View JWT payload claims',h:'jwt-decoder.html',k:'jwt payload decode view jwt payload claims jwt payload claims sub iss exp iat'},
+{t:'Diff Checker',d:'Compare two texts side-by-side',h:'diff-checker.html',k:'diff checker compare two texts side-by-side diff compare text code side by side differences'},
+{t:'Split View Diff',d:'View differences in split panes',h:'diff-checker.html',k:'split view diff view differences in split panes diff split view left right panes'},
+{t:'Unified Diff',d:'View differences in unified format',h:'diff-checker.html',k:'unified diff view differences in unified format diff unified format git patch'},
+{t:'Merge Changes',d:'Merge diff back to single text',h:'diff-checker.html',k:'merge changes merge diff back to single text diff merge combine accept changes'},
+{t:'Export Diff',d:'Download diff as .diff file',h:'diff-checker.html',k:'export diff download diff as .diff file diff export download patch file'},
+{t:'Regex Tester',d:'Test regular expressions live',h:'regex-tester.html',k:'regex tester test regular expressions live regex regular expression test match pattern flags'},
+{t:'Regex Match',d:'Find all regex matches in text',h:'regex-tester.html',k:'regex match find all regex matches in text regex match find all global'},
+{t:'Regex Replace',d:'Replace matches with regex',h:'regex-tester.html',k:'regex replace replace matches with regex regex replace substitute pattern'},
+{t:'Regex Flags',d:'Set regex flags: global, case, multiline',h:'regex-tester.html',k:'regex flags set regex flags: global, case, multiline regex flags global case insensitive multiline gi gm'},
+{t:'JSON Validator',d:'Validate JSON and show errors',h:'json-validator.html',k:'json validator validate json and show errors json validate check syntax error line number'},
+{t:'XSD Validator',d:'Validate XML against XSD schema',h:'xsd-validator.html',k:'xsd validator validate xml against xsd schema xsd xml schema validate namespace'},
+{t:'CSV Viewer',d:'View CSV data as a formatted table',h:'csv-viewer.html',k:'csv viewer view csv data as a formatted table csv table view format spreadsheet'},
+{t:'JSON to XML',d:'Convert JSON to XML format',h:'json-xml-converter.html',k:'json to xml convert json to xml format json xml convert transform'},
+{t:'XML to JSON',d:'Convert XML to JSON format',h:'json-xml-converter.html',k:'xml to json convert xml to json format xml json convert transform'},
+{t:'JSON to CSV',d:'Convert JSON array to CSV',h:'json-csv-converter.html',k:'json to csv convert json array to csv json csv convert export spreadsheet'},
+{t:'CSV to JSON',d:'Convert CSV to JSON array',h:'json-csv-converter.html',k:'csv to json convert csv to json array csv json convert import'},
+{t:'CSV to XML',d:'Convert CSV data to XML',h:'csv-xml-converter.html',k:'csv to xml convert csv data to xml csv xml convert transform'},
+{t:'XML to CSV',d:'Convert XML to CSV format',h:'csv-xml-converter.html',k:'xml to csv convert xml to csv format xml csv convert'},
+{t:'UUID Generator',d:'Generate v1, v4, v5 UUIDs',h:'uuid-generator.html',k:'uuid generator generate v1, v4, v5 uuids uuid guid generate v1 v4 v5 random unique id'},
+{t:'UUID v4',d:'Generate random UUID v4',h:'uuid-generator.html',k:'uuid v4 generate random uuid v4 uuid v4 random generate'},
+{t:'UUID v1',d:'Generate timestamp-based UUID v1',h:'uuid-generator.html',k:'uuid v1 generate timestamp-based uuid v1 uuid v1 timestamp'},
+{t:'Bulk UUID',d:'Generate multiple UUIDs at once',h:'uuid-generator.html',k:'bulk uuid generate multiple uuids at once uuid bulk multiple batch generate list'},
+{t:'Lorem Ipsum Generator',d:'Generate placeholder text',h:'lorem-ipsum.html',k:'lorem ipsum generator generate placeholder text lorem ipsum placeholder dummy text paragraphs sentences words'},
+{t:'Lorem Ipsum Paragraphs',d:'Generate lorem ipsum paragraphs',h:'lorem-ipsum.html',k:'lorem ipsum paragraphs generate lorem ipsum paragraphs lorem ipsum paragraphs placeholder'},
+{t:'Lorem Ipsum Sentences',d:'Generate lorem ipsum sentences',h:'lorem-ipsum.html',k:'lorem ipsum sentences generate lorem ipsum sentences lorem ipsum sentences placeholder'},
+{t:'Lorem Ipsum Words',d:'Generate specific number of words',h:'lorem-ipsum.html',k:'lorem ipsum words generate specific number of words lorem ipsum words count placeholder'},
+{t:'Text Tools',d:'10+ text utilities in one place',h:'text-tools.html',k:'text tools 10+ text utilities in one place text tools utilities word count case sort'},
+{t:'Word Counter',d:'Count words, characters, sentences',h:'text-tools.html',k:'word counter count words, characters, sentences word count counter characters sentences paragraphs lines'},
+{t:'Character Counter',d:'Count characters with/without spaces',h:'text-tools.html',k:'character counter count characters with/without spaces character count chars spaces counter'},
+{t:'Case Converter',d:'Convert text case: lower, UPPER, Title',h:'text-tools.html',k:'case converter convert text case: lower, upper, title case convert lower upper title sentence capitalize'},
+{t:'Uppercase Converter',d:'Convert text to UPPERCASE',h:'text-tools.html',k:'uppercase converter convert text to uppercase uppercase caps convert text'},
+{t:'Lowercase Converter',d:'Convert text to lowercase',h:'text-tools.html',k:'lowercase converter convert text to lowercase lowercase convert text'},
+{t:'Title Case',d:'Capitalize Every Word',h:'text-tools.html',k:'title case capitalize every word title case capitalize word'},
+{t:'Remove Line Breaks',d:'Collapse text to single paragraph',h:'text-tools.html',k:'remove line breaks collapse text to single paragraph remove line breaks newlines collapse paragraph single'},
+{t:'Remove Duplicate Lines',d:'Remove repeated lines from text',h:'text-tools.html',k:'remove duplicate lines remove repeated lines from text remove duplicates lines unique deduplicate'},
+{t:'Sort Lines',d:'Alphabetically sort lines of text',h:'text-tools.html',k:'sort lines alphabetically sort lines of text sort lines alphabetical order text list'},
+{t:'Find and Replace',d:'Find & replace text with regex support',h:'text-tools.html',k:'find and replace find & replace text with regex support find replace text regex pattern substitute'},
+{t:'Reverse Text',d:'Flip text character by character',h:'text-tools.html',k:'reverse text flip text character by character reverse text flip backwards mirror'},
+{t:'Remove Extra Spaces',d:'Clean up whitespace in text',h:'text-tools.html',k:'remove extra spaces clean up whitespace in text remove extra spaces whitespace clean trim'},
+{t:'Remove All Spaces',d:'Strip all spaces to single line',h:'text-tools.html',k:'remove all spaces strip all spaces to single line remove all spaces strip whitespace single line compact'},
+{t:'Add Prefix Suffix',d:'Add text before/after every line',h:'text-tools.html',k:'add prefix suffix add text before/after every line prefix suffix add line prepend append'},
+{t:'Number Lines',d:'Prepend line numbers to each line',h:'text-tools.html',k:'number lines prepend line numbers to each line number lines prepend sequential list numbered'},
+{t:'Markdown Preview',d:'Live markdown editor and preview',h:'markdown.html',k:'markdown preview live markdown editor and preview markdown preview editor live render md html'},
+{t:'Color Converter',d:'Convert HEX, RGB, HSL colors',h:'color-converter.html',k:'color converter convert hex, rgb, hsl colors color converter hex rgb hsl rgba color picker'},
+{t:'HEX to RGB',d:'Convert HEX color to RGB',h:'color-converter.html',k:'hex to rgb convert hex color to rgb hex rgb color convert #ffffff'},
+{t:'RGB to HEX',d:'Convert RGB color to HEX',h:'color-converter.html',k:'rgb to hex convert rgb color to hex rgb hex color convert'},
+{t:'HSL Color',d:'Convert to/from HSL color format',h:'color-converter.html',k:'hsl color convert to/from hsl color format hsl color convert hue saturation lightness'},
+{t:'Timestamp Converter',d:'Convert Unix timestamps to dates',h:'timestamp.html',k:'timestamp converter convert unix timestamps to dates timestamp unix epoch date time convert human readable'},
+{t:'Unix to Date',d:'Convert Unix timestamp to human date',h:'timestamp.html',k:'unix to date convert unix timestamp to human date unix epoch timestamp to date time'},
+{t:'Date to Unix',d:'Convert date/time to Unix timestamp',h:'timestamp.html',k:'date to unix convert date/time to unix timestamp date time to unix epoch timestamp'},
+{t:'Cron Expression Builder',d:'Build and test cron job schedules',h:'cron-expression.html',k:'cron expression builder build and test cron job schedules cron expression builder schedule job time'},
+{t:'Cron Parser',d:'Parse and explain cron syntax',h:'cron-expression.html',k:'cron parser parse and explain cron syntax cron parse explain syntax schedule'},
+{t:'Calculator',d:'Scientific calculator online',h:'calculator.html',k:'calculator scientific calculator online calculator scientific math sin cos tan log sqrt'},
+{t:'Scientific Calculator',d:'Trigonometry, log, sqrt functions',h:'calculator.html',k:'scientific calculator trigonometry, log, sqrt functions scientific calculator sin cos tan log sqrt pi'}];
 function doSearch(q){
-  var res=document.getElementById("searchResults");
-  if(!q.trim()){res.classList.remove("open");return;}
-  var tools=[
-    {t:"JSON Formatter",h:"json-formatter.html"},{t:"Diff Checker",h:"diff-checker.html"},
-    {t:"Base64 Encoder",h:"base64.html"},{t:"URL Encoder",h:"url-encode.html"},
-    {t:"Hash Generator",h:"hash-generator.html"},{t:"JWT Decoder",h:"jwt-decoder.html"},
-    {t:"Regex Tester",h:"regex-tester.html"},{t:"UUID Generator",h:"uuid-generator.html"},
-    {t:"Lorem Ipsum",h:"lorem-ipsum.html"},{t:"Markdown Preview",h:"markdown.html"},
-    {t:"Color Converter",h:"color-converter.html"},{t:"Timestamp",h:"timestamp.html"},
-    {t:"CSV Viewer",h:"csv-viewer.html"},{t:"HTML Formatter",h:"html-formatter.html"},
-    {t:"CSS Formatter",h:"css-formatter.html"},{t:"SQL Formatter",h:"sql-formatter.html"},
-    {t:"XML Formatter",h:"xml-formatter.html"},{t:"JS Minifier",h:"js-minifier.html"},
-    {t:"JSON Validator",h:"json-validator.html"},{t:"XSD Validator",h:"xsd-validator.html"},
-    {t:"JSON to XML",h:"json-xml-converter.html"},{t:"JSON to CSV",h:"json-csv-converter.html"},
-    {t:"CSV to XML",h:"csv-xml-converter.html"},{t:"Cron Expression",h:"cron-expression.html"},
-    {t:"Calculator",h:"calculator.html"},{t:"Contact",h:"contact.html"}
-  ];
-  var q2=q.toLowerCase();
-  var m=tools.filter(function(x){return x.t.toLowerCase().includes(q2);}).slice(0,6);
-  if(!m.length){res.classList.remove("open");return;}
-  res.innerHTML=m.map(function(x){
-    return'<a class="search-result-item" href="'+x.h+'"><div class="sri-text"><h4>'+x.t+'</h4></div></a>';
-  }).join("");
-  res.classList.add("open");
+  var res=document.getElementById('searchResults');
+  if(!q||!q.trim()){res.classList.remove('open');return;}
+  var q2=q.toLowerCase().trim();
+  // Score each entry: title-start match = 3pts, title-includes = 2pts, keyword = 1pt
+  var scored=_SI.map(function(e){
+    var s=0;
+    var tl=e.t.toLowerCase();
+    if(tl.startsWith(q2))s+=3;
+    else if(tl.includes(q2))s+=2;
+    if(e.k.includes(q2))s+=1;
+    return {e:e,s:s};
+  }).filter(function(x){return x.s>0;});
+  scored.sort(function(a,b){return b.s-a.s;});
+  var top=scored.slice(0,8);
+  if(!top.length){res.classList.remove('open');return;}
+  // Group by page
+  var seen={};
+  res.innerHTML=top.map(function(x){
+    var e=x.e;
+    var isPage=!seen[e.h];
+    seen[e.h]=true;
+    var icon=isPage?'<span style="color:var(--accent);font-size:0.7rem;flex-shrink:0">📄</span>':'<span style="color:var(--accent2);font-size:0.7rem;flex-shrink:0;margin-left:4px">⚡</span>';
+    return '<a class="search-result-item" href="'+e.h+'">'
+      +icon
+      +'<div class="sri-text"><h4>'+e.t+'</h4>'
+      +'<p style="font-size:0.7rem;color:var(--text-dim);margin:0">'+e.d+'</p>'
+      +'</div></a>';
+  }).join('');
+  res.classList.add('open');
 }
 document.addEventListener("click",function(e){
   if(!e.target.closest(".search-wrap")){
