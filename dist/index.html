@@ -33,8 +33,14 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="shortcut icon" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@700;800;900&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css?v=3">
+<style>
+/* Fix stretched heading appearance on index */
+.hero-content h1{font-family:'Inter',sans-serif;letter-spacing:-0.025em;font-size:clamp(1.8rem,3.8vw,2.9rem);line-height:1.15;}
+.hero-content h1 em{font-style:normal;}
+.section-header h2{font-family:'Inter',sans-serif;letter-spacing:-0.015em;}
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -161,6 +167,7 @@ function doSearch(q){
     {t:"Regex Tester",d:"Test and debug regular expressions",h:"regex-tester.html",i:".*",c:"ti-regex"},
     {t:"UUID Generator",d:"Generate v1, v4 and v5 UUIDs",h:"uuid-generator.html",i:"UUID",c:"ti-uuid"},
     {t:"Lorem Ipsum",d:"Generate placeholder text",h:"lorem-ipsum.html",i:"Aa",c:"ti-lorem"},
+    {t:"Text Tools",d:"Word count, case convert, sort & more",h:"text-tools.html",i:"Tx",c:"ti-md"},
     {t:"Markdown Preview",d:"Write and preview Markdown live",h:"markdown.html",i:"MD",c:"ti-md"},
     {t:"Color Converter",d:"HEX, RGB, HSL conversion",h:"color-converter.html",i:"🎨",c:"ti-color"},
     {t:"Timestamp Converter",d:"Unix ↔ human-readable dates",h:"timestamp.html",i:"⏱",c:"ti-ts"},
@@ -350,6 +357,11 @@ document.addEventListener("click",function(e){
  <a href="lorem-ipsum.html" class="tool-card">
  <div class="tool-icon ti-lorem">Aa</div>
  <div class="tool-info"><h3>Lorem Ipsum</h3><p>Generate placeholder text</p></div>
+ <div class="tool-arrow">→</div>
+ </a>
+ <a href="text-tools.html" class="tool-card">
+ <div class="tool-icon ti-md">Tx</div>
+ <div class="tool-info"><h3>Text Tools</h3><p>Word count, case convert, sort &amp; more</p></div>
  <div class="tool-arrow">→</div>
  </a>
  <a href="markdown.html" class="tool-card">

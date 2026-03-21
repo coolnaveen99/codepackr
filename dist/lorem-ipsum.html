@@ -211,7 +211,7 @@ document.addEventListener("click",function(e){
  document.getElementById('out').textContent=out;
 }
  function copyOut(){var t=document.getElementById('out').textContent;if(!t)return;navigator.clipboard.writeText(t).then(function(){toast('Copied!','ok');});}
-  // page starts empty
+  generate(); // auto-generate on load
 </script>
 
 
