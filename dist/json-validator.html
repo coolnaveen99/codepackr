@@ -93,10 +93,11 @@
     </nav>
     <div class="header-actions" style="display:flex;align-items:center;gap:8px;margin-left:auto">
       <div class="search-wrap">
-        <input type="search" id="globalSearch" placeholder="Search tools..." autocomplete="off" oninput="doSearch(this.value)">
+        <input type="search" id="globalSearch" aria-label="Search tools" placeholder="Search tools..." autocomplete="off" oninput="doSearch(this.value)">
         <span class="search-icon">&#8981;</span>
         <div class="search-results" id="searchResults"></div>
       </div>
+      <button id="themeBtn" onclick="toggleTheme()" title="Toggle dark/light mode" style="width:34px;height:34px;padding:0;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;flex-shrink:0" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">🌙</button>
       <a href="contact.html" style="padding:6px 12px;border-radius:6px;font-size:0.82rem;color:var(--text-muted);text-decoration:none;border:1px solid var(--border);white-space:nowrap;font-weight:600">Contact</a>
       <button class="hamburger" id="hamburgerBtn" onclick="toggleMenu()" aria-label="Open menu">
         <span></span><span></span><span></span>
@@ -256,7 +257,7 @@ document.addEventListener("click",function(e){
 
 
 <div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;"><div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;min-height:44px;align-items:center" id="toolNav"></div></div>
-<div class="tool-page">
+<div class="tool-page" role="main">
  <div class="tool-page-header">
  <div class="breadcrumb"><a href="index.html">Home</a> › JSON Validator</div>
  <h1>JSON Validator</h1><p>Strictly validate JSON and pinpoint any errors.</p>
@@ -264,7 +265,7 @@ document.addEventListener("click",function(e){
  <div class="ws-toolbar">
  <div style="margin-left:auto"><button class="btn btn-accent" onclick="validate()">⚡ Validate</button></div>
  </div>
- <div id="statusEl" style="display:none" class="status-bar"></div>
+ <div id="statusEl" aria-live="polite" style="display:none" class="status-bar"></div>
  <div class="ws-panel" style="margin-bottom:16px">
  <div class="ws-panel-header"><span class="ws-panel-title">Input JSON</span><div class="ws-panel-actions"><button class="btn-icon" onclick="document.getElementById('inp').value=''">✕</button></div></div>
  <textarea class="ws-textarea" id="inp" oninput="validate()" placeholder="Paste JSON to validate…" spellcheck="false" style="min-height:400px"></textarea>
@@ -273,7 +274,17 @@ document.addEventListener("click",function(e){
  var v=document.getElementById('inp').value.trim();var s=document.getElementById('statusEl');
  if(!v){s.style.display='none';return;}
  try{JSON.parse(v);s.className='status-bar status-valid';s.textContent='✓ Valid JSON';s.style.display='flex';}
- catch(e){s.className='status-bar status-invalid';s.textContent='✗ '+e.message;s.style.display='flex';}
+ catch(e){
+    var msg=e.message||String(e);
+    var lineMatch=msg.match(/line\s*(\d+)/i);
+    var colMatch=msg.match(/col(?:umn)?\s*(\d+)/i)||msg.match(/position\s*(\d+)/i);
+    var loc='';
+    if(lineMatch)loc+=' · line '+lineMatch[1];
+    if(colMatch)loc+=' col '+colMatch[1];
+    s.className='status-bar status-invalid';
+    s.textContent='✗ Invalid JSON'+loc+' — '+msg;
+    s.style.display='flex';
+  }
 }</script>
 
 
@@ -341,4 +352,24 @@ function toggleFaq(el){
 <script>function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
 (function(){var tools=[{h:'json-formatter.html',l:'JSON'},{h:'diff-checker.html',l:'Diff'},{h:'html-formatter.html',l:'HTML'},{h:'css-formatter.html',l:'CSS'},{h:'base64.html',l:'Base64'},{h:'url-encode.html',l:'URL'},{h:'regex-tester.html',l:'Regex'},{h:'hash-generator.html',l:'Hash'},{h:'uuid-generator.html',l:'UUID'},{h:'lorem-ipsum.html',l:'Lorem'}];document.getElementById('toolNav').innerHTML=tools.map(function(t){return'<a href="'+t.h+'" class="tab'+(t.h==='json-validator.html'?' active':'')+'" style="text-decoration:none">'+t.l+'</a>';}).join('');})();</script>
 
+<script>
+(function(){
+  var saved=localStorage.getItem('cpTheme');
+  var prefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;
+  if(saved==='dark'||(saved===null&&prefersDark)){
+    document.body.classList.add('dark');
+    var btn=document.getElementById('themeBtn');
+    if(btn)btn.textContent='☀️';
+  }
+})();
+function toggleTheme(){
+  var isDark=document.body.classList.toggle('dark');
+  localStorage.setItem('cpTheme',isDark?'dark':'light');
+  var btn=document.getElementById('themeBtn');
+  if(btn)btn.textContent=isDark?'☀️':'🌙';
+}
+</script>
+<script>
+document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();validate();}});
+</script>
 </body></html>

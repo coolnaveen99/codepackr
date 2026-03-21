@@ -41,6 +41,16 @@
 .hero-content h1 em{font-style:normal;}
 .section-header h2{font-family:'Inter',sans-serif;letter-spacing:-0.015em;}
 </style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"Codepackr","url":"https://www.codepackr.com","description":"Free online developer tools: JSON formatter, diff checker, base64 encoder, regex tester and more.","potentialAction":{"@type":"SearchAction","target":"https://www.codepackr.com/index.html#search?q={search_term_string}","query-input":"required name=search_term_string"}}
+</script>
+<script>
+(function(){
+  var saved=localStorage.getItem('cpTheme');
+  var prefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;
+  if(saved==='dark'||(saved===null&&prefersDark)){document.documentElement.classList.add('dark-pre');}
+})();
+</script>
 </head>
 <body>
 <header class="site-header">
@@ -100,10 +110,11 @@
     </nav>
     <div class="header-actions" style="display:flex;align-items:center;gap:8px;margin-left:auto">
       <div class="search-wrap">
-        <input type="search" id="globalSearch" placeholder="Search tools..." autocomplete="off" oninput="doSearch(this.value)">
+        <input type="search" id="globalSearch" aria-label="Search tools" placeholder="Search tools..." autocomplete="off" oninput="doSearch(this.value)">
         <span class="search-icon">&#8981;</span>
         <div class="search-results" id="searchResults"></div>
       </div>
+      <button id="themeBtn" onclick="toggleTheme()" title="Toggle dark/light mode" style="width:34px;height:34px;padding:0;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;flex-shrink:0" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">🌙</button>
       <a href="contact.html" style="padding:6px 12px;border-radius:6px;font-size:0.82rem;color:var(--text-muted);text-decoration:none;border:1px solid var(--border);white-space:nowrap;font-weight:600">Contact</a>
       <button class="hamburger" id="hamburgerBtn" onclick="toggleMenu()" aria-label="Open menu">
         <span></span><span></span><span></span>

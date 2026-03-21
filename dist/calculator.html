@@ -107,7 +107,13 @@
     </div>
   </nav>
   <div class="header-actions" style="display:flex;align-items:center;gap:8px;margin-left:auto">
+    <div class="search-wrap">
+      <input type="search" id="globalSearch" aria-label="Search tools" placeholder="Search tools..." autocomplete="off" aria-label="Search tools" oninput="doSearch(this.value)">
+      <span class="search-icon">&#8981;</span>
+      <div class="search-results" id="searchResults"></div>
+    </div>
     <a href="contact.html" style="padding:6px 12px;border-radius:6px;font-size:0.82rem;color:var(--text-muted);text-decoration:none;border:1px solid var(--border);font-weight:600">Contact</a>
+    <button id="themeBtn" onclick="toggleTheme()" title="Toggle dark/light mode" style="width:34px;height:34px;padding:0;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;flex-shrink:0">🌙</button>
     <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileMenu()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -127,7 +133,7 @@
   <a href="calculator.html">Calculator</a><a href="contact.html">Contact</a>
 </div>
 
-<div class="tool-page">
+<div class="tool-page" role="main">
   <div class="tool-page-header">
     <div class="breadcrumb"><a href="index.html">Home</a> &rsaquo; <a href="index.html#utils">Utilities</a> &rsaquo; Calculator</div>
     <h1>Scientific Calculator</h1>
@@ -411,6 +417,24 @@ document.addEventListener('click', function(e) {
 function toast(m,t){var el=document.getElementById('_toast');el.textContent=m;el.className='toast'+(t?' t-'+t:'');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2400);}
 
 render();
+</script>
+
+<script>
+(function(){
+  var saved=localStorage.getItem('cpTheme');
+  var prefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;
+  if(saved==='dark'||(saved===null&&prefersDark)){
+    document.body.classList.add('dark');
+    var btn=document.getElementById('themeBtn');
+    if(btn)btn.textContent='☀️';
+  }
+})();
+function toggleTheme(){
+  var isDark=document.body.classList.toggle('dark');
+  localStorage.setItem('cpTheme',isDark?'dark':'light');
+  var btn=document.getElementById('themeBtn');
+  if(btn)btn.textContent=isDark?'☀️':'🌙';
+}
 </script>
 </body>
 </html>

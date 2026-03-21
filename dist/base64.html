@@ -93,10 +93,11 @@
     </nav>
     <div class="header-actions" style="display:flex;align-items:center;gap:8px;margin-left:auto">
       <div class="search-wrap">
-        <input type="search" id="globalSearch" placeholder="Search tools..." autocomplete="off" oninput="doSearch(this.value)">
+        <input type="search" id="globalSearch" aria-label="Search tools" placeholder="Search tools..." autocomplete="off" oninput="doSearch(this.value)">
         <span class="search-icon">&#8981;</span>
         <div class="search-results" id="searchResults"></div>
       </div>
+      <button id="themeBtn" onclick="toggleTheme()" title="Toggle dark/light mode" style="width:34px;height:34px;padding:0;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;flex-shrink:0" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">🌙</button>
       <a href="contact.html" style="padding:6px 12px;border-radius:6px;font-size:0.82rem;color:var(--text-muted);text-decoration:none;border:1px solid var(--border);white-space:nowrap;font-weight:600">Contact</a>
       <button class="hamburger" id="hamburgerBtn" onclick="toggleMenu()" aria-label="Open menu">
         <span></span><span></span><span></span>
@@ -256,7 +257,7 @@ document.addEventListener("click",function(e){
 
 
 <div style="background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;"><div style="max-width:1400px;margin:0 auto;padding:0 28px;display:flex;gap:4px;align-items:center;min-height:44px;" id="toolNav"></div></div>
-<div class="tool-page">
+<div class="tool-page" role="main">
  <div class="tool-page-header">
  <div class="breadcrumb"><a href="index.html">Home</a> › <a href="index.html#encoders">Encoders</a> › Base64</div>
  <h1>Base64 Encoder / Decoder</h1>
@@ -275,7 +276,7 @@ document.addEventListener("click",function(e){
  <button class="btn btn-accent" onclick="run()">⚡ Convert</button>
  </div>
  </div>
- <div id="statusEl" style="display:none" class="status-bar"></div>
+ <div id="statusEl" aria-live="polite" style="display:none" class="status-bar"></div>
  <div class="tool-workspace">
  <div class="ws-panel">
  <div class="ws-panel-header"><span class="ws-panel-title" id="inLabel">Plain Text</span>
@@ -390,36 +391,48 @@ function toggleUrlSafe(btn){
 
 function run(){
   var v=document.getElementById('inp').value;
-  if(!v.trim()){setStatus('Input is empty','info');return;}
+  if(!v.trim()){setStatus('Input is empty — paste text above','info');return;}
   try{
     var res='';
     if(_mode==='encode'){
-      // encode: text -> base64
-      var encoded=btoa(encodeURIComponent(v).replace(/%([0-9A-F]{2})/g,function(match,p1){return String.fromCharCode('0x'+p1);}));
+      // Proper UTF-8 safe encode: handles all unicode characters
+      var bytes=new TextEncoder().encode(v);
+      var bin='';
+      bytes.forEach(function(b){bin+=String.fromCharCode(b);});
+      var encoded=btoa(bin);
       if(_urlSafe){
         res=encoded.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
       }else{
         res=encoded;
       }
-      setStatus('Encoded — '+res.length+' chars','valid');
+      setStatus('✓ Encoded — '+v.length+' chars → '+res.length+' Base64 chars','valid');
     }else{
-      // decode: base64 -> text
-      var s=v.trim();
-      // restore url-safe chars
+      // Proper decode with padding repair + UTF-8 decode
+      var s=v.trim().replace(/\s/g,'');
+      if(!s){setStatus('Input is empty','info');return;}
+      // Validate: only valid base64 chars
+      var validB64=/^[A-Za-z0-9+/\-_=]+$/;
+      if(!validB64.test(s)){setStatus('✗ Invalid Base64 — contains illegal characters','invalid');return;}
+      // Restore URL-safe chars and padding
       s=s.replace(/-/g,'+').replace(/_/g,'/');
-      // add padding
       while(s.length%4){s+='=';}
-      var decoded=atob(s);
+      var bin=atob(s);
+      // Decode as UTF-8
       try{
-        res=decodeURIComponent(decoded.split('').map(function(c){return'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2);}).join(''));
+        var bytes=new Uint8Array(bin.length);
+        for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+        res=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
       }catch(e2){
-        res=decoded;
+        // Fall back to raw string if not valid UTF-8
+        res=bin;
       }
-      setStatus('Decoded — '+res.length+' chars','valid');
+      setStatus('✓ Decoded — '+res.length+' chars','valid');
     }
     document.getElementById('out').textContent=res;
   }catch(e){
-    setStatus('Error: '+e.message,'invalid');
+    var msg=e.message||String(e);
+    if(msg.includes('Invalid character'))msg='Invalid Base64 string — check for typos or missing padding';
+    setStatus('✗ '+msg,'invalid');
   }
 }
 
@@ -427,6 +440,7 @@ function clearAll(){
   document.getElementById('inp').value='';
   document.getElementById('out').textContent='';
   setStatus();
+  document.getElementById('inp').focus();
 }
 
 function copyOut(){
@@ -451,4 +465,24 @@ function loadFile(ev){
 })();
 </script>
 
+<script>
+(function(){
+  var saved=localStorage.getItem('cpTheme');
+  var prefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;
+  if(saved==='dark'||(saved===null&&prefersDark)){
+    document.body.classList.add('dark');
+    var btn=document.getElementById('themeBtn');
+    if(btn)btn.textContent='☀️';
+  }
+})();
+function toggleTheme(){
+  var isDark=document.body.classList.toggle('dark');
+  localStorage.setItem('cpTheme',isDark?'dark':'light');
+  var btn=document.getElementById('themeBtn');
+  if(btn)btn.textContent=isDark?'☀️':'🌙';
+}
+</script>
+<script>
+document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();run();}});
+</script>
 </body></html>
