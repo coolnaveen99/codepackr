@@ -243,11 +243,12 @@ document.addEventListener("click",function(e){
  <span style="font-size:0.78rem;color:var(--text-muted)">lines added / removed / changed</span>
  <div style="margin-left:auto;display:flex;gap:8px">
  <div class="tabs" id="viewTab">
- <button class="tab active" onclick="setView('unified',this)">Unified</button>
- <button class="tab" onclick="setView('split',this)">Split</button>
+ <button class="tab" onclick="setView('unified',this)">Unified</button>
+ <button class="tab active" onclick="setView('split',this)">Split</button>
  </div>
  <button class="btn btn-secondary btn-sm" onclick="copyDiff()">Copy Diff</button>
  <button class="btn btn-secondary btn-sm" onclick="exportDiff()">Export .diff</button>
+ <button class="btn btn-success btn-sm" onclick="mergeChanges()">&#10549; Merge</button>
  </div>
  </div>
  <div class="diff-wrap" id="diffWrap">
@@ -342,7 +343,7 @@ function toggleFaq(el){
  </div>
 </footer>
 <div class="toast" id="_toast"></div>
-<script>var _ws=true,_wrap=true,_view='unified',_diff=[],_mode='text';
+<script>var _ws=true,_wrap=true,_view='split',_diff=[],_mode='text';
 function cnt(tid,cid){
  var v=document.getElementById(tid).value;
  document.getElementById(cid).textContent=(v?v.split('\n').length:0)+' lines · '+v.length+' chars';
@@ -528,6 +529,41 @@ function exportDiff(){
  a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));
  a.download='diff-output.diff';a.click();
  toast('Exported!','ok');
+}
+
+function mergeChanges(){
+ if(!_diff.length){toast('Run a comparison first','err');return;}
+ // Merge: keep unchanged lines + all added lines (modified version wins)
+ var merged=[];
+ var i=0;
+ while(i<_diff.length){
+  var x=_diff[i];
+  if(x.t==='c'){merged.push(x.v);i++;}
+  else if(x.t==='d'){
+   // Check if next is 'a' (change pair) — use 'a' (modified)
+   if(i+1<_diff.length&&_diff[i+1].t==='a'){merged.push(_diff[i+1].v);i+=2;}
+   else{i++;} // pure delete — drop it
+  }
+  else if(x.t==='a'){merged.push(x.v);i++;} // pure add — keep it
+ }
+ var result=merged.join('\n');
+ // Show merge result in a modal
+ var modal=document.createElement('div');
+ modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px';
+ modal.innerHTML='<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:720px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column">'+
+  '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--surface)">'+
+  '<span style="font-weight:800;font-size:0.92rem">⤵ Merged Result</span>'+
+  '<div style="display:flex;gap:8px">'+
+  '<button class="btn btn-success btn-sm" onclick="navigator.clipboard.writeText(document.getElementById(\'mergeOut\').value).then(()=>window.dispatchEvent(new CustomEvent(\'mergetoast\')))">Copy</button>'+
+  '<button class="btn btn-secondary btn-sm" onclick="(function(){var a=document.createElement(\'a\');a.href=URL.createObjectURL(new Blob([document.getElementById(\'mergeOut\').value],{type:\'text/plain\'}));a.download=\'merged.txt\';a.click();})()">Download</button>'+
+  '<button class="btn btn-secondary btn-sm" onclick="this.closest(\'[style*=fixed]\').remove()">✕ Close</button>'+
+  '</div></div>'+
+  '<textarea id="mergeOut" spellcheck="false" style="flex:1;min-height:320px;background:transparent;border:none;color:var(--text);font-family:var(--font-mono);font-size:0.82rem;line-height:1.7;padding:16px;resize:none;outline:none;overflow-y:auto">'+result.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</textarea>'+
+  '</div>';
+ document.body.appendChild(modal);
+ modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+ window.addEventListener('mergetoast',function(){toast('Merged text copied!','ok');},{once:true});
+ toast('Changes merged!','ok');
 }
 document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runDiff();}});
 (function(){
