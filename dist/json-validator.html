@@ -34,8 +34,8 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="shortcut icon" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/main.css?v=9">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css?v=10">
 </head>
 <body>
 <header class="site-header">
@@ -224,30 +224,40 @@ function doSearch(q){
   var res=document.getElementById('searchResults');
   if(!q||!q.trim()){res.classList.remove('open');return;}
   var q2=q.toLowerCase().trim();
-  // Score each entry: title-start match = 3pts, title-includes = 2pts, keyword = 1pt
+  var catMap={'json-formatter.html':'Formatters','html-formatter.html':'Formatters','css-formatter.html':'Formatters','sql-formatter.html':'Formatters','xml-formatter.html':'Formatters','js-minifier.html':'Formatters','base64.html':'Encoders','url-encode.html':'Encoders','hash-generator.html':'Encoders','jwt-decoder.html':'Encoders','diff-checker.html':'Validators','regex-tester.html':'Validators','json-validator.html':'Validators','xsd-validator.html':'Validators','csv-viewer.html':'Validators','json-xml-converter.html':'Converters','json-csv-converter.html':'Converters','csv-xml-converter.html':'Converters','uuid-generator.html':'Utilities','lorem-ipsum.html':'Utilities','text-tools.html':'Utilities','markdown.html':'Utilities','color-converter.html':'Utilities','timestamp.html':'Utilities','cron-expression.html':'Utilities','calculator.html':'Utilities','contact.html':'Other'};
+  var catColor={'Formatters':'var(--accent)','Encoders':'var(--accent2)','Validators':'#ffc84a','Converters':'var(--accent3)','Utilities':'#9c88ff','Other':'var(--text-dim)'};
   var scored=_SI.map(function(e){
-    var s=0;
-    var tl=e.t.toLowerCase();
+    var s=0,tl=e.t.toLowerCase();
     if(tl.startsWith(q2))s+=3;
     else if(tl.includes(q2))s+=2;
     if(e.k.includes(q2))s+=1;
-    return {e:e,s:s};
+    return{e:e,s:s};
   }).filter(function(x){return x.s>0;});
   scored.sort(function(a,b){return b.s-a.s;});
   var top=scored.slice(0,8);
-  if(!top.length){res.classList.remove('open');return;}
-  // Group by page
+  if(!top.length){
+    res.innerHTML='<div style="padding:14px 16px;font-size:0.8rem;color:var(--text-dim);text-align:center">No results for <strong>'+q+'</strong></div>';
+    res.classList.add('open');return;
+  }
+  // Highlight matching text in title
+  function hl(text,q){
+    var re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+    return text.replace(re,'<mark style="background:rgba(108,99,255,0.2);color:var(--accent);border-radius:2px;padding:0 1px">$1</mark>');
+  }
   var seen={};
   res.innerHTML=top.map(function(x){
     var e=x.e;
-    var isPage=!seen[e.h];
-    seen[e.h]=true;
-    var icon=isPage?'<span style="color:var(--accent);font-size:0.7rem;flex-shrink:0">📄</span>':'<span style="color:var(--accent2);font-size:0.7rem;flex-shrink:0;margin-left:4px">⚡</span>';
-    return '<a class="search-result-item" href="'+e.h+'">'
-      +icon
-      +'<div class="sri-text"><h4>'+e.t+'</h4>'
-      +'<p style="font-size:0.7rem;color:var(--text-dim);margin:0">'+e.d+'</p>'
-      +'</div></a>';
+    var cat=catMap[e.h]||'';
+    var cc=catColor[cat]||'var(--text-dim)';
+    var isPage=!seen[e.h];seen[e.h]=true;
+    var badge=cat?'<span style="font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:3px;background:'+cc+';color:#fff;opacity:0.85;margin-left:auto;flex-shrink:0">'+cat+'</span>':'';
+    var icon=isPage?'📄':'⚡';
+    return '<a class="search-result-item" href="'+e.h+'" style="align-items:center">'
+      +'<span style="font-size:0.75rem;flex-shrink:0;margin-right:2px">'+icon+'</span>'
+      +'<div class="sri-text" style="flex:1;min-width:0">'
+      +'<h4 style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+hl(e.t,q2)+'</h4>'
+      +'<p style="font-size:0.7rem;color:var(--text-dim);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.d+'</p>'
+      +'</div>'+badge+'</a>';
   }).join('');
   res.classList.add('open');
 }
@@ -376,5 +386,21 @@ function toggleTheme(){
 </script>
 <script>
 document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();validate();}});
+</script>
+
+<script>
+document.addEventListener('keydown',function(e){
+  if(e.key==='/'&&e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA'){
+    e.preventDefault();
+    var inp=document.getElementById('globalSearch');
+    if(inp){inp.focus();inp.select();}
+  }
+  if(e.key==='Escape'){
+    var inp=document.getElementById('globalSearch');
+    var res=document.getElementById('searchResults');
+    if(inp){inp.blur();inp.value='';}
+    if(res){res.classList.remove('open');}
+  }
+});
 </script>
 </body></html>
