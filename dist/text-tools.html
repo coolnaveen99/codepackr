@@ -312,7 +312,8 @@ var TOOLS = [
   {id:'rmspaces',  label:'Remove Extra Spaces', icon:'·'},
   {id:'pfxsfx',    label:'Prefix / Suffix',icon:'[  ]'},
   {id:'numlist',   label:'Number Lines',   icon:'1.'},
-  {id:'rmallsp',   label:'Remove All Spaces',icon:'_'}
+  {id:'rmallsp',   label:'Remove All Spaces',icon:'_'},
+  {id:'joinwords',  label:'Join Words',        icon:'⌸'}
 ];
 
 // Build tool bar
@@ -343,7 +344,8 @@ function selectTool(id, btn){
     rmspaces: 'Cleaned Text',
     pfxsfx:   'Text with Prefix / Suffix',
     numlist:  'Numbered Lines',
-    rmallsp:  'All Spaces Removed — Single Line'
+    rmallsp:  'All Spaces Removed — Single Line',
+    joinwords: 'Words Joined (no spaces)'
   };
   document.getElementById('outLabel').textContent = labels[id] || 'Output';
 }
@@ -428,6 +430,9 @@ function runTool(){
   else if(_tool==='rmallsp'){
     out = inp.replace(/\s+/g,' ').trim();
   }
+  else if(_tool==='joinwords'){
+    out = inp.replace(/\s+/g,'').trim();
+  }
   document.getElementById('txtOut').textContent = out;
   var wc=out.trim()?out.trim().split(/\s+/).length:0;
   document.getElementById('outStats').textContent = wc+' words · '+out.length+' chars';
@@ -499,6 +504,7 @@ updateStats();
     <div class="use-case"><div class="use-case-dot"></div><span><strong>Prefix / Suffix</strong> — add custom text before/after every line</span></div>
     <div class="use-case"><div class="use-case-dot"></div><span><strong>Number Lines</strong> — prepend a sequential line number to each line</span></div>
     <div class="use-case"><div class="use-case-dot"></div><span><strong>Remove All Spaces</strong> — strip every whitespace and collapse to a single line</span></div>
+    <div class="use-case"><div class="use-case-dot"></div><span><strong>Join Words</strong> — remove all spaces between words (e.g. <em>naveen kumar</em> → <em>naveenkumar</em>)</span></div>
   </div>
   <h2>Frequently Asked Questions</h2>
   <div class="faq-list">
