@@ -12,6 +12,9 @@
 </script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7368262160205015" crossorigin="anonymous"></script>
 <meta charset="UTF-8">
+<script>
+(function(){try{var s=localStorage.getItem('cpTheme');var p=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;if(s==='dark'||(s===null&&p)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();
+</script>
 <meta name="msvalidate.01" content="BC8B27F46BBCD43F50A45F870843689D" /><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Base64 Encoder / Decoder — Codepackr</title>
 <meta name="description" content="Free online Base64 encoder and decoder. Encode plain text or decode Base64 strings instantly in your browser. Supports URL-safe Base64 and file encoding.">
@@ -471,12 +474,14 @@ function loadFile(ev){
   var prefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;
   if(saved==='dark'||(saved===null&&prefersDark)){
     document.body.classList.add('dark');
+    document.documentElement.setAttribute('data-theme','dark');
     var btn=document.getElementById('themeBtn');
     if(btn)btn.textContent='☀️';
   }
 })();
 function toggleTheme(){
   var isDark=document.body.classList.toggle('dark');
+  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
   localStorage.setItem('cpTheme',isDark?'dark':'light');
   var btn=document.getElementById('themeBtn');
   if(btn)btn.textContent=isDark?'☀️':'🌙';
