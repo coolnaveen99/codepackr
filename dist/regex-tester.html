@@ -302,7 +302,6 @@ function run(){
  var statusEl=document.getElementById('statusEl');
  if(!pat){document.getElementById('out').innerHTML='<span style="color:var(--text-dim)">Enter a pattern above</span>';statusEl.style.display='none';document.getElementById('matchCount').textContent='';return;}
  try{
- try{
     var re=new RegExp(pat,flags);
  var matches=[],m;
  if(flags.includes('g')){while((m=re.exec(inp))!==null){matches.push(m);if(matches.length>500)break;}}

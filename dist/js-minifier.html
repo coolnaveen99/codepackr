@@ -285,12 +285,12 @@ document.addEventListener("click",function(e){
  </div>
  <script>function doMin(){
  var v=document.getElementById('inp').value;if(!v.trim())return;
- var out=v.replace(/\/\/[^\n]*/g,'').replace(/\/\*[\s\S]*?\*\
+ var out=v.replace(/\/\/[^\r\n]*/g,'').replace(/\/\*[\s\S]*?\*\//g,'').replace(/\s+/g,' ').replace(/\s*([{}();,:=+*<>])\s*/g,'$1').trim();
  document.getElementById('out').textContent=out;
  var saving=Math.round((1-out.length/v.length)*100);
  var s=document.getElementById('statusEl');s.className='status-bar status-valid';s.textContent='✓ Minified — '+saving+'% reduction('+v.length+' → '+out.length+' chars)';s.style.display='flex';
 }
- function clearAll(){document.getElementById('inp').value='';document.getElementById('out').textContent='';document.getElementById('statusEl').style.display='none';}\n return new Intl.DateTimeFormat(lang,{\n year:\'numeric\',\n month:\'long\',\n day:\'numeric\'\n}).format(date);\n}';</script>
+ function clearAll(){document.getElementById('inp').value='';document.getElementById('out').textContent='';document.getElementById('statusEl').style.display='none';}</script>
 
 
 <style>

@@ -466,7 +466,10 @@ function setMode(m,btn){
 function toggleOpt(k,btn){
  if(k==='ws'){_ws=!_ws;btn.classList.toggle('active',_ws);}
  else{_wrap=!_wrap;btn.classList.toggle('active',_wrap);}
- if(_diff.length)renderDiff(_diff);
+ if(_diff.length){
+  if(k==='ws')runDiff();
+  else renderDiff(_diff);
+ }
 }
 function setView(v,btn){
  _view=v;

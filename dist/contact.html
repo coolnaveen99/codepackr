@@ -212,9 +212,7 @@ async function submitForm(e){
   fd.append('email', document.getElementById('femail').value);
   fd.append('_replyto', document.getElementById('femail').value);
   fd.append('_subject', 'Codepackr: '+document.getElementById('fsubject').value);
-  fd.append('message', 'Topic: '+document.getElementById('fsubject').value+'
-
-'+document.getElementById('fmsg').value);
+  fd.append('message', 'Topic: '+document.getElementById('fsubject').value+'\n\n'+document.getElementById('fmsg').value);
 
   try{
     var res = await fetch('https://formspree.io/f/xnjgovzw', {
@@ -236,12 +234,6 @@ async function submitForm(e){
     errEl.style.display = 'block';
     btn.textContent = '✉ Send Message';
     btn.disabled = false;
-  }
-}
-  }catch(err){
-    errEl.textContent='Failed to send: '+err.message+'. Please email us directly.';
-    errEl.style.display='block';
-    btn.textContent='\u2709 Send Message';btn.disabled=false;
   }
 }
 </script>
