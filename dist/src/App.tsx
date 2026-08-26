@@ -275,7 +275,7 @@ function HomePage({ filteredTools, onSelectTool, query }: { filteredTools: Tool[
           <h1>Codepackr</h1>
           <p className="intro">Everything a developer needs, packed in one place. Format, validate, encode, convert, and inspect data locally in your browser.</p>
         </div>
-        <div className="hero-count"><strong>25+</strong><span>tools available</span></div>
+        <div className="hero-count"><strong>25+<i aria-hidden="true" className="count-light" /></strong><span>tools available</span></div>
       </section>
 
       <section className="index-menu" aria-label="Tool index">
@@ -1057,7 +1057,6 @@ function escapeHtml(value: string) {
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Something went wrong'
 }
-
 
 function copyToClipboard(value: string) {
   navigator.clipboard?.writeText(value)
