@@ -971,13 +971,75 @@ function describeCronPart(part: string) {
 function calculateExpression(input: string): { status: Status; value: string } {
   if (!input.trim()) return { status: { tone: 'info', text: 'Enter an expression to calculate' }, value: '' }
   try {
-    const expression = input.replace(/\^/g, '**').replace(/sqrt\(/g, 'Math.sqrt(').replace(/sin\(/g, 'Math.sin(').replace(/cos\(/g, 'Math.cos(').replace(/tan\(/g, 'Math.tan(')
-    if (!/^[\d+\-*/().\sA-Za-z_]*$/.test(expression)) return { status: { tone: 'warn', text: 'Unsupported character in expression' }, value: '' }
-    const result = Function(`"use strict"; return (${expression})`)()
+    const result = parseMathExpression(input)
+    if (!Number.isFinite(result)) return { status: { tone: 'warn', text: 'Result is not a finite number' }, value: '' }
     return { status: { tone: 'ok', text: 'Calculated' }, value: String(result) }
   } catch (error) {
     return { status: { tone: 'warn', text: getErrorMessage(error) }, value: '' }
   }
+}
+
+function parseMathExpression(input: string) {
+  const tokens = input.match(/sqrt|sin|cos|tan|\d*\.?\d+(?:e[+-]?\d+)?|[()+\-*/^]/gi) ?? []
+  if (tokens.join('').toLowerCase() !== input.replace(/\s+/g, '').toLowerCase()) throw new Error('Unsupported character in expression')
+  let position = 0
+
+  const peek = () => tokens[position]
+  const take = () => tokens[position++]
+  const parseExpression = (): number => {
+    let value = parseTerm()
+    while (peek() === '+' || peek() === '-') {
+      const operator = take()
+      const nextValue = parseTerm()
+      value = operator === '+' ? value + nextValue : value - nextValue
+    }
+    return value
+  }
+  const parseTerm = (): number => {
+    let value = parsePower()
+    while (peek() === '*' || peek() === '/') {
+      const operator = take()
+      const nextValue = parsePower()
+      value = operator === '*' ? value * nextValue : value / nextValue
+    }
+    return value
+  }
+  const parsePower = (): number => {
+    let value = parseFactor()
+    if (peek() === '^') {
+      take()
+      value = value ** parsePower()
+    }
+    return value
+  }
+  const parseFactor = (): number => {
+    const token = take()
+    if (!token) throw new Error('Incomplete expression')
+    if (token === '+') return parseFactor()
+    if (token === '-') return -parseFactor()
+    if (token === '(') {
+      const value = parseExpression()
+      if (take() !== ')') throw new Error('Missing closing parenthesis')
+      return value
+    }
+    if (/^(sqrt|sin|cos|tan)$/i.test(token)) {
+      if (take() !== '(') throw new Error(`${token} requires parentheses`)
+      const value = parseExpression()
+      if (take() !== ')') throw new Error('Missing closing parenthesis')
+      const fn = token.toLowerCase()
+      if (fn === 'sqrt') return Math.sqrt(value)
+      if (fn === 'sin') return Math.sin(value)
+      if (fn === 'cos') return Math.cos(value)
+      return Math.tan(value)
+    }
+    const number = Number(token)
+    if (Number.isNaN(number)) throw new Error(`Unexpected token: ${token}`)
+    return number
+  }
+
+  const result = parseExpression()
+  if (position < tokens.length) throw new Error(`Unexpected token: ${tokens[position]}`)
+  return result
 }
 
 function cleanTag(value: string) {
