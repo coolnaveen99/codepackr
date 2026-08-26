@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import QRCode from 'qrcode'
 import './App.css'
 
 type ToolId =
@@ -7,20 +8,25 @@ type ToolId =
   | 'css-formatter'
   | 'sql-formatter'
   | 'xml-formatter'
+  | 'yaml-formatter'
   | 'js-minifier'
   | 'base64'
   | 'url-encode'
+  | 'html-entity'
   | 'hash-generator'
   | 'jwt-decoder'
   | 'diff-checker'
   | 'regex-tester'
   | 'json-validator'
+  | 'json-path-tester'
   | 'xsd-validator'
   | 'csv-viewer'
   | 'json-xml-converter'
   | 'json-csv-converter'
   | 'csv-xml-converter'
   | 'uuid-generator'
+  | 'qr-generator'
+  | 'password-generator'
   | 'lorem-ipsum'
   | 'text-tools'
   | 'markdown'
@@ -43,6 +49,7 @@ const categories = [
       { id: 'css-formatter', name: 'CSS Formatter', description: 'Prettify and compress stylesheets', icon: '#' },
       { id: 'sql-formatter', name: 'SQL Formatter', description: 'Format SQL queries for readability', icon: 'SQL' },
       { id: 'xml-formatter', name: 'XML Formatter', description: 'Indent and prettify XML documents', icon: '<x>' },
+      { id: 'yaml-formatter', name: 'YAML Formatter', description: 'Format and validate YAML-style documents', icon: 'YML' },
       { id: 'js-minifier', name: 'JS Minifier', description: 'Compress JavaScript for production', icon: 'JS' },
     ],
   },
@@ -51,6 +58,7 @@ const categories = [
     tools: [
       { id: 'base64', name: 'Base64 Encoder', description: 'Encode and decode Base64 strings', icon: 'B64' },
       { id: 'url-encode', name: 'URL Encoder', description: 'Encode and decode URL components', icon: 'URL' },
+      { id: 'html-entity', name: 'HTML Entity Encoder', description: 'Encode and decode HTML entities', icon: '&lt;' },
       { id: 'hash-generator', name: 'Hash Generator', description: 'Generate SHA hashes in the browser', icon: '#!' },
       { id: 'jwt-decoder', name: 'JWT Decoder', description: 'Decode and inspect JWT tokens', icon: 'JWT' },
     ],
@@ -61,6 +69,7 @@ const categories = [
       { id: 'diff-checker', name: 'Diff Checker', description: 'Compare text and code side by side', icon: '!=' },
       { id: 'regex-tester', name: 'Regex Tester', description: 'Test and debug regular expressions', icon: '.*' },
       { id: 'json-validator', name: 'JSON Validator', description: 'Validate JSON and show parse errors', icon: 'OK' },
+      { id: 'json-path-tester', name: 'JSON Path Tester', description: 'Query JSON with simple JSONPath expressions', icon: '$.' },
       { id: 'xsd-validator', name: 'XSD Validator', description: 'Check XML syntax and schema root hints', icon: 'XSD' },
       { id: 'csv-viewer', name: 'CSV Viewer', description: 'View and format CSV as a table', icon: 'CSV' },
     ],
@@ -77,6 +86,8 @@ const categories = [
     name: 'Utilities',
     tools: [
       { id: 'uuid-generator', name: 'UUID Generator', description: 'Generate one or many UUIDs', icon: 'ID' },
+      { id: 'qr-generator', name: 'QR Code Generator', description: 'Generate downloadable QR codes', icon: 'QR' },
+      { id: 'password-generator', name: 'Password Generator', description: 'Create strong random passwords', icon: 'PW' },
       { id: 'lorem-ipsum', name: 'Lorem Ipsum', description: 'Generate placeholder text', icon: 'Aa' },
       { id: 'text-tools', name: 'Text Tools', description: 'Count, transform, sort, and clean text', icon: 'Tx' },
       { id: 'markdown', name: 'Markdown Preview', description: 'Live markdown editor and preview', icon: 'MD' },
@@ -321,12 +332,16 @@ function ToolRenderer({ tool }: { tool: Tool }) {
       return <FormatTool title="SQL Formatter" sample="select id,name from users where active=1 order by name" format={formatSql} />
     case 'xml-formatter':
       return <FormatTool title="XML Formatter" sample={'<root><item id="1">Codepackr</item></root>'} format={formatMarkup} minify={minifyMarkup} />
+    case 'yaml-formatter':
+      return <YamlTool />
     case 'js-minifier':
       return <FormatTool title="JavaScript Minifier" sample="function hello(name) {\n  console.log('Hello ' + name)\n}" format={(value) => value} minify={minifyJs} primaryLabel="Minify JS" />
     case 'base64':
       return <Base64Tool />
     case 'url-encode':
       return <UrlTool />
+    case 'html-entity':
+      return <HtmlEntityTool />
     case 'hash-generator':
       return <HashTool />
     case 'jwt-decoder':
@@ -337,6 +352,8 @@ function ToolRenderer({ tool }: { tool: Tool }) {
       return <RegexTool />
     case 'json-validator':
       return <JsonValidator />
+    case 'json-path-tester':
+      return <JsonPathTool />
     case 'xsd-validator':
       return <XsdValidator />
     case 'csv-viewer':
@@ -349,6 +366,10 @@ function ToolRenderer({ tool }: { tool: Tool }) {
       return <CsvXmlConverter />
     case 'uuid-generator':
       return <UuidTool />
+    case 'qr-generator':
+      return <QrTool />
+    case 'password-generator':
+      return <PasswordTool />
     case 'lorem-ipsum':
       return <LoremTool />
     case 'text-tools':
@@ -455,6 +476,20 @@ function FormatTool({ title, sample, format, minify, primaryLabel = 'Beautify' }
   )
 }
 
+function YamlTool() {
+  const [input, setInput] = useState('name: Codepackr\ntools:\n  - JSON Formatter\n  - Diff Checker\nactive: true')
+  const [output, setOutput] = useState('')
+  const [status, setStatus] = useState<Status>()
+
+  const run = () => {
+    const result = formatYaml(input)
+    setOutput(result.value)
+    setStatus(result.status)
+  }
+
+  return <ToolPanel status={status}><Actions><button className="primary" onClick={run}>Format / Validate</button><button onClick={() => { setInput(''); setOutput(''); setStatus(undefined) }}>Clear</button></Actions><div className="workbench"><TextareaBox label="YAML input" value={input} onChange={setInput} /><OutputBox label="Output" value={output} /></div></ToolPanel>
+}
+
 function Base64Tool() {
   const [input, setInput] = useState('Codepackr')
   const [output, setOutput] = useState('')
@@ -480,6 +515,16 @@ function UrlTool() {
     try { setOutput(decodeURIComponent(input)); setStatus({ tone: 'ok', text: 'URL decoded' }) }
     catch { setStatus({ tone: 'warn', text: 'Invalid URL encoded text' }) }
   }
+  return <TwoPaneTool input={input} setInput={setInput} output={output} status={status} onClear={() => setActiveMode(null)} actions={<><button className={activeMode === 'encode' ? 'primary' : ''} onClick={encode}>Encode</button><button className={activeMode === 'decode' ? 'primary' : ''} onClick={decode}>Decode</button></>} />
+}
+
+function HtmlEntityTool() {
+  const [input, setInput] = useState('<button class="primary">Save & continue</button>')
+  const [output, setOutput] = useState('')
+  const [status, setStatus] = useState<Status>()
+  const [activeMode, setActiveMode] = useState<'encode' | 'decode' | null>(null)
+  const encode = () => { setActiveMode('encode'); setOutput(encodeHtmlEntities(input)); setStatus({ tone: 'ok', text: 'HTML entities encoded' }) }
+  const decode = () => { setActiveMode('decode'); setOutput(decodeHtmlEntities(input)); setStatus({ tone: 'ok', text: 'HTML entities decoded' }) }
   return <TwoPaneTool input={input} setInput={setInput} output={output} status={status} onClear={() => setActiveMode(null)} actions={<><button className={activeMode === 'encode' ? 'primary' : ''} onClick={encode}>Encode</button><button className={activeMode === 'decode' ? 'primary' : ''} onClick={decode}>Decode</button></>} />
 }
 
@@ -538,6 +583,13 @@ function JsonValidator() {
   return <ToolPanel status={status}><TextareaBox label="JSON input" value={input} onChange={setInput} /></ToolPanel>
 }
 
+function JsonPathTool() {
+  const [input, setInput] = useState('{\n  "project": {\n    "name": "Codepackr",\n    "tools": ["JSON", "Diff", "Base64"]\n  }\n}')
+  const [path, setPath] = useState('$.project.tools[0]')
+  const result = useMemo(() => runJsonPath(input, path), [input, path])
+  return <ToolPanel status={result.status}><Actions><input value={path} onChange={(event) => setPath(event.target.value)} placeholder="$.project.tools[0]" /></Actions><div className="workbench"><TextareaBox label="JSON input" value={input} onChange={setInput} /><OutputBox label="JSONPath result" value={result.value} /></div></ToolPanel>
+}
+
 function XsdValidator() {
   const [xml, setXml] = useState('<note><to>Team</to><body>Hello</body></note>')
   const [xsd, setXsd] = useState('<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"><xs:element name="note" /></xs:schema>')
@@ -586,6 +638,45 @@ function UuidTool() {
   const [output, setOutput] = useState('')
   const generate = () => setOutput(Array.from({ length: Math.max(1, Math.min(count, 100)) }, () => crypto.randomUUID()).join('\n'))
   return <ToolPanel status={{ tone: 'info', text: 'Uses browser crypto.randomUUID for UUID v4' }}><Actions><input type="number" min="1" max="100" value={count} onChange={(event) => setCount(Number(event.target.value))} /><button className="primary" onClick={generate}>Generate UUIDs</button></Actions><OutputBox label="UUIDs" value={output} /></ToolPanel>
+}
+
+function QrTool() {
+  const [input, setInput] = useState('https://www.codepackr.com')
+  const [qrDataUrl, setQrDataUrl] = useState('')
+  const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Enter text or a URL to generate a QR code' })
+
+  useEffect(() => {
+    let cancelled = false
+    if (!input.trim()) {
+      setQrDataUrl('')
+      setStatus({ tone: 'info', text: 'Enter text or a URL to generate a QR code' })
+      return
+    }
+    QRCode.toDataURL(input, { margin: 2, width: 260, color: { dark: '#162033', light: '#ffffff' } })
+      .then((url) => { if (!cancelled) { setQrDataUrl(url); setStatus({ tone: 'ok', text: 'QR code generated' }) } })
+      .catch((error: unknown) => { if (!cancelled) setStatus({ tone: 'warn', text: getErrorMessage(error) }) })
+    return () => { cancelled = true }
+  }, [input])
+
+  return <ToolPanel status={status}><TextareaBox label="QR content" value={input} onChange={setInput} placeholder="Enter URL or text" />{qrDataUrl && <div className="qr-output"><img src={qrDataUrl} alt="Generated QR code" /><a className="download-link" href={qrDataUrl} download="codepackr-qr.png">Download PNG</a></div>}</ToolPanel>
+}
+
+function PasswordTool() {
+  const [length, setLength] = useState(16)
+  const [includeUpper, setIncludeUpper] = useState(true)
+  const [includeLower, setIncludeLower] = useState(true)
+  const [includeNumbers, setIncludeNumbers] = useState(true)
+  const [includeSymbols, setIncludeSymbols] = useState(true)
+  const [passwords, setPasswords] = useState('')
+  const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Choose options and generate passwords' })
+
+  const generate = () => {
+    const result = generatePasswords({ length, includeUpper, includeLower, includeNumbers, includeSymbols })
+    setPasswords(result.value)
+    setStatus(result.status)
+  }
+
+  return <ToolPanel status={status}><Actions><label className="inline-option">Length <input type="number" min="8" max="128" value={length} onChange={(event) => setLength(Number(event.target.value))} /></label><button className="primary" onClick={generate}>Generate</button></Actions><div className="option-grid"><label><input type="checkbox" checked={includeUpper} onChange={(event) => setIncludeUpper(event.target.checked)} /> Uppercase</label><label><input type="checkbox" checked={includeLower} onChange={(event) => setIncludeLower(event.target.checked)} /> Lowercase</label><label><input type="checkbox" checked={includeNumbers} onChange={(event) => setIncludeNumbers(event.target.checked)} /> Numbers</label><label><input type="checkbox" checked={includeSymbols} onChange={(event) => setIncludeSymbols(event.target.checked)} /> Symbols</label></div><OutputBox label="Generated passwords" value={passwords} /></ToolPanel>
 }
 
 function LoremTool() {
@@ -788,6 +879,73 @@ function minifyJs(value: string) {
   return value.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ').replace(/\s*([{}();,:=+\-*/<>])\s*/g, '$1').trim()
 }
 
+function formatYaml(value: string): { status: Status; value: string } {
+  const lines = value.replace(/\t/g, '  ').split(/\r?\n/)
+  const output: string[] = []
+  const indentStack = [0]
+
+  for (const rawLine of lines) {
+    const trimmed = rawLine.trim()
+    if (!trimmed || trimmed.startsWith('#')) {
+      output.push(trimmed)
+      continue
+    }
+    const currentIndent = rawLine.match(/^ */)?.[0].length ?? 0
+    if (currentIndent % 2 !== 0) return { status: { tone: 'warn', text: 'YAML indentation should use even spaces' }, value: output.join('\n') }
+    if (!trimmed.startsWith('- ') && !trimmed.includes(':')) return { status: { tone: 'warn', text: `Expected key/value pair near: ${trimmed}` }, value: output.join('\n') }
+    while (currentIndent < indentStack[indentStack.length - 1]) indentStack.pop()
+    if (currentIndent > indentStack[indentStack.length - 1]) indentStack.push(currentIndent)
+    output.push(`${' '.repeat(currentIndent)}${trimmed}`)
+  }
+  return { status: { tone: 'ok', text: 'YAML looks valid' }, value: output.join('\n').trim() }
+}
+
+function encodeHtmlEntities(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function decodeHtmlEntities(value: string) {
+  const textarea = document.createElement('textarea')
+  textarea.innerHTML = value
+  return textarea.value
+}
+
+function runJsonPath(input: string, path: string): { status: Status; value: string } {
+  try {
+    const data = JSON.parse(input)
+    if (!path.trim().startsWith('$')) return { status: { tone: 'warn', text: 'JSONPath must start with $' }, value: '' }
+    const tokens = tokenizeJsonPath(path)
+    let current: unknown = data
+    for (const token of tokens) {
+      if (Array.isArray(current) && typeof token === 'number') current = current[token]
+      else if (current && typeof current === 'object' && typeof token === 'string') current = (current as Record<string, unknown>)[token]
+      else return { status: { tone: 'warn', text: `No match at ${String(token)}` }, value: '' }
+    }
+    return { status: { tone: 'ok', text: 'JSONPath matched' }, value: JSON.stringify(current, null, 2) }
+  } catch (error) {
+    return { status: { tone: 'warn', text: getErrorMessage(error) }, value: '' }
+  }
+}
+
+function tokenizeJsonPath(path: string): Array<string | number> {
+  const body = path.trim().replace(/^\$\.?/, '')
+  if (!body) return []
+  const tokens: Array<string | number> = []
+  const pattern = /([^.[\]]+)|\[(\d+|"[^"]+"|'[^']+')\]/g
+  let match: RegExpExecArray | null
+  while ((match = pattern.exec(body))) {
+    const value = match[1] ?? match[2]
+    if (/^\d+$/.test(value)) tokens.push(Number(value))
+    else tokens.push(value.replace(/^['"]|['"]$/g, ''))
+  }
+  return tokens
+}
+
 function toBase64(value: string) {
   return btoa(String.fromCharCode(...new TextEncoder().encode(value)))
 }
@@ -893,6 +1051,41 @@ function makeLorem(count: number, mode: 'paragraphs' | 'sentences' | 'words') {
   if (mode === 'words') return Array.from({ length: safeCount }, (_, index) => words[index % words.length]).join(' ')
   if (mode === 'sentences') return Array.from({ length: safeCount }, (_, index) => sentence(index)).join(' ')
   return Array.from({ length: safeCount }, (_, index) => `${sentence(index)} ${sentence(index + 5)} ${sentence(index + 9)}`).join('\n\n')
+}
+
+function generatePasswords(options: { length: number; includeUpper: boolean; includeLower: boolean; includeNumbers: boolean; includeSymbols: boolean }): { status: Status; value: string } {
+  const pools = [
+    options.includeUpper ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' : '',
+    options.includeLower ? 'abcdefghijklmnopqrstuvwxyz' : '',
+    options.includeNumbers ? '0123456789' : '',
+    options.includeSymbols ? '!@#$%^&*()-_=+[]{};:,.?/|' : '',
+  ].filter(Boolean)
+  const pool = pools.join('')
+  const length = Math.max(8, Math.min(options.length, 128))
+  if (!pool) return { status: { tone: 'warn', text: 'Select at least one character set' }, value: '' }
+
+  const makePassword = () => {
+    const required = pools.map((set) => set[randomInt(set.length)])
+    const remaining = Array.from({ length: Math.max(length - required.length, 0) }, () => pool[randomInt(pool.length)])
+    return shuffle([...required, ...remaining]).join('')
+  }
+
+  return { status: { tone: 'ok', text: 'Passwords generated with crypto randomness' }, value: Array.from({ length: 5 }, makePassword).join('\n') }
+}
+
+function randomInt(max: number) {
+  const values = new Uint32Array(1)
+  crypto.getRandomValues(values)
+  return values[0] % max
+}
+
+function shuffle(values: string[]) {
+  const result = [...values]
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const swapIndex = randomInt(index + 1)
+    ;[result[index], result[swapIndex]] = [result[swapIndex], result[index]]
+  }
+  return result
 }
 
 function getTextStats(value: string) {
