@@ -24,6 +24,9 @@ type ToolId =
   | 'json-xml-converter'
   | 'json-csv-converter'
   | 'csv-xml-converter'
+  | 'edi-x12-formatter'
+  | 'edi-segment-viewer'
+  | 'edi-json-converter'
   | 'uuid-generator'
   | 'qr-generator'
   | 'password-generator'
@@ -83,6 +86,14 @@ const categories = [
     ],
   },
   {
+    name: 'EDI Tools',
+    tools: [
+      { id: 'edi-x12-formatter', name: 'EDI X12 Formatter', description: 'Format X12 EDI into readable segments', icon: 'X12' },
+      { id: 'edi-segment-viewer', name: 'EDI Segment Viewer', description: 'Inspect EDI segments and elements in a table', icon: 'SEG' },
+      { id: 'edi-json-converter', name: 'EDI to JSON Converter', description: 'Convert EDI X12 segments into JSON', icon: 'EJ' },
+    ],
+  },
+  {
     name: 'Utilities',
     tools: [
       { id: 'uuid-generator', name: 'UUID Generator', description: 'Generate one or many UUIDs', icon: 'ID' },
@@ -106,6 +117,7 @@ const tools: Tool[] = categories.flatMap((category) =>
 )
 
 const routeTools = [...tools, contactTool]
+const siteUrl = 'https://www.codepackr.com'
 
 const sampleJson = '{\n  "name": "Codepackr",\n  "tools": ["json", "diff", "base64"]\n}'
 
@@ -120,6 +132,71 @@ function getToolIdFromLocation(): ToolId | null {
 
 function getToolPath(toolId: ToolId) {
   return `/${toolId}.html`
+}
+
+function updateSeo(tool: Tool | null) {
+  const title = tool ? `${tool.name} - Codepackr` : 'Codepackr - Free Online Developer Tools'
+  const description = tool
+    ? `${tool.description}. Free online ${tool.name.toLowerCase()} from Codepackr. Runs locally in your browser.`
+    : 'Free online developer tools for formatting, validating, encoding, converting, and inspecting data locally in your browser.'
+  const canonical = `${siteUrl}${tool ? getToolPath(tool.id) : '/'}`
+  const keywords = tool
+    ? `${tool.name.toLowerCase()}, ${tool.category.toLowerCase()}, codepackr, developer tools, online tools`
+    : 'developer tools, json formatter, sql formatter, yaml formatter, diff checker, base64 encoder, qr code generator, password generator, edi tools'
+
+  document.title = title
+  upsertMeta('name', 'description', description)
+  upsertMeta('name', 'keywords', keywords)
+  upsertMeta('name', 'robots', 'index, follow')
+  upsertMeta('property', 'og:type', 'website')
+  upsertMeta('property', 'og:site_name', 'Codepackr')
+  upsertMeta('property', 'og:title', title)
+  upsertMeta('property', 'og:description', description)
+  upsertMeta('property', 'og:url', canonical)
+  upsertMeta('name', 'twitter:card', 'summary')
+  upsertMeta('name', 'twitter:title', title)
+  upsertMeta('name', 'twitter:description', description)
+  upsertCanonical(canonical)
+  upsertJsonLd({
+    '@context': 'https://schema.org',
+    '@type': tool ? 'WebApplication' : 'WebSite',
+    name: tool ? tool.name : 'Codepackr',
+    url: canonical,
+    description,
+    applicationCategory: tool ? 'DeveloperApplication' : undefined,
+    operatingSystem: tool ? 'Web' : undefined,
+  })
+}
+
+function upsertMeta(attribute: 'name' | 'property', key: string, content: string) {
+  let element = document.head.querySelector<HTMLMetaElement>(`meta[${attribute}="${key}"]`)
+  if (!element) {
+    element = document.createElement('meta')
+    element.setAttribute(attribute, key)
+    document.head.appendChild(element)
+  }
+  element.content = content
+}
+
+function upsertCanonical(href: string) {
+  let element = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')
+  if (!element) {
+    element = document.createElement('link')
+    element.rel = 'canonical'
+    document.head.appendChild(element)
+  }
+  element.href = href
+}
+
+function upsertJsonLd(data: Record<string, unknown>) {
+  let element = document.head.querySelector<HTMLScriptElement>('script[data-codepackr-seo="jsonld"]')
+  if (!element) {
+    element = document.createElement('script')
+    element.type = 'application/ld+json'
+    element.dataset.codepackrSeo = 'jsonld'
+    document.head.appendChild(element)
+  }
+  element.textContent = JSON.stringify(Object.fromEntries(Object.entries(data).filter(([, value]) => value !== undefined)))
 }
 
 function App() {
@@ -140,7 +217,7 @@ function App() {
   }, [])
 
   useEffect(() => {
-    document.title = currentTool ? `${currentTool.name} - Codepackr` : 'Codepackr - Free Online Developer Tools'
+    updateSeo(currentTool)
   }, [currentTool])
 
   const selectHome = () => {
@@ -364,6 +441,12 @@ function ToolRenderer({ tool }: { tool: Tool }) {
       return <JsonCsvConverter />
     case 'csv-xml-converter':
       return <CsvXmlConverter />
+    case 'edi-x12-formatter':
+      return <EdiFormatter />
+    case 'edi-segment-viewer':
+      return <EdiSegmentViewer />
+    case 'edi-json-converter':
+      return <EdiJsonConverter />
     case 'uuid-generator':
       return <UuidTool />
     case 'qr-generator':
@@ -631,6 +714,29 @@ function CsvXmlConverter() {
   const toXmlRun = () => { setActiveMode('csvToXml'); setOutput(jsonToXml(csvToObjects(input), 'records')); setStatus({ tone: 'ok', text: 'CSV converted to XML' }) }
   const toCsvRun = () => { setActiveMode('xmlToCsv'); const parsed = xmlToJson(input); try { setOutput(jsonToCsv(JSON.parse(parsed.value))); setStatus({ tone: 'ok', text: 'XML converted to CSV' }) } catch { setStatus(parsed.status) } }
   return <TwoPaneTool input={input} setInput={setInput} output={output} status={status} onClear={() => setActiveMode(null)} actions={<><button className={activeMode === 'csvToXml' ? 'primary' : ''} onClick={toXmlRun}>CSV to XML</button><button className={activeMode === 'xmlToCsv' ? 'primary' : ''} onClick={toCsvRun}>XML to CSV</button></>} />
+}
+
+const sampleEdi = 'ISA*00*          *00*          *ZZ*SENDER         *ZZ*RECEIVER       *260826*1200*U*00401*000000001*0*T*:~GS*PO*SENDER*RECEIVER*20260826*1200*1*X*004010~ST*850*0001~BEG*00*SA*12345**20260826~SE*3*0001~GE*1*1~IEA*1*000000001~'
+
+function EdiFormatter() {
+  const [input, setInput] = useState(sampleEdi)
+  const parsed = useMemo(() => parseEdi(input), [input])
+  const output = useMemo(() => formatEdi(input), [input])
+  return <ToolPanel status={parsed.status}><div className="workbench"><TextareaBox label="EDI X12 input" value={input} onChange={setInput} /><OutputBox label="Formatted EDI" value={output} /></div></ToolPanel>
+}
+
+function EdiSegmentViewer() {
+  const [input, setInput] = useState(sampleEdi)
+  const parsed = useMemo(() => parseEdi(input), [input])
+  const rows = useMemo(() => [['Segment', 'Name', 'Elements'], ...parsed.segments.map((segment) => [segment.tag, getEdiSegmentName(segment.tag), segment.elements.join(' | ')])], [parsed.segments])
+  return <ToolPanel status={parsed.status}><TextareaBox label="EDI X12 input" value={input} onChange={setInput} /><DataTable rows={rows} /></ToolPanel>
+}
+
+function EdiJsonConverter() {
+  const [input, setInput] = useState(sampleEdi)
+  const parsed = useMemo(() => parseEdi(input), [input])
+  const output = useMemo(() => JSON.stringify(parsed.segments.map((segment, index) => ({ index: index + 1, tag: segment.tag, name: getEdiSegmentName(segment.tag), elements: segment.elements })), null, 2), [parsed.segments])
+  return <ToolPanel status={parsed.status}><div className="workbench"><TextareaBox label="EDI X12 input" value={input} onChange={setInput} /><OutputBox label="JSON output" value={output} /></div></ToolPanel>
 }
 
 function UuidTool() {
@@ -995,6 +1101,57 @@ function parseCsv(input: string) {
 function csvToObjects(input: string) {
   const [header = [], ...rows] = parseCsv(input)
   return rows.map((row) => Object.fromEntries(header.map((key, index) => [key, row[index] ?? ''])))
+}
+
+function parseEdi(input: string): { status: Status; segments: { tag: string; elements: string[] }[] } {
+  const delimiter = input.includes('~') ? '~' : '\n'
+  const segments = input
+    .split(delimiter)
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+    .map((segment) => {
+      const [tag = '', ...elements] = segment.split('*')
+      return { tag: tag.trim().toUpperCase(), elements }
+    })
+
+  if (!segments.length) return { status: { tone: 'info', text: 'Paste EDI X12 content to parse' }, segments }
+  const hasTransaction = segments.some((segment) => segment.tag === 'ST') && segments.some((segment) => segment.tag === 'SE')
+  const hasEnvelope = segments.some((segment) => segment.tag === 'ISA') && segments.some((segment) => segment.tag === 'IEA')
+  const tone = hasTransaction ? 'ok' : 'warn'
+  const envelopeText = hasEnvelope ? ' with interchange envelope' : ''
+  return { status: { tone, text: `${segments.length} segments parsed${envelopeText}${hasTransaction ? '' : '. ST/SE transaction envelope not found'}` }, segments }
+}
+
+function formatEdi(input: string) {
+  return parseEdi(input).segments.map((segment) => `${[segment.tag, ...segment.elements].join('*')}~`).join('\n')
+}
+
+function getEdiSegmentName(tag: string) {
+  const names: Record<string, string> = {
+    ISA: 'Interchange Control Header',
+    IEA: 'Interchange Control Trailer',
+    GS: 'Functional Group Header',
+    GE: 'Functional Group Trailer',
+    ST: 'Transaction Set Header',
+    SE: 'Transaction Set Trailer',
+    BEG: 'Beginning Segment for Purchase Order',
+    BIG: 'Beginning Segment for Invoice',
+    BHT: 'Beginning of Hierarchical Transaction',
+    NM1: 'Individual or Organizational Name',
+    N1: 'Name',
+    N3: 'Address Information',
+    N4: 'Geographic Location',
+    REF: 'Reference Information',
+    DTM: 'Date/Time Reference',
+    HL: 'Hierarchical Level',
+    CLM: 'Claim Information',
+    LX: 'Assigned Number',
+    SV1: 'Professional Service',
+    PO1: 'Purchase Order Baseline Item Data',
+    PID: 'Product/Item Description',
+    CTT: 'Transaction Totals',
+  }
+  return names[tag] ?? 'EDI Segment'
 }
 
 function jsonToCsv(value: unknown) {
