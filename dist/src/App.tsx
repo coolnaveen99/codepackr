@@ -210,7 +210,7 @@ function App() {
             <h1>{currentTool.name}</h1>
             <p className="intro">{currentTool.description}. All processing runs locally in your browser.</p>
           </div>
-          <div className="hero-count"><strong>{tools.length}</strong><span>tools converted from dist</span></div>
+          <div className="hero-count"><strong>25+<i aria-hidden="true" className="count-light" /></strong><span>tools available</span></div>
         </section>
 
         <section className="layout">
