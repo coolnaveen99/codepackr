@@ -841,7 +841,7 @@ function ContactTool() {
   const [email, setEmail] = useState('')
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
-  const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Powered by Formspree. Your message goes directly to our inbox.' })
+  const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Your message is sent securely to our team.' })
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
 
@@ -886,8 +886,8 @@ function ContactTool() {
       {sent ? <div className="success-card"><strong>Message sent!</strong><span>Thank you for reaching out. We will get back to you within 24-48 hours.</span></div> : null}
       <form className="contact-form" onSubmit={submitContact}>
         <div className="contact-grid">
-          <label className="field"><span>Your Name *</span><input required value={name} onChange={(event) => setName(event.target.value)} placeholder="John Doe" /></label>
-          <label className="field"><span>Email Address *</span><input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="john@example.com" /></label>
+          <label className="field"><span>Your Name *</span><input required value={name} onChange={(event) => setName(event.target.value)} placeholder="Kumar" /></label>
+          <label className="field"><span>Email Address *</span><input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="kumar@example.com" /></label>
           <label className="field"><span>Subject *</span><select required value={subject} onChange={(event) => setSubject(event.target.value)}><option value="">Select a topic...</option><option value="bug">Bug Report</option><option value="feature">Feature / Tool Request</option><option value="feedback">General Feedback</option><option value="other">Other</option></select></label>
           <TextareaBox label="Message *" value={message} onChange={setMessage} placeholder="Describe your bug, suggestion, or feedback..." />
         </div>
