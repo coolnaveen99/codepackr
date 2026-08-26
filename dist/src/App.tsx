@@ -1058,6 +1058,7 @@ function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Something went wrong'
 }
 
+
 function copyToClipboard(value: string) {
   navigator.clipboard?.writeText(value)
 }
