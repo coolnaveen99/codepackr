@@ -138,11 +138,11 @@ function updateSeo(tool: Tool | null) {
   const title = tool ? `${tool.name} - Codepackr` : 'Codepackr - Free Online Developer Tools'
   const description = tool
     ? `${tool.description}. Free online ${tool.name.toLowerCase()} from Codepackr. Runs locally in your browser.`
-    : 'Free online developer tools for formatting, validating, encoding, converting, and inspecting data locally in your browser.'
+    : 'Free online developer tools for formatting, validating, encoding, converting, and inspecting JSON, HTML, CSS, SQL, XML, YAML, CSV, and EDI data in your browser.'
   const canonical = `${siteUrl}${tool ? getToolPath(tool.id) : '/'}`
   const keywords = tool
     ? `${tool.name.toLowerCase()}, ${tool.category.toLowerCase()}, codepackr, developer tools, online tools`
-    : 'developer tools, json formatter, sql formatter, yaml formatter, diff checker, base64 encoder, qr code generator, password generator, edi tools'
+    : 'online developer tools, JSON formatter, JSON validator, HTML formatter, CSS formatter, SQL formatter, XML formatter, YAML formatter, Base64 encoder, regex tester, data converter, EDI tools'
 
   document.title = title
   upsertMeta('name', 'description', description)
@@ -163,6 +163,8 @@ function updateSeo(tool: Tool | null) {
     name: tool ? tool.name : 'Codepackr',
     url: canonical,
     description,
+    isAccessibleForFree: true,
+    publisher: { '@type': 'Organization', name: 'Codepackr', url: siteUrl },
     applicationCategory: tool ? 'DeveloperApplication' : undefined,
     operatingSystem: tool ? 'Web' : undefined,
   })
@@ -244,12 +246,12 @@ function App() {
           <nav className="main-nav" aria-label="Tool categories">
             {categories.map((category) => (
               <div className="nav-item" key={category.name}>
-                <button type="button">{category.name} <span className="nav-arrow">v</span></button>
+                <a href={`/#${category.name.toLowerCase()}`}>{category.name} <span className="nav-arrow">v</span></a>
                 <div className="nav-dropdown">
                   {category.tools.map((tool) => (
-                    <button className={activeTool === tool.id ? 'active' : ''} key={tool.id} onClick={() => selectTool(tool.id)} type="button">
+                    <a className={activeTool === tool.id ? 'active' : ''} href={getToolPath(tool.id)} key={tool.id} onClick={(event) => { event.preventDefault(); selectTool(tool.id) }}>
                       <span className="dd-icon">{tool.icon}</span>{tool.name}
-                    </button>
+                    </a>
                   ))}
                 </div>
               </div>
