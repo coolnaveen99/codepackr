@@ -134,6 +134,11 @@ function getToolPath(toolId: ToolId) {
   return `/${toolId}.html`
 }
 
+// Lets the browser handle new-tab/middle clicks while keeping SPA routing for plain clicks.
+function isPlainClick(event: React.MouseEvent) {
+  return !event.defaultPrevented && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey
+}
+
 function updateSeo(tool: Tool | null) {
   const title = tool ? `${tool.name} - Codepackr` : 'Codepackr - Free Online Developer Tools'
   const description = tool
@@ -236,20 +241,25 @@ function App() {
     <div className={dark ? 'app dark' : 'app'}>
       <header className="site-header">
         <div className="header-inner">
-          <button className="logo" onClick={selectHome}>
+          <a className="logo" href="/" onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); selectHome() }}>
             <span className="logo-mark">{'{ }'}</span>
             <span className="logo-text">Code</span>
             <span className="logo-pack">packr</span>
-          </button>
+          </a>
           <nav className="main-nav" aria-label="Tool categories">
             {categories.map((category) => (
               <div className="nav-item" key={category.name}>
                 <button type="button">{category.name} <span className="nav-arrow">v</span></button>
                 <div className="nav-dropdown">
                   {category.tools.map((tool) => (
-                    <button className={activeTool === tool.id ? 'active' : ''} key={tool.id} onClick={() => selectTool(tool.id)} type="button">
+                    <a
+                      className={activeTool === tool.id ? 'active' : ''}
+                      href={getToolPath(tool.id)}
+                      key={tool.id}
+                      onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); selectTool(tool.id) }}
+                    >
                       <span className="dd-icon">{tool.icon}</span>{tool.name}
-                    </button>
+                    </a>
                   ))}
                 </div>
               </div>
@@ -268,7 +278,7 @@ function App() {
             <button className="theme-button" onClick={() => setDark((value) => !value)} aria-label="Toggle theme">
               {dark ? 'Light' : 'Dark'}
             </button>
-            <button className={activeTool === 'contact' ? 'contact-button active' : 'contact-button'} onClick={() => selectTool('contact')} type="button">Contact</button>
+            <a className={activeTool === 'contact' ? 'contact-button active' : 'contact-button'} href={getToolPath('contact')} onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); selectTool('contact') }}>Contact</a>
             <button className={menuOpen ? 'hamburger open' : 'hamburger'} onClick={() => setMenuOpen((value) => !value)} aria-label="Open menu" type="button">
               <span />
               <span />
@@ -282,9 +292,14 @@ function App() {
           <div key={category.name}>
             <div className="mobile-section">{category.name}</div>
             {category.tools.map((tool) => (
-              <button className={activeTool === tool.id ? 'active' : ''} key={tool.id} onClick={() => selectTool(tool.id)} type="button">
+              <a
+                className={activeTool === tool.id ? 'active' : ''}
+                href={getToolPath(tool.id)}
+                key={tool.id}
+                onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); selectTool(tool.id) }}
+              >
                 {tool.name}
-              </button>
+              </a>
             ))}
           </div>
         ))}
@@ -311,14 +326,15 @@ function App() {
                   <summary>{category.name}<span>{visibleTools.length}</span></summary>
                   <div className="tool-menu-items">
                     {visibleTools.map((tool) => (
-                    <button
+                    <a
                       className={activeTool === tool.id ? 'tool-link active' : 'tool-link'}
+                      href={getToolPath(tool.id)}
                       key={tool.id}
-                      onClick={() => selectTool(tool.id)}
+                      onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); selectTool(tool.id) }}
                     >
                       <span>{tool.icon}</span>
                       <div><strong>{tool.name}</strong><small>{tool.description}</small></div>
-                    </button>
+                    </a>
                     ))}
                   </div>
                 </details>
@@ -378,14 +394,19 @@ function HomePage({ filteredTools, onSelectTool, query }: { filteredTools: Tool[
               </div>
               <div className="index-grid">
                 {visibleTools.map((tool) => (
-                  <button className="index-card" key={tool.id} onClick={() => onSelectTool(tool.id)} type="button">
+                  <a
+                    className="index-card"
+                    href={getToolPath(tool.id)}
+                    key={tool.id}
+                    onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); onSelectTool(tool.id) }}
+                  >
                     <span className="index-icon">{tool.icon}</span>
                     <div>
                       <h3>{tool.name}</h3>
                       <p>{tool.description}</p>
                     </div>
                     <span className="index-arrow">-&gt;</span>
-                  </button>
+                  </a>
                 ))}
               </div>
             </section>
