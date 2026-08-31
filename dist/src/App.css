@@ -70,6 +70,7 @@
   border: 0;
   background: transparent;
   color: var(--ink);
+  cursor: pointer;
   font-size: 1.18rem;
   font-weight: 800;
   letter-spacing: 0;
@@ -173,7 +174,8 @@
   display: block;
 }
 
-.nav-dropdown button {
+.nav-dropdown button,
+.nav-dropdown a {
   display: block;
   width: 100%;
   min-height: auto;
@@ -189,7 +191,9 @@
 }
 
 .nav-dropdown button:hover,
-.nav-dropdown button.active {
+.nav-dropdown button.active,
+.nav-dropdown a:hover,
+.nav-dropdown a.active {
   background: var(--surface-2);
   color: var(--ink);
 }
@@ -247,6 +251,37 @@ button:hover,
 input:focus,
 select:focus,
 textarea:focus {
+  border-color: var(--brand);
+  outline: none;
+}
+
+/* Navigation controls are anchors so crawlers can follow them; mirror the button base above. */
+.logo,
+.contact-button,
+.tool-link,
+.index-card,
+.nav-dropdown a,
+.mobile-menu a {
+  text-decoration: none;
+}
+
+.contact-button,
+.tool-link,
+.index-card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 8px 13px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.contact-button:hover,
+.tool-link:hover {
   border-color: var(--brand);
   outline: none;
 }
@@ -333,7 +368,8 @@ textarea:focus {
   text-transform: uppercase;
 }
 
-.mobile-menu button {
+.mobile-menu button,
+.mobile-menu a {
   display: block;
   width: 100%;
   min-height: auto;
@@ -348,7 +384,9 @@ textarea:focus {
 }
 
 .mobile-menu button:hover,
-.mobile-menu button.active {
+.mobile-menu button.active,
+.mobile-menu a:hover,
+.mobile-menu a.active {
   background: var(--surface-2);
   color: var(--ink);
 }
