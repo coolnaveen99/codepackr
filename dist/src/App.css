@@ -817,13 +817,146 @@ h1 {
   white-space: pre-wrap;
 }
 
+.diff-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.diff-side {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
+.diff-side-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 0.75rem;
+}
+
+.diff-side-head button {
+  min-height: 26px;
+  margin-left: auto;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.diff-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-weight: 800;
+}
+
+.diff-tag.removed {
+  background: color-mix(in srgb, var(--warn) 14%, transparent);
+  color: var(--warn);
+}
+
+.diff-tag.added {
+  background: color-mix(in srgb, var(--ok) 14%, transparent);
+  color: var(--ok);
+}
+
+.diff-meta {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.seg-group {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.seg-group button {
+  border: 0;
+  border-radius: 0;
+}
+
+.seg-group button:not(.active-toggle) {
+  background: var(--surface);
+}
+
+.seg-group button + button {
+  border-left: 1px solid var(--line);
+}
+
+.diff-row.gap {
+  background: var(--surface-3);
+  color: var(--muted);
+  font-style: italic;
+}
+
+.diff-row.gap code {
+  font-size: 0.76rem;
+}
+
+.diff-scroll {
+  max-height: 420px;
+  overflow: auto;
+  font: 0.84rem/1.5 "JetBrains Mono", Consolas, monospace;
+}
+
+.diff-scroll .diff-row code {
+  overflow: visible;
+}
+
+.diff-scroll .diff-row {
+  grid-template-columns: 46px 1fr;
+}
+
+.diff-scroll.wrap .diff-row code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.diff-row.empty {
+  background: repeating-linear-gradient(
+    135deg,
+    transparent,
+    transparent 5px,
+    color-mix(in srgb, var(--line) 45%, transparent) 5px,
+    color-mix(in srgb, var(--line) 45%, transparent) 10px
+  );
+}
+
+.diff-row mark {
+  border-radius: 3px;
+  padding: 0 1px;
+  background: color-mix(in srgb, var(--brand) 30%, transparent);
+  color: inherit;
+}
+
+.diff-row.removed mark {
+  background: color-mix(in srgb, var(--warn) 32%, transparent);
+}
+
+.diff-row.added mark {
+  background: color-mix(in srgb, var(--ok) 30%, transparent);
+}
+
 .diff-row {
   display: grid;
   grid-template-columns: 34px 1fr;
   border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
 }
 
-.diff-row span {
+.diff-row > span {
   display: grid;
   place-items: center;
   color: var(--muted);
