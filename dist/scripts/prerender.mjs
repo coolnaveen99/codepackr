@@ -100,21 +100,73 @@ function escapeHtml(str) {
 }
 
 function buildHead(tool) {
-  const title = `${tool.name} - Codepackr`
-  const description = `${tool.description}. Free online ${tool.name.toLowerCase()} from Codepackr. Runs locally in your browser.`
-  const canonical = `${siteUrl}/${tool.id}.html`
-  const keywords = `${tool.name.toLowerCase()}, ${tool.category.toLowerCase()}, codepackr, developer tools, online tools`
-  const jsonLd = JSON.stringify({
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    name: tool.name,
-    url: canonical,
-    description,
-    applicationCategory: 'DeveloperApplication',
-    operatingSystem: 'Web',
-  })
+  const title = tool ? `${tool.name} - Codepackr` : 'Codepackr - Free Online Developer Tools'
+  const description = tool
+    ? `${tool.description}. Free online ${tool.name.toLowerCase()} from Codepackr. Runs locally in your browser.`
+    : 'Free online developer tools for formatting, validating, encoding, converting, and inspecting data locally in your browser. No upload, no sign-up.'
+  const canonical = tool ? `${siteUrl}/${tool.id}.html` : `${siteUrl}/`
+  const keywords = tool
+    ? `${tool.name.toLowerCase()}, ${tool.category.toLowerCase()}, codepackr, developer tools, online tools`
+    : 'developer tools, json formatter, sql formatter, yaml formatter, diff checker, base64 encoder, qr code generator, password generator, edi tools'
+  const jsonLd = JSON.stringify(
+    tool
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          name: tool.name,
+          url: canonical,
+          description,
+          applicationCategory: 'DeveloperApplication',
+          operatingSystem: 'Web',
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+        }
+      : {
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'Codepackr',
+          url: canonical,
+          description,
+        },
+  )
 
   return { title: escapeHtml(title), description: escapeHtml(description), canonical, keywords: escapeHtml(keywords), jsonLd }
+}
+
+// Static markup written into #root so crawlers get real text and crawlable
+// <a href> links without executing JavaScript. React replaces it on mount.
+function buildToolIndexHtml(activeId) {
+  return categories
+    .map((category) => {
+      const links = category.tools
+        .map((t) => {
+          const current = t.id === activeId ? ' aria-current="page"' : ''
+          return `<li><a href="/${t.id}.html"${current}><strong>${escapeHtml(t.name)}</strong> &ndash; ${escapeHtml(t.description)}</a></li>`
+        })
+        .join('')
+      return `<section><h2>${escapeHtml(category.name)}</h2><ul>${links}</ul></section>`
+    })
+    .join('')
+}
+
+function buildBody(tool) {
+  const heading = tool ? tool.name : 'Codepackr &ndash; Free Online Developer Tools'
+  const intro = tool
+    ? `${escapeHtml(tool.description)}. All processing runs locally in your browser &mdash; your data is never uploaded to a server.`
+    : 'Codepackr is a free collection of browser-based developer tools for formatting, validating, encoding, converting, and inspecting data. Every tool runs entirely in your browser &mdash; nothing is uploaded to a server.'
+  const breadcrumb = tool
+    ? `<nav aria-label="Breadcrumb"><a href="/">Home</a> / ${escapeHtml(tool.category)} / ${escapeHtml(tool.name)}</nav>`
+    : ''
+
+  return [
+    '<div id="root">',
+    '<header><a href="/">Codepackr</a></header>',
+    breadcrumb,
+    `<main><h1>${tool ? escapeHtml(heading) : heading}</h1><p>${intro}</p>`,
+    `<nav aria-label="All tools">${buildToolIndexHtml(tool?.id)}</nav>`,
+    '</main>',
+    '<footer><a href="/sitemap.xml">Sitemap</a><span>Copyright 2026 Codepackr</span></footer>',
+    '</div>',
+  ].join('')
 }
 
 function injectIntoHtml(html, tool) {
@@ -149,6 +201,8 @@ function injectIntoHtml(html, tool) {
     )
   }
 
+  out = out.replace(/<div id="root">[\s\S]*?<\/div>/, buildBody(tool))
+
   return out
 }
 
@@ -164,12 +218,26 @@ function run() {
 
   for (const tool of allTools) {
     const outPath = join(distDir, `${tool.id}.html`)
-    const html = injectIntoHtml(template, tool)
-    writeFileSync(outPath, html, 'utf-8')
+    writeFileSync(outPath, injectIntoHtml(template, tool), 'utf-8')
     count++
   }
 
-  console.log(`Prerendered ${count} tool pages with unique title/description/canonical/JSON-LD.`)
+  writeFileSync(indexPath, injectIntoHtml(template, null), 'utf-8')
+
+  const today = new Date().toISOString().slice(0, 10)
+  const urls = [
+    `  <url><loc>${siteUrl}/</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>`,
+    ...allTools.map(
+      (t) => `  <url><loc>${siteUrl}/${t.id}.html</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>`,
+    ),
+  ].join('\n')
+  writeFileSync(
+    join(distDir, 'sitemap.xml'),
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`,
+    'utf-8',
+  )
+
+  console.log(`Prerendered ${count} tool pages + homepage with unique metadata, static content, and crawlable links.`)
 }
 
 run()

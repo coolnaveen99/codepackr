@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import QRCode from 'qrcode'
 import './App.css'
 
@@ -41,6 +41,12 @@ type ToolId =
 
 type Tool = { id: ToolId; name: string; description: string; icon: string; category: string }
 type DiffLine = { type: 'common' | 'added' | 'removed'; value: string }
+type DiffPrecision = 'word' | 'char'
+type DiffSegment = { value: string; changed: boolean }
+type DiffSide = { num: number | null; value: string; type: 'common' | 'added' | 'removed' | 'empty'; segments?: DiffSegment[] }
+type DiffRow =
+  | { kind: 'row'; left: DiffSide; right: DiffSide; changed: boolean }
+  | { kind: 'gap'; count: number }
 type Status = { tone: 'ok' | 'warn' | 'info'; text: string }
 
 const categories = [
@@ -132,6 +138,11 @@ function getToolIdFromLocation(): ToolId | null {
 
 function getToolPath(toolId: ToolId) {
   return `/${toolId}.html`
+}
+
+// Lets the browser handle new-tab/middle clicks while keeping SPA routing for plain clicks.
+function isPlainClick(event: React.MouseEvent) {
+  return !event.defaultPrevented && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey
 }
 
 function updateSeo(tool: Tool | null) {
@@ -236,20 +247,25 @@ function App() {
     <div className={dark ? 'app dark' : 'app'}>
       <header className="site-header">
         <div className="header-inner">
-          <button className="logo" onClick={selectHome}>
+          <a className="logo" href="/" onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); selectHome() }}>
             <span className="logo-mark">{'{ }'}</span>
             <span className="logo-text">Code</span>
             <span className="logo-pack">packr</span>
-          </button>
+          </a>
           <nav className="main-nav" aria-label="Tool categories">
             {categories.map((category) => (
               <div className="nav-item" key={category.name}>
                 <button type="button">{category.name} <span className="nav-arrow">v</span></button>
                 <div className="nav-dropdown">
                   {category.tools.map((tool) => (
-                    <button className={activeTool === tool.id ? 'active' : ''} key={tool.id} onClick={() => selectTool(tool.id)} type="button">
+                    <a
+                      className={activeTool === tool.id ? 'active' : ''}
+                      href={getToolPath(tool.id)}
+                      key={tool.id}
+                      onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); selectTool(tool.id) }}
+                    >
                       <span className="dd-icon">{tool.icon}</span>{tool.name}
-                    </button>
+                    </a>
                   ))}
                 </div>
               </div>
@@ -268,7 +284,7 @@ function App() {
             <button className="theme-button" onClick={() => setDark((value) => !value)} aria-label="Toggle theme">
               {dark ? 'Light' : 'Dark'}
             </button>
-            <button className={activeTool === 'contact' ? 'contact-button active' : 'contact-button'} onClick={() => selectTool('contact')} type="button">Contact</button>
+            <a className={activeTool === 'contact' ? 'contact-button active' : 'contact-button'} href={getToolPath('contact')} onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); selectTool('contact') }}>Contact</a>
             <button className={menuOpen ? 'hamburger open' : 'hamburger'} onClick={() => setMenuOpen((value) => !value)} aria-label="Open menu" type="button">
               <span />
               <span />
@@ -282,9 +298,14 @@ function App() {
           <div key={category.name}>
             <div className="mobile-section">{category.name}</div>
             {category.tools.map((tool) => (
-              <button className={activeTool === tool.id ? 'active' : ''} key={tool.id} onClick={() => selectTool(tool.id)} type="button">
+              <a
+                className={activeTool === tool.id ? 'active' : ''}
+                href={getToolPath(tool.id)}
+                key={tool.id}
+                onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); selectTool(tool.id) }}
+              >
                 {tool.name}
-              </button>
+              </a>
             ))}
           </div>
         ))}
@@ -311,14 +332,15 @@ function App() {
                   <summary>{category.name}<span>{visibleTools.length}</span></summary>
                   <div className="tool-menu-items">
                     {visibleTools.map((tool) => (
-                    <button
+                    <a
                       className={activeTool === tool.id ? 'tool-link active' : 'tool-link'}
+                      href={getToolPath(tool.id)}
                       key={tool.id}
-                      onClick={() => selectTool(tool.id)}
+                      onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); selectTool(tool.id) }}
                     >
                       <span>{tool.icon}</span>
                       <div><strong>{tool.name}</strong><small>{tool.description}</small></div>
-                    </button>
+                    </a>
                     ))}
                   </div>
                 </details>
@@ -378,14 +400,19 @@ function HomePage({ filteredTools, onSelectTool, query }: { filteredTools: Tool[
               </div>
               <div className="index-grid">
                 {visibleTools.map((tool) => (
-                  <button className="index-card" key={tool.id} onClick={() => onSelectTool(tool.id)} type="button">
+                  <a
+                    className="index-card"
+                    href={getToolPath(tool.id)}
+                    key={tool.id}
+                    onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); onSelectTool(tool.id) }}
+                  >
                     <span className="index-icon">{tool.icon}</span>
                     <div>
                       <h3>{tool.name}</h3>
                       <p>{tool.description}</p>
                     </div>
                     <span className="index-arrow">-&gt;</span>
-                  </button>
+                  </a>
                 ))}
               </div>
             </section>
@@ -636,16 +663,127 @@ function DiffTool() {
   const [modified, setModified] = useState('')
   const [ignoreWhitespace, setIgnoreWhitespace] = useState(true)
   const [wrap, setWrap] = useState(true)
+  const [precision, setPrecision] = useState<DiffPrecision>('word')
+  const [hideUnchanged, setHideUnchanged] = useState(false)
   const diff = useMemo(() => buildDiff(original, modified, ignoreWhitespace), [original, modified, ignoreWhitespace])
+  const rows = useMemo(() => buildDiffRows(diff, precision), [diff, precision])
+  const visibleRows = useMemo(() => hideUnchanged ? collapseUnchanged(rows) : rows, [rows, hideUnchanged])
+  const changeIndexes = useMemo(
+    () => visibleRows.flatMap((row, index) => row.kind === 'row' && row.changed ? [index] : []),
+    [visibleRows],
+  )
   const added = diff.filter((line) => line.type === 'added').length
   const removed = diff.filter((line) => line.type === 'removed').length
+  const countLines = (value: string) => value ? value.split('\n').length : 0
+  const plural = (count: number, noun: string) => `${count} ${noun}${count === 1 ? '' : 's'}`
+
+  const leftPane = useRef<HTMLDivElement>(null)
+  const rightPane = useRef<HTMLDivElement>(null)
+  const syncing = useRef(false)
+  const cursor = useRef(-1)
+
+  const syncScroll = (source: 'left' | 'right') => () => {
+    if (syncing.current) return
+    const from = source === 'left' ? leftPane.current : rightPane.current
+    const to = source === 'left' ? rightPane.current : leftPane.current
+    if (!from || !to) return
+    // Guard against the mirrored scroll bouncing back and fighting the user.
+    syncing.current = true
+    to.scrollTop = from.scrollTop
+    to.scrollLeft = from.scrollLeft
+    requestAnimationFrame(() => { syncing.current = false })
+  }
+
+  const jumpToChange = (step: number) => {
+    if (!changeIndexes.length) return
+    const next = step === 0
+      ? 0
+      : (cursor.current + step + changeIndexes.length) % changeIndexes.length
+    cursor.current = next
+    leftPane.current?.children[changeIndexes[next]]?.scrollIntoView({ block: 'center' })
+  }
+
+  // Wrapped lines make paired rows different heights, which would drift the two panes out of alignment.
+  useLayoutEffect(() => {
+    const equalize = () => {
+      const leftRows = Array.from(leftPane.current?.children ?? []) as HTMLElement[]
+      const rightRows = Array.from(rightPane.current?.children ?? []) as HTMLElement[]
+      leftRows.forEach((row) => { row.style.minHeight = '' })
+      rightRows.forEach((row) => { row.style.minHeight = '' })
+      leftRows.forEach((row, index) => {
+        const twin = rightRows[index]
+        if (!twin) return
+        const height = `${Math.max(row.getBoundingClientRect().height, twin.getBoundingClientRect().height)}px`
+        row.style.minHeight = height
+        twin.style.minHeight = height
+      })
+    }
+
+    equalize()
+    window.addEventListener('resize', equalize)
+    return () => window.removeEventListener('resize', equalize)
+  }, [visibleRows, wrap])
 
   return (
     <ToolPanel>
-      <Actions><button className={ignoreWhitespace ? 'active-toggle' : ''} onClick={() => setIgnoreWhitespace((value) => !value)}>Ignore whitespace</button><button className={wrap ? 'active-toggle' : ''} onClick={() => setWrap((value) => !value)}>Wrap lines</button><button onClick={() => { setOriginal(''); setModified('') }}>Clear</button><span className="stat-pill">+{added} / -{removed}</span></Actions>
+      <Actions>
+        <button className={ignoreWhitespace ? 'active-toggle' : ''} onClick={() => setIgnoreWhitespace((value) => !value)}>Ignore whitespace</button>
+        <button className={wrap ? 'active-toggle' : ''} onClick={() => setWrap((value) => !value)}>Wrap lines</button>
+        <button className={hideUnchanged ? 'active-toggle' : ''} onClick={() => setHideUnchanged((value) => !value)}>Hide unchanged</button>
+        <span className="seg-group" role="group" aria-label="Diff precision">
+          <button className={precision === 'word' ? 'active-toggle' : ''} onClick={() => setPrecision('word')}>Word</button>
+          <button className={precision === 'char' ? 'active-toggle' : ''} onClick={() => setPrecision('char')}>Char</button>
+        </span>
+        <button disabled={!changeIndexes.length} onClick={() => jumpToChange(0)}>First change</button>
+        <button disabled={!changeIndexes.length} onClick={() => jumpToChange(-1)}>Prev</button>
+        <button disabled={!changeIndexes.length} onClick={() => jumpToChange(1)}>Next</button>
+        <button onClick={() => { setOriginal(''); setModified('') }}>Clear</button>
+        <span className="stat-pill">+{added} / -{removed}</span>
+      </Actions>
       <div className="workbench"><TextareaBox label="Original" value={original} onChange={setOriginal} /><TextareaBox label="Modified" value={modified} onChange={setModified} /></div>
-      <div className={wrap ? 'diff-lines wrap' : 'diff-lines'}>{diff.map((line, index) => <div className={`diff-row ${line.type}`} key={`${line.type}-${index}`}><span>{line.type === 'added' ? '+' : line.type === 'removed' ? '-' : ' '}</span><code>{line.value || ' '}</code></div>)}</div>
+      <div className="diff-split">
+        <section className="diff-side">
+          <header className="diff-side-head">
+            <span className="diff-tag removed">{plural(removed, 'removal')}</span>
+            <span className="diff-meta">{plural(countLines(original), 'line')}</span>
+            <button onClick={() => copyToClipboard(original)}>Copy</button>
+          </header>
+          <div className={wrap ? 'diff-scroll wrap' : 'diff-scroll'} onScroll={syncScroll('left')} ref={leftPane}>
+            {visibleRows.map((row, index) => <DiffSideRow key={`left-${index}`} row={row} side="left" />)}
+          </div>
+        </section>
+        <section className="diff-side">
+          <header className="diff-side-head">
+            <span className="diff-tag added">{plural(added, 'addition')}</span>
+            <span className="diff-meta">{plural(countLines(modified), 'line')}</span>
+            <button onClick={() => copyToClipboard(modified)}>Copy</button>
+          </header>
+          <div className={wrap ? 'diff-scroll wrap' : 'diff-scroll'} onScroll={syncScroll('right')} ref={rightPane}>
+            {visibleRows.map((row, index) => <DiffSideRow key={`right-${index}`} row={row} side="right" />)}
+          </div>
+        </section>
+      </div>
     </ToolPanel>
+  )
+}
+
+function DiffSideRow({ row, side }: { row: DiffRow; side: 'left' | 'right' }) {
+  if (row.kind === 'gap') {
+    return <div className="diff-row gap"><span>&#8942;</span><code>{row.count} unchanged line{row.count === 1 ? '' : 's'}</code></div>
+  }
+
+  const cell = side === 'left' ? row.left : row.right
+  return (
+    <div className={`diff-row ${cell.type}`}>
+      <span>{cell.num ?? ''}</span>
+      <code>
+        {cell.segments
+          ? cell.segments.map((segment, index) => segment.changed
+            ? <mark key={index}>{segment.value}</mark>
+            : <span key={index}>{segment.value}</span>)
+          : cell.value || ' '}
+      </code>
+    </div>
   )
 }
 
@@ -944,6 +1082,128 @@ function buildDiff(original: string, modified: string, ignoreWhitespace: boolean
     }
   }
   return result
+}
+
+// Pairs the linear diff into aligned left/right rows so both panes stay line-for-line in sync.
+function buildDiffRows(diff: DiffLine[], precision: DiffPrecision): DiffRow[] {
+  const rows: DiffRow[] = []
+  const blank: DiffSide = { num: null, value: '', type: 'empty' }
+  let leftNum = 0
+  let rightNum = 0
+  let index = 0
+
+  while (index < diff.length) {
+    if (diff[index].type === 'common') {
+      leftNum += 1
+      rightNum += 1
+      rows.push({
+        kind: 'row',
+        changed: false,
+        left: { num: leftNum, value: diff[index].value, type: 'common' },
+        right: { num: rightNum, value: diff[index].value, type: 'common' },
+      })
+      index += 1
+      continue
+    }
+
+    const removedLines: string[] = []
+    const addedLines: string[] = []
+    while (index < diff.length && diff[index].type !== 'common') {
+      if (diff[index].type === 'removed') removedLines.push(diff[index].value)
+      else addedLines.push(diff[index].value)
+      index += 1
+    }
+
+    for (let offset = 0; offset < Math.max(removedLines.length, addedLines.length); offset += 1) {
+      const leftValue = removedLines[offset]
+      const rightValue = addedLines[offset]
+      const paired = leftValue !== undefined && rightValue !== undefined
+      if (leftValue !== undefined) leftNum += 1
+      if (rightValue !== undefined) rightNum += 1
+      rows.push({
+        kind: 'row',
+        changed: true,
+        left: leftValue === undefined
+          ? blank
+          : { num: leftNum, value: leftValue, type: 'removed', segments: paired ? inlineSegments(leftValue, rightValue, precision) : undefined },
+        right: rightValue === undefined
+          ? blank
+          : { num: rightNum, value: rightValue, type: 'added', segments: paired ? inlineSegments(rightValue, leftValue, precision) : undefined },
+      })
+    }
+  }
+
+  return rows
+}
+
+const DIFF_CONTEXT_LINES = 3
+
+function collapseUnchanged(rows: DiffRow[]): DiffRow[] {
+  const keep = rows.map((row) => row.kind === 'row' && row.changed)
+  rows.forEach((row, index) => {
+    if (row.kind !== 'row' || !row.changed) return
+    for (let offset = 1; offset <= DIFF_CONTEXT_LINES; offset += 1) {
+      if (index - offset >= 0) keep[index - offset] = true
+      if (index + offset < rows.length) keep[index + offset] = true
+    }
+  })
+
+  const output: DiffRow[] = []
+  let skipped = 0
+  rows.forEach((row, index) => {
+    if (keep[index]) {
+      if (skipped) {
+        output.push({ kind: 'gap', count: skipped })
+        skipped = 0
+      }
+      output.push(row)
+    } else {
+      skipped += 1
+    }
+  })
+  if (skipped) output.push({ kind: 'gap', count: skipped })
+  return output
+}
+
+function inlineSegments(value: string, other: string, precision: DiffPrecision): DiffSegment[] {
+  const split = (input: string) => precision === 'char' ? Array.from(input) : input.match(/\s+|\S+/g) ?? []
+  const tokens = split(value)
+  const otherTokens = split(other)
+  if (!tokens.length) return []
+  if (tokens.length * otherTokens.length > 40000) return [{ value, changed: true }]
+
+  const table = Array.from({ length: tokens.length + 1 }, () => Array<number>(otherTokens.length + 1).fill(0))
+  for (let row = 1; row <= tokens.length; row += 1) {
+    for (let column = 1; column <= otherTokens.length; column += 1) {
+      table[row][column] = tokens[row - 1] === otherTokens[column - 1]
+        ? table[row - 1][column - 1] + 1
+        : Math.max(table[row - 1][column], table[row][column - 1])
+    }
+  }
+
+  const shared = Array<boolean>(tokens.length).fill(false)
+  let row = tokens.length
+  let column = otherTokens.length
+  while (row && column) {
+    if (tokens[row - 1] === otherTokens[column - 1]) {
+      shared[row - 1] = true
+      row -= 1
+      column -= 1
+    } else if (table[row - 1][column] >= table[row][column - 1]) {
+      row -= 1
+    } else {
+      column -= 1
+    }
+  }
+
+  const segments: DiffSegment[] = []
+  tokens.forEach((token, position) => {
+    const changed = !shared[position]
+    const last = segments[segments.length - 1]
+    if (last && last.changed === changed) last.value += token
+    else segments.push({ value: token, changed })
+  })
+  return segments
 }
 
 function formatMarkup(value: string) {
