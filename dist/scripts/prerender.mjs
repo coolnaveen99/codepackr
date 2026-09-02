@@ -39,6 +39,8 @@ const categories = [
       { id: 'html-entity', name: 'HTML Entity Encoder', description: 'Encode and decode HTML entities' },
       { id: 'hash-generator', name: 'Hash Generator', description: 'Generate SHA hashes in the browser' },
       { id: 'jwt-decoder', name: 'JWT Decoder', description: 'Decode and inspect JWT tokens' },
+      { id: 'jwt-encoder', name: 'JWT Encoder', description: 'Build and sign HS256 JSON Web Tokens' },
+      { id: 'base64-image', name: 'Base64 Image', description: 'Encode images as Base64 or decode data URLs' },
     ],
   },
   {
@@ -50,6 +52,8 @@ const categories = [
       { id: 'json-path-tester', name: 'JSON Path Tester', description: 'Query JSON with simple JSONPath expressions' },
       { id: 'xsd-validator', name: 'XSD Validator', description: 'Check XML syntax and schema root hints' },
       { id: 'csv-viewer', name: 'CSV Viewer', description: 'View and format CSV as a table' },
+      { id: 'json-structural-diff', name: 'Structural JSON Diff', description: 'Compare JSON by keys and values' },
+      { id: 'dotenv-formatter', name: 'dotenv Formatter', description: 'Format and validate .env files' },
     ],
   },
   {
@@ -58,6 +62,14 @@ const categories = [
       { id: 'json-xml-converter', name: 'JSON to XML Converter', description: 'Convert JSON and XML both ways' },
       { id: 'json-csv-converter', name: 'JSON to CSV Converter', description: 'Convert JSON arrays and CSV both ways' },
       { id: 'csv-xml-converter', name: 'CSV to XML Converter', description: 'Convert CSV records and XML both ways' },
+      { id: 'case-converter', name: 'Case Converter', description: 'Convert text between common naming conventions' },
+      { id: 'yaml-json-converter', name: 'YAML to JSON Converter', description: 'Convert YAML and JSON in either direction' },
+      { id: 'number-base-converter', name: 'Number Base Converter', description: 'Convert binary, octal, decimal, and hexadecimal' },
+      { id: 'markdown-html-converter', name: 'Markdown to HTML', description: 'Convert Markdown into raw HTML' },
+      { id: 'html-markdown-converter', name: 'HTML to Markdown', description: 'Convert HTML markup into Markdown' },
+      { id: 'curl-code-converter', name: 'cURL to Code', description: 'Convert cURL commands to fetch, Axios, or Python' },
+      { id: 'image-resizer', name: 'Image Resizer', description: 'Resize and compress images in your browser' },
+      { id: 'favicon-generator', name: 'Favicon Generator', description: 'Generate ICO and common PNG favicon sizes' },
     ],
   },
   {
@@ -80,6 +92,9 @@ const categories = [
       { id: 'color-converter', name: 'Color Converter', description: 'Convert HEX, RGB, and HSL colors' },
       { id: 'timestamp', name: 'Timestamp Converter', description: 'Convert Unix timestamps and dates' },
       { id: 'cron-expression', name: 'Cron Expression', description: 'Build and explain cron schedules' },
+      { id: 'slugify', name: 'Slugify Tool', description: 'Turn text into a clean URL-safe slug' },
+      { id: 'http-status-codes', name: 'HTTP Status Code Lookup', description: 'Search HTTP codes, names, and descriptions' },
+      { id: 'mock-json-generator', name: 'Mock JSON Generator', description: 'Generate fake records from a simple schema' },
       { id: 'calculator', name: 'Calculator', description: 'Scientific calculator for quick math' },
     ],
   },
@@ -100,7 +115,7 @@ function escapeHtml(str) {
 }
 
 function buildHead(tool) {
-  const title = tool ? `${tool.name} - Codepackr` : 'Codepackr - Free Online Developer Tools'
+  const title = tool ? `Free ${tool.name} Online | Codepackr` : 'Codepackr - Free Online Developer Tools'
   const description = tool
     ? `${tool.description}. Free online ${tool.name.toLowerCase()} from Codepackr. Runs locally in your browser.`
     : 'Free online developer tools for formatting, validating, encoding, converting, and inspecting data locally in your browser. No upload, no sign-up.'
@@ -156,12 +171,16 @@ function buildBody(tool) {
   const breadcrumb = tool
     ? `<nav aria-label="Breadcrumb"><a href="/">Home</a> / ${escapeHtml(tool.category)} / ${escapeHtml(tool.name)}</nav>`
     : ''
+  const toolGuide = tool
+    ? `<section><h2>How to use ${escapeHtml(tool.name)}</h2><ol><li>Enter or paste the content you want to process.</li><li>Choose the relevant action or options.</li><li>Review and copy or download the result.</li></ol><h2>${escapeHtml(tool.name)} FAQ</h2><h3>Is this tool free?</h3><p>Yes. ${escapeHtml(tool.name)} is free and requires no account.</p><h3>Is my data uploaded?</h3><p>No. Processing runs locally in your browser.</p></section>`
+    : ''
 
   return [
     '<div id="root">',
     '<header><a href="/">Codepackr</a></header>',
     breadcrumb,
     `<main><h1>${tool ? escapeHtml(heading) : heading}</h1><p>${intro}</p>`,
+    toolGuide,
     `<nav aria-label="All tools">${buildToolIndexHtml(tool?.id)}</nav>`,
     '</main>',
     '<footer><a href="/sitemap.xml">Sitemap</a><span>Copyright 2026 Codepackr</span></footer>',
