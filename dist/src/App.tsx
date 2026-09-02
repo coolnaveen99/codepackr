@@ -1,4 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { CronExpressionParser } from 'cron-parser'
+import { dump as dumpYaml, load as loadYaml } from 'js-yaml'
+import JSZip from 'jszip'
 import QRCode from 'qrcode'
 import './App.css'
 
@@ -15,6 +18,8 @@ type ToolId =
   | 'html-entity'
   | 'hash-generator'
   | 'jwt-decoder'
+  | 'jwt-encoder'
+  | 'base64-image'
   | 'diff-checker'
   | 'regex-tester'
   | 'json-validator'
@@ -24,6 +29,19 @@ type ToolId =
   | 'json-xml-converter'
   | 'json-csv-converter'
   | 'csv-xml-converter'
+  | 'case-converter'
+  | 'yaml-json-converter'
+  | 'number-base-converter'
+  | 'markdown-html-converter'
+  | 'html-markdown-converter'
+  | 'curl-code-converter'
+  | 'image-resizer'
+  | 'favicon-generator'
+  | 'slugify'
+  | 'http-status-codes'
+  | 'json-structural-diff'
+  | 'mock-json-generator'
+  | 'dotenv-formatter'
   | 'edi-x12-formatter'
   | 'edi-segment-viewer'
   | 'edi-json-converter'
@@ -70,6 +88,8 @@ const categories = [
       { id: 'html-entity', name: 'HTML Entity Encoder', description: 'Encode and decode HTML entities', icon: '&lt;' },
       { id: 'hash-generator', name: 'Hash Generator', description: 'Generate SHA hashes in the browser', icon: '#!' },
       { id: 'jwt-decoder', name: 'JWT Decoder', description: 'Decode and inspect JWT tokens', icon: 'JWT' },
+      { id: 'jwt-encoder', name: 'JWT Encoder', description: 'Build and sign HS256 JSON Web Tokens', icon: 'JWT+' },
+      { id: 'base64-image', name: 'Base64 Image', description: 'Encode images as Base64 or decode data URLs', icon: 'IMG' },
     ],
   },
   {
@@ -81,6 +101,8 @@ const categories = [
       { id: 'json-path-tester', name: 'JSON Path Tester', description: 'Query JSON with simple JSONPath expressions', icon: '$.' },
       { id: 'xsd-validator', name: 'XSD Validator', description: 'Check XML syntax and schema root hints', icon: 'XSD' },
       { id: 'csv-viewer', name: 'CSV Viewer', description: 'View and format CSV as a table', icon: 'CSV' },
+      { id: 'json-structural-diff', name: 'Structural JSON Diff', description: 'Compare JSON by keys and values', icon: 'J!=' },
+      { id: 'dotenv-formatter', name: 'dotenv Formatter', description: 'Format and validate .env files', icon: 'ENV' },
     ],
   },
   {
@@ -89,6 +111,14 @@ const categories = [
       { id: 'json-xml-converter', name: 'JSON to XML Converter', description: 'Convert JSON and XML both ways', icon: 'JX' },
       { id: 'json-csv-converter', name: 'JSON to CSV Converter', description: 'Convert JSON arrays and CSV both ways', icon: 'JC' },
       { id: 'csv-xml-converter', name: 'CSV to XML Converter', description: 'Convert CSV records and XML both ways', icon: 'CX' },
+      { id: 'case-converter', name: 'Case Converter', description: 'Convert text between common naming conventions', icon: 'Aa' },
+      { id: 'yaml-json-converter', name: 'YAML to JSON Converter', description: 'Convert YAML and JSON in either direction', icon: 'YJ' },
+      { id: 'number-base-converter', name: 'Number Base Converter', description: 'Convert binary, octal, decimal, and hexadecimal', icon: '01' },
+      { id: 'markdown-html-converter', name: 'Markdown to HTML', description: 'Convert Markdown into raw HTML', icon: 'M>H' },
+      { id: 'html-markdown-converter', name: 'HTML to Markdown', description: 'Convert HTML markup into Markdown', icon: 'H>M' },
+      { id: 'curl-code-converter', name: 'cURL to Code', description: 'Convert cURL commands to fetch, Axios, or Python', icon: 'cURL' },
+      { id: 'image-resizer', name: 'Image Resizer', description: 'Resize and compress images in your browser', icon: 'RSZ' },
+      { id: 'favicon-generator', name: 'Favicon Generator', description: 'Generate ICO and common PNG favicon sizes', icon: 'ICO' },
     ],
   },
   {
@@ -111,6 +141,9 @@ const categories = [
       { id: 'color-converter', name: 'Color Converter', description: 'Convert HEX, RGB, and HSL colors', icon: 'RGB' },
       { id: 'timestamp', name: 'Timestamp Converter', description: 'Convert Unix timestamps and dates', icon: 'TS' },
       { id: 'cron-expression', name: 'Cron Expression', description: 'Build and explain cron schedules', icon: 'CR' },
+      { id: 'slugify', name: 'Slugify Tool', description: 'Turn text into a clean URL-safe slug', icon: '/-' },
+      { id: 'http-status-codes', name: 'HTTP Status Code Lookup', description: 'Search HTTP codes, names, and descriptions', icon: 'HTTP' },
+      { id: 'mock-json-generator', name: 'Mock JSON Generator', description: 'Generate fake records from a simple schema', icon: 'FAKE' },
       { id: 'calculator', name: 'Calculator', description: 'Scientific calculator for quick math', icon: 'CAL' },
     ],
   },
@@ -146,7 +179,7 @@ function isPlainClick(event: React.MouseEvent) {
 }
 
 function updateSeo(tool: Tool | null) {
-  const title = tool ? `${tool.name} - Codepackr` : 'Codepackr - Free Online Developer Tools'
+  const title = tool ? `Free ${tool.name} Online | Codepackr` : 'Codepackr - Free Online Developer Tools'
   const description = tool
     ? `${tool.description}. Free online ${tool.name.toLowerCase()} from Codepackr. Runs locally in your browser.`
     : 'Free online developer tools for formatting, validating, encoding, converting, and inspecting data locally in your browser.'
@@ -176,6 +209,7 @@ function updateSeo(tool: Tool | null) {
     description,
     applicationCategory: tool ? 'DeveloperApplication' : undefined,
     operatingSystem: tool ? 'Web' : undefined,
+    offers: tool ? { '@type': 'Offer', price: '0', priceCurrency: 'USD' } : undefined,
   })
 }
 
@@ -213,8 +247,16 @@ function upsertJsonLd(data: Record<string, unknown>) {
 function App() {
   const [activeTool, setActiveTool] = useState<ToolId | null>(null)
   const [query, setQuery] = useState('')
-  const [dark, setDark] = useState(() => window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false)
+  const [dark, setDark] = useState(() => {
+    const savedTheme = localStorage.getItem('codepackr-theme')
+    return savedTheme ? savedTheme === 'dark' : window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
+  })
+  const [recentToolIds, setRecentToolIds] = useState<ToolId[]>(() => {
+    try { return JSON.parse(localStorage.getItem('codepackr-recent') ?? '[]') }
+    catch { return [] }
+  })
   const [menuOpen, setMenuOpen] = useState(false)
+  const searchRef = useRef<HTMLInputElement>(null)
   const currentTool = activeTool ? routeTools.find((tool) => tool.id === activeTool) ?? null : null
   const filteredTools = tools.filter((tool) =>
     `${tool.name} ${tool.description} ${tool.category}`.toLowerCase().includes(query.toLowerCase()),
@@ -231,6 +273,10 @@ function App() {
     updateSeo(currentTool)
   }, [currentTool])
 
+  useEffect(() => {
+    localStorage.setItem('codepackr-theme', dark ? 'dark' : 'light')
+  }, [dark])
+
   const selectHome = () => {
     setActiveTool(null)
     setMenuOpen(false)
@@ -241,7 +287,27 @@ function App() {
     setActiveTool(toolId)
     setMenuOpen(false)
     window.history.pushState(null, '', getToolPath(toolId))
+    setRecentToolIds((current) => {
+      const next = [toolId, ...current.filter((id) => id !== toolId)].slice(0, 8)
+      localStorage.setItem('codepackr-recent', JSON.stringify(next))
+      return next
+    })
   }
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        if (activeTool) selectHome()
+        requestAnimationFrame(() => searchRef.current?.focus())
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+        document.querySelector<HTMLButtonElement>('.tool-shell .primary:not(:disabled)')?.click()
+      }
+    }
+    window.addEventListener('keydown', handleShortcut)
+    return () => window.removeEventListener('keydown', handleShortcut)
+  })
 
   return (
     <div className={dark ? 'app dark' : 'app'}>
@@ -276,6 +342,7 @@ function App() {
               <input
                 aria-label="Search tools"
                 className="search"
+                ref={searchRef}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search tools..."
                 value={query}
@@ -309,17 +376,18 @@ function App() {
             ))}
           </div>
         ))}
+        <a className={activeTool === 'contact' ? 'active' : ''} href={getToolPath('contact')} onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); selectTool('contact') }}>Contact</a>
       </div>
 
       <main id="top" className="page">
-        {!currentTool ? <HomePage filteredTools={filteredTools} onSelectTool={selectTool} query={query} /> : currentTool.id === 'contact' ? <ContactPage /> : <>
+        {!currentTool ? <HomePage filteredTools={filteredTools} onSelectTool={selectTool} query={query} recentToolIds={recentToolIds} /> : currentTool.id === 'contact' ? <ContactPage /> : <>
         <section className="hero">
           <div>
             <div className="breadcrumb">Home / {currentTool.category} / {currentTool.name}</div>
             <h1>{currentTool.name}</h1>
             <p className="intro">{currentTool.description}. All processing runs locally in your browser.</p>
           </div>
-          <div className="hero-count"><strong>25+<i aria-hidden="true" className="count-light" /></strong><span>tools available</span></div>
+          <div className="hero-count"><strong>{tools.length}<i aria-hidden="true" className="count-light" /></strong><span>tools available</span></div>
         </section>
 
         <section className="layout">
@@ -350,6 +418,7 @@ function App() {
 
           <section className="tool-shell">
             <ToolRenderer tool={currentTool} />
+            <ToolInfo tool={currentTool} onSelectTool={selectTool} />
           </section>
         </section>
         </>}
@@ -376,7 +445,8 @@ function ContactPage() {
   )
 }
 
-function HomePage({ filteredTools, onSelectTool, query }: { filteredTools: Tool[]; onSelectTool: (toolId: ToolId) => void; query: string }) {
+function HomePage({ filteredTools, onSelectTool, query, recentToolIds }: { filteredTools: Tool[]; onSelectTool: (toolId: ToolId) => void; query: string; recentToolIds: ToolId[] }) {
+  const recentTools = recentToolIds.flatMap((id) => tools.find((tool) => tool.id === id) ?? [])
   return (
     <>
       <section className="home-hero">
@@ -385,10 +455,11 @@ function HomePage({ filteredTools, onSelectTool, query }: { filteredTools: Tool[
           <h1>Codepackr</h1>
           <p className="intro">Everything a developer needs, packed in one place. Format, validate, encode, convert, and inspect data locally in your browser.</p>
         </div>
-        <div className="hero-count"><strong>25+<i aria-hidden="true" className="count-light" /></strong><span>tools available</span></div>
+        <div className="hero-count"><strong>{tools.length}<i aria-hidden="true" className="count-light" /></strong><span>tools available</span></div>
       </section>
 
       <section className="index-menu" aria-label="Tool index">
+        {!query && recentTools.length > 0 && <section className="index-section recent-tools"><div className="section-heading"><h2>Recently used</h2><span>{recentTools.length} tools</span></div><div className="recent-row">{recentTools.map((tool) => <a href={getToolPath(tool.id)} key={tool.id} onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); onSelectTool(tool.id) }}><span>{tool.icon}</span>{tool.name}</a>)}</div></section>}
         {categories.map((category) => {
           const visibleTools = category.tools.filter((tool) => filteredTools.some((match) => match.id === tool.id))
           if (!visibleTools.length) return null
@@ -424,6 +495,11 @@ function HomePage({ filteredTools, onSelectTool, query }: { filteredTools: Tool[
   )
 }
 
+function ToolInfo({ tool, onSelectTool }: { tool: Tool; onSelectTool: (toolId: ToolId) => void }) {
+  const related = tools.filter((candidate) => candidate.id !== tool.id && candidate.category === tool.category).slice(0, 4)
+  return <section className="tool-info"><div className="info-heading"><h2>How to use {tool.name}</h2><button onClick={() => copyToClipboard(window.location.href)}>Copy page link</button></div><ol><li>Enter or paste the content you want to process.</li><li>Choose the relevant action or options for {tool.name.toLowerCase()}.</li><li>Review the result and any validation message.</li><li>Use the copy or download action to save the result.</li></ol><h2>Frequently asked questions</h2><details><summary>Is {tool.name} free?</summary><p>Yes. This tool is free to use without an account.</p></details><details><summary>Does Codepackr upload my data?</summary><p>No. {tool.name} processes your input locally in your browser.</p></details>{related.length > 0 && <><h2>Related tools</h2><div className="related-tools">{related.map((candidate) => <a href={getToolPath(candidate.id)} key={candidate.id} onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); onSelectTool(candidate.id) }}>{candidate.name}<span>-&gt;</span></a>)}</div></>}</section>
+}
+
 function ToolRenderer({ tool }: { tool: Tool }) {
   switch (tool.id) {
     case 'json-formatter':
@@ -450,6 +526,10 @@ function ToolRenderer({ tool }: { tool: Tool }) {
       return <HashTool />
     case 'jwt-decoder':
       return <JwtTool />
+    case 'jwt-encoder':
+      return <JwtEncoder />
+    case 'base64-image':
+      return <Base64ImageTool />
     case 'diff-checker':
       return <DiffTool />
     case 'regex-tester':
@@ -468,6 +548,28 @@ function ToolRenderer({ tool }: { tool: Tool }) {
       return <JsonCsvConverter />
     case 'csv-xml-converter':
       return <CsvXmlConverter />
+    case 'case-converter':
+      return <CaseConverter />
+    case 'yaml-json-converter':
+      return <YamlJsonConverter />
+    case 'number-base-converter':
+      return <NumberBaseConverter />
+    case 'markdown-html-converter':
+      return <MarkdownHtmlConverter />
+    case 'html-markdown-converter':
+      return <HtmlMarkdownConverter />
+    case 'json-structural-diff':
+      return <JsonStructuralDiff />
+    case 'mock-json-generator':
+      return <MockJsonGenerator />
+    case 'curl-code-converter':
+      return <CurlCodeConverter />
+    case 'dotenv-formatter':
+      return <DotenvFormatter />
+    case 'image-resizer':
+      return <ImageResizer />
+    case 'favicon-generator':
+      return <FaviconGenerator />
     case 'edi-x12-formatter':
       return <EdiFormatter />
     case 'edi-segment-viewer':
@@ -492,6 +594,10 @@ function ToolRenderer({ tool }: { tool: Tool }) {
       return <TimestampTool />
     case 'cron-expression':
       return <CronTool />
+    case 'slugify':
+      return <SlugifyTool />
+    case 'http-status-codes':
+      return <HttpStatusLookup />
     case 'calculator':
       return <CalculatorTool />
     case 'contact':
@@ -656,6 +762,121 @@ function JwtTool() {
   const [token, setToken] = useState('')
   const decoded = useMemo(() => decodeJwt(token), [token])
   return <ToolPanel status={decoded.status}><div className="workbench"><TextareaBox label="JWT token" value={token} onChange={setToken} placeholder="Paste a JWT token" /><OutputBox label="Decoded header and payload" value={decoded.value} /></div></ToolPanel>
+}
+
+function JwtEncoder() {
+  const [header, setHeader] = useState('{"alg":"HS256","typ":"JWT"}')
+  const [payload, setPayload] = useState('{"sub":"1234567890","name":"Codepackr User","iat":1710000000}')
+  const [secret, setSecret] = useState('change-me')
+  const [output, setOutput] = useState('')
+  const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Enter a payload and secret to sign an HS256 token' })
+  const sign = async () => {
+    try {
+      const parsedHeader = JSON.parse(header) as Record<string, unknown>
+      if (parsedHeader.alg !== 'HS256') throw new Error('Header alg must be HS256')
+      if (!secret) throw new Error('Secret is required')
+      setOutput(await signJwtHs256(parsedHeader, JSON.parse(payload), secret))
+      setStatus({ tone: 'ok', text: 'HS256 JWT signed locally with Web Crypto' })
+    } catch (error) { setOutput(''); setStatus({ tone: 'warn', text: getErrorMessage(error) }) }
+  }
+  return <ToolPanel status={status}><Actions><button className="primary" onClick={sign}>Sign JWT</button></Actions><div className="workbench"><TextareaBox label="Header JSON" value={header} onChange={setHeader} /><TextareaBox label="Payload JSON" value={payload} onChange={setPayload} /></div><label className="field compact-field"><span>HMAC secret</span><input type="password" value={secret} onChange={(event) => setSecret(event.target.value)} /></label><OutputBox label="Signed token" value={output} /></ToolPanel>
+}
+
+function MarkdownHtmlConverter() {
+  const [input, setInput] = useState('# Hello\n\nConvert **Markdown** to HTML.\n\n- Fast\n- Private')
+  const output = useMemo(() => markdownToHtml(input), [input])
+  return <ToolPanel status={{ tone: input ? 'ok' : 'info', text: input ? 'HTML generated' : 'Enter Markdown to convert' }}><div className="workbench"><TextareaBox label="Markdown" value={input} onChange={setInput} /><OutputBox label="Raw HTML" value={output} /></div></ToolPanel>
+}
+
+function HtmlMarkdownConverter() {
+  const [input, setInput] = useState('<h1>Hello</h1><p>Convert <strong>HTML</strong> to Markdown.</p><ul><li>Fast</li><li>Private</li></ul>')
+  const result = useMemo(() => htmlToMarkdown(input), [input])
+  return <ToolPanel status={result.status}><div className="workbench"><TextareaBox label="HTML" value={input} onChange={setInput} /><OutputBox label="Markdown" value={result.value} /></div></ToolPanel>
+}
+
+function JsonStructuralDiff() {
+  const [left, setLeft] = useState('{"name":"Codepackr","version":1,"active":true}')
+  const [right, setRight] = useState('{"name":"Codepackr","version":2,"tools":["json"]}')
+  const result = useMemo(() => structuralJsonDiff(left, right), [left, right])
+  return <ToolPanel status={result.status}><div className="workbench"><TextareaBox label="Original JSON" value={left} onChange={setLeft} /><TextareaBox label="Modified JSON" value={right} onChange={setRight} /></div><DataTable rows={[['Path', 'Change', 'Original', 'Modified'], ...result.changes.map((change) => [change.path, change.type, change.before, change.after])]} /></ToolPanel>
+}
+
+const mockTypes = ['string', 'number', 'boolean', 'date', 'uuid', 'email'] as const
+type MockType = typeof mockTypes[number]
+
+function MockJsonGenerator() {
+  const [schema, setSchema] = useState('id:uuid\nname:string\nemail:email\ncreatedAt:date\nactive:boolean')
+  const [count, setCount] = useState(5)
+  const result = useMemo(() => generateMockJson(schema, count), [schema, count])
+  return <ToolPanel status={result.status}><Actions><label className="inline-option">Records <input type="number" min="1" max="100" value={count} onChange={(event) => setCount(Number(event.target.value))} /></label></Actions><div className="workbench"><TextareaBox label="Schema (field:type)" value={schema} onChange={setSchema} placeholder="name:string" /><OutputBox label="Generated JSON" value={result.value} /></div><div className="hint">Supported types: {mockTypes.join(', ')}</div></ToolPanel>
+}
+
+function CurlCodeConverter() {
+  const [input, setInput] = useState("curl -X POST 'https://api.example.com/users' -H 'Content-Type: application/json' -H 'Authorization: Bearer token' -d '{\"name\":\"Ada\"}'")
+  const [language, setLanguage] = useState<'fetch' | 'axios' | 'python'>('fetch')
+  const result = useMemo(() => convertCurl(input, language), [input, language])
+  return <ToolPanel status={result.status}><Actions><span className="seg-group"><button className={language === 'fetch' ? 'active-toggle' : ''} onClick={() => setLanguage('fetch')}>Fetch</button><button className={language === 'axios' ? 'active-toggle' : ''} onClick={() => setLanguage('axios')}>Axios</button><button className={language === 'python' ? 'active-toggle' : ''} onClick={() => setLanguage('python')}>Python</button></span></Actions><div className="workbench"><TextareaBox label="cURL command" value={input} onChange={setInput} /><OutputBox label="Generated code" value={result.value} /></div></ToolPanel>
+}
+
+function DotenvFormatter() {
+  const [input, setInput] = useState('API_URL=https://api.example.com\nDEBUG=true\nAPI_KEY=\nDEBUG=false')
+  const result = useMemo(() => formatDotenv(input), [input])
+  return <ToolPanel status={result.status}><div className="workbench"><TextareaBox label=".env input" value={input} onChange={setInput} /><OutputBox label="Formatted .env" value={result.value} /></div>{result.errors.length > 0 && <ul className="error-list">{result.errors.map((error) => <li key={error}>{error}</li>)}</ul>}</ToolPanel>
+}
+
+function Base64ImageTool() {
+  const [dataUrl, setDataUrl] = useState('')
+  const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Choose an image or paste a Base64 data URL' })
+  const choose = async (file?: File) => {
+    if (!file) return
+    if (!file.type.startsWith('image/')) { setStatus({ tone: 'warn', text: 'Choose a valid image file' }); return }
+    try { setDataUrl(await readFileAsDataUrl(file)); setStatus({ tone: 'ok', text: `${file.name} encoded as Base64` }) }
+    catch (error) { setStatus({ tone: 'warn', text: getErrorMessage(error) }) }
+  }
+  const validImage = /^data:image\/[a-z0-9.+-]+;base64,/i.test(dataUrl)
+  return <ToolPanel status={status}><label className="file-picker">Choose image<input type="file" accept="image/*" onChange={(event) => choose(event.target.files?.[0])} /></label><TextareaBox label="Base64 data URL" value={dataUrl} onChange={(value) => { setDataUrl(value); setStatus({ tone: /^data:image\//i.test(value) ? 'ok' : 'info', text: value ? 'Paste a complete image data URL to preview' : 'Choose an image or paste a Base64 data URL' }) }} />{validImage && <div className="image-output"><img src={dataUrl} alt="Decoded Base64 preview" /><a className="download-link" href={dataUrl} download="decoded-image.png">Download image</a></div>}</ToolPanel>
+}
+
+function ImageResizer() {
+  const [source, setSource] = useState('')
+  const [width, setWidth] = useState(800)
+  const [height, setHeight] = useState(600)
+  const [quality, setQuality] = useState(0.85)
+  const [output, setOutput] = useState('')
+  const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Choose an image to resize' })
+  const choose = async (file?: File) => {
+    if (!file?.type.startsWith('image/')) { setStatus({ tone: 'warn', text: 'Choose a valid image file' }); return }
+    const url = await readFileAsDataUrl(file)
+    const image = await loadImage(url)
+    setSource(url); setWidth(image.naturalWidth); setHeight(image.naturalHeight); setOutput('')
+    setStatus({ tone: 'ok', text: `Loaded ${image.naturalWidth} x ${image.naturalHeight}` })
+  }
+  const resize = async () => {
+    try { setOutput(await resizeImage(source, width, height, 'image/jpeg', quality)); setStatus({ tone: 'ok', text: `Created ${width} x ${height} JPEG` }) }
+    catch (error) { setStatus({ tone: 'warn', text: getErrorMessage(error) }) }
+  }
+  return <ToolPanel status={status}><Actions><label className="file-picker">Choose image<input type="file" accept="image/*" onChange={(event) => choose(event.target.files?.[0])} /></label><label className="inline-option">Width <input type="number" min="1" max="8192" value={width} onChange={(event) => setWidth(Number(event.target.value))} /></label><label className="inline-option">Height <input type="number" min="1" max="8192" value={height} onChange={(event) => setHeight(Number(event.target.value))} /></label><label className="inline-option">Quality <input type="range" min="0.1" max="1" step="0.05" value={quality} onChange={(event) => setQuality(Number(event.target.value))} /></label><button className="primary" disabled={!source} onClick={resize}>Resize</button></Actions>{output && <div className="image-output"><img src={output} alt="Resized preview" /><a className="download-link" href={output} download={`resized-${width}x${height}.jpg`}>Download JPEG</a></div>}</ToolPanel>
+}
+
+function FaviconGenerator() {
+  const [source, setSource] = useState('')
+  const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Choose a square image for best results' })
+  const choose = async (file?: File) => {
+    if (!file?.type.startsWith('image/')) { setStatus({ tone: 'warn', text: 'Choose a valid image file' }); return }
+    setSource(await readFileAsDataUrl(file)); setStatus({ tone: 'ok', text: 'Image ready for favicon generation' })
+  }
+  const generate = async () => {
+    try {
+      const sizes = [16, 32, 180, 192, 512]
+      const pngs = await Promise.all(sizes.map(async (size) => ({ size, data: await resizeImage(source, size, size, 'image/png', 1) })))
+      const zip = new JSZip()
+      pngs.forEach(({ size, data }) => zip.file(`favicon-${size}x${size}.png`, data.split(',')[1], { base64: true }))
+      zip.file('favicon.ico', buildIco([pngs[0], pngs[1]]))
+      downloadBlob(await zip.generateAsync({ type: 'blob' }), 'codepackr-favicons.zip')
+      setStatus({ tone: 'ok', text: 'Downloaded ICO and five common PNG sizes as ZIP' })
+    } catch (error) { setStatus({ tone: 'warn', text: getErrorMessage(error) }) }
+  }
+  return <ToolPanel status={status}><Actions><label className="file-picker">Choose image<input type="file" accept="image/*" onChange={(event) => choose(event.target.files?.[0])} /></label><button className="primary" disabled={!source} onClick={generate}>Download favicon ZIP</button></Actions>{source && <div className="image-output"><img src={source} alt="Favicon source preview" /></div>}</ToolPanel>
 }
 
 function DiffTool() {
@@ -854,27 +1075,98 @@ function CsvXmlConverter() {
   return <TwoPaneTool input={input} setInput={setInput} output={output} status={status} onClear={() => setActiveMode(null)} actions={<><button className={activeMode === 'csvToXml' ? 'primary' : ''} onClick={toXmlRun}>CSV to XML</button><button className={activeMode === 'xmlToCsv' ? 'primary' : ''} onClick={toCsvRun}>XML to CSV</button></>} />
 }
 
+function CaseConverter() {
+  const [input, setInput] = useShareableInput('Codepackr developer tools')
+  const [output, setOutput] = useState('')
+  const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Choose an output convention' })
+  const convert = (mode: CaseMode) => {
+    const value = convertCase(input, mode)
+    setOutput(value)
+    setStatus(value ? { tone: 'ok', text: `Converted to ${caseLabels[mode]}` } : { tone: 'info', text: 'Enter text to convert' })
+  }
+  return <TwoPaneTool input={input} setInput={setInput} output={output} status={status} actions={Object.entries(caseLabels).map(([mode, label]) => <button key={mode} onClick={() => convert(mode as CaseMode)}>{label}</button>)} />
+}
+
+function YamlJsonConverter() {
+  const [input, setInput] = useShareableInput('name: Codepackr\ntools:\n  - JSON Formatter\n  - Diff Checker\nactive: true')
+  const [output, setOutput] = useState('')
+  const [status, setStatus] = useState<Status>()
+  const yamlToJson = () => {
+    try {
+      setOutput(JSON.stringify(loadYaml(input), null, 2))
+      setStatus({ tone: 'ok', text: 'YAML converted to JSON' })
+    } catch (error) {
+      setOutput('')
+      setStatus({ tone: 'warn', text: getErrorMessage(error) })
+    }
+  }
+  const jsonToYaml = () => {
+    try {
+      setOutput(dumpYaml(JSON.parse(input), { indent: 2, noRefs: true, lineWidth: 100 }))
+      setStatus({ tone: 'ok', text: 'JSON converted to YAML' })
+    } catch (error) {
+      setOutput('')
+      setStatus({ tone: 'warn', text: getErrorMessage(error) })
+    }
+  }
+  return <TwoPaneTool input={input} setInput={setInput} output={output} status={status} actions={<><button className="primary" onClick={yamlToJson}>YAML to JSON</button><button onClick={jsonToYaml}>JSON to YAML</button></>} />
+}
+
+const numberBases = [
+  { value: 2, label: 'Binary' },
+  { value: 8, label: 'Octal' },
+  { value: 10, label: 'Decimal' },
+  { value: 16, label: 'Hexadecimal' },
+]
+
+function NumberBaseConverter() {
+  const [input, setInput] = useShareableInput('255')
+  const [sourceBase, setSourceBase] = useState(10)
+  const result = useMemo(() => convertNumberBase(input, sourceBase), [input, sourceBase])
+  return <ToolPanel status={result.status}><Actions><label className="inline-option">Input base <select value={sourceBase} onChange={(event) => setSourceBase(Number(event.target.value))}>{numberBases.map((base) => <option key={base.value} value={base.value}>{base.label}</option>)}</select></label></Actions><TextareaBox label="Number" value={input} onChange={setInput} placeholder="Enter an integer" /><div className="result-grid">{numberBases.map((base) => <Result key={base.value} label={base.label} value={result.values[base.value] ?? ''} />)}</div></ToolPanel>
+}
+
+function SlugifyTool() {
+  const [input, setInput] = useShareableInput('Free Developer Tools by Codepackr')
+  const output = useMemo(() => slugify(input), [input])
+  return <ToolPanel status={{ tone: output ? 'ok' : 'info', text: output ? 'URL-safe slug ready' : 'Enter text to create a slug' }}><div className="workbench"><TextareaBox label="Text" value={input} onChange={setInput} /><OutputBox label="Slug" value={output} /></div></ToolPanel>
+}
+
+const httpStatuses = [
+  [100, 'Continue', 'The client should continue the request.'], [101, 'Switching Protocols', 'The server is switching protocols.'],
+  [200, 'OK', 'The request succeeded.'], [201, 'Created', 'A new resource was created.'], [202, 'Accepted', 'The request was accepted for processing.'], [204, 'No Content', 'The request succeeded with no response body.'],
+  [301, 'Moved Permanently', 'The resource has a permanent new URL.'], [302, 'Found', 'The resource is temporarily at another URL.'], [304, 'Not Modified', 'The cached representation is still current.'], [307, 'Temporary Redirect', 'Repeat the request at another URL with the same method.'], [308, 'Permanent Redirect', 'Permanently repeat the request at another URL with the same method.'],
+  [400, 'Bad Request', 'The server could not understand the request.'], [401, 'Unauthorized', 'Authentication is required.'], [403, 'Forbidden', 'The server refuses to authorize the request.'], [404, 'Not Found', 'The requested resource was not found.'], [405, 'Method Not Allowed', 'The HTTP method is not supported for this resource.'], [408, 'Request Timeout', 'The server timed out waiting for the request.'], [409, 'Conflict', 'The request conflicts with the current resource state.'], [410, 'Gone', 'The resource is no longer available.'], [415, 'Unsupported Media Type', 'The request media type is not supported.'], [418, "I'm a Teapot", 'The server refuses to brew coffee because it is a teapot.'], [422, 'Unprocessable Content', 'The request syntax is valid but its instructions cannot be processed.'], [429, 'Too Many Requests', 'The client sent too many requests.'],
+  [500, 'Internal Server Error', 'The server encountered an unexpected condition.'], [501, 'Not Implemented', 'The server does not support the requested functionality.'], [502, 'Bad Gateway', 'An upstream server returned an invalid response.'], [503, 'Service Unavailable', 'The server is temporarily unavailable.'], [504, 'Gateway Timeout', 'An upstream server did not respond in time.'],
+] satisfies Array<[number, string, string]>
+
+function HttpStatusLookup() {
+  const [query, setQuery] = useState('')
+  const rows = useMemo(() => httpStatuses.filter((status) => status.join(' ').toLowerCase().includes(query.trim().toLowerCase())).map(([code, name, description]) => [String(code), name, description]), [query])
+  return <ToolPanel status={{ tone: 'info', text: `${rows.length} HTTP status codes shown` }}><label className="field"><span>Search status codes</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search 404, redirect, unavailable..." /></label><DataTable rows={[['Code', 'Status', 'Description'], ...rows]} /></ToolPanel>
+}
+
 const sampleEdi = 'ISA*00*          *00*          *ZZ*SENDER         *ZZ*RECEIVER       *260826*1200*U*00401*000000001*0*T*:~GS*PO*SENDER*RECEIVER*20260826*1200*1*X*004010~ST*850*0001~BEG*00*SA*12345**20260826~SE*3*0001~GE*1*1~IEA*1*000000001~'
 
 function EdiFormatter() {
   const [input, setInput] = useState(sampleEdi)
   const parsed = useMemo(() => parseEdi(input), [input])
   const output = useMemo(() => formatEdi(input), [input])
-  return <ToolPanel status={parsed.status}><div className="workbench"><TextareaBox label="EDI X12 input" value={input} onChange={setInput} /><OutputBox label="Formatted EDI" value={output} /></div></ToolPanel>
+  return <ToolPanel status={parsed.status}><div className="workbench"><TextareaBox label="X12 or EDIFACT input" value={input} onChange={setInput} /><OutputBox label={`Formatted ${parsed.format}`} value={output} /></div>{parsed.errors.length > 0 && <ul className="error-list">{parsed.errors.map((error) => <li key={error}>{error}</li>)}</ul>}</ToolPanel>
 }
 
 function EdiSegmentViewer() {
   const [input, setInput] = useState(sampleEdi)
   const parsed = useMemo(() => parseEdi(input), [input])
-  const rows = useMemo(() => [['Segment', 'Name', 'Elements'], ...parsed.segments.map((segment) => [segment.tag, getEdiSegmentName(segment.tag), segment.elements.join(' | ')])], [parsed.segments])
-  return <ToolPanel status={parsed.status}><TextareaBox label="EDI X12 input" value={input} onChange={setInput} /><DataTable rows={rows} /></ToolPanel>
+  const rows = useMemo(() => [['Segment', 'Name', 'Element', 'Annotation', 'Value'], ...parsed.segments.flatMap((segment) => segment.elements.map((value, index) => [segment.tag, getEdiSegmentName(segment.tag, parsed.format), `${segment.tag}${String(index + 1).padStart(2, '0')}`, getEdiElementName(segment.tag, index + 1, parsed.format), value]))], [parsed])
+  return <ToolPanel status={parsed.status}><TextareaBox label="X12 or EDIFACT input" value={input} onChange={setInput} /><DataTable rows={rows} />{parsed.errors.length > 0 && <ul className="error-list">{parsed.errors.map((error) => <li key={error}>{error}</li>)}</ul>}</ToolPanel>
 }
 
 function EdiJsonConverter() {
   const [input, setInput] = useState(sampleEdi)
   const parsed = useMemo(() => parseEdi(input), [input])
-  const output = useMemo(() => JSON.stringify(parsed.segments.map((segment, index) => ({ index: index + 1, tag: segment.tag, name: getEdiSegmentName(segment.tag), elements: segment.elements })), null, 2), [parsed.segments])
-  return <ToolPanel status={parsed.status}><div className="workbench"><TextareaBox label="EDI X12 input" value={input} onChange={setInput} /><OutputBox label="JSON output" value={output} /></div></ToolPanel>
+  const output = useMemo(() => JSON.stringify({ format: parsed.format, validationErrors: parsed.errors, segments: parsed.segments.map((segment, index) => ({ index: index + 1, tag: segment.tag, name: getEdiSegmentName(segment.tag, parsed.format), elements: segment.elements.map((value, elementIndex) => ({ position: elementIndex + 1, name: getEdiElementName(segment.tag, elementIndex + 1, parsed.format), value })) })) }, null, 2), [parsed])
+  return <ToolPanel status={parsed.status}><div className="workbench"><TextareaBox label="X12 or EDIFACT input" value={input} onChange={setInput} /><OutputBox label="JSON output" value={output} /></div></ToolPanel>
 }
 
 function UuidTool() {
@@ -962,9 +1254,10 @@ function TimestampTool() {
 }
 
 function CronTool() {
-  const [cron, setCron] = useState('* * * * *')
+  const [cron, setCron] = useShareableInput('* * * * *')
   const explanation = useMemo(() => explainCron(cron), [cron])
-  return <ToolPanel status={explanation.status}><label className="field"><span>Cron expression</span><input value={cron} onChange={(event) => setCron(event.target.value)} /></label><OutputBox label="Explanation" value={explanation.value} /></ToolPanel>
+  const nextRuns = useMemo(() => getNextCronRuns(cron), [cron])
+  return <ToolPanel status={nextRuns.status.tone === 'warn' ? nextRuns.status : explanation.status}><label className="field"><span>Cron expression</span><input value={cron} onChange={(event) => setCron(event.target.value)} /></label><div className="workbench"><OutputBox label="Explanation" value={explanation.value} /><OutputBox label="Next 5 runs (local time)" value={nextRuns.value} /></div></ToolPanel>
 }
 
 function CalculatorTool() {
@@ -1341,6 +1634,194 @@ function decodeJwt(token: string): { status: Status; value: string } {
   }
 }
 
+function toBase64Url(value: string | Uint8Array) {
+  const bytes = typeof value === 'string' ? new TextEncoder().encode(value) : value
+  return btoa(Array.from(bytes, (byte) => String.fromCharCode(byte)).join('')).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
+}
+
+async function signJwtHs256(header: Record<string, unknown>, payload: unknown, secret: string) {
+  const body = `${toBase64Url(JSON.stringify(header))}.${toBase64Url(JSON.stringify(payload))}`
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+  const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(body))
+  return `${body}.${toBase64Url(new Uint8Array(signature))}`
+}
+
+function htmlToMarkdown(input: string): { status: Status; value: string } {
+  if (!input.trim()) return { status: { tone: 'info', text: 'Enter HTML to convert' }, value: '' }
+  const documentNode = new DOMParser().parseFromString(input, 'text/html')
+  const render = (node: Node, depth = 0): string => {
+    if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? ''
+    if (!(node instanceof HTMLElement)) return Array.from(node.childNodes).map((child) => render(child, depth)).join('')
+    const content = Array.from(node.childNodes).map((child) => render(child, depth)).join('')
+    const tag = node.tagName.toLowerCase()
+    if (/^h[1-6]$/.test(tag)) return `${'#'.repeat(Number(tag[1]))} ${content.trim()}\n\n`
+    if (tag === 'p') return `${content.trim()}\n\n`
+    if (tag === 'strong' || tag === 'b') return `**${content}**`
+    if (tag === 'em' || tag === 'i') return `*${content}*`
+    if (tag === 'code') return node.parentElement?.tagName === 'PRE' ? content : `\`${content}\``
+    if (tag === 'pre') return `\`\`\`\n${content.trim()}\n\`\`\`\n\n`
+    if (tag === 'a') return `[${content}](${node.getAttribute('href') ?? ''})`
+    if (tag === 'img') return `![${node.getAttribute('alt') ?? ''}](${node.getAttribute('src') ?? ''})`
+    if (tag === 'blockquote') return `${content.trim().split('\n').map((line) => `> ${line}`).join('\n')}\n\n`
+    if (tag === 'br') return '  \n'
+    if (tag === 'hr') return '\n---\n\n'
+    if (tag === 'li') return `${node.parentElement?.tagName === 'OL' ? `${Array.from(node.parentElement.children).indexOf(node) + 1}.` : '-'} ${content.trim()}\n`
+    if (tag === 'ul' || tag === 'ol') return `${content}\n`
+    return content
+  }
+  return { status: { tone: 'ok', text: 'HTML converted to Markdown' }, value: render(documentNode.body).replace(/\n{3,}/g, '\n\n').trim() }
+}
+
+type JsonChange = { path: string; type: 'added' | 'removed' | 'changed'; before: string; after: string }
+
+function structuralJsonDiff(left: string, right: string): { status: Status; changes: JsonChange[] } {
+  try {
+    const before = JSON.parse(left) as unknown
+    const after = JSON.parse(right) as unknown
+    const changes: JsonChange[] = []
+    const visit = (oldValue: unknown, newValue: unknown, path: string) => {
+      if (Object.is(oldValue, newValue)) return
+      const oldObject = oldValue !== null && typeof oldValue === 'object'
+      const newObject = newValue !== null && typeof newValue === 'object'
+      if (oldObject && newObject && Array.isArray(oldValue) === Array.isArray(newValue)) {
+        const keys = new Set([...Object.keys(oldValue as object), ...Object.keys(newValue as object)])
+        keys.forEach((key) => {
+          const oldRecord = oldValue as Record<string, unknown>
+          const newRecord = newValue as Record<string, unknown>
+          const nextPath = Array.isArray(oldValue) ? `${path}[${key}]` : `${path}.${key}`
+          if (!(key in oldRecord)) changes.push({ path: nextPath, type: 'added', before: '', after: JSON.stringify(newRecord[key]) })
+          else if (!(key in newRecord)) changes.push({ path: nextPath, type: 'removed', before: JSON.stringify(oldRecord[key]), after: '' })
+          else visit(oldRecord[key], newRecord[key], nextPath)
+        })
+      } else changes.push({ path, type: 'changed', before: JSON.stringify(oldValue), after: JSON.stringify(newValue) })
+    }
+    visit(before, after, '$')
+    return { status: { tone: changes.length ? 'info' : 'ok', text: changes.length ? `${changes.length} structural changes found` : 'JSON structures are equal' }, changes }
+  } catch (error) { return { status: { tone: 'warn', text: getErrorMessage(error) }, changes: [] } }
+}
+
+function generateMockJson(schema: string, count: number): { status: Status; value: string } {
+  const fields: Array<{ name: string; type: MockType }> = []
+  for (const [index, line] of schema.split(/\r?\n/).entries()) {
+    if (!line.trim()) continue
+    const match = line.match(/^\s*([A-Za-z_$][\w$.-]*)\s*:\s*(\w+)\s*$/)
+    if (!match || !mockTypes.includes(match[2] as MockType)) return { status: { tone: 'warn', text: `Line ${index + 1}: use field:type with a supported type` }, value: '' }
+    fields.push({ name: match[1], type: match[2] as MockType })
+  }
+  if (!fields.length) return { status: { tone: 'info', text: 'Define at least one field' }, value: '' }
+  const names = ['Alex', 'Jordan', 'Morgan', 'Riley', 'Taylor', 'Casey']
+  const makeValue = (type: MockType, index: number): string | number | boolean => {
+    if (type === 'number') return randomInt(10000)
+    if (type === 'boolean') return index % 2 === 0
+    if (type === 'date') return new Date(Date.UTC(2024 + index % 3, index % 12, index % 28 + 1)).toISOString()
+    if (type === 'uuid') return crypto.randomUUID()
+    if (type === 'email') return `user${index + 1}@example.com`
+    return `${names[index % names.length]} ${index + 1}`
+  }
+  const records = Array.from({ length: Math.max(1, Math.min(count || 1, 100)) }, (_, index) => Object.fromEntries(fields.map((field) => [field.name, makeValue(field.type, index)])))
+  return { status: { tone: 'ok', text: `${records.length} mock records generated` }, value: JSON.stringify(records, null, 2) }
+}
+
+function shellTokens(input: string) {
+  const tokens: string[] = []
+  const pattern = /"((?:\\.|[^"])*)"|'([^']*)'|([^\s]+)/g
+  let match: RegExpExecArray | null
+  while ((match = pattern.exec(input.replace(/\\\r?\n/g, ' ')))) tokens.push((match[1] ?? match[2] ?? match[3]).replace(/\\"/g, '"'))
+  return tokens
+}
+
+function convertCurl(input: string, language: 'fetch' | 'axios' | 'python'): { status: Status; value: string } {
+  const tokens = shellTokens(input.trim())
+  if (tokens[0]?.toLowerCase() !== 'curl') return { status: { tone: 'warn', text: 'Command must start with curl' }, value: '' }
+  let method = 'GET'; let url = ''; let body = ''
+  const headers: Record<string, string> = {}
+  for (let index = 1; index < tokens.length; index += 1) {
+    const token = tokens[index]
+    if (token === '-X' || token === '--request') method = (tokens[++index] ?? 'GET').toUpperCase()
+    else if (token === '-H' || token === '--header') { const header = tokens[++index] ?? ''; const separator = header.indexOf(':'); if (separator > 0) headers[header.slice(0, separator).trim()] = header.slice(separator + 1).trim() }
+    else if (['-d', '--data', '--data-raw', '--data-binary'].includes(token)) { body = tokens[++index] ?? ''; if (method === 'GET') method = 'POST' }
+    else if (!token.startsWith('-')) url = token
+  }
+  if (!url) return { status: { tone: 'warn', text: 'No request URL found' }, value: '' }
+  const headerJson = JSON.stringify(headers, null, 2)
+  if (language === 'python') return { status: { tone: 'ok', text: 'Converted to Python requests' }, value: `import requests\n\nresponse = requests.request(\n    ${JSON.stringify(method)},\n    ${JSON.stringify(url)},\n    headers=${headerJson.replace(/true|false|null/g, (value) => ({ true: 'True', false: 'False', null: 'None' })[value] ?? value).replace(/^/gm, '    ').trim()},${body ? `\n    data=${JSON.stringify(body)},` : ''}\n)\nresponse.raise_for_status()` }
+  if (language === 'axios') return { status: { tone: 'ok', text: 'Converted to Axios' }, value: `const response = await axios({\n  method: ${JSON.stringify(method.toLowerCase())},\n  url: ${JSON.stringify(url)},\n  headers: ${headerJson.replace(/^/gm, '  ').trim()},${body ? `\n  data: ${JSON.stringify(body)},` : ''}\n});` }
+  return { status: { tone: 'ok', text: 'Converted to Fetch API' }, value: `const response = await fetch(${JSON.stringify(url)}, {\n  method: ${JSON.stringify(method)},\n  headers: ${headerJson.replace(/^/gm, '  ').trim()},${body ? `\n  body: ${JSON.stringify(body)},` : ''}\n});\nif (!response.ok) throw new Error(\`HTTP \${response.status}\`);` }
+}
+
+function formatDotenv(input: string): { status: Status; value: string; errors: string[] } {
+  const errors: string[] = []
+  const seen = new Map<string, number>()
+  const output = input.split(/\r?\n/).map((line, index) => {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) return trimmed
+    const match = trimmed.match(/^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/)
+    if (!match) { errors.push(`Line ${index + 1}: expected KEY=value syntax`); return trimmed }
+    const [, key, value] = match
+    if (seen.has(key)) errors.push(`Line ${index + 1}: duplicate key ${key} (first defined on line ${seen.get(key)})`)
+    else seen.set(key, index + 1)
+    if (!value) errors.push(`Line ${index + 1}: ${key} has an empty value`)
+    if (/\s/.test(value) && !/^(['"]).*\1$/.test(value)) errors.push(`Line ${index + 1}: quote values containing spaces`)
+    return `${key}=${value}`
+  }).join('\n')
+  return { status: { tone: errors.length ? 'warn' : 'ok', text: errors.length ? `${errors.length} dotenv issue${errors.length === 1 ? '' : 's'} found` : 'Valid dotenv file' }, value: output, errors }
+}
+
+function readFileAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('Unable to read file'))
+    reader.onerror = () => reject(reader.error ?? new Error('Unable to read file'))
+    reader.readAsDataURL(file)
+  })
+}
+
+function loadImage(source: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    if (!source) { reject(new Error('Choose an image first')); return }
+    const image = new Image()
+    image.onload = () => resolve(image)
+    image.onerror = () => reject(new Error('Unable to decode image'))
+    image.src = source
+  })
+}
+
+async function resizeImage(source: string, width: number, height: number, type: 'image/png' | 'image/jpeg', quality: number) {
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || width > 8192 || height > 8192) throw new Error('Width and height must be whole numbers from 1 to 8192')
+  const image = await loadImage(source)
+  const canvas = document.createElement('canvas')
+  canvas.width = width; canvas.height = height
+  const context = canvas.getContext('2d')
+  if (!context) throw new Error('Canvas is not available')
+  context.imageSmoothingEnabled = true; context.imageSmoothingQuality = 'high'
+  context.drawImage(image, 0, 0, width, height)
+  return canvas.toDataURL(type, quality)
+}
+
+function buildIco(images: Array<{ size: number; data: string }>) {
+  const payloads = images.map(({ data }) => Uint8Array.from(atob(data.split(',')[1]), (char) => char.charCodeAt(0)))
+  const directorySize = 6 + images.length * 16
+  const output = new Uint8Array(directorySize + payloads.reduce((total, payload) => total + payload.length, 0))
+  const view = new DataView(output.buffer)
+  view.setUint16(2, 1, true); view.setUint16(4, images.length, true)
+  let offset = directorySize
+  images.forEach(({ size }, index) => {
+    const entry = 6 + index * 16
+    output[entry] = size >= 256 ? 0 : size; output[entry + 1] = size >= 256 ? 0 : size
+    view.setUint16(entry + 4, 1, true); view.setUint16(entry + 6, 32, true)
+    view.setUint32(entry + 8, payloads[index].length, true); view.setUint32(entry + 12, offset, true)
+    output.set(payloads[index], offset); offset += payloads[index].length
+  })
+  return output
+}
+
+function downloadBlob(blob: Blob, name: string) {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url; link.download = name; link.click()
+  setTimeout(() => URL.revokeObjectURL(url), 0)
+}
+
 function runRegex(pattern: string, flags: string, text: string): { status: Status; value: string } {
   try {
     const expression = new RegExp(pattern, flags.includes('g') ? flags : `${flags}g`)
@@ -1373,31 +1854,78 @@ function csvToObjects(input: string) {
   return rows.map((row) => Object.fromEntries(header.map((key, index) => [key, row[index] ?? ''])))
 }
 
-function parseEdi(input: string): { status: Status; segments: { tag: string; elements: string[] }[] } {
-  const delimiter = input.includes('~') ? '~' : '\n'
-  const segments = input
-    .split(delimiter)
-    .map((segment) => segment.trim())
-    .filter(Boolean)
-    .map((segment) => {
-      const [tag = '', ...elements] = segment.split('*')
-      return { tag: tag.trim().toUpperCase(), elements }
-    })
+type EdiFormat = 'X12' | 'EDIFACT'
+type ParsedEdi = { status: Status; format: EdiFormat; segments: { tag: string; elements: string[] }[]; errors: string[]; elementSeparator: string; segmentTerminator: string }
 
-  if (!segments.length) return { status: { tone: 'info', text: 'Paste EDI X12 content to parse' }, segments }
-  const hasTransaction = segments.some((segment) => segment.tag === 'ST') && segments.some((segment) => segment.tag === 'SE')
-  const hasEnvelope = segments.some((segment) => segment.tag === 'ISA') && segments.some((segment) => segment.tag === 'IEA')
-  const tone = hasTransaction ? 'ok' : 'warn'
-  const envelopeText = hasEnvelope ? ' with interchange envelope' : ''
-  return { status: { tone, text: `${segments.length} segments parsed${envelopeText}${hasTransaction ? '' : '. ST/SE transaction envelope not found'}` }, segments }
+function splitEdi(value: string, delimiter: string, release = '') {
+  const parts: string[] = []; let current = ''
+  for (let index = 0; index < value.length; index += 1) {
+    const character = value[index]
+    if (release && character === release && value[index + 1] === delimiter) { current += delimiter; index += 1 }
+    else if (release && character === release && value[index + 1] === release) { current += release; index += 1 }
+    else if (character === delimiter) { parts.push(current); current = '' }
+    else current += character
+  }
+  parts.push(current)
+  return parts
+}
+
+function parseEdi(input: string): ParsedEdi {
+  const source = input.trim()
+  const format: EdiFormat = /^(UNA|UNB)[+:]/.test(source) ? 'EDIFACT' : 'X12'
+  const hasUna = format === 'EDIFACT' && source.startsWith('UNA') && source.length >= 9
+  const elementSeparator = format === 'EDIFACT' ? (hasUna ? source[4] : '+') : (source.startsWith('ISA') ? source[3] : '*')
+  const segmentTerminator = format === 'EDIFACT' ? (hasUna ? source[8] : "'") : (source.startsWith('ISA') && source.length > 105 ? source[105] : source.includes('~') ? '~' : '\n')
+  const release = format === 'EDIFACT' ? (hasUna ? source[6] : '?') : ''
+  const ediBody = hasUna ? source.slice(9) : source
+  const parsedSegments = splitEdi(ediBody, segmentTerminator, release).map((segment) => segment.trim()).filter(Boolean).map((segment) => {
+    const values = splitEdi(segment, elementSeparator, release)
+    return { tag: (values.shift() ?? '').trim().toUpperCase(), elements: values }
+  })
+  const segments = hasUna ? [{ tag: 'UNA', elements: [source.slice(3, 8)] }, ...parsedSegments] : parsedSegments
+  if (!segments.length) return { status: { tone: 'info', text: 'Paste X12 or EDIFACT content to parse' }, format, segments, errors: [], elementSeparator, segmentTerminator }
+  const errors = format === 'X12' ? validateX12(segments) : validateEdifact(segments)
+  return { status: { tone: errors.length ? 'warn' : 'ok', text: `${segments.length} ${format} segments parsed${errors.length ? ` with ${errors.length} validation issue${errors.length === 1 ? '' : 's'}` : ' successfully'}` }, format, segments, errors, elementSeparator, segmentTerminator }
 }
 
 function formatEdi(input: string) {
-  return parseEdi(input).segments.map((segment) => `${[segment.tag, ...segment.elements].join('*')}~`).join('\n')
+  const parsed = parseEdi(input)
+  return parsed.segments.map((segment) => segment.tag === 'UNA'
+    ? `UNA${segment.elements[0]}${parsed.segmentTerminator}`
+    : `${[segment.tag, ...segment.elements].join(parsed.elementSeparator)}${parsed.segmentTerminator === '\n' ? '' : parsed.segmentTerminator}`).join('\n')
 }
 
-function getEdiSegmentName(tag: string) {
-  const names: Record<string, string> = {
+function validateX12(segments: { tag: string; elements: string[] }[]) {
+  const errors: string[] = []
+  const tags = new Set(segments.map((segment) => segment.tag))
+  const transaction = segments.find((segment) => segment.tag === 'ST')?.elements[0]
+  const requireSegments = (setName: string, required: string[]) => required.forEach((tag) => { if (!tags.has(tag)) errors.push(`${setName}: required ${tag} segment is missing`) })
+  if (!tags.has('ST') || !tags.has('SE')) errors.push('Transaction envelope must contain both ST and SE segments')
+  if (transaction === '850') requireSegments('850 Purchase Order', ['BEG', 'PO1'])
+  else if (transaction === '810') requireSegments('810 Invoice', ['BIG', 'IT1', 'TDS'])
+  else if (transaction === '856') requireSegments('856 Ship Notice', ['BSN', 'HL'])
+  else if (transaction) errors.push(`Transaction set ${transaction} is parsed, but validation rules are available only for 850, 810, and 856`)
+  const startIndex = segments.findIndex((segment) => segment.tag === 'ST')
+  const endIndex = segments.findIndex((segment, index) => index > startIndex && segment.tag === 'SE')
+  if (startIndex >= 0 && endIndex > startIndex) {
+    const declared = Number(segments[endIndex].elements[0])
+    const actual = endIndex - startIndex + 1
+    if (Number.isFinite(declared) && declared !== actual) errors.push(`SE01 declares ${declared} segments, but the transaction contains ${actual}`)
+    if (segments[startIndex].elements[1] && segments[endIndex].elements[1] !== segments[startIndex].elements[1]) errors.push('ST02 and SE02 transaction control numbers do not match')
+  }
+  return errors
+}
+
+function validateEdifact(segments: { tag: string; elements: string[] }[]) {
+  const tags = new Set(segments.map((segment) => segment.tag))
+  const errors: string[] = []
+  if (!tags.has('UNB') || !tags.has('UNZ')) errors.push('Interchange envelope must contain both UNB and UNZ segments')
+  if (tags.has('UNH') !== tags.has('UNT')) errors.push('Message envelope must contain both UNH and UNT segments')
+  return errors
+}
+
+function getEdiSegmentName(tag: string, format: EdiFormat = 'X12') {
+  const x12Names: Record<string, string> = {
     ISA: 'Interchange Control Header',
     IEA: 'Interchange Control Trailer',
     GS: 'Functional Group Header',
@@ -1420,8 +1948,36 @@ function getEdiSegmentName(tag: string) {
     PO1: 'Purchase Order Baseline Item Data',
     PID: 'Product/Item Description',
     CTT: 'Transaction Totals',
+    BSN: 'Beginning Segment for Ship Notice',
+    IT1: 'Baseline Item Data for Invoice',
+    TDS: 'Total Monetary Value Summary',
   }
-  return names[tag] ?? 'EDI Segment'
+  const edifactNames: Record<string, string> = { UNA: 'Service String Advice', UNB: 'Interchange Header', UNZ: 'Interchange Trailer', UNH: 'Message Header', UNT: 'Message Trailer', BGM: 'Beginning of Message', DTM: 'Date or Time or Period', NAD: 'Name and Address', LIN: 'Line Item', QTY: 'Quantity', MOA: 'Monetary Amount', RFF: 'Reference', UNS: 'Section Control' }
+  return (format === 'EDIFACT' ? edifactNames : x12Names)[tag] ?? `${format} Segment`
+}
+
+function getEdiElementName(tag: string, position: number, format: EdiFormat) {
+  const annotations: Record<string, string[]> = format === 'EDIFACT' ? {
+    UNA: ['Component, element, decimal, release, and repetition characters'],
+    UNB: ['Syntax identifier', 'Interchange sender', 'Interchange recipient', 'Preparation date/time', 'Interchange control reference'],
+    UNH: ['Message reference number', 'Message identifier'],
+    BGM: ['Document/message name', 'Document/message number', 'Message function'],
+    DTM: ['Date/time/period details'],
+    NAD: ['Party function qualifier', 'Party identification details', 'Name and address', 'Party name', 'Street', 'City', 'Country subdivision', 'Postal code', 'Country code'],
+    LIN: ['Line item identifier', 'Action request', 'Item number identification'],
+    QTY: ['Quantity details'],
+  } : {
+    ISA: ['Authorization qualifier', 'Authorization information', 'Security qualifier', 'Security information', 'Sender qualifier', 'Sender ID', 'Receiver qualifier', 'Receiver ID', 'Interchange date', 'Interchange time', 'Repetition separator', 'Control version', 'Control number', 'Acknowledgment requested', 'Usage indicator', 'Component separator'],
+    ST: ['Transaction set identifier', 'Transaction control number', 'Implementation convention reference'],
+    BEG: ['Purpose code', 'Purchase order type', 'Purchase order number', 'Release number', 'Purchase order date'],
+    BIG: ['Invoice date', 'Invoice number', 'Purchase order date', 'Purchase order number'],
+    BSN: ['Purpose code', 'Shipment identification', 'Shipment date', 'Shipment time', 'Hierarchical structure code'],
+    PO1: ['Assigned identification', 'Quantity ordered', 'Unit of measure', 'Unit price', 'Basis of unit price'],
+    IT1: ['Assigned identification', 'Quantity invoiced', 'Unit of measure', 'Unit price', 'Basis of unit price'],
+    HL: ['Hierarchical ID number', 'Parent ID number', 'Level code', 'Child code'],
+    SE: ['Number of included segments', 'Transaction control number'],
+  }
+  return annotations[tag]?.[position - 1] ?? `Element ${position}`
 }
 
 function jsonToCsv(value: unknown) {
@@ -1586,6 +2142,82 @@ function describeCronPart(part: string) {
   if (part.includes(',')) return `at ${part.split(',').join(', ')}`
   if (part.includes('-')) return `from ${part.split('-').join(' through ')}`
   return `at ${part}`
+}
+
+const caseLabels = {
+  camel: 'camelCase',
+  snake: 'snake_case',
+  kebab: 'kebab-case',
+  pascal: 'PascalCase',
+  constant: 'CONSTANT_CASE',
+  title: 'Title Case',
+} as const
+
+type CaseMode = keyof typeof caseLabels
+
+function splitWords(input: string) {
+  return input
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[^a-zA-Z0-9]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.toLowerCase())
+}
+
+function convertCase(input: string, mode: CaseMode) {
+  const words = splitWords(input)
+  const capitalize = (word: string) => word ? `${word[0].toUpperCase()}${word.slice(1)}` : ''
+  if (mode === 'camel') return words.map((word, index) => index ? capitalize(word) : word).join('')
+  if (mode === 'pascal') return words.map(capitalize).join('')
+  if (mode === 'snake') return words.join('_')
+  if (mode === 'kebab') return words.join('-')
+  if (mode === 'constant') return words.join('_').toUpperCase()
+  return words.map(capitalize).join(' ')
+}
+
+function convertNumberBase(input: string, sourceBase: number): { status: Status; values: Record<number, string> } {
+  const normalized = input.trim().replace(/_/g, '')
+  if (!normalized) return { status: { tone: 'info', text: 'Enter an integer to convert' }, values: {} }
+  const signless = normalized.replace(/^[+-]/, '')
+  const digitPatterns: Record<number, RegExp> = { 2: /^[01]+$/, 8: /^[0-7]+$/, 10: /^\d+$/, 16: /^[\da-f]+$/i }
+  if (!digitPatterns[sourceBase]?.test(signless)) return { status: { tone: 'warn', text: `Invalid base ${sourceBase} integer` }, values: {} }
+  try {
+    const sign = normalized.startsWith('-') ? -1n : 1n
+    const prefixes: Record<number, string> = { 2: '0b', 8: '0o', 10: '', 16: '0x' }
+    const value = sign * BigInt(`${prefixes[sourceBase]}${signless}`)
+    return { status: { tone: 'ok', text: 'Integer converted exactly' }, values: Object.fromEntries(numberBases.map((base) => [base.value, value.toString(base.value).toUpperCase()])) }
+  } catch (error) {
+    return { status: { tone: 'warn', text: getErrorMessage(error) }, values: {} }
+  }
+}
+
+function slugify(input: string) {
+  return input.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').replace(/-{2,}/g, '-')
+}
+
+function getNextCronRuns(cron: string): { status: Status; value: string } {
+  try {
+    const interval = CronExpressionParser.parse(cron.trim())
+    const runs = Array.from({ length: 5 }, () => interval.next().toDate().toLocaleString())
+    return { status: { tone: 'ok', text: 'Cron expression parsed' }, value: runs.map((run, index) => `${index + 1}. ${run}`).join('\n') }
+  } catch (error) {
+    return { status: { tone: 'warn', text: getErrorMessage(error) }, value: '' }
+  }
+}
+
+function useShareableInput(defaultValue: string): [string, (value: string) => void] {
+  const [value, setValue] = useState(() => new URLSearchParams(window.location.search).get('input') ?? defaultValue)
+  const updateValue = (nextValue: string) => {
+    setValue(nextValue)
+    const url = new URL(window.location.href)
+    if (nextValue && nextValue.length <= 3000) url.searchParams.set('input', nextValue)
+    else url.searchParams.delete('input')
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
+  }
+  return [value, updateValue]
 }
 
 function calculateExpression(input: string): { status: Status; value: string } {

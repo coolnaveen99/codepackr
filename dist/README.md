@@ -23,6 +23,8 @@ All tools run locally in the browser. Input is not uploaded by the formatting, v
 - HTML Entity Encoder and Decoder
 - Hash Generator
 - JWT Decoder
+- JWT Encoder
+- Base64 Image Encoder and Decoder
 
 ### Validators and inspection tools
 
@@ -32,12 +34,22 @@ All tools run locally in the browser. Input is not uploaded by the formatting, v
 - JSONPath Tester
 - XSD Validator
 - CSV Viewer
+- Structural JSON Diff
+- dotenv Formatter and Validator
 
 ### Converters
 
 - JSON to XML Converter
 - JSON to CSV Converter
 - CSV to XML Converter
+- Case Converter
+- YAML to JSON Converter
+- Number Base Converter
+- Markdown to HTML Converter
+- HTML to Markdown Converter
+- cURL to Code Converter
+- Image Resizer and Compressor
+- Favicon Generator
 - EDI X12 Formatter
 - EDI Segment Viewer
 - EDI to JSON Converter
@@ -53,13 +65,19 @@ All tools run locally in the browser. Input is not uploaded by the formatting, v
 - Color Converter
 - Unix Timestamp Converter
 - Cron Expression Builder
+- Slugify Tool
+- HTTP Status Code Lookup
+- Mock JSON Data Generator
 - Calculator
 
 ## Features
 
 - Search tools by name, category, or description.
-- Light and dark themes.
-- Shareable tool URLs such as `/json-formatter.html` and `/regex-tester.html`.
+- Persisted light and dark themes.
+- Shareable short-input tool URLs using the `input` query parameter.
+- Recently used and related tool navigation.
+- Keyboard shortcuts: `Ctrl/Cmd+K` for search and `Ctrl/Cmd+Enter` to run a tool.
+- Installable PWA with offline caching.
 - Responsive layout for desktop and mobile browsers.
 - Copyable output for tool results.
 - Contact page for bug reports, feedback, and tool requests.
