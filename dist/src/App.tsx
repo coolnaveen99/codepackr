@@ -444,109 +444,121 @@ function App() {
 }
 
 function AdTop() {
-  const pushedRef = useRef(false)
-  const adRef = useRef<HTMLModElement>(null)
+  const adRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (pushedRef.current || adRef.current?.getAttribute('data-adsbygoogle-status')) return
-    pushedRef.current = true
-    const windowWithAds = window as Window & { adsbygoogle?: unknown[] }
-    const adsbygoogle = windowWithAds.adsbygoogle = windowWithAds.adsbygoogle || []
-    adsbygoogle.push({})
+    if (adRef.current && typeof window !== 'undefined') {
+      const windowWithAds = window as Window & { adsbygoogle?: unknown[] }
+      if (windowWithAds.adsbygoogle) {
+        try {
+          windowWithAds.adsbygoogle.push({})
+        } catch (error) {
+          console.error('AdSense error:', error)
+        }
+      }
+    }
   }, [])
 
   return (
-    <aside className="ad-top" aria-label="Advertisement">
+    <div ref={adRef} className="ad-top" style={{ textAlign: 'center', minHeight: '90px' }}>
       <ins
-        ref={adRef}
         className="adsbygoogle"
         style={{ display: 'inline-block', width: '728px', height: '90px' }}
         data-ad-client="ca-pub-7526363571565796"
         data-ad-slot="8639237999"
         data-ad-format="horizontal"
       />
-    </aside>
+    </div>
   )
 }
 
 function AdLeft() {
-  const pushedRef = useRef(false)
-  const adRef = useRef<HTMLModElement>(null)
+  const adRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (pushedRef.current || adRef.current?.getAttribute('data-adsbygoogle-status')) return
-    pushedRef.current = true
-    const windowWithAds = window as Window & { adsbygoogle?: unknown[] }
-    const adsbygoogle = windowWithAds.adsbygoogle = windowWithAds.adsbygoogle || []
-    adsbygoogle.push({})
+    if (adRef.current && typeof window !== 'undefined') {
+      const windowWithAds = window as Window & { adsbygoogle?: unknown[] }
+      if (windowWithAds.adsbygoogle) {
+        try {
+          windowWithAds.adsbygoogle.push({})
+        } catch (error) {
+          console.error('AdSense error:', error)
+        }
+      }
+    }
   }, [])
 
   return (
-    <aside className="ad-left" aria-label="Advertisement">
+    <div ref={adRef} className="ad-left" style={{ minHeight: '320px' }}>
       <ins
-        ref={adRef}
         className="adsbygoogle"
-        style={{ display: 'block', width: '100%', height: '320px' }}
+        style={{ display: 'block' }}
         data-ad-client="ca-pub-7526363571565796"
         data-ad-slot="8066673720"
         data-ad-format="auto"
         data-full-width-responsive="true"
       />
-    </aside>
+    </div>
   )
 }
 
 function AdRight() {
-  const pushedRef = useRef(false)
-  const adRef = useRef<HTMLModElement>(null)
+  const adRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (pushedRef.current || adRef.current?.getAttribute('data-adsbygoogle-status')) return
-    pushedRef.current = true
-    const windowWithAds = window as Window & { adsbygoogle?: unknown[] }
-    const adsbygoogle = windowWithAds.adsbygoogle = windowWithAds.adsbygoogle || []
-    adsbygoogle.push({})
+    if (adRef.current && typeof window !== 'undefined') {
+      const windowWithAds = window as Window & { adsbygoogle?: unknown[] }
+      if (windowWithAds.adsbygoogle) {
+        try {
+          windowWithAds.adsbygoogle.push({})
+        } catch (error) {
+          console.error('AdSense error:', error)
+        }
+      }
+    }
   }, [])
 
   return (
-    <aside className="ad-right" aria-label="Advertisement">
+    <div ref={adRef} className="ad-right" style={{ minHeight: '320px' }}>
       <ins
-        ref={adRef}
         className="adsbygoogle"
-        style={{ display: 'block', width: '100%', height: '320px' }}
+        style={{ display: 'block' }}
         data-ad-client="ca-pub-7526363571565796"
         data-ad-slot="7176992835"
         data-ad-format="auto"
         data-full-width-responsive="true"
       />
-    </aside>
+    </div>
   )
 }
 
 function AdBottom() {
-  const pushedRef = useRef(false)
-  const adRef = useRef<HTMLModElement>(null)
+  const adRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (pushedRef.current || adRef.current?.getAttribute('data-adsbygoogle-status')) return
-    pushedRef.current = true
-    const windowWithAds = window as Window & { adsbygoogle?: unknown[] }
-    const adsbygoogle = windowWithAds.adsbygoogle = windowWithAds.adsbygoogle || []
-    adsbygoogle.push({})
+    if (adRef.current && typeof window !== 'undefined') {
+      const windowWithAds = window as Window & { adsbygoogle?: unknown[] }
+      if (windowWithAds.adsbygoogle) {
+        try {
+          windowWithAds.adsbygoogle.push({})
+        } catch (error) {
+          console.error('AdSense error:', error)
+        }
+      }
+    }
   }, [])
 
   return (
-    <aside className="ad-bottom" aria-label="Advertisement">
+    <div ref={adRef} className="ad-bottom" style={{ minHeight: '320px' }}>
       <ins
-        ref={adRef}
         className="adsbygoogle"
-        style={{ display: 'block', width: '100%', height: '320px' }}
+        style={{ display: 'block' }}
         data-ad-client="ca-pub-7526363571565796"
         data-ad-slot="2351312619"
         data-ad-format="auto"
         data-full-width-responsive="true"
       />
-    </aside>
+    </div>
   )
 }
 
