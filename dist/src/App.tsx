@@ -109,7 +109,7 @@ const categories = [
     name: 'Converters',
     tools: [
       { id: 'json-xml-converter', name: 'JSON to XML / XML to JSON', description: 'Convert JSON to XML or XML to JSON', icon: 'JX' },
-      { id: 'json-csv-converter', name: 'JSON to CSV Converter', description: 'Convert JSON arrays and CSV both ways', icon: 'JC' },
+      { id: 'json-csv-converter', name: 'JSON to CSV / CSV to JSON', description: 'Convert JSON to CSV or CSV to JSON', icon: 'JC' },
       { id: 'csv-xml-converter', name: 'CSV to XML / XML to CSV', description: 'Convert CSV to XML or XML to CSV', icon: 'CX' },
       { id: 'case-converter', name: 'Case Converter', description: 'Convert text between common naming conventions', icon: 'Aa' },
       { id: 'yaml-json-converter', name: 'YAML to JSON Converter', description: 'Convert YAML and JSON in either direction', icon: 'YJ' },
