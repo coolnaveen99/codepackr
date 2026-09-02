@@ -1001,16 +1001,12 @@ function ContactTool() {
     formData.append('message', message)
 
     try {
-      const response = await fetch('https://script.google.com/macros/s/AKfycbzdXJFPIxYzXi7ldi6Cks03cctcVHLEqNfS0w11vAwMzDIjhME_dmJE54k6cW_LNpkwCQ/exec', {
+      const response = await fetch('https://script.google.com/macros/s/AKfycbxLtRspOxZaKhGdikBBlAjJk3ndSibOs0t3Im2Xf-K0podjAPItb90iOA9mDjRAbuT_Bg/exec', {
         method: 'POST',
         body: formData,
-        headers: { Accept: 'application/json' },
+        mode: 'no-cors',
       })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        const errorMessage = Array.isArray(data.errors) ? data.errors.map((error: { message: string }) => error.message).join(', ') : `Error ${response.status}`
-        throw new Error(errorMessage)
-      }
+      if (response.type !== 'opaque' && !response.ok) throw new Error(`Error ${response.status}`)
       setSent(true)
       setStatus({ tone: 'ok', text: 'Message sent! Thank you for reaching out. We will get back to you within 24-48 hours.' })
       setName('')
