@@ -985,18 +985,23 @@ function ContactTool() {
 
   const submitContact = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    const normalizedEmail = email.trim()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(normalizedEmail)) {
+      setStatus({ tone: 'warn', text: 'Enter a valid email address, for example name@example.com.' })
+      return
+    }
+
     setSending(true)
     setStatus({ tone: 'info', text: 'Sending message...' })
 
     const formData = new FormData()
     formData.append('name', name)
-    formData.append('email', email)
-    formData.append('_replyto', email)
-    formData.append('_subject', `Codepackr: ${subject}`)
-    formData.append('message', `Topic: ${subject}\n\n${message}`)
+    formData.append('email', normalizedEmail)
+    formData.append('subject', subject)
+    formData.append('message', message)
 
     try {
-      const response = await fetch('https://formspree.io/f/xnjgovzw', {
+      const response = await fetch('https://script.google.com/macros/s/AKfycbzdXJFPIxYzXi7ldi6Cks03cctcVHLEqNfS0w11vAwMzDIjhME_dmJE54k6cW_LNpkwCQ/exec', {
         method: 'POST',
         body: formData,
         headers: { Accept: 'application/json' },
@@ -1025,7 +1030,7 @@ function ContactTool() {
       <form className="contact-form" onSubmit={submitContact}>
         <div className="contact-grid">
           <label className="field"><span>Your Name *</span><input required value={name} onChange={(event) => setName(event.target.value)} placeholder="Kumar" /></label>
-          <label className="field"><span>Email Address *</span><input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="kumar@example.com" /></label>
+          <label className="field"><span>Email Address *</span><input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} onInvalid={(event) => { event.currentTarget.setCustomValidity('Enter a valid email address, for example name@example.com.'); setStatus({ tone: 'warn', text: 'Enter a valid email address, for example name@example.com.' }) }} onInput={(event) => event.currentTarget.setCustomValidity('')} placeholder="kumar@example.com" /></label>
           <label className="field"><span>Subject *</span><select required value={subject} onChange={(event) => setSubject(event.target.value)}><option value="">Select a topic...</option><option value="bug">Bug Report</option><option value="feature">Feature / Tool Request</option><option value="feedback">General Feedback</option><option value="other">Other</option></select></label>
           <TextareaBox label="Message *" value={message} onChange={setMessage} placeholder="Describe your bug, suggestion, or feedback..." />
         </div>
@@ -1284,14 +1289,23 @@ function decodeHtmlEntities(value: string) {
 function runJsonPath(input: string, path: string): { status: Status; value: string } {
   try {
     const data = JSON.parse(input)
-    if (!path.trim().startsWith('$')) return { status: { tone: 'warn', text: 'JSONPath must start with $' }, value: '' }
-    const tokens = tokenizeJsonPath(path)
+    const expression = path.trim()
+    if (!expression.startsWith('$')) return { status: { tone: 'warn', text: 'JSONPath must start with $' }, value: '' }
+    if (expression.includes('..')) return { status: { tone: 'warn', text: 'Recursive descent (..) is not supported' }, value: '' }
+    const tokens = tokenizeJsonPath(expression)
     let current: unknown = data
     for (const token of tokens) {
-      if (Array.isArray(current) && typeof token === 'number') current = current[token]
-      else if (current && typeof current === 'object' && typeof token === 'string') current = (current as Record<string, unknown>)[token]
-      else return { status: { tone: 'warn', text: `No match at ${String(token)}` }, value: '' }
+      if (Array.isArray(current) && typeof token === 'number') {
+        if (token >= current.length) return { status: { tone: 'warn', text: `No match at [${token}]` }, value: '' }
+        current = current[token]
+      } else if (current !== null && typeof current === 'object' && !Array.isArray(current) && typeof token === 'string') {
+        if (!Object.prototype.hasOwnProperty.call(current, token)) return { status: { tone: 'warn', text: `No match at ${token}` }, value: '' }
+        current = (current as Record<string, unknown>)[token]
+      } else {
+        return { status: { tone: 'warn', text: `No match at ${String(token)}` }, value: '' }
+      }
     }
+    if (current === undefined) return { status: { tone: 'warn', text: 'No match' }, value: '' }
     return { status: { tone: 'ok', text: 'JSONPath matched' }, value: JSON.stringify(current, null, 2) }
   } catch (error) {
     return { status: { tone: 'warn', text: getErrorMessage(error) }, value: '' }
