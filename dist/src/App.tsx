@@ -3,6 +3,7 @@ import { CronExpressionParser } from 'cron-parser'
 import { dump as dumpYaml, load as loadYaml } from 'js-yaml'
 import JSZip from 'jszip'
 import QRCode from 'qrcode'
+import toolContent from './tool-content.json'
 import './App.css'
 
 type ToolId =
@@ -58,6 +59,7 @@ type ToolId =
   | 'contact'
 
 type Tool = { id: ToolId; name: string; description: string; icon: string; category: string }
+type ToolContent = { steps: string[]; faq: [string, string][] }
 type DiffLine = { type: 'common' | 'added' | 'removed'; value: string }
 type DiffPrecision = 'word' | 'char'
 type DiffSegment = { value: string; changed: boolean }
@@ -501,7 +503,8 @@ function HomePage({ filteredTools, onSelectTool, query, recentToolIds }: { filte
 
 function ToolInfo({ tool, onSelectTool }: { tool: Tool; onSelectTool: (toolId: ToolId) => void }) {
   const related = tools.filter((candidate) => candidate.id !== tool.id && candidate.category === tool.category).slice(0, 4)
-  return <section className="tool-info"><div className="info-heading"><h2>How to use {tool.name}</h2><button onClick={() => copyToClipboard(window.location.href)}>Copy page link</button></div><ol><li>Enter or paste the content you want to process.</li><li>Choose the relevant action or options for {tool.name.toLowerCase()}.</li><li>Review the result and any validation message.</li><li>Use the copy or download action to save the result.</li></ol><h2>Frequently asked questions</h2><details><summary>Is {tool.name} free?</summary><p>Yes. This tool is free to use without an account.</p></details><details><summary>Does Codepackr upload my data?</summary><p>No. {tool.name} processes your input locally in your browser.</p></details>{related.length > 0 && <><h2>Related tools</h2><div className="related-tools">{related.map((candidate) => <a href={getToolPath(candidate.id)} key={candidate.id} onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); onSelectTool(candidate.id) }}>{candidate.name}<span>-&gt;</span></a>)}</div></>}</section>
+  const content = toolContent[tool.id as Exclude<ToolId, 'contact'>] as ToolContent
+  return <section className="tool-info"><div className="info-heading"><h2>How to use {tool.name}</h2><button onClick={() => copyToClipboard(window.location.href)}>Copy page link</button></div><ol>{content.steps.map((step) => <li key={step}>{step}</li>)}</ol><h2>Frequently asked questions</h2>{content.faq.map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}{related.length > 0 && <><h2>Related tools</h2><div className="related-tools">{related.map((candidate) => <a href={getToolPath(candidate.id)} key={candidate.id} onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); onSelectTool(candidate.id) }}>{candidate.name}<span>-&gt;</span></a>)}</div></>}</section>
 }
 
 function ToolRenderer({ tool }: { tool: Tool }) {

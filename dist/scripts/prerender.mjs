@@ -17,6 +17,7 @@ import { dirname, join } from 'node:path'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const distDir = join(__dirname, '..', 'dist')
 const siteUrl = 'https://www.codepackr.com'
+const toolContent = JSON.parse(readFileSync(join(__dirname, '..', 'src', 'tool-content.json'), 'utf-8'))
 
 const categories = [
   {
@@ -171,8 +172,9 @@ function buildBody(tool) {
   const breadcrumb = tool
     ? `<nav aria-label="Breadcrumb"><a href="/">Home</a> / ${escapeHtml(tool.category)} / ${escapeHtml(tool.name)}</nav>`
     : ''
-  const toolGuide = tool
-    ? `<section><h2>How to use ${escapeHtml(tool.name)}</h2><ol><li>Enter or paste the content you want to process.</li><li>Choose the relevant action or options.</li><li>Review and copy or download the result.</li></ol><h2>${escapeHtml(tool.name)} FAQ</h2><h3>Is this tool free?</h3><p>Yes. ${escapeHtml(tool.name)} is free and requires no account.</p><h3>Is my data uploaded?</h3><p>No. Processing runs locally in your browser.</p></section>`
+  const content = tool ? toolContent[tool.id] : null
+  const toolGuide = tool && content
+    ? `<section><h2>How to use ${escapeHtml(tool.name)}</h2><ol>${content.steps.map((step) => `<li>${escapeHtml(step)}</li>`).join('')}</ol><h2>${escapeHtml(tool.name)} FAQ</h2>${content.faq.map(([question, answer]) => `<h3>${escapeHtml(question)}</h3><p>${escapeHtml(answer)}</p>`).join('')}<h2>Related tools</h2><ul>${allTools.filter((candidate) => candidate.id !== tool.id && candidate.category === tool.category).slice(0, 4).map((candidate) => `<li><a href="/${candidate.id}.html">${escapeHtml(candidate.name)}</a></li>`).join('')}</ul></section>`
     : ''
 
   return [
