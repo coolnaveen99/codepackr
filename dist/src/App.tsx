@@ -108,9 +108,9 @@ const categories = [
   {
     name: 'Converters',
     tools: [
-      { id: 'json-xml-converter', name: 'JSON to XML Converter', description: 'Convert JSON and XML both ways', icon: 'JX' },
+      { id: 'json-xml-converter', name: 'JSON to XML / XML to JSON', description: 'Convert JSON to XML or XML to JSON', icon: 'JX' },
       { id: 'json-csv-converter', name: 'JSON to CSV Converter', description: 'Convert JSON arrays and CSV both ways', icon: 'JC' },
-      { id: 'csv-xml-converter', name: 'CSV to XML Converter', description: 'Convert CSV records and XML both ways', icon: 'CX' },
+      { id: 'csv-xml-converter', name: 'CSV to XML / XML to CSV', description: 'Convert CSV to XML or XML to CSV', icon: 'CX' },
       { id: 'case-converter', name: 'Case Converter', description: 'Convert text between common naming conventions', icon: 'Aa' },
       { id: 'yaml-json-converter', name: 'YAML to JSON Converter', description: 'Convert YAML and JSON in either direction', icon: 'YJ' },
       { id: 'number-base-converter', name: 'Number Base Converter', description: 'Convert binary, octal, decimal, and hexadecimal', icon: '01' },
@@ -274,6 +274,15 @@ function App() {
   }, [currentTool])
 
   useEffect(() => {
+    if (!currentTool || currentTool.id === 'contact') return
+    setRecentToolIds((current) => {
+      const next = [currentTool.id, ...current.filter((id) => id !== currentTool.id)].slice(0, 8)
+      localStorage.setItem('codepackr-recent', JSON.stringify(next))
+      return next
+    })
+  }, [currentTool])
+
+  useEffect(() => {
     localStorage.setItem('codepackr-theme', dark ? 'dark' : 'light')
   }, [dark])
 
@@ -287,11 +296,6 @@ function App() {
     setActiveTool(toolId)
     setMenuOpen(false)
     window.history.pushState(null, '', getToolPath(toolId))
-    setRecentToolIds((current) => {
-      const next = [toolId, ...current.filter((id) => id !== toolId)].slice(0, 8)
-      localStorage.setItem('codepackr-recent', JSON.stringify(next))
-      return next
-    })
   }
 
   useEffect(() => {
@@ -785,7 +789,7 @@ function JwtEncoder() {
 function MarkdownHtmlConverter() {
   const [input, setInput] = useState('# Hello\n\nConvert **Markdown** to HTML.\n\n- Fast\n- Private')
   const output = useMemo(() => markdownToHtml(input), [input])
-  return <ToolPanel status={{ tone: input ? 'ok' : 'info', text: input ? 'HTML generated' : 'Enter Markdown to convert' }}><div className="workbench"><TextareaBox label="Markdown" value={input} onChange={setInput} /><OutputBox label="Raw HTML" value={output} /></div></ToolPanel>
+  return <ToolPanel status={{ tone: input ? 'ok' : 'info', text: input ? 'HTML generated' : 'Enter Markdown to convert' }}><div className="workbench"><TextareaBox label="Markdown (MD)" value={input} onChange={setInput} /><OutputBox label="Raw HTML" value={output} /></div></ToolPanel>
 }
 
 function HtmlMarkdownConverter() {
@@ -844,6 +848,7 @@ function ImageResizer() {
   const [quality, setQuality] = useState(0.85)
   const [output, setOutput] = useState('')
   const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Choose an image to resize' })
+  const fileInput = useRef<HTMLInputElement>(null)
   const choose = async (file?: File) => {
     if (!file?.type.startsWith('image/')) { setStatus({ tone: 'warn', text: 'Choose a valid image file' }); return }
     const url = await readFileAsDataUrl(file)
@@ -855,12 +860,18 @@ function ImageResizer() {
     try { setOutput(await resizeImage(source, width, height, 'image/jpeg', quality)); setStatus({ tone: 'ok', text: `Created ${width} x ${height} JPEG` }) }
     catch (error) { setStatus({ tone: 'warn', text: getErrorMessage(error) }) }
   }
-  return <ToolPanel status={status}><Actions><label className="file-picker">Choose image<input type="file" accept="image/*" onChange={(event) => choose(event.target.files?.[0])} /></label><label className="inline-option">Width <input type="number" min="1" max="8192" value={width} onChange={(event) => setWidth(Number(event.target.value))} /></label><label className="inline-option">Height <input type="number" min="1" max="8192" value={height} onChange={(event) => setHeight(Number(event.target.value))} /></label><label className="inline-option">Quality <input type="range" min="0.1" max="1" step="0.05" value={quality} onChange={(event) => setQuality(Number(event.target.value))} /></label><button className="primary" disabled={!source} onClick={resize}>Resize</button></Actions>{output && <div className="image-output"><img src={output} alt="Resized preview" /><a className="download-link" href={output} download={`resized-${width}x${height}.jpg`}>Download JPEG</a></div>}</ToolPanel>
+  const reset = () => {
+    setSource(''); setOutput(''); setWidth(800); setHeight(600); setQuality(0.85)
+    if (fileInput.current) fileInput.current.value = ''
+    setStatus({ tone: 'info', text: 'Choose an image to resize' })
+  }
+  return <ToolPanel status={status}><Actions><label className="file-picker">Choose image<input ref={fileInput} type="file" accept="image/*" onChange={(event) => choose(event.target.files?.[0])} /></label><label className="inline-option">Width <input type="number" min="1" max="8192" value={width} onChange={(event) => setWidth(Number(event.target.value))} /></label><label className="inline-option">Height <input type="number" min="1" max="8192" value={height} onChange={(event) => setHeight(Number(event.target.value))} /></label><label className="inline-option">Quality <input type="range" min="0.1" max="1" step="0.05" value={quality} onChange={(event) => setQuality(Number(event.target.value))} /></label><button className="primary" disabled={!source} onClick={resize}>Resize</button><button disabled={!source && !output} onClick={reset}>Reset</button></Actions>{source && <div className="image-preview-grid"><ImagePreview label="Original image" source={source} alt="Original image preview" />{output && <ImagePreview label="Resized image" source={output} alt="Resized preview"><a className="download-link" href={output} download={`resized-${width}x${height}.jpg`}>Download JPEG</a></ImagePreview>}</div>}</ToolPanel>
 }
 
 function FaviconGenerator() {
   const [source, setSource] = useState('')
   const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Choose a square image for best results' })
+  const fileInput = useRef<HTMLInputElement>(null)
   const choose = async (file?: File) => {
     if (!file?.type.startsWith('image/')) { setStatus({ tone: 'warn', text: 'Choose a valid image file' }); return }
     setSource(await readFileAsDataUrl(file)); setStatus({ tone: 'ok', text: 'Image ready for favicon generation' })
@@ -876,7 +887,16 @@ function FaviconGenerator() {
       setStatus({ tone: 'ok', text: 'Downloaded ICO and five common PNG sizes as ZIP' })
     } catch (error) { setStatus({ tone: 'warn', text: getErrorMessage(error) }) }
   }
-  return <ToolPanel status={status}><Actions><label className="file-picker">Choose image<input type="file" accept="image/*" onChange={(event) => choose(event.target.files?.[0])} /></label><button className="primary" disabled={!source} onClick={generate}>Download favicon ZIP</button></Actions>{source && <div className="image-output"><img src={source} alt="Favicon source preview" /></div>}</ToolPanel>
+  const reset = () => {
+    setSource('')
+    if (fileInput.current) fileInput.current.value = ''
+    setStatus({ tone: 'info', text: 'Choose a square image for best results' })
+  }
+  return <ToolPanel status={status}><Actions><label className="file-picker">Choose image<input ref={fileInput} type="file" accept="image/*" onChange={(event) => choose(event.target.files?.[0])} /></label><button className="primary" disabled={!source} onClick={generate}>Download favicon ZIP</button><button disabled={!source} onClick={reset}>Reset</button></Actions>{source && <ImagePreview label="Source image" source={source} alt="Favicon source preview" />}</ToolPanel>
+}
+
+function ImagePreview({ label, source, alt, children }: { label: string; source: string; alt: string; children?: React.ReactNode }) {
+  return <section className="image-output"><strong>{label}</strong><img src={source} alt={alt} />{children}</section>
 }
 
 function DiffTool() {
@@ -1091,9 +1111,11 @@ function YamlJsonConverter() {
   const [input, setInput] = useShareableInput('name: Codepackr\ntools:\n  - JSON Formatter\n  - Diff Checker\nactive: true')
   const [output, setOutput] = useState('')
   const [status, setStatus] = useState<Status>()
+  const [activeMode, setActiveMode] = useState<'yamlToJson' | 'jsonToYaml'>('yamlToJson')
   const yamlToJson = () => {
     try {
       setOutput(JSON.stringify(loadYaml(input), null, 2))
+      setActiveMode('yamlToJson')
       setStatus({ tone: 'ok', text: 'YAML converted to JSON' })
     } catch (error) {
       setOutput('')
@@ -1103,13 +1125,14 @@ function YamlJsonConverter() {
   const jsonToYaml = () => {
     try {
       setOutput(dumpYaml(JSON.parse(input), { indent: 2, noRefs: true, lineWidth: 100 }))
+      setActiveMode('jsonToYaml')
       setStatus({ tone: 'ok', text: 'JSON converted to YAML' })
     } catch (error) {
       setOutput('')
       setStatus({ tone: 'warn', text: getErrorMessage(error) })
     }
   }
-  return <TwoPaneTool input={input} setInput={setInput} output={output} status={status} actions={<><button className="primary" onClick={yamlToJson}>YAML to JSON</button><button onClick={jsonToYaml}>JSON to YAML</button></>} />
+  return <TwoPaneTool input={input} setInput={setInput} output={output} status={status} onClear={() => setActiveMode('yamlToJson')} actions={<><button className={activeMode === 'yamlToJson' ? 'primary' : ''} onClick={yamlToJson}>YAML to JSON</button><button className={activeMode === 'jsonToYaml' ? 'primary' : ''} onClick={jsonToYaml}>JSON to YAML</button></>} />
 }
 
 const numberBases = [
@@ -1235,7 +1258,7 @@ function TextTools() {
 
 function MarkdownTool() {
   const [input, setInput] = useState('# Markdown Preview\n\nType **markdown** and see HTML preview.\n\n- JSON\n- Diff\n- Base64')
-  return <ToolPanel><div className="workbench"><TextareaBox label="Markdown" value={input} onChange={setInput} /><div className="preview" dangerouslySetInnerHTML={{ __html: markdownToHtml(input) }} /></div></ToolPanel>
+  return <ToolPanel><div className="workbench"><TextareaBox label="Markdown (MD)" value={input} onChange={setInput} /><section className="preview-field"><span>Preview</span><div className="preview" dangerouslySetInnerHTML={{ __html: markdownToHtml(input) }} /></section></div></ToolPanel>
 }
 
 function ColorTool() {
@@ -2090,14 +2113,36 @@ function transformText(input: string, mode: string, find: string, replace: strin
 }
 
 function markdownToHtml(input: string) {
-  return escapeHtml(input)
-    .replace(/^### (.*)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.*)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.*)$/gm, '<h1>$1</h1>')
+  const output: string[] = []
+  let listOpen = false
+  const inline = (value: string) => escapeHtml(value)
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/^- (.*)$/gm, '<li>$1</li>')
-    .replace(/\n/g, '<br>')
+  const closeList = () => {
+    if (!listOpen) return
+    output.push('</ul>')
+    listOpen = false
+  }
+
+  input.split(/\r?\n/).forEach((line) => {
+    const heading = line.match(/^(#{1,3})\s+(.*)$/)
+    const listItem = line.match(/^[-*]\s+(.*)$/)
+    if (listItem) {
+      if (!listOpen) { output.push('<ul>'); listOpen = true }
+      output.push(`<li>${inline(listItem[1])}</li>`)
+    } else if (heading) {
+      closeList()
+      const level = heading[1].length
+      output.push(`<h${level}>${inline(heading[2])}</h${level}>`)
+    } else if (line.trim()) {
+      closeList()
+      output.push(`<p>${inline(line)}</p>`)
+    } else {
+      closeList()
+    }
+  })
+  closeList()
+  return output.join('\n')
 }
 
 function convertColor(input: string): { status: Status; hex: string; value: string } {
