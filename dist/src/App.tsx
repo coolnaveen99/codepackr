@@ -443,7 +443,7 @@ function App() {
 
 function HorizontalAd({ position = 'top' }: { position?: 'top' | 'bottom' }) {
   const pushedRef = useRef(false)
-  const adRef = useRef<HTMLElement>(null)
+  const adRef = useRef<HTMLModElement>(null)
 
   useEffect(() => {
     if (pushedRef.current || adRef.current?.getAttribute('data-adsbygoogle-status')) return
@@ -468,7 +468,7 @@ function HorizontalAd({ position = 'top' }: { position?: 'top' | 'bottom' }) {
 
 function VerticalAd({ side, slot }: { side: 'left' | 'right'; slot: string }) {
   const pushedRef = useRef(false)
-  const adRef = useRef<HTMLElement>(null)
+  const adRef = useRef<HTMLModElement>(null)
 
   useEffect(() => {
     if (pushedRef.current || adRef.current?.getAttribute('data-adsbygoogle-status')) return
