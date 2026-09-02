@@ -458,9 +458,11 @@ function HorizontalAd({ position = 'top' }: { position?: 'top' | 'bottom' }) {
       <ins
         ref={adRef}
         className="adsbygoogle"
-        style={{ display: 'inline-block', width: '100%', height: '90px' }}
+        style={{ display: 'block', width: '100%', height: '90px' }}
         data-ad-client="ca-pub-7526363571565796"
         data-ad-slot="8639237999"
+        data-ad-format="auto"
+        data-full-width-responsive="true"
       />
     </aside>
   )
