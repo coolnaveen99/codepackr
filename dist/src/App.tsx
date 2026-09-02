@@ -385,6 +385,10 @@ function App() {
         <a className={activeTool === 'contact' ? 'active' : ''} href={getToolPath('contact')} onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); selectTool('contact') }}>Contact</a>
       </div>
 
+      <HorizontalAd />
+      <VerticalAd side="left" slot="8066673720" />
+      <VerticalAd side="right" slot="7176992835" />
+
       <main id="top" className="page">
         {!currentTool ? <HomePage filteredTools={filteredTools} onSelectTool={selectTool} query={query} recentToolIds={recentToolIds} /> : currentTool.id === 'contact' ? <ContactPage /> : <>
         <section className="hero">
@@ -430,8 +434,62 @@ function App() {
         </>}
       </main>
 
+      <HorizontalAd position="bottom" />
+
       <footer><span>Copyright 2026 Codepackr</span><span>Fast tools, clean code. Developed by TNK.</span><a href="/sitemap.xml">Sitemap</a></footer>
     </div>
+  )
+}
+
+function HorizontalAd({ position = 'top' }: { position?: 'top' | 'bottom' }) {
+  const pushedRef = useRef(false)
+  const adRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (pushedRef.current || adRef.current?.getAttribute('data-adsbygoogle-status')) return
+    pushedRef.current = true
+    const windowWithAds = window as Window & { adsbygoogle?: unknown[] }
+    const adsbygoogle = windowWithAds.adsbygoogle = windowWithAds.adsbygoogle || []
+    adsbygoogle.push({})
+  }, [])
+
+  return (
+    <aside className={`horizontal-ad horizontal-ad-${position}`} aria-label="Advertisement">
+      <ins
+        ref={adRef}
+        className="adsbygoogle"
+        style={{ display: 'inline-block', width: '100%', height: '90px' }}
+        data-ad-client="ca-pub-7526363571565796"
+        data-ad-slot="8639237999"
+      />
+    </aside>
+  )
+}
+
+function VerticalAd({ side, slot }: { side: 'left' | 'right'; slot: string }) {
+  const pushedRef = useRef(false)
+  const adRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (pushedRef.current || adRef.current?.getAttribute('data-adsbygoogle-status')) return
+    pushedRef.current = true
+    const windowWithAds = window as Window & { adsbygoogle?: unknown[] }
+    const adsbygoogle = windowWithAds.adsbygoogle = windowWithAds.adsbygoogle || []
+    adsbygoogle.push({})
+  }, [])
+
+  return (
+    <aside className={`vertical-ad vertical-ad-${side}`} aria-label="Advertisement">
+      <ins
+        ref={adRef}
+        className="adsbygoogle"
+        style={{ display: 'block' }}
+        data-ad-client="ca-pub-7526363571565796"
+        data-ad-slot={slot}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
+    </aside>
   )
 }
 
