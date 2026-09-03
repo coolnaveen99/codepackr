@@ -224,15 +224,35 @@ function isPlainClick(event: React.MouseEvent) {
   return !event.defaultPrevented && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey
 }
 
+function buildSeoKeywords(tool: Tool | null) {
+  const baseKeywords = [
+    'codepackr', 'free online developer tools', 'developer tools online', 'browser based tools', 'client side tools', 'no upload tools',
+    'json formatter', 'json validator', 'json minifier', 'base64 encoder', 'url encoder', 'html formatter', 'css formatter', 'sql formatter',
+    'xml formatter', 'yaml formatter', 'diff checker', 'regex tester', 'jwt decoder', 'jwt encoder', 'hash generator', 'hmac generator',
+    'crc32 checksum', 'text tools', 'word counter', 'character counter', 'line counter', 'sentence counter', 'qr code generator',
+    'password generator', 'timestamp converter', 'cron expression tool', 'percentage calculator', 'tip calculator', 'sip calculator', 'loan calculator',
+  ]
+  if (!tool) return baseKeywords.join(', ')
+
+  const name = tool.name.toLowerCase()
+  const category = tool.category.toLowerCase()
+  const slug = tool.id.replace(/-/g, ' ')
+  const words = `${tool.name} ${tool.description}`.toLowerCase().match(/[a-z0-9]+/g) ?? []
+  const keywords = [
+    name, slug, `${name} online`, `free ${name}`, `free ${name} online`, `${name} tool`, `${name} free`, `${name} browser`,
+    `${name} no upload`, `${name} client side`, `${category} tools`, 'online developer tools', 'free developer tools', 'browser developer tools',
+    'codepackr tools', 'web developer tools', 'frontend tools', 'backend tools', 'data tools', ...words,
+  ]
+  return Array.from(new Set(keywords)).slice(0, 40).join(', ')
+}
+
 function updateSeo(tool: Tool | null) {
   const title = tool ? `Free ${tool.name} Online | Codepackr` : 'Codepackr - Free Online Developer Tools'
   const description = tool
     ? `${tool.description}. Free online ${tool.name.toLowerCase()} from Codepackr. Runs locally in your browser.`
     : 'Free online developer tools for formatting, validating, encoding, converting, and inspecting data locally in your browser.'
   const canonical = `${siteUrl}${tool ? getToolPath(tool.id) : '/'}`
-  const keywords = tool
-    ? `${tool.name.toLowerCase()}, ${tool.category.toLowerCase()}, codepackr, developer tools, online tools`
-    : 'developer tools, json formatter, sql formatter, yaml formatter, diff checker, base64 encoder, qr code generator, password generator, edi tools'
+  const keywords = buildSeoKeywords(tool)
 
   document.title = title
   upsertMeta('name', 'description', description)
