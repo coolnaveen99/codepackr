@@ -478,7 +478,7 @@ function App() {
         </>}
       </main>
 
-      <footer><span>Copyright 2026 Codepackr</span><span>Fast tools, clean code. Developed by TNK.</span><a href={getToolPath('text-tools')}>Text Tools</a><a href="/sitemap.xml">Sitemap</a></footer>
+      <footer><span>Copyright 2026 Codepackr</span><span>Fast tools, clean code. Developed by TNK.</span><a href="/sitemap.xml">Sitemap</a></footer>
     </div>
   )
 }
