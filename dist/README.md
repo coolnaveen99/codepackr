@@ -125,7 +125,7 @@ When deploying, submit `https://www.codepackr.com/sitemap.xml` to Google Search 
 
 ## Deployment
 
-The app is configured for Vercel. Set the Vercel project root directory to this repository directory, then use:
+The app is configured for Vercel. Set the Vercel project root directory to `dist/` (the directory containing this `package.json`), then use:
 
 ```bash
 npm install
