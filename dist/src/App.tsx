@@ -8,6 +8,7 @@ import './App.css'
 
 type ToolId =
   | 'json-formatter'
+  | 'json-minifier'
   | 'html-formatter'
   | 'css-formatter'
   | 'sql-formatter'
@@ -18,6 +19,8 @@ type ToolId =
   | 'url-encode'
   | 'html-entity'
   | 'hash-generator'
+  | 'crc32-checksum-generator'
+  | 'hmac-generator'
   | 'jwt-decoder'
   | 'jwt-encoder'
   | 'base64-image'
@@ -51,11 +54,26 @@ type ToolId =
   | 'password-generator'
   | 'lorem-ipsum'
   | 'text-tools'
+  | 'word-counter'
+  | 'character-counter'
+  | 'line-counter'
+  | 'sentence-counter'
+  | 'remove-duplicate-lines'
+  | 'remove-empty-lines'
+  | 'remove-extra-spaces'
+  | 'sort-lines-alphabetically'
+  | 'reverse-line-order'
+  | 'what-is-my-screen-resolution'
+  | 'what-is-my-user-agent'
   | 'markdown'
   | 'color-converter'
   | 'timestamp'
   | 'cron-expression'
   | 'calculator'
+  | 'percentage-calculator'
+  | 'tip-calculator'
+  | 'sip-calculator'
+  | 'loan-calculator'
   | 'contact'
 
 type Tool = { id: ToolId; name: string; description: string; icon: string; category: string }
@@ -74,6 +92,7 @@ const categories = [
     name: 'Formatters',
     tools: [
       { id: 'json-formatter', name: 'JSON Formatter', description: 'Beautify, minify, and validate JSON', icon: '{ }' },
+      { id: 'json-minifier', name: 'JSON Minifier', description: 'Minify JSON and validate its syntax', icon: '{-}' },
       { id: 'html-formatter', name: 'HTML Formatter', description: 'Beautify and minify HTML markup', icon: '</>' },
       { id: 'css-formatter', name: 'CSS Formatter', description: 'Prettify and compress stylesheets', icon: '#' },
       { id: 'sql-formatter', name: 'SQL Formatter', description: 'Format SQL queries for readability', icon: 'SQL' },
@@ -89,9 +108,21 @@ const categories = [
       { id: 'url-encode', name: 'URL Encoder', description: 'Encode and decode URL components', icon: 'URL' },
       { id: 'html-entity', name: 'HTML Entity Encoder', description: 'Encode and decode HTML entities', icon: '&lt;' },
       { id: 'hash-generator', name: 'Hash Generator', description: 'Generate SHA hashes in the browser', icon: '#!' },
+      { id: 'crc32-checksum-generator', name: 'CRC32 Checksum Generator', description: 'Calculate a CRC32 checksum for text or a file', icon: 'CRC' },
+      { id: 'hmac-generator', name: 'HMAC Generator', description: 'Create keyed HMAC signatures locally', icon: 'HMAC' },
       { id: 'jwt-decoder', name: 'JWT Decoder', description: 'Decode and inspect JWT tokens', icon: 'JWT' },
       { id: 'jwt-encoder', name: 'JWT Encoder', description: 'Build and sign HS256 JSON Web Tokens', icon: 'JWT+' },
       { id: 'base64-image', name: 'Base64 Image', description: 'Encode images as Base64 or decode data URLs', icon: 'IMG' },
+    ],
+  },
+  {
+    name: 'Calculators',
+    tools: [
+      { id: 'calculator', name: 'Calculator', description: 'Scientific calculator for quick math', icon: 'CAL' },
+      { id: 'percentage-calculator', name: 'Percentage Calculator', description: 'Calculate percentages, increases, and decreases', icon: '%' },
+      { id: 'tip-calculator', name: 'Tip Calculator', description: 'Calculate tips and split a bill', icon: 'TIP' },
+      { id: 'sip-calculator', name: 'SIP Calculator', description: 'Estimate returns from monthly investments', icon: 'SIP' },
+      { id: 'loan-calculator', name: 'Loan Calculator', description: 'Calculate loan EMI, interest, and repayment', icon: 'EMI' },
     ],
   },
   {
@@ -139,6 +170,8 @@ const categories = [
       { id: 'password-generator', name: 'Password Generator', description: 'Create strong random passwords', icon: 'PW' },
       { id: 'lorem-ipsum', name: 'Lorem Ipsum', description: 'Generate placeholder text', icon: 'Aa' },
       { id: 'text-tools', name: 'Text Tools', description: 'Count, transform, sort, and clean text', icon: 'Tx' },
+      { id: 'what-is-my-screen-resolution', name: 'What Is My Screen Resolution', description: 'See your current screen resolution', icon: 'SCR' },
+      { id: 'what-is-my-user-agent', name: 'What Is My User Agent', description: 'See your browser user agent string', icon: 'UA' },
       { id: 'markdown', name: 'Markdown Preview', description: 'Live markdown editor and preview', icon: 'MD' },
       { id: 'color-converter', name: 'Color Converter', description: 'Convert HEX, RGB, and HSL colors', icon: 'RGB' },
       { id: 'timestamp', name: 'Timestamp Converter', description: 'Convert Unix timestamps and dates', icon: 'TS' },
@@ -146,7 +179,6 @@ const categories = [
       { id: 'slugify', name: 'Slugify Tool', description: 'Turn text into a clean URL-safe slug', icon: '/-' },
       { id: 'http-status-codes', name: 'HTTP Status Code Lookup', description: 'Search HTTP codes, names, and descriptions', icon: 'HTTP' },
       { id: 'mock-json-generator', name: 'Mock JSON Generator', description: 'Generate fake records from a simple schema', icon: 'FAKE' },
-      { id: 'calculator', name: 'Calculator', description: 'Scientific calculator for quick math', icon: 'CAL' },
     ],
   },
 ] satisfies { name: string; tools: Omit<Tool, 'category'>[] }[]
@@ -158,6 +190,18 @@ const tools: Tool[] = categories.flatMap((category) =>
 )
 
 const routeTools = [...tools, contactTool]
+const textOperationRoutes: Tool[] = [
+  { id: 'word-counter', name: 'Word Counter', description: 'Count words, characters, and sentences in text', icon: 'W', category: 'Text Tools' },
+  { id: 'character-counter', name: 'Character Counter', description: 'Count characters in text online', icon: 'C', category: 'Text Tools' },
+  { id: 'line-counter', name: 'Line Counter', description: 'Count lines in text online', icon: 'L', category: 'Text Tools' },
+  { id: 'sentence-counter', name: 'Sentence Counter', description: 'Count sentences in text online', icon: 'S', category: 'Text Tools' },
+  { id: 'remove-duplicate-lines', name: 'Remove Duplicate Lines', description: 'Remove duplicate lines from text', icon: 'D', category: 'Text Tools' },
+  { id: 'remove-empty-lines', name: 'Remove Empty Lines', description: 'Remove blank lines from text', icon: 'E', category: 'Text Tools' },
+  { id: 'remove-extra-spaces', name: 'Remove Extra Spaces', description: 'Collapse extra spaces and tabs in text', icon: 'SP', category: 'Text Tools' },
+  { id: 'sort-lines-alphabetically', name: 'Sort Lines Alphabetically', description: 'Sort text lines alphabetically', icon: 'AZ', category: 'Text Tools' },
+  { id: 'reverse-line-order', name: 'Reverse Line Order', description: 'Reverse the order of text lines', icon: 'REV', category: 'Text Tools' },
+]
+routeTools.push(...textOperationRoutes)
 const siteUrl = 'https://www.codepackr.com'
 
 const sampleJson = '{\n  "name": "Codepackr",\n  "tools": ["json", "diff", "base64"]\n}'
@@ -247,7 +291,7 @@ function upsertJsonLd(data: Record<string, unknown>) {
 }
 
 function App() {
-  const [activeTool, setActiveTool] = useState<ToolId | null>(null)
+  const [activeTool, setActiveTool] = useState<ToolId | null>(() => getToolIdFromLocation())
   const [query, setQuery] = useState('')
   const [dark, setDark] = useState(() => {
     const savedTheme = localStorage.getItem('codepackr-theme')
@@ -264,8 +308,11 @@ function App() {
     `${tool.name} ${tool.description} ${tool.category}`.toLowerCase().includes(query.toLowerCase()),
   )
 
+  useLayoutEffect(() => {
+    document.getElementById('root')?.removeAttribute('data-codepackr-prerendered')
+  }, [])
+
   useEffect(() => {
-    setActiveTool(getToolIdFromLocation())
     const handleNavigation = () => setActiveTool(getToolIdFromLocation())
     window.addEventListener('popstate', handleNavigation)
     return () => window.removeEventListener('popstate', handleNavigation)
@@ -389,11 +436,13 @@ function App() {
         {!currentTool ? <HomePage filteredTools={filteredTools} onSelectTool={selectTool} query={query} recentToolIds={recentToolIds} /> : currentTool.id === 'contact' ? <ContactPage /> : <>
         <section className="hero">
           <div>
-            <div className="breadcrumb">Home / {currentTool.category} / {currentTool.name}</div>
+            <div className="tool-page-bar">
+              <div className="breadcrumb">Home / {currentTool.category} / {currentTool.name}</div>
+            </div>
             <h1>{currentTool.name}</h1>
             <p className="intro">{currentTool.description}. All processing runs locally in your browser.</p>
           </div>
-          <div className="hero-count"><strong>{tools.length}<i aria-hidden="true" className="count-light" /></strong><span>tools available</span></div>
+          <div className="hero-summary"><ToolPageActions /><div className="hero-count"><strong>{tools.length}<i aria-hidden="true" className="count-light" /></strong><span>tools available</span></div></div>
         </section>
 
         <section className="layout">
@@ -503,14 +552,103 @@ function HomePage({ filteredTools, onSelectTool, query, recentToolIds }: { filte
 
 function ToolInfo({ tool, onSelectTool }: { tool: Tool; onSelectTool: (toolId: ToolId) => void }) {
   const related = tools.filter((candidate) => candidate.id !== tool.id && candidate.category === tool.category).slice(0, 4)
-  const content = toolContent[tool.id as Exclude<ToolId, 'contact'>] as ToolContent
-  return <section className="tool-info"><div className="info-heading"><h2>How to use {tool.name}</h2><button onClick={() => copyToClipboard(window.location.href)}>Copy page link</button></div><ol>{content.steps.map((step) => <li key={step}>{step}</li>)}</ol><h2>Frequently asked questions</h2>{content.faq.map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}{related.length > 0 && <><h2>Related tools</h2><div className="related-tools">{related.map((candidate) => <a href={getToolPath(candidate.id)} key={candidate.id} onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); onSelectTool(candidate.id) }}>{candidate.name}<span>-&gt;</span></a>)}</div></>}</section>
+  const content = (toolContent[tool.id as keyof typeof toolContent] as ToolContent | undefined) ?? getDefaultToolContent(tool)
+  const isTextOperation = textOperationRoutes.some((candidate) => candidate.id === tool.id)
+  return <section className="tool-info"><div className="info-heading"><h2>How to use {tool.name}</h2><button onClick={() => copyToClipboard(window.location.href)}>Copy page link</button></div><ol>{content.steps.map((step) => <li key={step}>{step}</li>)}</ol><h2>Frequently asked questions</h2>{content.faq.map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}{isTextOperation && <p><a className="tool-inline-link" href={getToolPath('text-tools')}>Open all Text Tools</a></p>}{related.length > 0 && <><h2>Related tools</h2><div className="related-tools">{related.map((candidate) => <a href={getToolPath(candidate.id)} key={candidate.id} onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); onSelectTool(candidate.id) }}>{candidate.name}<span>-&gt;</span></a>)}</div></>}</section>
+}
+
+function getDefaultToolContent(tool: Tool): ToolContent {
+  return {
+    steps: [`Enter or select the data for ${tool.name}.`, 'Adjust the available options if needed.', 'Review the result and copy it for use in your project.'],
+    faq: [['Does this tool upload my data?', 'No. All processing runs locally in your browser, and Codepackr does not upload your input.'], ['Can I use this tool for free?', 'Yes. This tool is free to use without an account or installation.']],
+  }
+}
+
+function Icon({ name }: { name: 'share' | 'x' | 'facebook' | 'linkedin' | 'reddit' | 'whatsapp' | 'telegram' | 'email' | 'close' }) {
+  const paths = {
+    share: <><circle cx="18" cy="5" r="2.5" /><circle cx="6" cy="12" r="2.5" /><circle cx="18" cy="19" r="2.5" /><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4" /></>,
+    x: <path d="M5 4h4.1l3.5 4.7L16.7 4H19l-5.3 6.1L19.4 20h-4.1l-3.9-5.3L6.8 20H4.5l5.8-6.7L5 4Z" />,
+    facebook: <path d="M13.5 20v-7h2.4l.4-2.8h-2.8V8.4c0-.8.2-1.4 1.4-1.4h1.5V4.5c-.3 0-1.1-.1-2.1-.1-2.1 0-3.6 1.3-3.6 3.7v2.1H8v2.8h2.6v7h2.9Z" />,
+    linkedin: <><path d="M6.2 8.6H3.4V20h2.8V8.6ZM4.8 4A1.7 1.7 0 1 0 4.8 7.4 1.7 1.7 0 0 0 4.8 4Z" /><path d="M10.1 8.6V20h2.8v-5.6c0-1.5.3-2.9 2.1-2.9 1.8 0 1.8 1.7 1.8 3V20h2.8v-6.1c0-3-1.6-4.4-3.7-4.4-1.7 0-2.5.9-2.9 1.6V8.6h-2.9Z" /></>,
+    reddit: <><circle cx="12" cy="13" r="6.5" /><circle cx="9.5" cy="12.2" r=".9" fill="currentColor" /><circle cx="14.5" cy="12.2" r=".9" fill="currentColor" /><path d="M9.2 15.1c1.7 1.3 3.9 1.3 5.6 0M14 7l.8-3 2.3.6" /></>,
+    whatsapp: <><path d="M19.1 4.9A9 9 0 0 0 4.8 15.7L4 20l4.4-1.1A9 9 0 1 0 19.1 4.9Z" /><path d="M8.5 8.2c.2-.5.4-.5.7-.5h.5c.2 0 .4.1.5.4l.7 1.6c.1.3.1.5-.1.7l-.5.6c.5 1 1.3 1.8 2.3 2.3l.6-.5c.2-.2.4-.2.7-.1l1.6.7c.3.1.4.3.4.5v.5c0 .3-.2.6-.5.7-.5.2-1.1.3-1.7.1-2.6-.8-4.7-2.9-5.5-5.5-.2-.6-.1-1.2.1-1.7Z" /></>,
+    telegram: <path d="m21 4-3.1 15.1c-.2 1.1-.9 1.4-1.8.9l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.4-5 9.1-8.2c.4-.4-.1-.6-.6-.3L5.4 12.8.5 11.3c-1.1-.3-1.1-1.1.2-1.6L19.8 2.3C20.7 2 21.2 2.4 21 4Z" />,
+    email: <><rect x="3" y="5" width="18" height="14" rx="1.5" /><path d="m4 7 8 6 8-6" /></>,
+    close: <path d="m6 6 12 12M18 6 6 18" />,
+  }
+  return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>
+}
+
+function ToolPageActions() {
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
+  const [isOpen, setIsOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const canonicalUrl = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href || window.location.href
+  const title = document.title
+
+  useEffect(() => {
+    if (!isOpen) return
+    closeRef.current?.focus()
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false)
+      if (event.key === 'Tab') {
+        const focusable = Array.from(document.querySelectorAll<HTMLElement>('.share-modal button, .share-modal input, .share-modal a')).filter((element) => !element.hasAttribute('disabled'))
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        if (!first || !last) return
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus() }
+        if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => { document.removeEventListener('keydown', handleKeyDown); triggerRef.current?.focus() }
+  }, [isOpen])
+
+  const copyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(canonicalUrl)
+    } catch {
+      const input = document.querySelector<HTMLInputElement>('#share-page-url')
+      input?.select()
+      document.execCommand('copy')
+    }
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1600)
+  }
+
+  const encodedUrl = encodeURIComponent(canonicalUrl)
+  const encodedTitle = encodeURIComponent(title)
+  const shareLinks = [
+    ['X', 'x', `https://x.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`],
+    ['Facebook', 'facebook', `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`],
+    ['LinkedIn', 'linkedin', `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`],
+    ['Reddit', 'reddit', `https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`],
+    ['WhatsApp', 'whatsapp', `https://api.whatsapp.com/send?text=${encodedTitle}%3A%20${encodedUrl}`],
+    ['Telegram', 'telegram', `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`],
+    ['Email', 'email', `mailto:?subject=${encodedTitle}&body=${encodeURIComponent(`Check out this tool: ${canonicalUrl}`)}`],
+  ] as const
+
+  return <>
+    <div className="tool-page-actions" aria-label="Tool page actions">
+      <button className="tool-share-button" type="button" onClick={() => setIsOpen(true)} ref={triggerRef}><Icon name="share" />Share</button>
+    </div>
+    {isOpen && <div className="share-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setIsOpen(false) }}>
+      <section className="share-modal" role="dialog" aria-modal="true" aria-labelledby="share-modal-title">
+        <div className="share-modal-heading"><h2 id="share-modal-title">Share this tool</h2><button className="tool-action-icon" type="button" onClick={() => setIsOpen(false)} ref={closeRef} aria-label="Close share dialog"><Icon name="close" /></button></div>
+        <div className="share-copy-row"><input id="share-page-url" readOnly value={canonicalUrl} aria-label="Page URL" /><button className="primary" type="button" onClick={copyUrl}>{copied ? 'Copied!' : 'Copy'}</button></div>
+        <div className="share-links" aria-label="Share on social media">{shareLinks.map(([label, icon, href]) => <a href={href} key={label} target="_blank" rel="noopener" aria-label={`Share on ${label}`}><Icon name={icon} /><span>{label}</span></a>)}</div>
+      </section>
+    </div>}
+  </>
 }
 
 function ToolRenderer({ tool }: { tool: Tool }) {
   switch (tool.id) {
     case 'json-formatter':
       return <JsonFormatter />
+    case 'json-minifier':
+      return <JsonMinifier />
     case 'html-formatter':
       return <FormatTool title="HTML Formatter" sample="<main><h1>Hello</h1><p>World</p></main>" format={formatMarkup} minify={minifyMarkup} />
     case 'css-formatter':
@@ -531,6 +669,10 @@ function ToolRenderer({ tool }: { tool: Tool }) {
       return <HtmlEntityTool />
     case 'hash-generator':
       return <HashTool />
+    case 'crc32-checksum-generator':
+      return <Crc32Tool />
+    case 'hmac-generator':
+      return <HmacTool />
     case 'jwt-decoder':
       return <JwtTool />
     case 'jwt-encoder':
@@ -593,6 +735,12 @@ function ToolRenderer({ tool }: { tool: Tool }) {
       return <LoremTool />
     case 'text-tools':
       return <TextTools />
+    case 'word-counter': case 'character-counter': case 'line-counter': case 'sentence-counter': case 'remove-duplicate-lines': case 'remove-empty-lines': case 'remove-extra-spaces': case 'sort-lines-alphabetically': case 'reverse-line-order':
+      return <TextTools initialMode={tool.id} />
+    case 'what-is-my-screen-resolution':
+      return <ScreenResolutionTool />
+    case 'what-is-my-user-agent':
+      return <UserAgentTool />
     case 'markdown':
       return <MarkdownTool />
     case 'color-converter':
@@ -607,6 +755,14 @@ function ToolRenderer({ tool }: { tool: Tool }) {
       return <HttpStatusLookup />
     case 'calculator':
       return <CalculatorTool />
+    case 'percentage-calculator':
+      return <PercentageCalculator />
+    case 'tip-calculator':
+      return <TipCalculator />
+    case 'sip-calculator':
+      return <SipCalculator />
+    case 'loan-calculator':
+      return <LoanCalculator />
     case 'contact':
       return <ContactTool />
   }
@@ -666,6 +822,17 @@ function JsonFormatter() {
       <div className="workbench"><TextareaBox label="JSON input" value={input} onChange={setInput} /><OutputBox label="Output" value={output} /></div>
     </ToolPanel>
   )
+}
+
+function JsonMinifier() {
+  const [input, setInput] = useState(sampleJson)
+  const [output, setOutput] = useState('')
+  const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Paste JSON and minify it locally' })
+  const minify = () => {
+    try { setOutput(JSON.stringify(JSON.parse(input))); setStatus({ tone: 'ok', text: 'Valid JSON minified' }) }
+    catch (error) { setOutput(''); setStatus({ tone: 'warn', text: getErrorMessage(error) }) }
+  }
+  return <ToolPanel status={status}><Actions><button className="primary" onClick={minify}>Minify JSON</button><a className="tool-inline-link" href={getToolPath('json-formatter')}>Need to format instead? Try the JSON Formatter.</a></Actions><div className="workbench"><TextareaBox label="JSON input" value={input} onChange={setInput} /><OutputBox label="Minified JSON" value={output} /></div></ToolPanel>
 }
 
 function FormatTool({ title, sample, format, minify, primaryLabel = 'Beautify' }: { title: string; sample: string; format: (value: string) => string; minify?: (value: string) => string; primaryLabel?: string }) {
@@ -763,6 +930,50 @@ function HashTool() {
     setStatus({ tone: 'ok', text: `${algorithm} generated` })
   }
   return <ToolPanel status={status}><Actions><select value={algorithm} onChange={(event) => setAlgorithm(event.target.value)}><option>SHA-1</option><option>SHA-256</option><option>SHA-384</option><option>SHA-512</option></select><button className="primary" onClick={run}>Generate Hash</button></Actions><div className="workbench"><TextareaBox label="Input" value={input} onChange={setInput} /><OutputBox label="Hash" value={output} /></div></ToolPanel>
+}
+
+function Crc32Tool() {
+  const [input, setInput] = useState('Codepackr')
+  const [output, setOutput] = useState('')
+  const calculate = (value: string | ArrayBuffer) => setOutput(crc32(value))
+  const readFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    file.arrayBuffer().then(calculate)
+  }
+  return <ToolPanel status={{ tone: output ? 'ok' : 'info', text: output ? 'CRC32 calculated locally' : 'Enter text or select a file' }}><Actions><button className="primary" onClick={() => calculate(input)}>Calculate CRC32</button><label className="inline-option">File <input type="file" onChange={readFile} /></label></Actions><div className="workbench"><TextareaBox label="Text input" value={input} onChange={setInput} /><OutputBox label="CRC32 checksum (hex)" value={output} /></div></ToolPanel>
+}
+
+function HmacTool() {
+  const [message, setMessage] = useState('Codepackr')
+  const [secret, setSecret] = useState('')
+  const [algorithm, setAlgorithm] = useState<'SHA-256' | 'SHA-384' | 'SHA-512'>('SHA-256')
+  const [format, setFormat] = useState<'hex' | 'base64'>('hex')
+  const [output, setOutput] = useState('')
+  const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Enter a message and secret key' })
+  const generate = async () => {
+    try {
+      if (!secret) throw new Error('A secret key is required')
+      const encoder = new TextEncoder()
+      const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: algorithm }, false, ['sign'])
+      const signature = new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode(message)))
+      setOutput(format === 'hex' ? Array.from(signature).map((byte) => byte.toString(16).padStart(2, '0')).join('') : btoa(String.fromCharCode(...signature)))
+      setStatus({ tone: 'ok', text: `${algorithm} HMAC generated locally` })
+    } catch (error) { setOutput(''); setStatus({ tone: 'warn', text: getErrorMessage(error) }) }
+  }
+  return <ToolPanel status={status}><Actions><select value={algorithm} onChange={(event) => setAlgorithm(event.target.value as typeof algorithm)}><option>SHA-256</option><option>SHA-384</option><option>SHA-512</option></select><select value={format} onChange={(event) => setFormat(event.target.value as typeof format)}><option value="hex">Hex</option><option value="base64">Base64</option></select><button className="primary" onClick={generate}>Generate HMAC</button></Actions><div className="workbench"><TextareaBox label="Message" value={message} onChange={setMessage} /><TextareaBox label="Secret key" value={secret} onChange={setSecret} /></div><OutputBox label="HMAC signature" value={output} /></ToolPanel>
+}
+
+function BrowserValueTool({ label, value }: { label: string; value: string }) {
+  return <ToolPanel status={{ tone: 'ok', text: 'Read locally from your browser' }}><div className="browser-value"><span>{label}</span><strong>{value}</strong><button className="primary" onClick={() => copyToClipboard(value)}>Copy</button></div></ToolPanel>
+}
+
+function ScreenResolutionTool() {
+  return <BrowserValueTool label="Your screen resolution" value={`${window.screen.width} x ${window.screen.height} pixels`} />
+}
+
+function UserAgentTool() {
+  return <BrowserValueTool label="Your browser user agent" value={navigator.userAgent} />
 }
 
 function JwtTool() {
@@ -1248,15 +1459,25 @@ function LoremTool() {
   return <ToolPanel><Actions><select value={mode} onChange={(event) => setMode(event.target.value as 'paragraphs' | 'sentences' | 'words')}><option value="paragraphs">Paragraphs</option><option value="sentences">Sentences</option><option value="words">Words</option></select><input type="number" min="1" max="50" value={count} onChange={(event) => setCount(Number(event.target.value))} /></Actions><OutputBox label="Generated text" value={output} /></ToolPanel>
 }
 
-function TextTools() {
+const textToolModes = [
+  ['word-counter', 'Word Counter', 'Paste your text below to count words.'],
+  ['character-counter', 'Character Counter', 'Paste your text below to count characters.'],
+  ['line-counter', 'Line Counter', 'Paste your text below to count lines.'],
+  ['sentence-counter', 'Sentence Counter', 'Paste your text below to count sentences.'],
+  ['dedupe', 'Remove Duplicate Lines', 'Paste your text below to remove repeated lines.'],
+  ['remove-empty-lines', 'Remove Empty Lines', 'Paste your text below to remove blank lines.'],
+  ['remove-extra-spaces', 'Remove Extra Spaces', 'Paste your text below to collapse spaces and tabs.'],
+  ['sort-lines-alphabetically', 'Sort Lines', 'Paste your text below to sort its lines alphabetically.'],
+  ['reverse-line-order', 'Reverse Lines', 'Paste your text below to reverse line order.'],
+] as const
+
+function TextTools({ initialMode }: { initialMode?: string }) {
   const [input, setInput] = useState('Paste your text here\nPaste your text here')
-  const [find, setFind] = useState('Paste')
-  const [replace, setReplace] = useState('Add')
-  const [output, setOutput] = useState('')
-  const [activeMode, setActiveMode] = useState<string | null>(null)
+  const [activeMode, setActiveMode] = useState(initialMode || window.location.hash.slice(1) || 'word-counter')
   const stats = getTextStats(input)
-  const transform = (mode: string) => { setActiveMode(mode); setOutput(transformText(input, mode, find, replace)) }
-  return <ToolPanel status={{ tone: 'info', text: `${stats.words} words, ${stats.characters} characters, ${stats.lines} lines` }}><Actions><button className={activeMode === 'upper' ? 'primary' : ''} onClick={() => transform('upper')}>Uppercase</button><button className={activeMode === 'lower' ? 'primary' : ''} onClick={() => transform('lower')}>Lowercase</button><button className={activeMode === 'title' ? 'primary' : ''} onClick={() => transform('title')}>Title Case</button><button className={activeMode === 'dedupe' ? 'primary' : ''} onClick={() => transform('dedupe')}>Remove Duplicates</button><button className={activeMode === 'sort' ? 'primary' : ''} onClick={() => transform('sort')}>Sort Lines</button><button className={activeMode === 'trim' ? 'primary' : ''} onClick={() => transform('trim')}>Clean Spaces</button><button className={activeMode === 'reverse' ? 'primary' : ''} onClick={() => transform('reverse')}>Reverse</button></Actions><div className="inline-fields"><input value={find} onChange={(event) => setFind(event.target.value)} placeholder="Find" /><input value={replace} onChange={(event) => setReplace(event.target.value)} placeholder="Replace" /><button className={activeMode === 'replace' ? 'primary' : ''} onClick={() => transform('replace')}>Replace</button></div><div className="workbench"><TextareaBox label="Input" value={input} onChange={setInput} /><OutputBox label="Output" value={output} /></div></ToolPanel>
+  const selected = textToolModes.find(([id]) => id === activeMode) ?? textToolModes[0]
+  const output = textToolOutput(input, activeMode, stats)
+  return <ToolPanel status={{ tone: 'info', text: `${stats.words} words, ${stats.characters} characters, ${stats.lines} lines, ${stats.sentences} sentences` }}><Actions>{textToolModes.map(([id, label]) => <button className={activeMode === id ? 'primary' : ''} onClick={() => { setActiveMode(id); window.history.replaceState(null, '', `${getToolPath('text-tools')}#${id}`) }} key={id}>{label}</button>)}</Actions><p className="tool-description">{selected[2]}</p><div className="workbench"><TextareaBox label="Text input" value={input} onChange={setInput} /><OutputBox label={selected[1]} value={output} /></div></ToolPanel>
 }
 
 function MarkdownTool() {
@@ -1293,13 +1514,58 @@ function CalculatorTool() {
   return <ToolPanel status={result.status}><Actions><button className="primary" onClick={() => setExpression('')}>Clear</button></Actions><label className="field"><span>Expression</span><input value={expression} onChange={(event) => setExpression(event.target.value)} placeholder="Enter expression, for example sqrt(16) + 2^3" /></label><div className="calculator-pad">{['7','8','9','/','sqrt(','4','5','6','*','^','1','2','3','-','(', '0','.','C','+',')'].map((key) => <button key={key} onClick={() => key === 'C' ? setExpression('') : addInput(key)}>{key}</button>)}</div><Result label="Result" value={result.value} /></ToolPanel>
 }
 
+function PercentageCalculator() {
+  const [percent, setPercent] = useState('15')
+  const [number, setNumber] = useState('200')
+  const [increase, setIncrease] = useState('')
+  const percentage = Number(percent)
+  const base = Number(number)
+  const change = Number(increase)
+  const percentOf = Number.isFinite(percentage * base) ? percentage * base / 100 : 0
+  return <ToolPanel><div className="workbench"><label className="field"><span>Percentage</span><input type="number" value={percent} onChange={(event) => setPercent(event.target.value)} /></label><label className="field"><span>Number</span><input type="number" value={number} onChange={(event) => setNumber(event.target.value)} /></label></div><Result label={`${percent || 0}% of ${number || 0}`} value={String(percentOf)} /><label className="field compact-field"><span>Increase or decrease amount (%)</span><input type="number" value={increase} onChange={(event) => setIncrease(event.target.value)} placeholder="For example, 10 or -10" /></label><Result label="Adjusted number" value={String(base * (1 + (Number.isFinite(change) ? change : 0) / 100))} /></ToolPanel>
+}
+
+function TipCalculator() {
+  const [bill, setBill] = useState('100')
+  const [tipPercent, setTipPercent] = useState('18')
+  const [people, setPeople] = useState('1')
+  const billAmount = Math.max(0, Number(bill) || 0)
+  const tip = billAmount * Math.max(0, Number(tipPercent) || 0) / 100
+  const total = billAmount + tip
+  const split = Math.max(1, Math.floor(Number(people) || 1))
+  return <ToolPanel><div className="workbench"><label className="field"><span>Bill amount</span><input type="number" min="0" step="0.01" value={bill} onChange={(event) => setBill(event.target.value)} /></label><label className="field"><span>Tip percentage</span><input type="number" min="0" value={tipPercent} onChange={(event) => setTipPercent(event.target.value)} /></label><label className="field"><span>People</span><input type="number" min="1" value={people} onChange={(event) => setPeople(event.target.value)} /></label></div><div className="result-grid"><Result label="Tip" value={tip.toFixed(2)} /><Result label="Total" value={total.toFixed(2)} /><Result label="Per person" value={(total / split).toFixed(2)} /></div></ToolPanel>
+}
+
+function SipCalculator() {
+  const [monthlyInvestment, setMonthlyInvestment] = useState('5000')
+  const [annualReturn, setAnnualReturn] = useState('12')
+  const [years, setYears] = useState('10')
+  const monthly = Math.max(0, Number(monthlyInvestment) || 0)
+  const months = Math.max(0, Math.floor(Number(years) || 0) * 12)
+  const monthlyRate = Math.max(0, Number(annualReturn) || 0) / 1200
+  const invested = monthly * months
+  const futureValue = monthlyRate === 0 ? invested : monthly * (((1 + monthlyRate) ** months - 1) / monthlyRate) * (1 + monthlyRate)
+  return <ToolPanel><div className="workbench"><label className="field"><span>Monthly investment</span><input type="number" min="0" value={monthlyInvestment} onChange={(event) => setMonthlyInvestment(event.target.value)} /></label><label className="field"><span>Expected annual return (%)</span><input type="number" min="0" step="0.1" value={annualReturn} onChange={(event) => setAnnualReturn(event.target.value)} /></label><label className="field"><span>Investment period (years)</span><input type="number" min="0" step="1" value={years} onChange={(event) => setYears(event.target.value)} /></label></div><div className="result-grid"><Result label="Amount invested" value={invested.toFixed(2)} /><Result label="Estimated returns" value={(futureValue - invested).toFixed(2)} /><Result label="Estimated maturity value" value={futureValue.toFixed(2)} /></div></ToolPanel>
+}
+
+function LoanCalculator() {
+  const [principal, setPrincipal] = useState('500000')
+  const [annualRate, setAnnualRate] = useState('8.5')
+  const [years, setYears] = useState('5')
+  const amount = Math.max(0, Number(principal) || 0)
+  const months = Math.max(1, Math.floor(Number(years) || 0) * 12)
+  const monthlyRate = Math.max(0, Number(annualRate) || 0) / 1200
+  const emi = monthlyRate === 0 ? amount / months : amount * monthlyRate * (1 + monthlyRate) ** months / ((1 + monthlyRate) ** months - 1)
+  const total = emi * months
+  return <ToolPanel><div className="workbench"><label className="field"><span>Loan amount</span><input type="number" min="0" value={principal} onChange={(event) => setPrincipal(event.target.value)} /></label><label className="field"><span>Annual interest rate (%)</span><input type="number" min="0" step="0.1" value={annualRate} onChange={(event) => setAnnualRate(event.target.value)} /></label><label className="field"><span>Loan term (years)</span><input type="number" min="1" step="1" value={years} onChange={(event) => setYears(event.target.value)} /></label></div><div className="result-grid"><Result label="Monthly EMI" value={emi.toFixed(2)} /><Result label="Total interest" value={(total - amount).toFixed(2)} /><Result label="Total repayment" value={total.toFixed(2)} /></div></ToolPanel>
+}
+
 function ContactTool() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
   const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Your message is sent securely to our team.' })
-  const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
 
   const submitContact = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -1310,22 +1576,20 @@ function ContactTool() {
       return
     }
 
-    setSending(true)
-    setStatus({ tone: 'info', text: 'Sending message...' })
-
-    const formData = new FormData()
-    formData.append('name', name)
-    formData.append('email', normalizedEmail)
-    formData.append('subject', subject)
-    formData.append('message', message)
-
     try {
-      const response = await fetch('https://script.google.com/macros/s/AKfycbxLtRspOxZaKhGdikBBlAjJk3ndSibOs0t3Im2Xf-K0podjAPItb90iOA9mDjRAbuT_Bg/exec', {
-        method: 'POST',
-        body: formData,
-        mode: 'no-cors',
-      })
-      if (response.type !== 'opaque' && !response.ok) throw new Error(`Error ${response.status}`)
+      const form = document.createElement('form')
+      form.action = 'https://script.google.com/macros/s/AKfycbxLtRspOxZaKhGdikBBlAjJk3ndSibOs0t3Im2Xf-K0podjAPItb90iOA9mDjRAbuT_Bg/exec'
+      form.method = 'POST'
+      form.target = 'contact-submit-frame'
+      for (const [key, value] of Object.entries({ name, email: normalizedEmail, subject, message })) {
+        const input = document.createElement('input')
+        input.name = key
+        input.value = value
+        form.appendChild(input)
+      }
+      document.body.appendChild(form)
+      form.submit()
+      form.remove()
       setSent(true)
       setStatus({ tone: 'ok', text: 'Message sent! Thank you for reaching out. We will get back to you within 24-48 hours.' })
       setName('')
@@ -1334,13 +1598,12 @@ function ContactTool() {
       setMessage('')
     } catch (error) {
       setStatus({ tone: 'warn', text: `${getErrorMessage(error)}. Please try again.` })
-    } finally {
-      setSending(false)
     }
   }
 
   return (
     <ToolPanel status={status}>
+      <iframe className="contact-submit-frame" name="contact-submit-frame" title="Contact form submission" />
       {sent ? <div className="success-card"><strong>Message sent!</strong><span>Thank you for reaching out. We will get back to you within 24-48 hours.</span></div> : null}
       <form className="contact-form" onSubmit={submitContact}>
         <div className="contact-grid">
@@ -1349,7 +1612,7 @@ function ContactTool() {
           <label className="field"><span>Subject *</span><select required value={subject} onChange={(event) => setSubject(event.target.value)}><option value="">Select a topic...</option><option value="bug">Bug Report</option><option value="feature">Feature / Tool Request</option><option value="feedback">General Feedback</option><option value="other">Other</option></select></label>
           <TextareaBox label="Message *" value={message} onChange={setMessage} placeholder="Describe your bug, suggestion, or feedback..." />
         </div>
-        <button className="primary submit-button" disabled={sending} type="submit">{sending ? 'Sending...' : 'Send Message'}</button>
+        <button className="primary submit-button" type="submit">Send Message</button>
       </form>
     </ToolPanel>
   )
@@ -2098,21 +2361,32 @@ function shuffle(values: string[]) {
 }
 
 function getTextStats(value: string) {
-  return { words: value.trim() ? value.trim().split(/\s+/).length : 0, characters: value.length, lines: value ? value.split('\n').length : 0 }
+  return { words: value.trim() ? value.trim().split(/\s+/).length : 0, characters: value.length, lines: value ? value.split(/\r?\n/).length : 0, sentences: value.trim() ? (value.match(/[.!?]+(?=\s|$)/g) ?? []).length || 1 : 0 }
 }
 
-function transformText(input: string, mode: string, find: string, replace: string) {
+function textToolOutput(input: string, mode: string, stats: ReturnType<typeof getTextStats>) {
   switch (mode) {
-    case 'upper': return input.toUpperCase()
-    case 'lower': return input.toLowerCase()
-    case 'title': return input.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase())
+    case 'word-counter': return String(stats.words)
+    case 'character-counter': return String(stats.characters)
+    case 'line-counter': return String(stats.lines)
+    case 'sentence-counter': return String(stats.sentences)
     case 'dedupe': return Array.from(new Set(input.split(/\r?\n/))).join('\n')
-    case 'sort': return input.split(/\r?\n/).sort((a, b) => a.localeCompare(b)).join('\n')
-    case 'trim': return input.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim()
-    case 'reverse': return Array.from(input).reverse().join('')
-    case 'replace': return find ? input.split(find).join(replace) : input
+    case 'remove-empty-lines': return input.split(/\r?\n/).filter((line) => line.trim()).join('\n')
+    case 'remove-extra-spaces': return input.replace(/[ \t]+/g, ' ')
+    case 'sort-lines-alphabetically': return input.split(/\r?\n/).sort((left, right) => left.localeCompare(right)).join('\n')
+    case 'reverse-line-order': return input.split(/\r?\n/).reverse().join('\n')
     default: return input
   }
+}
+
+function crc32(value: string | ArrayBuffer) {
+  const bytes = typeof value === 'string' ? new TextEncoder().encode(value) : new Uint8Array(value)
+  let checksum = 0xffffffff
+  for (const byte of bytes) {
+    checksum ^= byte
+    for (let bit = 0; bit < 8; bit += 1) checksum = (checksum >>> 1) ^ (checksum & 1 ? 0xedb88320 : 0)
+  }
+  return ((checksum ^ 0xffffffff) >>> 0).toString(16).padStart(8, '0').toUpperCase()
 }
 
 function markdownToHtml(input: string) {
