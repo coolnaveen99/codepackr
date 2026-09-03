@@ -1586,7 +1586,27 @@ function ContactTool() {
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
   const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Your message is sent securely to our team.' })
+  const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
+  const submittingRef = useRef(false)
+  const submitTimeoutRef = useRef<number>()
+
+  useEffect(() => () => {
+    if (submitTimeoutRef.current) window.clearTimeout(submitTimeoutRef.current)
+  }, [])
+
+  const completeContactSubmit = () => {
+    if (!submittingRef.current) return
+    submittingRef.current = false
+    if (submitTimeoutRef.current) window.clearTimeout(submitTimeoutRef.current)
+    setSending(false)
+    setSent(true)
+    setStatus({ tone: 'ok', text: 'Message submitted. Thank you for reaching out. We will get back to you within 24-48 hours.' })
+    setName('')
+    setEmail('')
+    setSubject('')
+    setMessage('')
+  }
 
   const submitContact = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -1597,12 +1617,24 @@ function ContactTool() {
     }
 
     try {
+      setSending(true)
+      setSent(false)
+      setStatus({ tone: 'info', text: 'Submitting message...' })
+      submittingRef.current = true
+      if (submitTimeoutRef.current) window.clearTimeout(submitTimeoutRef.current)
+      submitTimeoutRef.current = window.setTimeout(() => {
+        if (!submittingRef.current) return
+        submittingRef.current = false
+        setSending(false)
+        setStatus({ tone: 'warn', text: 'We could not confirm the message submission. Please try again.' })
+      }, 12000)
       const form = document.createElement('form')
       form.action = 'https://script.google.com/macros/s/AKfycbxLtRspOxZaKhGdikBBlAjJk3ndSibOs0t3Im2Xf-K0podjAPItb90iOA9mDjRAbuT_Bg/exec'
       form.method = 'POST'
       form.target = 'contact-submit-frame'
       for (const [key, value] of Object.entries({ name, email: normalizedEmail, subject, message })) {
         const input = document.createElement('input')
+        input.type = 'hidden'
         input.name = key
         input.value = value
         form.appendChild(input)
@@ -1610,21 +1642,18 @@ function ContactTool() {
       document.body.appendChild(form)
       form.submit()
       form.remove()
-      setSent(true)
-      setStatus({ tone: 'ok', text: 'Message sent! Thank you for reaching out. We will get back to you within 24-48 hours.' })
-      setName('')
-      setEmail('')
-      setSubject('')
-      setMessage('')
     } catch (error) {
+      submittingRef.current = false
+      if (submitTimeoutRef.current) window.clearTimeout(submitTimeoutRef.current)
+      setSending(false)
       setStatus({ tone: 'warn', text: `${getErrorMessage(error)}. Please try again.` })
     }
   }
 
   return (
     <ToolPanel status={status}>
-      <iframe className="contact-submit-frame" name="contact-submit-frame" title="Contact form submission" />
-      {sent ? <div className="success-card"><strong>Message sent!</strong><span>Thank you for reaching out. We will get back to you within 24-48 hours.</span></div> : null}
+      <iframe className="contact-submit-frame" name="contact-submit-frame" title="Contact form submission" onLoad={completeContactSubmit} />
+      {sent ? <div className="success-card"><strong>Message submitted!</strong><span>Thank you for reaching out. We will get back to you within 24-48 hours.</span></div> : null}
       <form className="contact-form" onSubmit={submitContact}>
         <div className="contact-grid">
           <label className="field"><span>Your Name *</span><input required value={name} onChange={(event) => setName(event.target.value)} placeholder="Kumar" /></label>
@@ -1632,7 +1661,7 @@ function ContactTool() {
           <label className="field"><span>Subject *</span><select required value={subject} onChange={(event) => setSubject(event.target.value)}><option value="">Select a topic...</option><option value="bug">Bug Report</option><option value="feature">Feature / Tool Request</option><option value="feedback">General Feedback</option><option value="other">Other</option></select></label>
           <TextareaBox label="Message *" value={message} onChange={setMessage} placeholder="Describe your bug, suggestion, or feedback..." />
         </div>
-        <button className="primary submit-button" type="submit">Send Message</button>
+        <button className="primary submit-button" disabled={sending} type="submit">{sending ? 'Submitting...' : 'Send Message'}</button>
       </form>
     </ToolPanel>
   )
