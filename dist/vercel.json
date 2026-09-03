@@ -1,12 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "outputDirectory": "build",
-  "rewrites": [
-    {
-      "source": "/((?!assets/|favicon.svg|robots.txt|sitemap.xml).*)",
-      "destination": "/index.html"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*).html",
