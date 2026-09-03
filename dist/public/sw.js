@@ -1,5 +1,5 @@
-const CACHE_NAME = 'codepackr-v1'
-const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/favicon.svg']
+const CACHE_NAME = 'codepackr-v2'
+const APP_SHELL = ['/', '/index.html', '/site.webmanifest', '/favicon.ico?v=2']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)))
@@ -14,9 +14,14 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET' || new URL(event.request.url).origin !== self.location.origin) return
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
-      if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()))
-      return response
-    }).catch(() => caches.match('/index.html'))),
+    (event.request.mode === 'navigate'
+      ? fetch(event.request).then((response) => {
+          if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()))
+          return response
+        }).catch(() => caches.match(event.request).then((cached) => cached || caches.match('/index.html')))
+      : caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
+          if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()))
+          return response
+        }).catch(() => caches.match('/index.html')))),
   )
 })
