@@ -589,30 +589,6 @@ h1 {
   align-items: start;
 }
 
-.horizontal-ad {
-  width: min(728px, calc(100% - 28px));
-  height: 90px;
-  margin: 20px auto 0;
-  overflow: hidden;
-}
-
-.vertical-ad {
-  position: fixed;
-  top: 90px;
-  z-index: 100;
-  width: 300px;
-  min-height: 600px;
-  overflow: hidden;
-}
-
-.vertical-ad-left {
-  left: 16px;
-}
-
-.vertical-ad-right {
-  right: 16px;
-}
-
 .tool-rail {
   position: sticky;
   top: 88px;
@@ -1545,10 +1521,6 @@ footer a:hover {
   .tool-rail {
     position: static;
     max-height: none;
-  }
-
-  .vertical-ad {
-    display: none;
   }
 }
 
