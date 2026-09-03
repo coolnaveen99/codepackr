@@ -133,6 +133,13 @@ const textOperationLandingPages = [
 ].map((tool) => ({ ...tool, category: 'Text Tools' }))
 const prerenderTools = [...allTools, ...textOperationLandingPages]
 
+function getDefaultToolContent(tool) {
+  return {
+    steps: [`Provide the input for ${tool.name}: ${tool.description}.`, `Run ${tool.name} to process the input in your browser.`, 'Review the result, then copy or download it when it is ready.'],
+    faq: [[`What does ${tool.name} do?`, `${tool.description}. It is designed for quick checks and transformations without leaving this page.`], [`Is ${tool.name} private?`, 'Yes. Processing runs locally in your browser, so your input is not uploaded to Codepackr.']],
+  }
+}
+
 function escapeHtml(str) {
   return str
     .replace(/&/g, '&amp;')
@@ -196,7 +203,7 @@ function buildBody(tool) {
   const breadcrumb = tool
     ? `<nav aria-label="Breadcrumb"><a href="/">Home</a> / ${escapeHtml(tool.category)} / ${escapeHtml(tool.name)}</nav>`
     : ''
-  const content = tool ? toolContent[tool.id] ?? { steps: [`Enter or select the data for ${tool.name}.`, 'Adjust the available options if needed.', 'Review the result and copy it for use in your project.'], faq: [['Does this tool upload my data?', 'No. All processing runs locally in your browser, and Codepackr does not upload your input.'], ['Can I use this tool for free?', 'Yes. This tool is free to use without an account or installation.']] } : null
+  const content = tool ? toolContent[tool.id] ?? getDefaultToolContent(tool) : null
   const relatedPool = tool?.category === 'Text Tools' ? textOperationLandingPages : allTools
   const related = tool ? relatedPool.filter((candidate) => candidate.id !== tool.id && candidate.category === tool.category).slice(0, 4) : []
   const textToolsLink = tool && textOperationLandingPages.some((candidate) => candidate.id === tool.id) ? '<p><a href="/text-tools.html">Open all Text Tools</a></p>' : ''
@@ -212,7 +219,7 @@ function buildBody(tool) {
     toolGuide,
     `<nav aria-label="All tools">${buildToolIndexHtml(tool?.id)}</nav>`,
     '</main>',
-    '<footer><a href="/sitemap.xml">Sitemap</a><span>Copyright 2026 Codepackr</span></footer>',
+    '<footer><a href="/text-tools.html">Text Tools</a><a href="/sitemap.xml">Sitemap</a><span>Copyright 2026 Codepackr</span></footer>',
     '</div>',
   ].join('')
 }

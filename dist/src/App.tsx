@@ -478,7 +478,7 @@ function App() {
         </>}
       </main>
 
-      <footer><span>Copyright 2026 Codepackr</span><span>Fast tools, clean code. Developed by TNK.</span><a href="/sitemap.xml">Sitemap</a></footer>
+      <footer><span>Copyright 2026 Codepackr</span><span>Fast tools, clean code. Developed by TNK.</span><a href={getToolPath('text-tools')}>Text Tools</a><a href="/sitemap.xml">Sitemap</a></footer>
     </div>
   )
 }
@@ -563,8 +563,8 @@ function ToolInfo({ tool, onSelectTool }: { tool: Tool; onSelectTool: (toolId: T
 
 function getDefaultToolContent(tool: Tool): ToolContent {
   return {
-    steps: [`Enter or select the data for ${tool.name}.`, 'Adjust the available options if needed.', 'Review the result and copy it for use in your project.'],
-    faq: [['Does this tool upload my data?', 'No. All processing runs locally in your browser, and Codepackr does not upload your input.'], ['Can I use this tool for free?', 'Yes. This tool is free to use without an account or installation.']],
+    steps: [`Provide the input for ${tool.name}: ${tool.description}.`, `Run ${tool.name} to process the input in your browser.`, 'Review the result, then copy or download it when it is ready.'],
+    faq: [[`What does ${tool.name} do?`, `${tool.description}. It is designed for quick checks and transformations without leaving this page.`], [`Is ${tool.name} private?`, 'Yes. Processing runs locally in your browser, so your input is not uploaded to Codepackr.']],
   }
 }
 
