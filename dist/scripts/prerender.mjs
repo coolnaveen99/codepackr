@@ -1,6 +1,6 @@
 // scripts/prerender.mjs
 //
-// Runs after `vite build`. Reads the built dist/index.html (which already has
+// Runs after `vite build`. Reads the built build/index.html (which already has
 // the correct <script src="/assets/...compiled main.js"> tags injected by Vite)
 // and, for every tool route, writes a copy of that file with tool-specific
 // <title>, <meta description>, <link rel="canonical">, Open Graph, Twitter,
@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const distDir = join(__dirname, '..', 'dist')
+const distDir = join(__dirname, '..', 'build')
 const siteUrl = 'https://www.codepackr.com'
 const toolContent = JSON.parse(readFileSync(join(__dirname, '..', 'src', 'tool-content.json'), 'utf-8'))
 
@@ -259,7 +259,7 @@ function injectIntoHtml(html, tool) {
 function run() {
   const indexPath = join(distDir, 'index.html')
   if (!existsSync(indexPath)) {
-    console.error('dist/index.html not found. Run `vite build` first.')
+    console.error('build/index.html not found. Run `vite build` first.')
     process.exit(1)
   }
 

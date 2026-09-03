@@ -1,0 +1,17 @@
+{
+  "name": "Codepackr Developer Tools",
+  "short_name": "Codepackr",
+  "description": "Free browser-based developer tools that work locally and offline.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f7fb",
+  "theme_color": "#2459e6",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

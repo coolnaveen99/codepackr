@@ -102,7 +102,7 @@ npm run build
 npm run preview
 ```
 
-The build output is generated in `dist/`. Do not edit `dist/` manually; Vite and `scripts/prerender.mjs` regenerate it.
+The build output is generated in `build/`. Do not edit `build/` manually; Vite and `scripts/prerender.mjs` regenerate it.
 
 To test the production output locally, run `npm run preview` after `npm run build` and open the URL Vite prints in the terminal.
 
@@ -118,7 +118,7 @@ npm run build
 - `index.html` contains the base title, description, canonical URL, social metadata, and Bing Webmaster verification tag.
 - `src/App.tsx` updates titles, descriptions, canonicals, and JSON-LD structured data for each tool route.
 - `public/robots.txt` permits crawling and points search engines to the sitemap.
-- `scripts/prerender.mjs` is the source of truth for deployable routes. Every `npm run build` regenerates `dist/sitemap.xml` from its tool registry.
+- `scripts/prerender.mjs` is the source of truth for deployable routes. Every `npm run build` regenerates `build/sitemap.xml` from its tool registry.
 - `public/sitemap.xml` mirrors the route inventory for source review. Add a new tool to `scripts/prerender.mjs`, then run `npm run build` to update the deployed sitemap.
 
 When deploying, submit `https://www.codepackr.com/sitemap.xml` to Google Search Console and Bing Webmaster Tools. The Google Search Console verification tag must be added to `index.html` using the value supplied by Google; the Bing tag cannot be reused for Google verification.
