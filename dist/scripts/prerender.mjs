@@ -24,6 +24,7 @@ const categories = [
     name: 'Formatters',
     tools: [
       { id: 'json-formatter', name: 'JSON Formatter', description: 'Beautify, minify, and validate JSON' },
+      { id: 'json-minifier', name: 'JSON Minifier', description: 'Minify JSON and validate its syntax' },
       { id: 'html-formatter', name: 'HTML Formatter', description: 'Beautify and minify HTML markup' },
       { id: 'css-formatter', name: 'CSS Formatter', description: 'Prettify and compress stylesheets' },
       { id: 'sql-formatter', name: 'SQL Formatter', description: 'Format SQL queries for readability' },
@@ -39,9 +40,21 @@ const categories = [
       { id: 'url-encode', name: 'URL Encoder', description: 'Encode and decode URL components' },
       { id: 'html-entity', name: 'HTML Entity Encoder', description: 'Encode and decode HTML entities' },
       { id: 'hash-generator', name: 'Hash Generator', description: 'Generate SHA hashes in the browser' },
+      { id: 'crc32-checksum-generator', name: 'CRC32 Checksum Generator', description: 'Calculate a CRC32 checksum for text or a file' },
+      { id: 'hmac-generator', name: 'HMAC Generator', description: 'Create keyed HMAC signatures locally' },
       { id: 'jwt-decoder', name: 'JWT Decoder', description: 'Decode and inspect JWT tokens' },
       { id: 'jwt-encoder', name: 'JWT Encoder', description: 'Build and sign HS256 JSON Web Tokens' },
       { id: 'base64-image', name: 'Base64 Image', description: 'Encode images as Base64 or decode data URLs' },
+    ],
+  },
+  {
+    name: 'Calculators',
+    tools: [
+      { id: 'calculator', name: 'Calculator', description: 'Scientific calculator for quick math' },
+      { id: 'percentage-calculator', name: 'Percentage Calculator', description: 'Calculate percentages, increases, and decreases' },
+      { id: 'tip-calculator', name: 'Tip Calculator', description: 'Calculate tips and split a bill' },
+      { id: 'sip-calculator', name: 'SIP Calculator', description: 'Estimate returns from monthly investments' },
+      { id: 'loan-calculator', name: 'Loan Calculator', description: 'Calculate loan EMI, interest, and repayment' },
     ],
   },
   {
@@ -89,6 +102,8 @@ const categories = [
       { id: 'password-generator', name: 'Password Generator', description: 'Create strong random passwords' },
       { id: 'lorem-ipsum', name: 'Lorem Ipsum', description: 'Generate placeholder text' },
       { id: 'text-tools', name: 'Text Tools', description: 'Count, transform, sort, and clean text' },
+      { id: 'what-is-my-screen-resolution', name: 'What Is My Screen Resolution', description: 'See your current screen resolution' },
+      { id: 'what-is-my-user-agent', name: 'What Is My User Agent', description: 'See your browser user agent string' },
       { id: 'markdown', name: 'Markdown Preview', description: 'Live markdown editor and preview' },
       { id: 'color-converter', name: 'Color Converter', description: 'Convert HEX, RGB, and HSL colors' },
       { id: 'timestamp', name: 'Timestamp Converter', description: 'Convert Unix timestamps and dates' },
@@ -96,7 +111,6 @@ const categories = [
       { id: 'slugify', name: 'Slugify Tool', description: 'Turn text into a clean URL-safe slug' },
       { id: 'http-status-codes', name: 'HTTP Status Code Lookup', description: 'Search HTTP codes, names, and descriptions' },
       { id: 'mock-json-generator', name: 'Mock JSON Generator', description: 'Generate fake records from a simple schema' },
-      { id: 'calculator', name: 'Calculator', description: 'Scientific calculator for quick math' },
     ],
   },
   {
@@ -106,6 +120,18 @@ const categories = [
 ]
 
 const allTools = categories.flatMap((c) => c.tools.map((t) => ({ ...t, category: c.name })))
+const textOperationLandingPages = [
+  { id: 'word-counter', name: 'Word Counter', description: 'Count words, characters, and sentences online free' },
+  { id: 'character-counter', name: 'Character Counter', description: 'Count characters in text online free' },
+  { id: 'line-counter', name: 'Line Counter', description: 'Count lines in text online free' },
+  { id: 'sentence-counter', name: 'Sentence Counter', description: 'Count sentences in text online free' },
+  { id: 'remove-duplicate-lines', name: 'Remove Duplicate Lines', description: 'Remove duplicate lines from text online free' },
+  { id: 'remove-empty-lines', name: 'Remove Empty Lines', description: 'Remove empty lines from text online free' },
+  { id: 'remove-extra-spaces', name: 'Remove Extra Spaces', description: 'Collapse extra spaces and tabs in text online free' },
+  { id: 'sort-lines-alphabetically', name: 'Sort Lines Alphabetically', description: 'Sort text lines alphabetically online free' },
+  { id: 'reverse-line-order', name: 'Reverse Line Order', description: 'Reverse the order of text lines online free' },
+].map((tool) => ({ ...tool, category: 'Text Tools' }))
+const prerenderTools = [...allTools, ...textOperationLandingPages]
 
 function escapeHtml(str) {
   return str
@@ -115,15 +141,35 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
 }
 
+function buildSeoKeywords(tool) {
+  const baseKeywords = [
+    'codepackr', 'free online developer tools', 'developer tools online', 'browser based tools', 'client side tools', 'no upload tools',
+    'json formatter', 'json validator', 'json minifier', 'base64 encoder', 'url encoder', 'html formatter', 'css formatter', 'sql formatter',
+    'xml formatter', 'yaml formatter', 'diff checker', 'regex tester', 'jwt decoder', 'jwt encoder', 'hash generator', 'hmac generator',
+    'crc32 checksum', 'text tools', 'word counter', 'character counter', 'line counter', 'sentence counter', 'qr code generator',
+    'password generator', 'timestamp converter', 'cron expression tool', 'percentage calculator', 'tip calculator', 'sip calculator', 'loan calculator',
+  ]
+  if (!tool) return baseKeywords.join(', ')
+
+  const name = tool.name.toLowerCase()
+  const category = tool.category.toLowerCase()
+  const slug = tool.id.replace(/-/g, ' ')
+  const words = `${tool.name} ${tool.description}`.toLowerCase().match(/[a-z0-9]+/g) ?? []
+  const keywords = [
+    name, slug, `${name} online`, `free ${name}`, `free ${name} online`, `${name} tool`, `${name} free`, `${name} browser`,
+    `${name} no upload`, `${name} client side`, `${category} tools`, 'online developer tools', 'free developer tools', 'browser developer tools',
+    'codepackr tools', 'web developer tools', 'frontend tools', 'backend tools', 'data tools', ...words,
+  ]
+  return Array.from(new Set(keywords)).slice(0, 40).join(', ')
+}
+
 function buildHead(tool) {
   const title = tool ? `Free ${tool.name} Online | Codepackr` : 'Codepackr - Free Online Developer Tools'
   const description = tool
     ? `${tool.description}. Free online ${tool.name.toLowerCase()} from Codepackr. Runs locally in your browser.`
     : 'Free online developer tools for formatting, validating, encoding, converting, and inspecting data locally in your browser. No upload, no sign-up.'
   const canonical = tool ? `${siteUrl}/${tool.id}.html` : `${siteUrl}/`
-  const keywords = tool
-    ? `${tool.name.toLowerCase()}, ${tool.category.toLowerCase()}, codepackr, developer tools, online tools`
-    : 'developer tools, json formatter, sql formatter, yaml formatter, diff checker, base64 encoder, qr code generator, password generator, edi tools'
+  const keywords = buildSeoKeywords(tool)
   const jsonLd = JSON.stringify(
     tool
       ? {
@@ -172,13 +218,15 @@ function buildBody(tool) {
   const breadcrumb = tool
     ? `<nav aria-label="Breadcrumb"><a href="/">Home</a> / ${escapeHtml(tool.category)} / ${escapeHtml(tool.name)}</nav>`
     : ''
-  const content = tool ? toolContent[tool.id] : null
+  const content = tool ? toolContent[tool.id] ?? { steps: [`Enter or select the data for ${tool.name}.`, 'Adjust the available options if needed.', 'Review the result and copy it for use in your project.'], faq: [['Does this tool upload my data?', 'No. All processing runs locally in your browser, and Codepackr does not upload your input.'], ['Can I use this tool for free?', 'Yes. This tool is free to use without an account or installation.']] } : null
+  const related = tool ? allTools.filter((candidate) => candidate.id !== tool.id && candidate.category === tool.category).slice(0, 4) : []
+  const textToolsLink = tool && textOperationLandingPages.some((candidate) => candidate.id === tool.id) ? '<p><a href="/text-tools.html">Open all Text Tools</a></p>' : ''
   const toolGuide = tool && content
-    ? `<section><h2>How to use ${escapeHtml(tool.name)}</h2><ol>${content.steps.map((step) => `<li>${escapeHtml(step)}</li>`).join('')}</ol><h2>${escapeHtml(tool.name)} FAQ</h2>${content.faq.map(([question, answer]) => `<h3>${escapeHtml(question)}</h3><p>${escapeHtml(answer)}</p>`).join('')}<h2>Related tools</h2><ul>${allTools.filter((candidate) => candidate.id !== tool.id && candidate.category === tool.category).slice(0, 4).map((candidate) => `<li><a href="/${candidate.id}.html">${escapeHtml(candidate.name)}</a></li>`).join('')}</ul></section>`
+    ? `<section><h2>How to use ${escapeHtml(tool.name)}</h2><ol>${content.steps.map((step) => `<li>${escapeHtml(step)}</li>`).join('')}</ol><h2>${escapeHtml(tool.name)} FAQ</h2>${content.faq.map(([question, answer]) => `<h3>${escapeHtml(question)}</h3><p>${escapeHtml(answer)}</p>`).join('')}${textToolsLink}<h2>Related tools</h2><ul>${related.map((candidate) => `<li><a href="/${candidate.id}.html">${escapeHtml(candidate.name)}</a></li>`).join('')}</ul></section>`
     : ''
 
   return [
-    '<div id="root">',
+    '<div id="root" data-codepackr-prerendered>',
     '<header><a href="/">Codepackr</a></header>',
     breadcrumb,
     `<main><h1>${tool ? escapeHtml(heading) : heading}</h1><p>${intro}</p>`,
@@ -237,7 +285,7 @@ function run() {
   const template = readFileSync(indexPath, 'utf-8')
   let count = 0
 
-  for (const tool of allTools) {
+  for (const tool of prerenderTools) {
     const outPath = join(distDir, `${tool.id}.html`)
     writeFileSync(outPath, injectIntoHtml(template, tool), 'utf-8')
     count++
@@ -248,7 +296,7 @@ function run() {
   const today = new Date().toISOString().slice(0, 10)
   const urls = [
     `  <url><loc>${siteUrl}/</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>`,
-    ...allTools.map(
+    ...prerenderTools.map(
       (t) => `  <url><loc>${siteUrl}/${t.id}.html</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>`,
     ),
   ].join('\n')
