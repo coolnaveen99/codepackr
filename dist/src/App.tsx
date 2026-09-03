@@ -385,11 +385,7 @@ function App() {
         <a className={activeTool === 'contact' ? 'active' : ''} href={getToolPath('contact')} onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); selectTool('contact') }}>Contact</a>
       </div>
 
-      <AdTop />
-
-      <div className="ads-container">
-        <AdLeft />
-        <main id="top" className="page">
+      <main id="top" className="page">
         {!currentTool ? <HomePage filteredTools={filteredTools} onSelectTool={selectTool} query={query} recentToolIds={recentToolIds} /> : currentTool.id === 'contact' ? <ContactPage /> : <>
         <section className="hero">
           <div>
@@ -433,131 +429,8 @@ function App() {
         </section>
         </>}
       </main>
-        <AdRight />
-      </div>
-
-      <AdBottom />
 
       <footer><span>Copyright 2026 Codepackr</span><span>Fast tools, clean code. Developed by TNK.</span><a href="/sitemap.xml">Sitemap</a></footer>
-    </div>
-  )
-}
-
-function AdTop() {
-  const adRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (adRef.current && typeof window !== 'undefined') {
-      const windowWithAds = window as Window & { adsbygoogle?: unknown[] }
-      if (windowWithAds.adsbygoogle) {
-        try {
-          windowWithAds.adsbygoogle.push({})
-        } catch (error) {
-          console.error('AdSense error:', error)
-        }
-      }
-    }
-  }, [])
-
-  return (
-    <div ref={adRef} className="ad-top" style={{ textAlign: 'center', minHeight: '90px' }}>
-      <ins
-        className="adsbygoogle"
-        style={{ display: 'inline-block', width: '728px', height: '90px' }}
-        data-ad-client="ca-pub-7526363571565796"
-        data-ad-slot="8639237999"
-        data-ad-format="horizontal"
-      />
-    </div>
-  )
-}
-
-function AdLeft() {
-  const adRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (adRef.current && typeof window !== 'undefined') {
-      const windowWithAds = window as Window & { adsbygoogle?: unknown[] }
-      if (windowWithAds.adsbygoogle) {
-        try {
-          windowWithAds.adsbygoogle.push({})
-        } catch (error) {
-          console.error('AdSense error:', error)
-        }
-      }
-    }
-  }, [])
-
-  return (
-    <div ref={adRef} className="ad-left" style={{ minHeight: '320px' }}>
-      <ins
-        className="adsbygoogle"
-        style={{ display: 'block' }}
-        data-ad-client="ca-pub-7526363571565796"
-        data-ad-slot="8066673720"
-        data-ad-format="auto"
-        data-full-width-responsive="true"
-      />
-    </div>
-  )
-}
-
-function AdRight() {
-  const adRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (adRef.current && typeof window !== 'undefined') {
-      const windowWithAds = window as Window & { adsbygoogle?: unknown[] }
-      if (windowWithAds.adsbygoogle) {
-        try {
-          windowWithAds.adsbygoogle.push({})
-        } catch (error) {
-          console.error('AdSense error:', error)
-        }
-      }
-    }
-  }, [])
-
-  return (
-    <div ref={adRef} className="ad-right" style={{ minHeight: '320px' }}>
-      <ins
-        className="adsbygoogle"
-        style={{ display: 'block' }}
-        data-ad-client="ca-pub-7526363571565796"
-        data-ad-slot="7176992835"
-        data-ad-format="auto"
-        data-full-width-responsive="true"
-      />
-    </div>
-  )
-}
-
-function AdBottom() {
-  const adRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (adRef.current && typeof window !== 'undefined') {
-      const windowWithAds = window as Window & { adsbygoogle?: unknown[] }
-      if (windowWithAds.adsbygoogle) {
-        try {
-          windowWithAds.adsbygoogle.push({})
-        } catch (error) {
-          console.error('AdSense error:', error)
-        }
-      }
-    }
-  }, [])
-
-  return (
-    <div ref={adRef} className="ad-bottom" style={{ minHeight: '320px' }}>
-      <ins
-        className="adsbygoogle"
-        style={{ display: 'block' }}
-        data-ad-client="ca-pub-7526363571565796"
-        data-ad-slot="2351312619"
-        data-ad-format="auto"
-        data-full-width-responsive="true"
-      />
     </div>
   )
 }
