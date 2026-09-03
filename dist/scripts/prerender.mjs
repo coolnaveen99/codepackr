@@ -1,6 +1,6 @@
 // scripts/prerender.mjs
 //
-// Runs after `vite build`. Reads the built dist/index.html (which already has
+// Runs after `vite build`. Reads the built build/index.html (which already has
 // the correct <script src="/assets/...compiled main.js"> tags injected by Vite)
 // and, for every tool route, writes a copy of that file with tool-specific
 // <title>, <meta description>, <link rel="canonical">, Open Graph, Twitter,
@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const distDir = join(__dirname, '..', 'dist')
+const distDir = join(__dirname, '..', 'build')
 const siteUrl = 'https://www.codepackr.com'
 const toolContent = JSON.parse(readFileSync(join(__dirname, '..', 'src', 'tool-content.json'), 'utf-8'))
 
@@ -141,35 +141,12 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
 }
 
-function buildSeoKeywords(tool) {
-  const baseKeywords = [
-    'codepackr', 'free online developer tools', 'developer tools online', 'browser based tools', 'client side tools', 'no upload tools',
-    'json formatter', 'json validator', 'json minifier', 'base64 encoder', 'url encoder', 'html formatter', 'css formatter', 'sql formatter',
-    'xml formatter', 'yaml formatter', 'diff checker', 'regex tester', 'jwt decoder', 'jwt encoder', 'hash generator', 'hmac generator',
-    'crc32 checksum', 'text tools', 'word counter', 'character counter', 'line counter', 'sentence counter', 'qr code generator',
-    'password generator', 'timestamp converter', 'cron expression tool', 'percentage calculator', 'tip calculator', 'sip calculator', 'loan calculator',
-  ]
-  if (!tool) return baseKeywords.join(', ')
-
-  const name = tool.name.toLowerCase()
-  const category = tool.category.toLowerCase()
-  const slug = tool.id.replace(/-/g, ' ')
-  const words = `${tool.name} ${tool.description}`.toLowerCase().match(/[a-z0-9]+/g) ?? []
-  const keywords = [
-    name, slug, `${name} online`, `free ${name}`, `free ${name} online`, `${name} tool`, `${name} free`, `${name} browser`,
-    `${name} no upload`, `${name} client side`, `${category} tools`, 'online developer tools', 'free developer tools', 'browser developer tools',
-    'codepackr tools', 'web developer tools', 'frontend tools', 'backend tools', 'data tools', ...words,
-  ]
-  return Array.from(new Set(keywords)).slice(0, 40).join(', ')
-}
-
 function buildHead(tool) {
   const title = tool ? `Free ${tool.name} Online | Codepackr` : 'Codepackr - Free Online Developer Tools'
   const description = tool
     ? `${tool.description}. Free online ${tool.name.toLowerCase()} from Codepackr. Runs locally in your browser.`
     : 'Free online developer tools for formatting, validating, encoding, converting, and inspecting data locally in your browser. No upload, no sign-up.'
   const canonical = tool ? `${siteUrl}/${tool.id}.html` : `${siteUrl}/`
-  const keywords = buildSeoKeywords(tool)
   const jsonLd = JSON.stringify(
     tool
       ? {
@@ -191,13 +168,14 @@ function buildHead(tool) {
         },
   )
 
-  return { title: escapeHtml(title), description: escapeHtml(description), canonical, keywords: escapeHtml(keywords), jsonLd }
+  return { title: escapeHtml(title), description: escapeHtml(description), canonical, jsonLd }
 }
 
 // Static markup written into #root so crawlers get real text and crawlable
 // <a href> links without executing JavaScript. React replaces it on mount.
 function buildToolIndexHtml(activeId) {
-  return categories
+  const navigationCategories = [...categories, { name: 'Text Tools', tools: textOperationLandingPages }]
+  return navigationCategories
     .map((category) => {
       const links = category.tools
         .map((t) => {
@@ -219,7 +197,8 @@ function buildBody(tool) {
     ? `<nav aria-label="Breadcrumb"><a href="/">Home</a> / ${escapeHtml(tool.category)} / ${escapeHtml(tool.name)}</nav>`
     : ''
   const content = tool ? toolContent[tool.id] ?? { steps: [`Enter or select the data for ${tool.name}.`, 'Adjust the available options if needed.', 'Review the result and copy it for use in your project.'], faq: [['Does this tool upload my data?', 'No. All processing runs locally in your browser, and Codepackr does not upload your input.'], ['Can I use this tool for free?', 'Yes. This tool is free to use without an account or installation.']] } : null
-  const related = tool ? allTools.filter((candidate) => candidate.id !== tool.id && candidate.category === tool.category).slice(0, 4) : []
+  const relatedPool = tool?.category === 'Text Tools' ? textOperationLandingPages : allTools
+  const related = tool ? relatedPool.filter((candidate) => candidate.id !== tool.id && candidate.category === tool.category).slice(0, 4) : []
   const textToolsLink = tool && textOperationLandingPages.some((candidate) => candidate.id === tool.id) ? '<p><a href="/text-tools.html">Open all Text Tools</a></p>' : ''
   const toolGuide = tool && content
     ? `<section><h2>How to use ${escapeHtml(tool.name)}</h2><ol>${content.steps.map((step) => `<li>${escapeHtml(step)}</li>`).join('')}</ol><h2>${escapeHtml(tool.name)} FAQ</h2>${content.faq.map(([question, answer]) => `<h3>${escapeHtml(question)}</h3><p>${escapeHtml(answer)}</p>`).join('')}${textToolsLink}<h2>Related tools</h2><ul>${related.map((candidate) => `<li><a href="/${candidate.id}.html">${escapeHtml(candidate.name)}</a></li>`).join('')}</ul></section>`
@@ -239,16 +218,15 @@ function buildBody(tool) {
 }
 
 function injectIntoHtml(html, tool) {
-  const { title, description, canonical, keywords, jsonLd } = buildHead(tool)
+  const { title, description, canonical, jsonLd } = buildHead(tool)
 
   let out = html
 
   // <title>
   out = out.replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`)
 
-  // meta description / keywords / robots (assumes tags already exist from index.html template)
+  // meta description / robots (assumes tags already exist from index.html template)
   out = out.replace(/<meta name="description" content="[^"]*"\s*\/?>/, `<meta name="description" content="${description}" />`)
-  out = out.replace(/<meta name="keywords" content="[^"]*"\s*\/?>/, `<meta name="keywords" content="${keywords}" />`)
 
   // canonical
   out = out.replace(/<link rel="canonical" href="[^"]*"\s*\/?>/, `<link rel="canonical" href="${canonical}" />`)
@@ -257,10 +235,13 @@ function injectIntoHtml(html, tool) {
   out = out.replace(/<meta property="og:title" content="[^"]*"\s*\/?>/, `<meta property="og:title" content="${title}" />`)
   out = out.replace(/<meta property="og:description" content="[^"]*"\s*\/?>/, `<meta property="og:description" content="${description}" />`)
   out = out.replace(/<meta property="og:url" content="[^"]*"\s*\/?>/, `<meta property="og:url" content="${canonical}" />`)
+  out = out.replace(/<meta property="og:image" content="[^"]*"\s*\/?>/, '<meta property="og:image" content="https://www.codepackr.com/assets/og/default.png" />')
 
   // Twitter
+  out = out.replace(/<meta name="twitter:card" content="[^"]*"\s*\/?>/, '<meta name="twitter:card" content="summary_large_image" />')
   out = out.replace(/<meta name="twitter:title" content="[^"]*"\s*\/?>/, `<meta name="twitter:title" content="${title}" />`)
   out = out.replace(/<meta name="twitter:description" content="[^"]*"\s*\/?>/, `<meta name="twitter:description" content="${description}" />`)
+  out = out.replace(/<meta name="twitter:image" content="[^"]*"\s*\/?>/, '<meta name="twitter:image" content="https://www.codepackr.com/assets/og/default.png" />')
 
   // Inject JSON-LD structured data right before </head> (only if not already present)
   if (!out.includes('data-codepackr-seo="jsonld-prerendered"')) {
@@ -278,7 +259,7 @@ function injectIntoHtml(html, tool) {
 function run() {
   const indexPath = join(distDir, 'index.html')
   if (!existsSync(indexPath)) {
-    console.error('dist/index.html not found. Run `vite build` first.')
+    console.error('build/index.html not found. Run `vite build` first.')
     process.exit(1)
   }
 

@@ -224,48 +224,27 @@ function isPlainClick(event: React.MouseEvent) {
   return !event.defaultPrevented && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey
 }
 
-function buildSeoKeywords(tool: Tool | null) {
-  const baseKeywords = [
-    'codepackr', 'free online developer tools', 'developer tools online', 'browser based tools', 'client side tools', 'no upload tools',
-    'json formatter', 'json validator', 'json minifier', 'base64 encoder', 'url encoder', 'html formatter', 'css formatter', 'sql formatter',
-    'xml formatter', 'yaml formatter', 'diff checker', 'regex tester', 'jwt decoder', 'jwt encoder', 'hash generator', 'hmac generator',
-    'crc32 checksum', 'text tools', 'word counter', 'character counter', 'line counter', 'sentence counter', 'qr code generator',
-    'password generator', 'timestamp converter', 'cron expression tool', 'percentage calculator', 'tip calculator', 'sip calculator', 'loan calculator',
-  ]
-  if (!tool) return baseKeywords.join(', ')
-
-  const name = tool.name.toLowerCase()
-  const category = tool.category.toLowerCase()
-  const slug = tool.id.replace(/-/g, ' ')
-  const words = `${tool.name} ${tool.description}`.toLowerCase().match(/[a-z0-9]+/g) ?? []
-  const keywords = [
-    name, slug, `${name} online`, `free ${name}`, `free ${name} online`, `${name} tool`, `${name} free`, `${name} browser`,
-    `${name} no upload`, `${name} client side`, `${category} tools`, 'online developer tools', 'free developer tools', 'browser developer tools',
-    'codepackr tools', 'web developer tools', 'frontend tools', 'backend tools', 'data tools', ...words,
-  ]
-  return Array.from(new Set(keywords)).slice(0, 40).join(', ')
-}
-
 function updateSeo(tool: Tool | null) {
   const title = tool ? `Free ${tool.name} Online | Codepackr` : 'Codepackr - Free Online Developer Tools'
   const description = tool
     ? `${tool.description}. Free online ${tool.name.toLowerCase()} from Codepackr. Runs locally in your browser.`
     : 'Free online developer tools for formatting, validating, encoding, converting, and inspecting data locally in your browser.'
   const canonical = `${siteUrl}${tool ? getToolPath(tool.id) : '/'}`
-  const keywords = buildSeoKeywords(tool)
-
   document.title = title
   upsertMeta('name', 'description', description)
-  upsertMeta('name', 'keywords', keywords)
   upsertMeta('name', 'robots', 'index, follow')
   upsertMeta('property', 'og:type', 'website')
   upsertMeta('property', 'og:site_name', 'Codepackr')
   upsertMeta('property', 'og:title', title)
   upsertMeta('property', 'og:description', description)
   upsertMeta('property', 'og:url', canonical)
-  upsertMeta('name', 'twitter:card', 'summary')
+  upsertMeta('property', 'og:image', `${siteUrl}/assets/og/default.png`)
+  upsertMeta('property', 'og:image:width', '1200')
+  upsertMeta('property', 'og:image:height', '630')
+  upsertMeta('name', 'twitter:card', 'summary_large_image')
   upsertMeta('name', 'twitter:title', title)
   upsertMeta('name', 'twitter:description', description)
+  upsertMeta('name', 'twitter:image', `${siteUrl}/assets/og/default.png`)
   upsertCanonical(canonical)
   upsertJsonLd({
     '@context': 'https://schema.org',
@@ -564,6 +543,10 @@ function HomePage({ filteredTools, onSelectTool, query, recentToolIds }: { filte
             </section>
           )
         })}
+        {!query && <section className="index-section" id="text-tools">
+          <div className="section-heading"><h2>Text Tools</h2><span>{textOperationRoutes.length} tools</span></div>
+          <div className="index-grid">{textOperationRoutes.map((tool) => <a className="index-card" href={getToolPath(tool.id)} key={tool.id} onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); onSelectTool(tool.id) }}><span className="index-icon">{tool.icon}</span><div><h3>{tool.name}</h3><p>{tool.description}</p></div><span className="index-arrow">-&gt;</span></a>)}</div>
+        </section>}
         {query && !filteredTools.length && <div className="empty">No tools matched your search.</div>}
       </section>
     </>
@@ -571,7 +554,8 @@ function HomePage({ filteredTools, onSelectTool, query, recentToolIds }: { filte
 }
 
 function ToolInfo({ tool, onSelectTool }: { tool: Tool; onSelectTool: (toolId: ToolId) => void }) {
-  const related = tools.filter((candidate) => candidate.id !== tool.id && candidate.category === tool.category).slice(0, 4)
+  const relatedPool = tool.category === 'Text Tools' ? textOperationRoutes : tools
+  const related = relatedPool.filter((candidate) => candidate.id !== tool.id && candidate.category === tool.category).slice(0, 4)
   const content = (toolContent[tool.id as keyof typeof toolContent] as ToolContent | undefined) ?? getDefaultToolContent(tool)
   const isTextOperation = textOperationRoutes.some((candidate) => candidate.id === tool.id)
   return <section className="tool-info"><div className="info-heading"><h2>How to use {tool.name}</h2><button onClick={() => copyToClipboard(window.location.href)}>Copy page link</button></div><ol>{content.steps.map((step) => <li key={step}>{step}</li>)}</ol><h2>Frequently asked questions</h2>{content.faq.map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}{isTextOperation && <p><a className="tool-inline-link" href={getToolPath('text-tools')}>Open all Text Tools</a></p>}{related.length > 0 && <><h2>Related tools</h2><div className="related-tools">{related.map((candidate) => <a href={getToolPath(candidate.id)} key={candidate.id} onClick={(event) => { if (!isPlainClick(event)) return; event.preventDefault(); onSelectTool(candidate.id) }}>{candidate.name}<span>-&gt;</span></a>)}</div></>}</section>
@@ -1586,7 +1570,27 @@ function ContactTool() {
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
   const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Your message is sent securely to our team.' })
+  const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
+  const submittingRef = useRef(false)
+  const submitTimeoutRef = useRef<number>()
+
+  useEffect(() => () => {
+    if (submitTimeoutRef.current) window.clearTimeout(submitTimeoutRef.current)
+  }, [])
+
+  const completeContactSubmit = () => {
+    if (!submittingRef.current) return
+    submittingRef.current = false
+    if (submitTimeoutRef.current) window.clearTimeout(submitTimeoutRef.current)
+    setSending(false)
+    setSent(true)
+    setStatus({ tone: 'ok', text: 'Message submitted. Thank you for reaching out. We will get back to you within 24-48 hours.' })
+    setName('')
+    setEmail('')
+    setSubject('')
+    setMessage('')
+  }
 
   const submitContact = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -1597,12 +1601,24 @@ function ContactTool() {
     }
 
     try {
+      setSending(true)
+      setSent(false)
+      setStatus({ tone: 'info', text: 'Submitting message...' })
+      submittingRef.current = true
+      if (submitTimeoutRef.current) window.clearTimeout(submitTimeoutRef.current)
+      submitTimeoutRef.current = window.setTimeout(() => {
+        if (!submittingRef.current) return
+        submittingRef.current = false
+        setSending(false)
+        setStatus({ tone: 'warn', text: 'We could not confirm the message submission. Please try again.' })
+      }, 12000)
       const form = document.createElement('form')
       form.action = 'https://script.google.com/macros/s/AKfycbxLtRspOxZaKhGdikBBlAjJk3ndSibOs0t3Im2Xf-K0podjAPItb90iOA9mDjRAbuT_Bg/exec'
       form.method = 'POST'
       form.target = 'contact-submit-frame'
       for (const [key, value] of Object.entries({ name, email: normalizedEmail, subject, message })) {
         const input = document.createElement('input')
+        input.type = 'hidden'
         input.name = key
         input.value = value
         form.appendChild(input)
@@ -1610,21 +1626,18 @@ function ContactTool() {
       document.body.appendChild(form)
       form.submit()
       form.remove()
-      setSent(true)
-      setStatus({ tone: 'ok', text: 'Message sent! Thank you for reaching out. We will get back to you within 24-48 hours.' })
-      setName('')
-      setEmail('')
-      setSubject('')
-      setMessage('')
     } catch (error) {
+      submittingRef.current = false
+      if (submitTimeoutRef.current) window.clearTimeout(submitTimeoutRef.current)
+      setSending(false)
       setStatus({ tone: 'warn', text: `${getErrorMessage(error)}. Please try again.` })
     }
   }
 
   return (
     <ToolPanel status={status}>
-      <iframe className="contact-submit-frame" name="contact-submit-frame" title="Contact form submission" />
-      {sent ? <div className="success-card"><strong>Message sent!</strong><span>Thank you for reaching out. We will get back to you within 24-48 hours.</span></div> : null}
+      <iframe className="contact-submit-frame" name="contact-submit-frame" title="Contact form submission" onLoad={completeContactSubmit} />
+      {sent ? <div className="success-card"><strong>Message submitted!</strong><span>Thank you for reaching out. We will get back to you within 24-48 hours.</span></div> : null}
       <form className="contact-form" onSubmit={submitContact}>
         <div className="contact-grid">
           <label className="field"><span>Your Name *</span><input required value={name} onChange={(event) => setName(event.target.value)} placeholder="Kumar" /></label>
@@ -1632,7 +1645,7 @@ function ContactTool() {
           <label className="field"><span>Subject *</span><select required value={subject} onChange={(event) => setSubject(event.target.value)}><option value="">Select a topic...</option><option value="bug">Bug Report</option><option value="feature">Feature / Tool Request</option><option value="feedback">General Feedback</option><option value="other">Other</option></select></label>
           <TextareaBox label="Message *" value={message} onChange={setMessage} placeholder="Describe your bug, suggestion, or feedback..." />
         </div>
-        <button className="primary submit-button" type="submit">Send Message</button>
+        <button className="primary submit-button" disabled={sending} type="submit">{sending ? 'Submitting...' : 'Send Message'}</button>
       </form>
     </ToolPanel>
   )
