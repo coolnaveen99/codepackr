@@ -86,14 +86,31 @@ All tools run locally in the browser. Input is not uploaded by the formatting, v
 
 This project uses React, TypeScript, and Vite.
 
-Run all commands from this repository directory:
+### Run locally after extracting the repository
 
-```bash
+1. Extract the downloaded repository ZIP file.
+2. Open PowerShell or a terminal in the extracted repository folder.
+3. Change to the app directory. In this repository, the app is in `dist`:
+
+```powershell
+cd dist
+```
+
+4. Install the Node.js dependencies. This requires Node.js 18 or later:
+
+```powershell
 npm install
+```
+
+5. Start the local development server:
+
+```powershell
 npm run dev
 ```
 
-The development server is normally available at `http://localhost:5173`. Use a browser to open the homepage or any tool URL, such as `http://localhost:5173/json-formatter.html`.
+The terminal displays the local address, normally `http://localhost:5173`. Open it in a browser. To stop the server, press `Ctrl+C` in the terminal.
+
+Run all remaining development commands from the `dist` directory.
 
 ## Production build
 
@@ -132,6 +149,6 @@ npm install
 npm run build
 ```
 
-`vercel.json` rewrites application routes to the Vite entry point while leaving static assets, `robots.txt`, and `sitemap.xml` available directly.
+`vercel.json` serves the generated static pages and returns `404` for nonexistent URLs, preventing invalid URLs from being treated as homepage content.
 
 The contact form posts to a Google Apps Script endpoint. The production Content Security Policy in `vercel.json` permits both `script.google.com` and the `script.googleusercontent.com` redirect host required by Apps Script.
