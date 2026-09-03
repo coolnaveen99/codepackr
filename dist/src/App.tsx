@@ -594,6 +594,7 @@ function ToolPageActions() {
   useEffect(() => {
     if (!isOpen) return
     closeRef.current?.focus()
+    const trigger = triggerRef.current
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setIsOpen(false)
       if (event.key === 'Tab') {
@@ -606,7 +607,7 @@ function ToolPageActions() {
       }
     }
     document.addEventListener('keydown', handleKeyDown)
-    return () => { document.removeEventListener('keydown', handleKeyDown); triggerRef.current?.focus() }
+    return () => { document.removeEventListener('keydown', handleKeyDown); trigger?.focus() }
   }, [isOpen])
 
   const copyUrl = async () => {
@@ -1572,25 +1573,11 @@ function ContactTool() {
   const [status, setStatus] = useState<Status>({ tone: 'info', text: 'Your message is sent securely to our team.' })
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
-  const submittingRef = useRef(false)
   const submitTimeoutRef = useRef<number>()
 
   useEffect(() => () => {
     if (submitTimeoutRef.current) window.clearTimeout(submitTimeoutRef.current)
   }, [])
-
-  const completeContactSubmit = () => {
-    if (!submittingRef.current) return
-    submittingRef.current = false
-    if (submitTimeoutRef.current) window.clearTimeout(submitTimeoutRef.current)
-    setSending(false)
-    setSent(true)
-    setStatus({ tone: 'ok', text: 'Message submitted. Thank you for reaching out. We will get back to you within 24-48 hours.' })
-    setName('')
-    setEmail('')
-    setSubject('')
-    setMessage('')
-  }
 
   const submitContact = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -1604,30 +1591,26 @@ function ContactTool() {
       setSending(true)
       setSent(false)
       setStatus({ tone: 'info', text: 'Submitting message...' })
-      submittingRef.current = true
       if (submitTimeoutRef.current) window.clearTimeout(submitTimeoutRef.current)
       submitTimeoutRef.current = window.setTimeout(() => {
-        if (!submittingRef.current) return
-        submittingRef.current = false
         setSending(false)
         setStatus({ tone: 'warn', text: 'We could not confirm the message submission. Please try again.' })
       }, 12000)
-      const form = document.createElement('form')
-      form.action = 'https://script.google.com/macros/s/AKfycbxLtRspOxZaKhGdikBBlAjJk3ndSibOs0t3Im2Xf-K0podjAPItb90iOA9mDjRAbuT_Bg/exec'
-      form.method = 'POST'
-      form.target = 'contact-submit-frame'
-      for (const [key, value] of Object.entries({ name, email: normalizedEmail, subject, message })) {
-        const input = document.createElement('input')
-        input.type = 'hidden'
-        input.name = key
-        input.value = value
-        form.appendChild(input)
-      }
-      document.body.appendChild(form)
-      form.submit()
-      form.remove()
+      await fetch('https://script.google.com/macros/s/AKfycbxLtRspOxZaKhGdikBBlAjJk3ndSibOs0t3Im2Xf-K0podjAPItb90iOA9mDjRAbuT_Bg/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: new URLSearchParams({ name, email: normalizedEmail, subject, message }).toString(),
+      })
+      if (submitTimeoutRef.current) window.clearTimeout(submitTimeoutRef.current)
+      setSending(false)
+      setSent(true)
+      setStatus({ tone: 'ok', text: 'Message submitted. Thank you for reaching out. We will get back to you within 24-48 hours.' })
+      setName('')
+      setEmail('')
+      setSubject('')
+      setMessage('')
     } catch (error) {
-      submittingRef.current = false
       if (submitTimeoutRef.current) window.clearTimeout(submitTimeoutRef.current)
       setSending(false)
       setStatus({ tone: 'warn', text: `${getErrorMessage(error)}. Please try again.` })
@@ -1636,7 +1619,6 @@ function ContactTool() {
 
   return (
     <ToolPanel status={status}>
-      <iframe className="contact-submit-frame" name="contact-submit-frame" title="Contact form submission" onLoad={completeContactSubmit} />
       {sent ? <div className="success-card"><strong>Message submitted!</strong><span>Thank you for reaching out. We will get back to you within 24-48 hours.</span></div> : null}
       <form className="contact-form" onSubmit={submitContact}>
         <div className="contact-grid">
