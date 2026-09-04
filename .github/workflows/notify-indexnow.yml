@@ -1,0 +1,27 @@
+name: Notify IndexNow on Production Deploy
+
+on:
+  deployment_status:
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  ping-indexnow:
+    name: Submit URLs to IndexNow
+    # Trigger on manual run OR when Vercel production deployment succeeds
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+       (github.event.deployment.environment == 'Production' ||
+        github.event.deployment.environment == 'production'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Submit Sitemap URLs to IndexNow
+        run: node scripts/indexnow.mjs

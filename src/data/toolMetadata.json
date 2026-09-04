@@ -2358,31 +2358,40 @@
     ]
   },
   "terms": {
-    "name": "Terms and Conditions",
-    "title": "Terms and Conditions - Codepackr",
-    "description": "Read the terms and conditions for using Codepackr free developer tools, permitted personal and commercial uses, warranties, and data ownership.",
+    "name": "Terms",
+    "title": "Terms - Codepackr",
+    "description": "Free online terms tool for developers. Fast, client-side, and private.",
     "canonicalPath": "/terms.html",
     "canonicalUrl": "https://www.codepackr.com/terms.html",
-    "category": "general",
+    "category": "utilities",
     "features": [
-      "Free for personal, commercial, and enterprise developer workflows.",
-      "You retain 100% intellectual property ownership of your data and code.",
-      "Clear terms of service, warranty disclaimers, and liability boundaries.",
-      "Zero account registration or subscription fees required."
+      "Fast, responsive browser utility for Terms with intuitive controls.",
+      "Modern developer-first UI optimized for dark and light themes.",
+      "Runs offline and locally without sending telemetry on your inputs.",
+      "Instant output generation with convenient one-click copying.",
+      "Keyboard shortcuts and clean ergonomics for high-productivity development."
     ],
     "howToUse": [
-      "Review the terms of service outline to understand permitted usage.",
-      "Use our suite of developer utilities with full confidence in data privacy.",
-      "Contact developer support if you have questions or feedback."
+      "Enter or adjust the input parameters in the tool control panel.",
+      "View real-time updates and calculation or generation results instantly.",
+      "Copy the result to your clipboard or customize settings as needed."
     ],
     "faqs": [
       {
-        "question": "Can I use Codepackr tools for commercial or enterprise projects?",
-        "answer": "Yes. All Codepackr tools are free for commercial, non-profit, educational, and personal software development without licensing fees."
+        "question": "Is my data or code sent to an external server when using Terms?",
+        "answer": "No. All operations in Terms execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
       },
       {
-        "question": "Does Codepackr own any of the code or data I paste into the tools?",
-        "answer": "No. You retain 100% exclusive ownership, copyright, and intellectual property rights over all data, code, payloads, and queries you process through Codepackr."
+        "question": "Can I use Terms offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Terms offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Terms handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
       }
     ]
   },
