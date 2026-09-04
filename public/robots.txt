@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+Sitemap: https://www.codepackr.com/sitemap.xml

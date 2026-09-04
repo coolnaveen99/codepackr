@@ -1,0 +1,6 @@
+{
+  "name": "Codepackr",
+  "description": "Free browser-based developer tools for formatting, validating, encoding, converting, and inspecting data locally.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
