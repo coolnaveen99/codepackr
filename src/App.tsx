@@ -17,7 +17,8 @@ import { EdiToolsView } from './components/tools/EdiToolsView';
 import { XmlToolsView } from './components/xml/XmlToolsView';
 import { resolveCurrentRoute, getToolPath, getToolDirectUrl } from './lib/urls';
 import { updateDocumentMetadata } from './lib/seo';
-import { Shield, Terminal, GitBranch, Send, Camera, CirclePlay, Star } from 'lucide-react';
+import { Shield, Terminal, Star } from 'lucide-react';
+import { GithubIcon, XTwitterIcon, LinkedinIcon, YoutubeIcon, InstagramIcon } from './components/BrandIcons';
 
 export const App: React.FC = () => {
   // Theme state
@@ -30,6 +31,7 @@ export const App: React.FC = () => {
   // Navigation state
   const [activeTool, setActiveTool] = useState<ToolDef | null>(null);
   const [activePage, setActivePage] = useState<'home' | 'contact' | 'privacy'>('home');
+  const [legalTab, setLegalTab] = useState<'privacy' | 'terms'>('privacy');
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -53,7 +55,7 @@ export const App: React.FC = () => {
     if (activePage === 'contact') {
       routeKey = 'contact';
     } else if (activePage === 'privacy') {
-      routeKey = 'privacy';
+      routeKey = legalTab === 'terms' ? 'terms' : 'privacy';
     } else if (rawSlug && rawSlug !== 'index') {
       routeKey = rawSlug;
     } else if (activeTool) {
@@ -78,6 +80,11 @@ export const App: React.FC = () => {
       } else if (route.page === 'privacy') {
         setActivePage('privacy');
         setActiveTool(null);
+        if (route.category === 'terms' || (typeof window !== 'undefined' && window.location.pathname.includes('terms'))) {
+          setLegalTab('terms');
+        } else {
+          setLegalTab('privacy');
+        }
       } else if (route.tool) {
         setActiveTool(route.tool);
         setActivePage('home');
@@ -126,10 +133,12 @@ export const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const navigateToPrivacy = () => {
+  const navigateToPrivacy = (tab: 'privacy' | 'terms' = 'privacy') => {
+    setLegalTab(tab);
     setActiveTool(null);
     setActivePage('privacy');
-    window.history.pushState({}, '', '/privacy.html');
+    const path = tab === 'terms' ? '/terms.html' : '/privacy.html';
+    window.history.pushState({}, '', path);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -189,7 +198,11 @@ export const App: React.FC = () => {
         {activePage === 'contact' ? (
           <ContactView onBack={navigateToHome} />
         ) : activePage === 'privacy' ? (
-          <PrivacyPolicyView onBack={navigateToHome} onContactClick={navigateToContact} />
+          <PrivacyPolicyView
+            onBack={navigateToHome}
+            onContactClick={navigateToContact}
+            initialTab={legalTab}
+          />
         ) : activeTool ? (
           renderTool(activeTool)
         ) : (
@@ -202,28 +215,27 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* Footer with Social Links */}
-      <footer className="border-t mt-12 py-10"
+      {/* Footer */}
+      <footer className="border-t mt-16 py-8"
         style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-xs"
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-5">
+          {/* Quick Navigation & Branding */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs"
             style={{ color: 'var(--muted)' }}
           >
-            {/* Brand Logo & Mission */}
             <div className="flex items-center gap-2.5">
-              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-white shadow-sm"
+              <span className="w-5 h-5 rounded-md flex items-center justify-center text-white shadow-sm"
                 style={{ background: 'linear-gradient(135deg, #5B52E8 0%, #009f88 100%)' }}
               >
-                <Terminal className="w-3.5 h-3.5 text-white" />
+                <Terminal className="w-3 h-3 text-white" />
               </span>
               <span className="font-bold text-sm" style={{ color: 'var(--ink)' }}>
                 Codepackr
               </span>
-              <span>— Free, fast, private developer utilities</span>
+              <span className="hidden sm:inline">— Fast, private developer utilities</span>
             </div>
 
-            {/* Navigation Links */}
             <div className="flex items-center gap-5 font-medium">
               <button onClick={navigateToHome} className="hover:text-[var(--brand)] transition-colors cursor-pointer">
                 All Tools
@@ -234,77 +246,109 @@ export const App: React.FC = () => {
               <button onClick={navigateToContact} className="hover:text-[var(--brand)] transition-colors cursor-pointer">
                 Contact &amp; Feedback
               </button>
-              <button onClick={navigateToPrivacy} className="hover:text-[var(--brand)] transition-colors cursor-pointer">
+              <button onClick={() => navigateToPrivacy('privacy')} className="hover:text-[var(--brand)] transition-colors cursor-pointer">
                 Privacy Policy
               </button>
+              <button onClick={() => navigateToPrivacy('terms')} className="hover:text-[var(--brand)] transition-colors cursor-pointer">
+                Terms &amp; Conditions
+              </button>
+              <a
+                href="/sitemap.xml"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-[var(--brand)] transition-colors cursor-pointer"
+              >
+                Sitemap
+              </a>
+            </div>
+          </div>
+
+          {/* Clean Bottom Bar matching reference image */}
+          <div className="border-t pt-5 flex flex-col md:flex-row items-center justify-between gap-4 text-xs"
+            style={{ borderColor: 'var(--line)', color: 'var(--muted)' }}
+          >
+            <div className="text-center md:text-left leading-relaxed">
+              &copy; {new Date().getFullYear()} Codepackr. All Rights Reserved. By using this website you've read the{' '}
+              <button
+                onClick={() => navigateToPrivacy('privacy')}
+                className="font-medium underline underline-offset-4 decoration-dotted hover:text-[var(--ink)] hover:decoration-solid transition-colors cursor-pointer"
+              >
+                Privacy Policy
+              </button>
+              {', '}
+              <button
+                onClick={() => navigateToPrivacy('terms')}
+                className="font-medium underline underline-offset-4 decoration-dotted hover:text-[var(--ink)] hover:decoration-solid transition-colors cursor-pointer"
+              >
+                Terms and Conditions
+              </button>
+              {', and view the '}
+              <a
+                href="/sitemap.xml"
+                target="_blank"
+                rel="noreferrer"
+                className="font-medium underline underline-offset-4 decoration-dotted hover:text-[var(--ink)] hover:decoration-solid transition-colors cursor-pointer"
+              >
+                Sitemap
+              </a>.
             </div>
 
-            {/* Social Media & Repository Links */}
-            <div className="flex items-center gap-2">
+            {/* Clean Minimalist Social Icons */}
+            <div className="flex items-center gap-3 text-[var(--muted)]">
               <a
                 href="https://github.com/coolnaveen99/codepackr"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border transition-all hover:text-[var(--brand)] hover:border-[var(--brand)] shadow-sm text-xs font-semibold"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                aria-label="GitHub repository"
-                title="GitHub repository"
+                className="hover:text-[var(--ink)] transition-colors p-1"
+                aria-label="GitHub"
+                title="GitHub"
               >
-                <GitBranch className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">GitHub</span>
+                <GithubIcon className="w-4 h-4" />
               </a>
 
               <a
-                href="https://twitter.com/"
+                href="https://x.com/Codepackr"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border transition-all hover:text-[#1DA1F2] hover:border-[#1DA1F2] shadow-sm text-xs font-semibold"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                aria-label="Twitter / X"
-                title="Twitter / X"
+                className="hover:text-[var(--ink)] transition-colors p-1"
+                aria-label="X (formerly Twitter)"
+                title="X / Twitter"
               >
-                <Send className="w-3.5 h-3.5 text-[#1DA1F2]" />
-                <span className="hidden sm:inline">Twitter</span>
+                <XTwitterIcon className="w-4 h-4" />
               </a>
 
               <a
-                href="https://instagram.com/"
+                href="https://www.linkedin.com/company/codepackr/"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border transition-all hover:text-[#E1306C] hover:border-[#E1306C] shadow-sm text-xs font-semibold"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                aria-label="Instagram"
-                title="Instagram"
+                className="hover:text-[#0A66C2] transition-colors p-1"
+                aria-label="LinkedIn"
+                title="LinkedIn"
               >
-                <Camera className="w-3.5 h-3.5 text-[#E1306C]" />
-                <span className="hidden sm:inline">Instagram</span>
+                <LinkedinIcon className="w-4 h-4" />
               </a>
 
               <a
                 href="https://youtube.com/"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border transition-all hover:text-[#FF0000] hover:border-[#FF0000] shadow-sm text-xs font-semibold"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                aria-label="YouTube"
-                title="YouTube"
+                className="hover:text-[#FF0000] transition-colors p-1 opacity-70 hover:opacity-100"
+                aria-label="YouTube (Placeholder)"
+                title="YouTube (Placeholder)"
               >
-                <CirclePlay className="w-3.5 h-3.5 text-[#FF0000]" />
-                <span className="hidden sm:inline">YouTube</span>
+                <YoutubeIcon className="w-4 h-4" />
               </a>
-            </div>
-          </div>
 
-          <div className="border-t pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px]"
-            style={{ borderColor: 'var(--line)', color: 'var(--muted)' }}
-          >
-            <span>&copy; {new Date().getFullYear()} Codepackr. All rights reserved. Open source under MIT license.</span>
-            <div className="flex items-center gap-3">
-              <span>Client-side only execution</span>
-              <span>&bull;</span>
-              <span>Zero server logs</span>
-              <span>&bull;</span>
-              <span>SSL / HTTPS Secured</span>
+              <a
+                href="https://instagram.com/"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-[#E1306C] transition-colors p-1 opacity-70 hover:opacity-100"
+                aria-label="Instagram (Placeholder)"
+                title="Instagram (Placeholder)"
+              >
+                <InstagramIcon className="w-4 h-4" />
+              </a>
             </div>
           </div>
         </div>

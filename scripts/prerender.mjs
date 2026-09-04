@@ -142,33 +142,90 @@ for (const file of pages) {
         <header style="margin-bottom: 24px;">
           <a href="/" style="font-weight: 700; color: #5B52E8; text-decoration: none; font-size: 1.1rem;">Codepackr</a>
           <h1 style="font-size: 2rem; margin: 12px 0 8px 0; color: #111827;">Privacy Policy</h1>
-          <p style="font-size: 1rem; color: #4B5563; line-height: 1.5;">Last updated: September 4, 2026. Codepackr is committed to protecting developer privacy with client-side execution and transparent data handling.</p>
+          <p style="font-size: 1rem; color: #4B5563; line-height: 1.5;">Last updated: September 4, 2026 &bull; Version 2.4 &bull; Effective Immediately. Codepackr is committed to protecting developer privacy with client-side execution and transparent data handling.</p>
         </header>
 
         <section style="background: #F9FAFB; padding: 20px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 20px;">
           <h2 style="font-size: 1.25rem; color: #111827; margin: 0 0 8px 0;">1. 100% Client-Side Processing Architecture</h2>
-          <p style="color: #374151; margin: 0 0 8px 0; line-height: 1.6;">All code, JSON, XML, EDI files, SQL queries, tokens, and data formatted or converted using Codepackr are processed locally in your browser using JavaScript and standard Web APIs. No code payloads are ever uploaded, transmitted, stored, or inspected on our servers.</p>
+          <p style="color: #374151; margin: 0 0 8px 0; line-height: 1.6;">All code, JSON, XML, EDI files, SQL queries, regex patterns, tokens, and data formatted or converted using Codepackr are processed locally in your browser using JavaScript and standard Web APIs. No code payloads are ever uploaded, transmitted, stored, inspected, or logged on our servers.</p>
         </section>
 
         <section style="background: #F9FAFB; padding: 20px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 20px;">
           <h2 style="font-size: 1.25rem; color: #111827; margin: 0 0 8px 0;">2. Google AdSense &amp; Third-Party Cookies</h2>
-          <p style="color: #374151; margin: 0 0 8px 0; line-height: 1.6;">We use Google AdSense (Publisher ID: pub-7526363571565796) to display advertising. Third-party vendors, including Google, use cookies to serve ads based on prior visits to this or other websites. Users may opt out of personalized advertising by visiting <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer" style="color: #5B52E8;">Google Ads Settings</a> or <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" style="color: #5B52E8;">www.aboutads.info</a>.</p>
+          <p style="color: #374151; margin: 0 0 8px 0; line-height: 1.6;">We use Google AdSense (Publisher ID: pub-7526363571565796) to display advertising. Third-party vendors, including Google, use cookies to serve ads based on prior visits to this or other websites. Users may opt out of personalized advertising by visiting <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer" style="color: #5B52E8;">Google Ads Settings</a>, <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" style="color: #5B52E8;">www.aboutads.info</a>, or <a href="https://optout.networkadvertising.org/" target="_blank" rel="noopener noreferrer" style="color: #5B52E8;">networkadvertising.org</a>.</p>
         </section>
 
         <section style="background: #F9FAFB; padding: 20px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 20px;">
-          <h2 style="font-size: 1.25rem; color: #111827; margin: 0 0 8px 0;">3. Analytics Telemetry</h2>
-          <p style="color: #374151; margin: 0 0 8px 0; line-height: 1.6;">We use Google Analytics (Tag ID: G-1WPJJP0CHB) and Microsoft Clarity (Project ID: ya1n0vs9s5) to track aggregate site usage, performance, and UX diagnostics. All tool input areas are masked.</p>
+          <h2 style="font-size: 1.25rem; color: #111827; margin: 0 0 8px 0;">3. Web Analytics &amp; Diagnostic Telemetry</h2>
+          <p style="color: #374151; margin: 0 0 8px 0; line-height: 1.6;">We use Google Analytics (Measurement ID: G-623PS59FEY) and Microsoft Clarity (Project ID: ya1n0vs9s5) to track aggregate site usage, performance, and UX diagnostics. All tool input areas and code editors have strict masking enabled.</p>
         </section>
 
         <section style="background: #F9FAFB; padding: 20px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 20px;">
-          <h2 style="font-size: 1.25rem; color: #111827; margin: 0 0 8px 0;">4. GDPR &amp; CCPA Rights</h2>
+          <h2 style="font-size: 1.25rem; color: #111827; margin: 0 0 8px 0;">4. Browser Local Storage &amp; Cache</h2>
+          <p style="color: #374151; margin: 0 0 8px 0; line-height: 1.6;">Codepackr uses localStorage strictly to preserve UI preferences (theme selection, bookmarks, and layout preferences). This data is stored only on your machine and is never transmitted over the network.</p>
+        </section>
+
+        <section style="background: #F9FAFB; padding: 20px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 20px;">
+          <h2 style="font-size: 1.25rem; color: #111827; margin: 0 0 8px 0;">5. GDPR &amp; CCPA Rights</h2>
           <p style="color: #374151; margin: 0 0 8px 0; line-height: 1.6;">Because Codepackr operates without user accounts and does not store personal developer payloads, we do not profile or sell personal information.</p>
         </section>
 
-        <footer style="margin-top: 32px; font-size: 0.875rem; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 16px;">
-          <a href="/" style="color: #5B52E8; margin-right: 16px;">All Tools</a>
-          <a href="/contact.html" style="color: #5B52E8; margin-right: 16px;">Contact &amp; Feedback</a>
+        <footer style="margin-top: 32px; font-size: 0.875rem; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 16px; display: flex; gap: 16px; flex-wrap: wrap;">
+          <a href="/" style="color: #5B52E8;">All Tools</a>
+          <a href="/contact.html" style="color: #5B52E8;">Contact &amp; Feedback</a>
           <a href="/privacy.html" style="color: #5B52E8;">Privacy Policy</a>
+          <a href="/terms.html" style="color: #5B52E8;">Terms and Conditions</a>
+          <a href="/sitemap.xml" style="color: #5B52E8;">Sitemap</a>
+        </footer>
+      </main>
+    </div>
+    `.trim();
+  } else if (slug === 'terms') {
+    crawlerContent = `
+    <div id="root" data-codepackr-prerendered="true">
+      <main style="max-width: 900px; margin: 40px auto; padding: 20px; font-family: system-ui, -apple-system, sans-serif;">
+        <header style="margin-bottom: 24px;">
+          <a href="/" style="font-weight: 700; color: #5B52E8; text-decoration: none; font-size: 1.1rem;">Codepackr</a>
+          <h1 style="font-size: 2rem; margin: 12px 0 8px 0; color: #111827;">Terms and Conditions</h1>
+          <p style="font-size: 1rem; color: #4B5563; line-height: 1.5;">Last updated: September 4, 2026 &bull; Version 2.4 &bull; Effective Immediately. Please review the terms of service governing access to Codepackr developer tools.</p>
+        </header>
+
+        <section style="background: #F9FAFB; padding: 20px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 20px;">
+          <h2 style="font-size: 1.25rem; color: #111827; margin: 0 0 8px 0;">1. Acceptance of Terms</h2>
+          <p style="color: #374151; margin: 0 0 8px 0; line-height: 1.6;">By accessing or using Codepackr at https://www.codepackr.com, you agree to be bound by these Terms and Conditions and our Privacy Policy.</p>
+        </section>
+
+        <section style="background: #F9FAFB; padding: 20px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 20px;">
+          <h2 style="font-size: 1.25rem; color: #111827; margin: 0 0 8px 0;">2. Permitted Use &amp; Commercial License</h2>
+          <p style="color: #374151; margin: 0 0 8px 0; line-height: 1.6;">Codepackr utilities are provided 100% free for personal, educational, non-profit, commercial, and enterprise software engineering workflows without licensing fees, paywalls, or usage quotas.</p>
+        </section>
+
+        <section style="background: #F9FAFB; padding: 20px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 20px;">
+          <h2 style="font-size: 1.25rem; color: #111827; margin: 0 0 8px 0;">3. 100% User Code &amp; Data Ownership</h2>
+          <p style="color: #374151; margin: 0 0 8px 0; line-height: 1.6;">You retain complete, exclusive ownership and all intellectual property rights to any source code, data, JSON, XML, EDI files, or queries you process through Codepackr. Codepackr asserts zero ownership, licenses, or rights over your inputs or generated outputs.</p>
+        </section>
+
+        <section style="background: #F9FAFB; padding: 20px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 20px;">
+          <h2 style="font-size: 1.25rem; color: #111827; margin: 0 0 8px 0;">4. Acceptable Use Policy</h2>
+          <p style="color: #374151; margin: 0 0 8px 0; line-height: 1.6;">You agree not to use Codepackr for distributed denial of service attacks, abusive scraping, malware distribution, or unauthorized security exploits.</p>
+        </section>
+
+        <section style="background: #F9FAFB; padding: 20px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 20px;">
+          <h2 style="font-size: 1.25rem; color: #111827; margin: 0 0 8px 0;">5. Disclaimer of Warranties (&ldquo;As Is&rdquo;)</h2>
+          <p style="color: #374151; margin: 0 0 8px 0; line-height: 1.6;">All tools and documentation are provided strictly on an &ldquo;as is&rdquo; and &ldquo;as available&rdquo; basis without warranties of any kind, express or implied. Developers should audit calculations and cryptographic outputs in staging environments before production use.</p>
+        </section>
+
+        <section style="background: #F9FAFB; padding: 20px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 20px;">
+          <h2 style="font-size: 1.25rem; color: #111827; margin: 0 0 8px 0;">6. Limitation of Liability</h2>
+          <p style="color: #374151; margin: 0 0 8px 0; line-height: 1.6;">To the fullest extent permitted by law, Codepackr and its contributors shall not be liable for any direct, indirect, incidental, or consequential damages resulting from the use or inability to use our tools.</p>
+        </section>
+
+        <footer style="margin-top: 32px; font-size: 0.875rem; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 16px; display: flex; gap: 16px; flex-wrap: wrap;">
+          <a href="/" style="color: #5B52E8;">All Tools</a>
+          <a href="/contact.html" style="color: #5B52E8;">Contact &amp; Feedback</a>
+          <a href="/privacy.html" style="color: #5B52E8;">Privacy Policy</a>
+          <a href="/terms.html" style="color: #5B52E8;">Terms and Conditions</a>
+          <a href="/sitemap.xml" style="color: #5B52E8;">Sitemap</a>
         </footer>
       </main>
     </div>
@@ -191,7 +248,8 @@ for (const file of pages) {
         <footer style="margin-top: 32px; font-size: 0.875rem; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 16px;">
           <a href="/" style="color: #5B52E8; margin-right: 16px;">All Tools</a>
           <a href="/contact.html" style="color: #5B52E8; margin-right: 16px;">Contact &amp; Feedback</a>
-          <a href="/privacy.html" style="color: #5B52E8;">Privacy Policy</a>
+          <a href="/privacy.html" style="color: #5B52E8; margin-right: 16px;">Privacy Policy</a>
+          <a href="/sitemap.xml" style="color: #5B52E8;">Sitemap</a>
         </footer>
       </main>
     </div>
@@ -259,6 +317,8 @@ for (const file of pages) {
           <a href="/" style="color: #5B52E8; text-decoration: none; font-weight: 500;">&larr; Explore All Developer Tools</a>
           <a href="/contact.html" style="color: #5B52E8; text-decoration: none;">Contact &amp; Feedback</a>
           <a href="/privacy.html" style="color: #5B52E8; text-decoration: none;">Privacy Policy</a>
+          <a href="/terms.html" style="color: #5B52E8; text-decoration: none;">Terms and Conditions</a>
+          <a href="/sitemap.xml" style="color: #5B52E8; text-decoration: none;">Sitemap</a>
         </footer>
       </main>
     </div>

@@ -149,9 +149,13 @@ export function resolveCurrentRoute(): {
     return { page: 'contact', tool: null };
   }
 
-  // 2. Check privacy page
+  // 2. Check privacy and terms pages
   if (pathname === 'privacy.html' || pathname === 'privacy' || searchParams.get('page') === 'privacy') {
     return { page: 'privacy', tool: null };
+  }
+
+  if (pathname === 'terms.html' || pathname === 'terms' || searchParams.get('page') === 'terms') {
+    return { page: 'privacy', tool: null, category: 'terms' };
   }
 
   // 2. Check path slug (e.g. "json-formatter.html" or "json-formatter")

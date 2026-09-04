@@ -2357,6 +2357,35 @@
       }
     ]
   },
+  "terms": {
+    "name": "Terms and Conditions",
+    "title": "Terms and Conditions - Codepackr",
+    "description": "Read the terms and conditions for using Codepackr free developer tools, permitted personal and commercial uses, warranties, and data ownership.",
+    "canonicalPath": "/terms.html",
+    "canonicalUrl": "https://www.codepackr.com/terms.html",
+    "category": "general",
+    "features": [
+      "Free for personal, commercial, and enterprise developer workflows.",
+      "You retain 100% intellectual property ownership of your data and code.",
+      "Clear terms of service, warranty disclaimers, and liability boundaries.",
+      "Zero account registration or subscription fees required."
+    ],
+    "howToUse": [
+      "Review the terms of service outline to understand permitted usage.",
+      "Use our suite of developer utilities with full confidence in data privacy.",
+      "Contact developer support if you have questions or feedback."
+    ],
+    "faqs": [
+      {
+        "question": "Can I use Codepackr tools for commercial or enterprise projects?",
+        "answer": "Yes. All Codepackr tools are free for commercial, non-profit, educational, and personal software development without licensing fees."
+      },
+      {
+        "question": "Does Codepackr own any of the code or data I paste into the tools?",
+        "answer": "No. You retain 100% exclusive ownership, copyright, and intellectual property rights over all data, code, payloads, and queries you process through Codepackr."
+      }
+    ]
+  },
   "word-counter": {
     "name": "Word Counter & Text Statistics",
     "title": "Word Counter & Text Statistics - Codepackr",
