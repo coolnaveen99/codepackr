@@ -81,6 +81,62 @@ const ENVELOPE_ELEMENT_NAMES: Record<string, string[]> = {
     'Number of Included Functional Groups',
     'Interchange Control Number',
   ],
+  BEG: [
+    'Transaction Set Purpose Code',
+    'Purchase Order Type Code',
+    'Purchase Order Number',
+    'Release Number',
+    'Date (CCYYMMDD)',
+  ],
+  BCH: [
+    'Transaction Set Purpose Code (04=Change)',
+    'Purchase Order Type Code',
+    'Purchase Order Number',
+    'Release Number',
+    'Date (CCYYMMDD)',
+    'Contract Number',
+    'Reference Number',
+    'Change Order Sequence Number',
+    'Change Date (CCYYMMDD)',
+  ],
+  BSN: [
+    'Transaction Set Purpose Code (00=Original)',
+    'Shipment Identification (Ship Notice / ASN)',
+    'Date (CCYYMMDD)',
+    'Time (HHMM[SS])',
+    'Hierarchical Structure Code (0001=SOPI)',
+  ],
+  POC: [
+    'Assigned Identification (Line #)',
+    'Change Type Code (CA=Change, DI=Delete, AI=Add)',
+    'Quantity Ordered (Revised)',
+    'Quantity Left to Receive',
+    'Unit or Basis for Measurement Code',
+    'Unit Price',
+    'Basis of Unit Price Code',
+    'Product/Service ID Qualifier (VN=Vendor Part)',
+    'Product/Service ID',
+    'Product/Service ID Qualifier (UP=UPC)',
+    'Product/Service ID',
+  ],
+  HL: [
+    'Hierarchical ID Number',
+    'Hierarchical Parent ID Number',
+    'Hierarchical Level Code (S=Shipment, O=Order, P=Pack, I=Item)',
+    'Hierarchical Child Code',
+  ],
+  BIG: [
+    'Invoice Date',
+    'Invoice Number',
+    'Purchase Order Date',
+    'Purchase Order Number',
+  ],
+  N1: [
+    'Entity Identifier Code (BT=BillTo, ST=ShipTo, VN=Vendor, SF=ShipFrom)',
+    'Name',
+    'Identification Code Qualifier',
+    'Identification Code',
+  ],
 };
 
 const SAMPLE_850 = `ISA*00*          *00*          *ZZ*ACMESUPPLY     *ZZ*GLOBALBUYER    *260903*1430*U*00401*000000001*0*P*>~
@@ -135,12 +191,9 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
   onSelectRelated,
   initialInput = '',
 }) => {
-  const [activeTab, setActiveTab] = useState<string>(tool.id);
-  const [input, setInput] = useState<string>(initialInput || SAMPLE_850);
-  const [output, setOutput] = useState<string>('');
-  const [copied, setCopied] = useState<boolean>(false);
-  const [filterQuery, setFilterQuery] = useState<string>('');
-  const [expandedSegment, setExpandedSegment] = useState<number | null>(0);
+  // Normalize tool ID mapping
+  const normalizedInitialTab = tool.id === 'edi-validator' ? 'edi-validator' : tool.id;
+  const [activeTab, setActiveTab] = useState<string>(normalizedInitialTab || 'edi-validator');
   const [selectedSampleId, setSelectedSampleId] = useState<string>('850');
 
   // Delimiters
@@ -149,20 +202,33 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
   const [subElementSeparator, setSubElementSeparator] = useState<string>('>');
   const [indentOutput, setIndentOutput] = useState<boolean>(true);
 
-  // Sync activeTab when URL or tool navigation changes
+  // Initialize input
+  const [input, setInput] = useState<string>(() => {
+    if (initialInput) return initialInput;
+    return SAMPLE_850;
+  });
+
+  const [output, setOutput] = useState<string>('');
+  const [copied, setCopied] = useState<boolean>(false);
+  const [filterQuery, setFilterQuery] = useState<string>('');
+  const [expandedSegment, setExpandedSegment] = useState<number | null>(0);
+
+  // Keep activeTab in sync with tool prop changes
   useEffect(() => {
-    setActiveTab(tool.id);
+    if (tool && tool.id) {
+      setActiveTab(tool.id);
+    }
   }, [tool.id]);
 
-  // Find the exact tool definition for the currently active subtab
+  // Current active tool definition for single dynamic top header
   const currentActiveToolDef = useMemo(() => {
     return TOOLS.find((t) => t.id === activeTab) || tool;
   }, [activeTab, tool]);
 
   const loadTransactionSample = (txId: string) => {
-    const found = EDI_TRANSACTIONS.find((t) => t.id === txId);
+    const found = EDI_TRANSACTIONS.find((t) => t.id === txId || t.code === txId);
     if (!found) return;
-    setSelectedSampleId(txId);
+    setSelectedSampleId(found.id);
     setInput(found.samplePayload);
     if (found.standard === 'EDIFACT') {
       setSegmentTerminator("'");
@@ -246,6 +312,7 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
     const stList = segments.filter((s) => s.tag === 'ST');
     const seList = segments.filter((s) => s.tag === 'SE');
 
+    // 1. Interchange Envelope (ISA/IEA)
     if (!isa) {
       issues.push({ type: 'error', message: 'Missing mandatory Interchange Header (ISA).' });
     } else if (isa.elements.length !== 16) {
@@ -271,6 +338,7 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
       }
     }
 
+    // 2. Functional Group Envelope (GS/GE)
     if (!gs && isa) {
       issues.push({ type: 'warning', message: 'No Functional Group Header (GS) found.' });
     }
@@ -289,12 +357,42 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
       }
     }
 
+    // 3. Transaction Set (ST/SE)
     if (stList.length !== seList.length) {
       issues.push({
         type: 'error',
         message: `Transaction Set Header/Trailer count mismatch: found ${stList.length} ST and ${seList.length} SE.`,
       });
     }
+    stList.forEach((st, idx) => {
+      const se = seList[idx];
+      if (se) {
+        const stCtrl = st.elements[1]?.trim();
+        const seCtrl = se.elements[1]?.trim();
+        if (stCtrl && seCtrl && stCtrl !== seCtrl) {
+          issues.push({
+            type: 'error',
+            message: `Transaction Set Control Number mismatch: ST02 (${stCtrl}) != SE02 (${seCtrl}).`,
+            line: se.lineNumber,
+            segment: 'SE',
+          });
+        }
+        const stIndex = segments.findIndex((s) => s === st);
+        const seIndex = segments.findIndex((s) => s === se);
+        if (stIndex !== -1 && seIndex !== -1 && seIndex >= stIndex) {
+          const actualCount = seIndex - stIndex + 1;
+          const declaredCount = parseInt(se.elements[0], 10);
+          if (!isNaN(declaredCount) && declaredCount !== actualCount) {
+            issues.push({
+              type: 'error',
+              message: `Segment count mismatch in SE01: declared ${declaredCount}, but actual count between ST and SE is ${actualCount}.`,
+              line: se.lineNumber,
+              segment: 'SE',
+            });
+          }
+        }
+      }
+    });
 
     if (issues.length === 0) {
       issues.push({
@@ -365,6 +463,47 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
     }
   };
 
+  const handleExportSegmentsCsv = () => {
+    if (parsedSegments.length === 0) return;
+    const rows: string[] = ['"Line","Tag","Name","ElementCount","RawSegment"'];
+    parsedSegments.forEach((s) => {
+      rows.push(
+        `"${s.lineNumber}","${s.tag}","${s.name.replace(/"/g, '""')}","${s.elements.length}","${s.raw.replace(/"/g, '""')}"`
+      );
+    });
+    handleDownload(rows.join('\n'), `edi_segments_${selectedSampleId}.csv`);
+  };
+
+  const handleExportSegmentsJson = () => {
+    if (parsedSegments.length === 0) return;
+    const json = JSON.stringify(parsedSegments, null, 2);
+    handleDownload(json, `edi_segments_${selectedSampleId}.json`);
+  };
+
+  const handleExportValidationReport = () => {
+    const lines: string[] = [
+      '==================================================',
+      '         EDI COMPLIANCE VALIDATION REPORT         ',
+      '==================================================',
+      `Timestamp: ${new Date().toISOString()}`,
+      `Selected Sample: ${selectedSampleId}`,
+      `Total Segments Parsed: ${parsedSegments.length}`,
+      `Delimiters: Segment='${segmentTerminator}' Element='${elementSeparator}' Sub-Elem='${subElementSeparator}'`,
+      '',
+      'SUMMARY:',
+      `  Errors:   ${validationIssues.filter((i) => i.type === 'error').length}`,
+      `  Warnings: ${validationIssues.filter((i) => i.type === 'warning').length}`,
+      `  Info:     ${validationIssues.filter((i) => i.type === 'info').length}`,
+      '',
+      'FINDINGS:',
+    ];
+    validationIssues.forEach((issue, idx) => {
+      lines.push(`[${issue.type.toUpperCase()}] #${idx + 1}: ${issue.message}`);
+      if (issue.line) lines.push(`   At line ${issue.line} (${issue.segment || 'segment'})`);
+    });
+    handleDownload(lines.join('\n'), `edi_validation_report_${selectedSampleId}.txt`);
+  };
+
   const filteredSegments = useMemo(() => {
     if (!filterQuery.trim()) return parsedSegments;
     const q = filterQuery.toLowerCase();
@@ -376,12 +515,15 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
     );
   }, [parsedSegments, filterQuery]);
 
+  const errorCount = validationIssues.filter((i) => i.type === 'error').length;
+  const warningCount = validationIssues.filter((i) => i.type === 'warning').length;
+
   return (
     <div className="space-y-6">
-      {/* SINGLE UNIFIED TOP HEADER: Dynamic to current tab */}
+      {/* 1. SINGLE TOP HEADER: Bookmark, Share, Category badges */}
       <ToolHeader tool={currentActiveToolDef} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
 
-      {/* Sub-tools Navigation Tabs */}
+      {/* 2. Sub-tools Navigation Tabs */}
       <div
         className="flex items-center gap-2 border-b overflow-x-auto pb-2"
         style={{ borderColor: 'var(--line)', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -425,12 +567,13 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
         })}
       </div>
 
-      {/* Delimiter & Sample Controls Bar for core viewer/formatter/validator */}
+      {/* 3. Delimiter & Sample Controls Bar (for formatter, viewer, to-json, validator) */}
       {['edi-formatter', 'edi-segment-viewer', 'edi-to-json', 'edi-validator'].includes(activeTab) && (
         <div
           className="p-4 rounded-2xl border flex flex-col lg:flex-row lg:items-center justify-between gap-4 text-xs"
           style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
         >
+          {/* Sample Selectors */}
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-[var(--muted)]">Load Transaction:</span>
             <select
@@ -450,8 +593,72 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
                 </optgroup>
               ))}
             </select>
+
+            {/* Active Standard Indicator Badge */}
+            {(() => {
+              const currentTx = EDI_TRANSACTIONS.find((t) => t.id === selectedSampleId);
+              if (!currentTx) return null;
+              return (
+                <span
+                  className="px-2 py-0.5 rounded-md font-mono text-[10px] font-semibold border"
+                  style={{
+                    backgroundColor: 'var(--bg)',
+                    borderColor: 'var(--line)',
+                    color: currentTx.standard === 'EDIFACT' ? '#d97706' : 'var(--brand)',
+                  }}
+                >
+                  {currentTx.standard} • {currentTx.functionalGroup}
+                </span>
+              );
+            })()}
+
+            <div className="hidden sm:block h-4 w-px bg-[var(--line)] mx-1" />
+
+            {/* Quick Presets */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[11px] text-[var(--muted)] hidden sm:inline">Quick:</span>
+              {[
+                { id: '850', label: '850 PO' },
+                { id: '855', label: '855 Ack' },
+                { id: '856', label: '856 ASN' },
+                { id: '810', label: '810 Inv' },
+                { id: '997', label: '997 Ack' },
+              ].map((preset) => {
+                const isPresetActive = selectedSampleId === preset.id;
+                return (
+                  <button
+                    key={preset.id}
+                    onClick={() => loadTransactionSample(preset.id)}
+                    className={`px-2 py-1 rounded-lg border font-medium text-xs transition-all cursor-pointer ${
+                      isPresetActive
+                        ? 'border-[var(--brand)] text-[var(--brand)] font-semibold shadow-xs'
+                        : 'hover:opacity-80'
+                    }`}
+                    style={{
+                      backgroundColor: isPresetActive ? 'var(--surface-2)' : 'var(--bg)',
+                      borderColor: isPresetActive ? 'var(--brand)' : 'var(--line)',
+                      color: isPresetActive ? 'var(--brand)' : 'var(--ink)',
+                    }}
+                  >
+                    {preset.label}
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={() => setInput('')}
+                disabled={!input}
+                className="px-2.5 py-1 rounded-lg border font-medium text-xs transition-all cursor-pointer flex items-center gap-1 hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed ml-1"
+                style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--muted)' }}
+                title="Clear EDI input payload"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                <span>Clear</span>
+              </button>
+            </div>
           </div>
 
+          {/* Delimiter Settings */}
           <div className="flex items-center gap-3 flex-wrap border-t lg:border-t-0 pt-2 lg:pt-0" style={{ borderColor: 'var(--line)' }}>
             <div className="flex items-center gap-1.5">
               <span className="text-[var(--muted)]">Segment:</span>
@@ -461,6 +668,7 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
                 onChange={(e) => setSegmentTerminator(e.target.value)}
                 className="w-10 px-2 py-1 rounded-md border text-center font-mono"
                 style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                title="Segment Terminator"
               />
             </div>
             <div className="flex items-center gap-1.5">
@@ -471,12 +679,25 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
                 onChange={(e) => setElementSeparator(e.target.value)}
                 className="w-10 px-2 py-1 rounded-md border text-center font-mono"
                 style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                title="Element Separator"
+              />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[var(--muted)]">Sub-Elem:</span>
+              <input
+                type="text"
+                value={subElementSeparator}
+                onChange={(e) => setSubElementSeparator(e.target.value)}
+                className="w-10 px-2 py-1 rounded-md border text-center font-mono"
+                style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                title="Sub-element / Component Separator"
               />
             </div>
             <button
               onClick={autoDetectDelimiters}
               className="px-2.5 py-1 rounded-lg border font-medium hover:opacity-80 transition-opacity flex items-center gap-1 cursor-pointer"
               style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--brand)' }}
+              title="Auto-detect from ISA or UNA header"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Auto-detect</span>
@@ -485,33 +706,210 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
         </div>
       )}
 
-      {/* Main Workspace */}
-      {activeTab === 'edi-formatter' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="p-4 rounded-2xl border flex flex-col space-y-3" style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}>
+      {/* 4. EDI VALIDATOR VIEW: Full Dashboard, Report & Live Editor */}
+      {activeTab === 'edi-validator' && (
+        <div className="space-y-6">
+          {/* Summary Banner */}
+          <div
+            className="p-5 rounded-2xl border flex items-center justify-between gap-4 flex-wrap"
+            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+          >
+            <div className="flex items-center gap-3.5">
+              {errorCount > 0 ? (
+                <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0">
+                  <ShieldAlert className="w-7 h-7" />
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-7 h-7" />
+                </div>
+              )}
+              <div>
+                <h3 className="text-base font-bold" style={{ color: 'var(--ink)' }}>
+                  {errorCount > 0
+                    ? 'EDI Compliance Discrepancies Detected'
+                    : 'EDI Structure & Envelope Validation Passed'}
+                </h3>
+                <p className="text-xs text-[var(--muted)]">
+                  Strictly validates ISA/IEA, GS/GE, and ST/SE envelope pairing, control numbers, and SE01 segment counts.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 text-xs flex-wrap">
+              <span
+                className={`px-3 py-1.5 rounded-xl border font-bold ${
+                  errorCount > 0
+                    ? 'bg-rose-500/10 text-rose-600 border-rose-500/20'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-[var(--muted)] border-transparent'
+                }`}
+              >
+                {errorCount} Errors
+              </span>
+              <span
+                className={`px-3 py-1.5 rounded-xl border font-bold ${
+                  warningCount > 0
+                    ? 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-[var(--muted)] border-transparent'
+                }`}
+              >
+                {warningCount} Warnings
+              </span>
+              <button
+                onClick={handleExportValidationReport}
+                disabled={!input.trim()}
+                className="px-3.5 py-2 rounded-xl border font-semibold flex items-center gap-1.5 hover:opacity-80 disabled:opacity-40 cursor-pointer shadow-xs"
+                style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                title="Download full compliance validation report"
+              >
+                <Download className="w-3.5 h-3.5 text-[var(--brand)]" />
+                <span>Export Report</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Validation Findings List */}
+          <div
+            className="rounded-2xl border divide-y overflow-hidden shadow-xs"
+            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+          >
+            {validationIssues.map((issue, idx) => {
+              const isError = issue.type === 'error';
+              const isWarn = issue.type === 'warning';
+              return (
+                <div key={idx} className="p-4 flex items-start gap-3">
+                  {isError ? (
+                    <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                  ) : isWarn ? (
+                    <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                  ) : (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                  )}
+                  <div className="flex-1 text-xs">
+                    <p className={`font-semibold ${isError ? 'text-rose-600' : isWarn ? 'text-amber-600' : 'text-emerald-600'}`}>
+                      {issue.message}
+                    </p>
+                    {issue.line && (
+                      <p className="text-[var(--muted)] mt-1 font-mono">
+                        At line #{issue.line} ({issue.segment})
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Live Document Editor */}
+          <div
+            className="p-5 rounded-2xl border space-y-3"
+            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+          >
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold" style={{ color: 'var(--ink)' }}>Raw EDI Input</span>
-              <button onClick={() => setInput('')} className="hover:opacity-80 text-[var(--muted)]">Clear</button>
+              <div>
+                <span className="font-bold text-sm" style={{ color: 'var(--ink)' }}>
+                  Live Document Editor
+                </span>
+                <span className="text-[var(--muted)] block mt-0.5">
+                  Type, edit, or paste your EDI ANSI X12 or EDIFACT string below. Validation results update instantly.
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setInput('')}
+                  disabled={!input}
+                  className="flex items-center gap-1 text-[var(--muted)] hover:opacity-80 disabled:opacity-40 text-xs cursor-pointer"
+                  title="Clear document"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                  <span>Clear</span>
+                </button>
+                <span className="text-[var(--muted)] font-mono font-medium">
+                  {parsedSegments.length} Segments
+                </span>
+              </div>
             </div>
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              rows={12}
+              className="w-full p-3.5 rounded-xl font-mono text-xs outline-none resize-y border leading-relaxed"
+              style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              placeholder="Paste raw ANSI X12 or EDIFACT string here (e.g. ISA*00*...~GS*...)"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* 5. FORMATTER TAB */}
+      {activeTab === 'edi-formatter' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div
+            className="p-4 rounded-2xl border flex flex-col space-y-3"
+            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+          >
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold" style={{ color: 'var(--ink)' }}>
+                Raw EDI Input
+              </span>
+              <div className="flex items-center gap-2">
+                <label className="cursor-pointer hover:opacity-80 flex items-center gap-1 text-[var(--muted)]">
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Upload .edi/.txt</span>
+                  <input type="file" accept=".edi,.txt,.x12" onChange={handleFileUpload} className="hidden" />
+                </label>
+                <button onClick={() => setInput('')} className="hover:opacity-80 text-[var(--muted)]">
+                  Clear
+                </button>
+              </div>
+            </div>
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Paste raw ANSI X12 or EDIFACT string here..."
               rows={16}
-              className="w-full p-3.5 rounded-xl font-mono text-xs outline-none resize-y border"
+              className="w-full p-3.5 rounded-xl font-mono text-xs outline-none resize-y border transition-colors"
               style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
             />
           </div>
-          <div className="p-4 rounded-2xl border flex flex-col space-y-3" style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}>
+
+          <div
+            className="p-4 rounded-2xl border flex flex-col space-y-3"
+            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+          >
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold" style={{ color: 'var(--ink)' }}>Formatted EDI Output</span>
-              <button
-                onClick={() => handleCopy(output)}
-                className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80"
-                style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? 'Copied' : 'Copy'}</span>
-              </button>
+              <div className="flex items-center gap-3">
+                <span className="font-semibold" style={{ color: 'var(--ink)' }}>
+                  Formatted EDI Output
+                </span>
+                <label className="flex items-center gap-1.5 cursor-pointer text-[var(--muted)]">
+                  <input
+                    type="checkbox"
+                    checked={indentOutput}
+                    onChange={(e) => setIndentOutput(e.target.checked)}
+                    className="rounded"
+                  />
+                  <span>Smart loop indent</span>
+                </label>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleCopy(output)}
+                  className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80 cursor-pointer"
+                  style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                >
+                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copied ? 'Copied' : 'Copy'}</span>
+                </button>
+                <button
+                  onClick={() => handleDownload(output, `formatted_${selectedSampleId}.edi`)}
+                  className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80 cursor-pointer"
+                  style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download</span>
+                </button>
+              </div>
             </div>
             <textarea
               readOnly
@@ -524,6 +922,7 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
         </div>
       )}
 
+      {/* 6. SEGMENT VIEWER TAB */}
       {activeTab === 'edi-segment-viewer' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -533,54 +932,216 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
                 type="text"
                 value={filterQuery}
                 onChange={(e) => setFilterQuery(e.target.value)}
-                placeholder="Filter segments..."
+                placeholder="Filter by segment tag (e.g. ISA, N1, PO1) or element value..."
                 className="w-full pl-9 pr-8 py-2 rounded-xl text-xs border outline-none font-medium"
                 style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
               />
+              {filterQuery && (
+                <button
+                  onClick={() => setFilterQuery('')}
+                  className="absolute right-2.5 top-2.5 text-[var(--muted)] hover:opacity-80 p-0.5 cursor-pointer"
+                  title="Clear filter"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+              <div className="text-xs text-[var(--muted)]">
+                Showing {filteredSegments.length} of {parsedSegments.length} segments
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={handleExportSegmentsCsv}
+                  disabled={parsedSegments.length === 0}
+                  className="px-2.5 py-1.5 rounded-xl border flex items-center gap-1.5 text-xs font-semibold hover:opacity-80 disabled:opacity-40 cursor-pointer shadow-xs"
+                  style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  title="Export parsed segments to CSV"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Export CSV</span>
+                </button>
+                <button
+                  onClick={handleExportSegmentsJson}
+                  disabled={parsedSegments.length === 0}
+                  className="px-2.5 py-1.5 rounded-xl border flex items-center gap-1.5 text-xs font-semibold hover:opacity-80 disabled:opacity-40 cursor-pointer shadow-xs"
+                  style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  title="Export parsed segments structure to JSON"
+                >
+                  <Download className="w-3.5 h-3.5 text-[var(--brand)]" />
+                  <span>Export JSON</span>
+                </button>
+              </div>
             </div>
           </div>
-          <div className="rounded-2xl border divide-y overflow-hidden" style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}>
-            {filteredSegments.map((seg, idx) => (
-              <div key={seg.id} className="p-3.5 text-xs font-mono">
-                #{seg.lineNumber} [{seg.tag}] {seg.name} - {seg.raw}
+
+          <div
+            className="rounded-2xl border divide-y overflow-hidden"
+            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+          >
+            {filteredSegments.length === 0 ? (
+              <div className="p-8 text-center text-xs text-[var(--muted)]">
+                No segments matched your filter criteria.
               </div>
-            ))}
+            ) : (
+              filteredSegments.map((seg, idx) => {
+                const isExpanded = expandedSegment === idx;
+                const elementDescriptions = ENVELOPE_ELEMENT_NAMES[seg.tag];
+                return (
+                  <div key={seg.id} className="transition-colors">
+                    <button
+                      onClick={() => setExpandedSegment(isExpanded ? null : idx)}
+                      className="w-full p-3.5 flex items-center justify-between text-left hover:opacity-90 cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className="w-6 text-[10px] font-mono text-[var(--muted)]">
+                          #{seg.lineNumber}
+                        </span>
+                        <span
+                          className="px-2.5 py-0.5 rounded-md font-mono font-bold text-xs"
+                          style={{ backgroundColor: 'rgba(91, 82, 232, 0.12)', color: 'var(--brand)' }}
+                        >
+                          {seg.tag}
+                        </span>
+                        <span className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>
+                          {seg.name}
+                        </span>
+                        <span className="text-[11px] text-[var(--muted)]">
+                          ({seg.elements.length} elements)
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[11px] text-[var(--muted)] max-w-[200px] sm:max-w-md truncate hidden md:inline">
+                          {seg.raw}
+                        </span>
+                        {isExpanded ? (
+                          <ChevronDown className="w-4 h-4 text-[var(--muted)]" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 text-[var(--muted)]" />
+                        )}
+                      </div>
+                    </button>
+                    {isExpanded && (
+                      <div
+                        className="p-4 border-t space-y-3"
+                        style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)' }}
+                      >
+                        <div className="text-[11px] font-mono text-[var(--muted)] break-all">
+                          <strong>Raw:</strong> {seg.raw}
+                        </div>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-xs text-left">
+                            <thead>
+                              <tr className="border-b" style={{ borderColor: 'var(--line)', color: 'var(--muted)' }}>
+                                <th className="py-1.5 px-2 font-medium">Position</th>
+                                <th className="py-1.5 px-2 font-medium">Description</th>
+                                <th className="py-1.5 px-2 font-medium">Value</th>
+                                <th className="py-1.5 px-2 font-medium">Length</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y font-mono" style={{ borderColor: 'var(--line)' }}>
+                              {seg.elements.map((elem, elemIdx) => {
+                                const posNum = elemIdx + 1;
+                                const posTag = `${seg.tag}${posNum < 10 ? '0' + posNum : posNum}`;
+                                const desc = elementDescriptions?.[elemIdx] || 'Element Data';
+                                return (
+                                  <tr key={posTag} className="hover:opacity-80">
+                                    <td className="py-1.5 px-2 font-semibold text-[var(--brand)]">{posTag}</td>
+                                    <td className="py-1.5 px-2 text-[var(--ink)] font-sans">{desc}</td>
+                                    <td className="py-1.5 px-2 text-[var(--ink)] font-bold">
+                                      {elem || <span className="text-[var(--muted)] font-normal italic">[empty]</span>}
+                                    </td>
+                                    <td className="py-1.5 px-2 text-[var(--muted)]">{elem.length}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       )}
 
+      {/* 7. EDI TO JSON TAB */}
       {activeTab === 'edi-to-json' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            rows={16}
-            className="w-full p-3.5 rounded-xl font-mono text-xs border"
-            style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-          />
-          <textarea
-            readOnly
-            value={output}
-            rows={16}
-            className="w-full p-3.5 rounded-xl font-mono text-xs border"
-            style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-          />
-        </div>
-      )}
-
-      {activeTab === 'edi-validator' && (
-        <div className="space-y-4">
-          <div className="rounded-2xl border p-4" style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}>
-            {validationIssues.map((issue, idx) => (
-              <div key={idx} className="text-xs py-1">
-                [{issue.type}] {issue.message}
+          <div
+            className="p-4 rounded-2xl border flex flex-col space-y-3"
+            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+          >
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold" style={{ color: 'var(--ink)' }}>
+                EDI ANSI X12 Input
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setInput('')}
+                  disabled={!input}
+                  className="flex items-center gap-1 hover:opacity-80 text-[var(--muted)] disabled:opacity-40 cursor-pointer"
+                  title="Clear EDI input payload"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                  <span>Clear</span>
+                </button>
+                <button onClick={() => setInput(SAMPLE_850)} className="hover:opacity-80 text-[var(--brand)] cursor-pointer">
+                  Reset Sample
+                </button>
               </div>
-            ))}
+            </div>
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              rows={16}
+              className="w-full p-3.5 rounded-xl font-mono text-xs outline-none resize-y border"
+              style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+            />
+          </div>
+
+          <div
+            className="p-4 rounded-2xl border flex flex-col space-y-3"
+            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+          >
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold" style={{ color: 'var(--ink)' }}>
+                Structured JSON Tree
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleCopy(output)}
+                  className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80 cursor-pointer"
+                  style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                >
+                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copied ? 'Copied' : 'Copy'}</span>
+                </button>
+                <button
+                  onClick={() => handleDownload(output, `edi_parsed_${selectedSampleId}.json`)}
+                  className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80 cursor-pointer"
+                  style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download JSON</span>
+                </button>
+              </div>
+            </div>
+            <textarea
+              readOnly
+              value={output}
+              rows={16}
+              className="w-full p-3.5 rounded-xl font-mono text-xs outline-none resize-y border"
+              style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+            />
           </div>
         </div>
       )}
 
-      {/* Sub-tools wrapped in a container that suppresses internal duplicate ToolHeaders */}
+      {/* 8. Other Sub-Tools without duplicate ToolHeaders */}
       <div className="[&>div>div:first-child]:hidden">
         {activeTab === 'json-to-edi' && (
           <JsonToEdiConverter tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
