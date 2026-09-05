@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Copy, Check, Download, RefreshCw, SlidersHorizontal, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Copy, Check, Download, RefreshCw, SlidersHorizontal, CheckCircle2, AlertTriangle, ShieldCheck, Upload, Trash2 } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
 
@@ -290,13 +290,45 @@ export const EdiDelimiterCleaner: React.FC<EdiDelimiterCleanerProps> = ({
           className="p-4 rounded-2xl border shadow-sm flex flex-col"
           style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
         >
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
             <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
               RAW OR UNWRAPPED EDI
             </span>
-            <span className="text-[11px] text-[var(--muted)]">
-              Detected: {currentDelims.elem} &amp; {currentDelims.term}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-[var(--muted)] hidden sm:inline">
+                Detected: {currentDelims.elem} &amp; {currentDelims.term}
+              </span>
+              <label className="cursor-pointer hover:opacity-80 flex items-center gap-1 text-[var(--muted)] text-xs">
+                <Upload className="w-3.5 h-3.5" />
+                <span>Upload</span>
+                <input
+                  type="file"
+                  accept=".edi,.txt,.x12"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (evt) => {
+                        if (typeof evt.target?.result === 'string') {
+                          setInput(evt.target.result);
+                        }
+                      };
+                      reader.readAsText(file);
+                    }
+                  }}
+                  className="hidden"
+                />
+              </label>
+              <button
+                onClick={() => setInput('')}
+                disabled={!input}
+                className="hover:opacity-80 text-rose-500 disabled:opacity-40 flex items-center gap-1 text-xs cursor-pointer"
+                title="Clear input"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Clear</span>
+              </button>
+            </div>
           </div>
           <textarea
             value={input}
@@ -312,12 +344,30 @@ export const EdiDelimiterCleaner: React.FC<EdiDelimiterCleanerProps> = ({
           className="p-4 rounded-2xl border shadow-sm flex flex-col"
           style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
         >
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
             <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4" />
               CLEANED &amp; NORMALIZED EDI
             </span>
-            <span className="text-[11px] text-[var(--muted)]">Terminated with {targetSegTerm}</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleCopy}
+                disabled={!cleanedEdi}
+                className="text-xs flex items-center gap-1 hover:opacity-80 text-[var(--brand)] font-medium disabled:opacity-40 cursor-pointer"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copied ? 'Copied!' : 'Copy'}</span>
+              </button>
+              <button
+                onClick={handleDownload}
+                disabled={!cleanedEdi}
+                className="text-xs flex items-center gap-1 hover:opacity-80 text-[var(--muted)] font-medium disabled:opacity-40 cursor-pointer"
+                title="Download cleaned .edi"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download</span>
+              </button>
+            </div>
           </div>
           <textarea
             readOnly

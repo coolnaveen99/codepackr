@@ -18,6 +18,10 @@ import {
   ShieldAlert,
   SlidersHorizontal,
   FileCode2,
+  Send,
+  Trash2,
+  X,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
@@ -25,48 +29,13 @@ import { EdiAckGenerator } from '../edi/EdiAckGenerator';
 import { JsonToEdiConverter } from '../edi/JsonToEdiConverter';
 import { EdiTemplateGenerator } from '../edi/EdiTemplateGenerator';
 import { EdiDelimiterCleaner } from '../edi/EdiDelimiterCleaner';
+import { As2ToolsView } from '../edi/As2ToolsView';
+import { COMPREHENSIVE_SEGMENT_DICTIONARY, EDI_TRANSACTIONS } from '../../data/ediDictionary';
 
-// Standard ANSI X12 segment dictionary for common segments
-const SEGMENT_NAMES: Record<string, string> = {
-  ISA: 'Interchange Control Header',
-  IEA: 'Interchange Control Trailer',
-  GS: 'Functional Group Header',
-  GE: 'Functional Group Trailer',
-  ST: 'Transaction Set Header',
-  SE: 'Transaction Set Trailer',
-  BIG: 'Beginning Segment for Invoice',
-  BGN: 'Beginning Segment',
-  BEG: 'Beginning Segment for Purchase Order',
-  CUR: 'Currency',
-  REF: 'Reference Identification',
-  PER: 'Administrative Communications Contact',
-  N1: 'Party Identification (Name)',
-  N2: 'Additional Name Information',
-  N3: 'Party Location (Address)',
-  N4: 'Geographic Location (City, State, Zip)',
-  DTM: 'Date/Time Reference',
-  FOB: 'F.O.B. Related Instructions',
-  ITD: 'Terms of Sale/Deferred Terms',
-  TXI: 'Tax Information',
-  CAD: 'Carrier Detail',
-  SAC: 'Service, Promotion, Allowance, or Charge',
-  HL: 'Hierarchical Level',
-  LIN: 'Item Identification',
-  SN1: 'Item Detail (Shipment)',
-  PO1: 'Baseline Item Data (Purchase Order)',
-  PID: 'Product/Item Description',
-  MEA: 'Measurements',
-  QTY: 'Quantity Information',
-  IT1: 'Baseline Item Data (Invoice)',
-  TDS: 'Total Monetary Value Summary',
-  CTT: 'Transaction Totals',
-  AK1: 'Functional Group Response Header',
-  AK2: 'Transaction Set Response Header',
-  AK5: 'Transaction Set Response Trailer',
-  AK9: 'Functional Group Response Trailer',
-};
+// Standard ANSI X12 and EDIFACT segment dictionary
+const SEGMENT_NAMES: Record<string, string> = COMPREHENSIVE_SEGMENT_DICTIONARY;
 
-// Known element descriptions for critical envelope segments
+// Known element descriptions for critical envelope and header segments
 const ENVELOPE_ELEMENT_NAMES: Record<string, string[]> = {
   ISA: [
     'Authorization Information Qualifier',
@@ -120,6 +89,43 @@ const ENVELOPE_ELEMENT_NAMES: Record<string, string[]> = {
     'Release Number',
     'Date (CCYYMMDD)',
   ],
+  BCH: [
+    'Transaction Set Purpose Code (04=Change)',
+    'Purchase Order Type Code',
+    'Purchase Order Number',
+    'Release Number',
+    'Date (CCYYMMDD)',
+    'Contract Number',
+    'Reference Number',
+    'Change Order Sequence Number',
+    'Change Date (CCYYMMDD)',
+  ],
+  BSN: [
+    'Transaction Set Purpose Code (00=Original)',
+    'Shipment Identification (Ship Notice / ASN)',
+    'Date (CCYYMMDD)',
+    'Time (HHMM[SS])',
+    'Hierarchical Structure Code (0001=SOPI)',
+  ],
+  POC: [
+    'Assigned Identification (Line #)',
+    'Change Type Code (CA=Change, DI=Delete, AI=Add)',
+    'Quantity Ordered (Revised)',
+    'Quantity Left to Receive',
+    'Unit or Basis for Measurement Code',
+    'Unit Price',
+    'Basis of Unit Price Code',
+    'Product/Service ID Qualifier (VN=Vendor Part)',
+    'Product/Service ID',
+    'Product/Service ID Qualifier (UP=UPC)',
+    'Product/Service ID',
+  ],
+  HL: [
+    'Hierarchical ID Number',
+    'Hierarchical Parent ID Number',
+    'Hierarchical Level Code (S=Shipment, O=Order, P=Pack, I=Item)',
+    'Hierarchical Child Code',
+  ],
   BIG: [
     'Invoice Date',
     'Invoice Number',
@@ -127,7 +133,7 @@ const ENVELOPE_ELEMENT_NAMES: Record<string, string[]> = {
     'Purchase Order Number',
   ],
   N1: [
-    'Entity Identifier Code (BT=BillTo, ST=ShipTo, VN=Vendor)',
+    'Entity Identifier Code (BT=BillTo, ST=ShipTo, VN=Vendor, SF=ShipFrom)',
     'Name',
     'Identification Code Qualifier',
     'Identification Code',
@@ -225,6 +231,7 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
   const [copied, setCopied] = useState<boolean>(false);
   const [filterQuery, setFilterQuery] = useState<string>('');
   const [expandedSegment, setExpandedSegment] = useState<number | null>(0);
+  const [selectedSampleId, setSelectedSampleId] = useState<string>('850');
 
   // Delimiters
   const [segmentTerminator, setSegmentTerminator] = useState<string>('~');
@@ -236,6 +243,23 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
   useEffect(() => {
     setActiveTab(tool.id);
   }, [tool.id]);
+
+  // Load a transaction sample and auto-configure standard delimiters
+  const loadTransactionSample = (txId: string) => {
+    const found = EDI_TRANSACTIONS.find((t) => t.id === txId);
+    if (!found) return;
+    setSelectedSampleId(txId);
+    setInput(found.samplePayload);
+    if (found.standard === 'EDIFACT') {
+      setSegmentTerminator("'");
+      setElementSeparator('+');
+      setSubElementSeparator(':');
+    } else {
+      setSegmentTerminator('~');
+      setElementSeparator('*');
+      setSubElementSeparator('>');
+    }
+  };
 
   // Auto-detect delimiters from raw EDI input (ISA standard: element sep at index 3, terminator at 105 or end of ISA)
   const autoDetectDelimiters = () => {
@@ -535,6 +559,47 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
     }
   };
 
+  const handleExportSegmentsCsv = () => {
+    if (parsedSegments.length === 0) return;
+    const rows: string[] = ['"Line","Tag","Name","ElementCount","RawSegment"'];
+    parsedSegments.forEach((s) => {
+      rows.push(
+        `"${s.lineNumber}","${s.tag}","${s.name.replace(/"/g, '""')}","${s.elements.length}","${s.raw.replace(/"/g, '""')}"`
+      );
+    });
+    handleDownload(rows.join('\n'), `edi_segments_${selectedSampleId}.csv`);
+  };
+
+  const handleExportSegmentsJson = () => {
+    if (parsedSegments.length === 0) return;
+    const json = JSON.stringify(parsedSegments, null, 2);
+    handleDownload(json, `edi_segments_${selectedSampleId}.json`);
+  };
+
+  const handleExportValidationReport = () => {
+    const lines: string[] = [
+      '==================================================',
+      '         EDI COMPLIANCE VALIDATION REPORT         ',
+      '==================================================',
+      `Timestamp: ${new Date().toISOString()}`,
+      `Selected Sample: ${selectedSampleId}`,
+      `Total Segments Parsed: ${parsedSegments.length}`,
+      `Delimiters: Segment='${segmentTerminator}' Element='${elementSeparator}' Sub-Elem='${subElementSeparator}'`,
+      '',
+      'SUMMARY:',
+      `  Errors:   ${validationIssues.filter((i) => i.type === 'error').length}`,
+      `  Warnings: ${validationIssues.filter((i) => i.type === 'warning').length}`,
+      `  Info:     ${validationIssues.filter((i) => i.type === 'info').length}`,
+      '',
+      'FINDINGS:',
+    ];
+    validationIssues.forEach((issue, idx) => {
+      lines.push(`[${issue.type.toUpperCase()}] #${idx + 1}: ${issue.message}`);
+      if (issue.line) lines.push(`   At line ${issue.line} (${issue.segment || 'segment'})`);
+    });
+    handleDownload(lines.join('\n'), `edi_validation_report_${selectedSampleId}.txt`);
+  };
+
   const filteredSegments = useMemo(() => {
     if (!filterQuery.trim()) return parsedSegments;
     const q = filterQuery.toLowerCase();
@@ -551,7 +616,10 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
       <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
 
       {/* Sub-tools Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b overflow-x-auto pb-2" style={{ borderColor: 'var(--line)' }}>
+      <div
+        className="flex items-center gap-2 border-b overflow-x-auto pb-2"
+        style={{ borderColor: 'var(--line)', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
         {[
           { id: 'edi-formatter', label: 'EDI Formatter & Indenter', icon: Sparkles },
           { id: 'edi-segment-viewer', label: 'EDI Segment & Element Viewer', icon: Table },
@@ -561,6 +629,7 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
           { id: 'edi-997-generator', label: '997 & CONTRL Ack Generator', icon: CheckCircle2 },
           { id: 'edi-sample-generator', label: 'Template & Sample Generator', icon: FileText },
           { id: 'edi-delimiter-converter', label: 'Delimiter Swapper & Normalizer', icon: SlidersHorizontal },
+          { id: 'as2-tools', label: 'AS2 Encoder, Decoder & MDN', icon: Send },
         ].map((tab) => {
           const TabIcon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -587,52 +656,97 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
       {/* Delimiter & Sample Controls Bar for core viewer/formatter/validator */}
       {['edi-formatter', 'edi-segment-viewer', 'edi-to-json', 'edi-validator'].includes(activeTab) && (
       <div
-        className="p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-4 text-xs"
+        className="p-4 rounded-2xl border flex flex-col lg:flex-row lg:items-center justify-between gap-4 text-xs"
         style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
       >
         {/* Sample Selectors */}
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-semibold text-[var(--muted)]">Load Sample:</span>
-          <button
-            onClick={() => {
-              setInput(SAMPLE_850);
-              setSegmentTerminator('~');
-              setElementSeparator('*');
-              setSubElementSeparator('>');
-            }}
-            className="px-2.5 py-1 rounded-lg border font-medium hover:opacity-80 transition-opacity"
-            style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+          <span className="font-semibold text-[var(--muted)]">Load Transaction:</span>
+          <select
+            aria-label="Load EDI Sample Document"
+            value={selectedSampleId}
+            onChange={(e) => loadTransactionSample(e.target.value)}
+            className="px-2.5 py-1.5 rounded-lg border font-medium text-xs outline-none cursor-pointer"
+            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
           >
-            850 Purchase Order
-          </button>
-          <button
-            onClick={() => {
-              setInput(SAMPLE_810);
-              setSegmentTerminator('~');
-              setElementSeparator('*');
-              setSubElementSeparator('>');
-            }}
-            className="px-2.5 py-1 rounded-lg border font-medium hover:opacity-80 transition-opacity"
-            style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-          >
-            810 Invoice
-          </button>
-          <button
-            onClick={() => {
-              setInput(SAMPLE_997);
-              setSegmentTerminator('~');
-              setElementSeparator('*');
-              setSubElementSeparator('>');
-            }}
-            className="px-2.5 py-1 rounded-lg border font-medium hover:opacity-80 transition-opacity"
-            style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-          >
-            997 Ack
-          </button>
+            {Array.from(new Set(EDI_TRANSACTIONS.map((t) => t.category))).map((category) => (
+              <optgroup key={category} label={category}>
+                {EDI_TRANSACTIONS.filter((t) => t.category === category).map((tx) => (
+                  <option key={tx.id} value={tx.id}>
+                    {tx.code} — {tx.name}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+
+          {/* Active Standard Indicator Badge */}
+          {(() => {
+            const currentTx = EDI_TRANSACTIONS.find((t) => t.id === selectedSampleId);
+            if (!currentTx) return null;
+            return (
+              <span
+                className="px-2 py-0.5 rounded-md font-mono text-[10px] font-semibold border"
+                style={{
+                  backgroundColor: 'var(--bg)',
+                  borderColor: 'var(--line)',
+                  color: currentTx.standard === 'EDIFACT' ? '#d97706' : 'var(--brand)',
+                }}
+              >
+                {currentTx.standard} • {currentTx.functionalGroup}
+              </span>
+            );
+          })()}
+
+          <div className="hidden sm:block h-4 w-px bg-[var(--line)] mx-1" />
+
+          {/* Quick Presets (Synchronized with dropdown) */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[11px] text-[var(--muted)] hidden sm:inline">Quick:</span>
+            {[
+              { id: '850', label: '850 PO' },
+              { id: '860', label: '860 Change' },
+              { id: '856', label: '856 ASN' },
+              { id: '810', label: '810 Inv' },
+              { id: '997', label: '997 Ack' },
+            ].map((preset) => {
+              const isPresetActive = selectedSampleId === preset.id;
+              return (
+                <button
+                  key={preset.id}
+                  onClick={() => loadTransactionSample(preset.id)}
+                  className={`px-2 py-1 rounded-lg border font-medium text-xs transition-all cursor-pointer ${
+                    isPresetActive
+                      ? 'border-[var(--brand)] text-[var(--brand)] font-semibold shadow-xs'
+                      : 'hover:opacity-80'
+                  }`}
+                  style={{
+                    backgroundColor: isPresetActive ? 'var(--surface-2)' : 'var(--bg)',
+                    borderColor: isPresetActive ? 'var(--brand)' : 'var(--line)',
+                    color: isPresetActive ? 'var(--brand)' : 'var(--ink)',
+                  }}
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
+
+            {/* Clear Input Document Button */}
+            <button
+              onClick={() => setInput('')}
+              disabled={!input}
+              className="px-2.5 py-1 rounded-lg border font-medium text-xs transition-all cursor-pointer flex items-center gap-1 hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed ml-1"
+              style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--muted)' }}
+              title="Clear EDI input payload"
+            >
+              <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+              <span>Clear</span>
+            </button>
+          </div>
         </div>
 
         {/* Delimiter Settings */}
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap border-t lg:border-t-0 pt-2 lg:pt-0" style={{ borderColor: 'var(--line)' }}>
           <div className="flex items-center gap-1.5">
             <span className="text-[var(--muted)]">Segment:</span>
             <input
@@ -668,9 +782,9 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
           </div>
           <button
             onClick={autoDetectDelimiters}
-            className="px-2.5 py-1 rounded-lg border font-medium hover:opacity-80 transition-opacity flex items-center gap-1"
+            className="px-2.5 py-1 rounded-lg border font-medium hover:opacity-80 transition-opacity flex items-center gap-1 cursor-pointer"
             style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--brand)' }}
-            title="Auto-detect from ISA header"
+            title="Auto-detect from ISA or UNA header"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Auto-detect</span>
@@ -745,7 +859,7 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
                   <span>{copied ? 'Copied' : 'Copy'}</span>
                 </button>
                 <button
-                  onClick={() => handleDownload(output, 'formatted.edi')}
+                  onClick={() => handleDownload(output, `formatted_${selectedSampleId}.edi`)}
                   className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80"
                   style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
                 >
@@ -767,8 +881,8 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
 
       {activeTab === 'edi-segment-viewer' && (
         <div className="space-y-4">
-          {/* Search filter */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
+          {/* Search filter & Export Actions */}
+          <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="relative flex-1 min-w-[240px]">
               <Search className="w-4 h-4 absolute left-3 top-2.5 text-[var(--muted)]" />
               <input
@@ -776,12 +890,46 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
                 value={filterQuery}
                 onChange={(e) => setFilterQuery(e.target.value)}
                 placeholder="Filter by segment tag (e.g. ISA, N1, PO1) or element value..."
-                className="w-full pl-9 pr-3.5 py-2 rounded-xl text-xs border outline-none"
+                className="w-full pl-9 pr-8 py-2 rounded-xl text-xs border outline-none font-medium"
                 style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
               />
+              {filterQuery && (
+                <button
+                  onClick={() => setFilterQuery('')}
+                  className="absolute right-2.5 top-2.5 text-[var(--muted)] hover:opacity-80 p-0.5 cursor-pointer"
+                  title="Clear filter"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
-            <div className="text-xs text-[var(--muted)]">
-              Showing {filteredSegments.length} of {parsedSegments.length} segments
+
+            <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+              <div className="text-xs text-[var(--muted)]">
+                Showing {filteredSegments.length} of {parsedSegments.length} segments
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={handleExportSegmentsCsv}
+                  disabled={parsedSegments.length === 0}
+                  className="px-2.5 py-1.5 rounded-xl border flex items-center gap-1.5 text-xs font-semibold hover:opacity-80 disabled:opacity-40 cursor-pointer shadow-xs"
+                  style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  title="Export parsed segments to CSV"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Export CSV</span>
+                </button>
+                <button
+                  onClick={handleExportSegmentsJson}
+                  disabled={parsedSegments.length === 0}
+                  className="px-2.5 py-1.5 rounded-xl border flex items-center gap-1.5 text-xs font-semibold hover:opacity-80 disabled:opacity-40 cursor-pointer shadow-xs"
+                  style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  title="Export parsed segments structure to JSON"
+                >
+                  <Download className="w-3.5 h-3.5 text-[var(--brand)]" />
+                  <span>Export JSON</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -891,9 +1039,20 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
               <span className="font-semibold" style={{ color: 'var(--ink)' }}>
                 EDI ANSI X12 Input
               </span>
-              <button onClick={() => setInput(SAMPLE_850)} className="hover:opacity-80 text-[var(--brand)]">
-                Reset Sample
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setInput('')}
+                  disabled={!input}
+                  className="flex items-center gap-1 hover:opacity-80 text-[var(--muted)] disabled:opacity-40 cursor-pointer"
+                  title="Clear EDI input payload"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                  <span>Clear</span>
+                </button>
+                <button onClick={() => setInput(SAMPLE_850)} className="hover:opacity-80 text-[var(--brand)] cursor-pointer">
+                  Reset Sample
+                </button>
+              </div>
             </div>
             <textarea
               value={input}
@@ -916,15 +1075,15 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleCopy(output)}
-                  className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80"
+                  className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80 cursor-pointer"
                   style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
                 >
                   {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copied ? 'Copied' : 'Copy'}</span>
                 </button>
                 <button
-                  onClick={() => handleDownload(output, 'edi-parsed.json')}
-                  className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80"
+                  onClick={() => handleDownload(output, `edi_parsed_${selectedSampleId}.json`)}
+                  className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80 cursor-pointer"
                   style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
                 >
                   <Download className="w-3.5 h-3.5" />
@@ -972,13 +1131,23 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-3 text-xs">
+            <div className="flex items-center gap-2.5 text-xs flex-wrap">
               <span className="px-3 py-1 rounded-full border bg-rose-500/10 text-rose-600 border-rose-500/20 font-semibold">
                 {validationIssues.filter((i) => i.type === 'error').length} Errors
               </span>
               <span className="px-3 py-1 rounded-full border bg-amber-500/10 text-amber-600 border-amber-500/20 font-semibold">
                 {validationIssues.filter((i) => i.type === 'warning').length} Warnings
               </span>
+              <button
+                onClick={handleExportValidationReport}
+                disabled={!input.trim()}
+                className="px-3 py-1.5 rounded-xl border font-semibold flex items-center gap-1.5 hover:opacity-80 disabled:opacity-40 cursor-pointer shadow-xs"
+                style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                title="Download full compliance validation report"
+              >
+                <Download className="w-3.5 h-3.5 text-[var(--brand)]" />
+                <span>Export Report</span>
+              </button>
             </div>
           </div>
 
@@ -1023,7 +1192,18 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
               <span className="font-semibold" style={{ color: 'var(--ink)' }}>
                 Live Document Editor (Fix &amp; Re-validate)
               </span>
-              <span className="text-[var(--muted)]">{parsedSegments.length} Segments Parsed</span>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setInput('')}
+                  disabled={!input}
+                  className="flex items-center gap-1 text-[var(--muted)] hover:opacity-80 disabled:opacity-40 text-xs cursor-pointer"
+                  title="Clear document"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                  <span>Clear</span>
+                </button>
+                <span className="text-[var(--muted)]">{parsedSegments.length} Segments Parsed</span>
+              </div>
             </div>
             <textarea
               value={input}
@@ -1048,6 +1228,9 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
       )}
       {activeTab === 'edi-delimiter-converter' && (
         <EdiDelimiterCleaner tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} initialInput={input} />
+      )}
+      {activeTab === 'as2-tools' && (
+        <As2ToolsView tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} initialInput={input} />
       )}
     </div>
   );

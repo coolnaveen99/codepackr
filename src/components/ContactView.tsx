@@ -344,7 +344,7 @@ export const ContactView: React.FC<ContactViewProps> = ({ onBack }) => {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Alex Developer"
+                  placeholder="e.g. Kumar"
                   disabled={isSubmitting}
                   className="w-full p-3 text-xs sm:text-sm rounded-xl border outline-none disabled:opacity-60"
                   style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}

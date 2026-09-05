@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Copy, Check, Download, RefreshCw, CheckCircle2, AlertTriangle, ShieldCheck, ArrowLeftRight } from 'lucide-react';
+import { Copy, Check, Download, RefreshCw, CheckCircle2, AlertTriangle, ShieldCheck, ArrowLeftRight, Upload, Trash2 } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
 
@@ -315,11 +315,42 @@ export const EdiAckGenerator: React.FC<EdiAckGeneratorProps> = ({
           className="p-4 rounded-2xl border shadow-sm flex flex-col"
           style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
         >
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
             <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
               INPUT EDI INTERCHANGE (PASTE 850, 810, 856...)
             </span>
-            <span className="text-[11px] text-[var(--muted)]">Auto-parses ISA, GS, ST</span>
+            <div className="flex items-center gap-2">
+              <label className="cursor-pointer hover:opacity-80 flex items-center gap-1 text-[var(--muted)] text-xs">
+                <Upload className="w-3.5 h-3.5" />
+                <span>Upload</span>
+                <input
+                  type="file"
+                  accept=".edi,.txt,.x12"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (evt) => {
+                        if (typeof evt.target?.result === 'string') {
+                          setInputEdi(evt.target.result);
+                        }
+                      };
+                      reader.readAsText(file);
+                    }
+                  }}
+                  className="hidden"
+                />
+              </label>
+              <button
+                onClick={() => setInputEdi('')}
+                disabled={!inputEdi}
+                className="hover:opacity-80 text-rose-500 disabled:opacity-40 flex items-center gap-1 text-xs cursor-pointer"
+                title="Clear EDI input"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Clear</span>
+              </button>
+            </div>
           </div>
           <textarea
             value={inputEdi}
@@ -336,12 +367,30 @@ export const EdiAckGenerator: React.FC<EdiAckGeneratorProps> = ({
           className="p-4 rounded-2xl border shadow-sm flex flex-col"
           style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
         >
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
             <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4" />
               GENERATED {ackType === 'x12_997' ? 'EDI 997 ACKNOWLEDGMENT' : 'EDIFACT CONTRL'}
             </span>
-            <span className="text-[11px] text-[var(--muted)]">Ready to transmit</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleCopy}
+                disabled={!generatedAck}
+                className="text-xs flex items-center gap-1 hover:opacity-80 text-[var(--brand)] font-medium disabled:opacity-40 cursor-pointer"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copied ? 'Copied!' : 'Copy'}</span>
+              </button>
+              <button
+                onClick={handleDownload}
+                disabled={!generatedAck}
+                className="text-xs flex items-center gap-1 hover:opacity-80 text-[var(--muted)] font-medium disabled:opacity-40 cursor-pointer"
+                title="Download acknowledgment"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download</span>
+              </button>
+            </div>
           </div>
           <textarea
             readOnly

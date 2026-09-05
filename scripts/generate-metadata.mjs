@@ -123,7 +123,9 @@ const aliasDefinitions = {
 
 // Sitemap slugs
 const sitemap = fs.readFileSync(path.resolve('public/sitemap.xml'), 'utf8');
-const sitemapSlugs = [...sitemap.matchAll(/<loc>https:\/\/www\.codepackr\.com\/([^<]+)\.html<\/loc>/g)].map(m => m[1]);
+const sitemapSlugs = [...sitemap.matchAll(/<loc>https:\/\/www\.codepackr\.com\/([^<]+)<\/loc>/g)]
+  .map(m => m[1].replace(/^\/+|\/+$/g, '').replace(/\.html$/, ''))
+  .filter(Boolean);
 
 // Specific custom content helpers by category and tool
 function getCategoryFeatures(category, toolName) {
@@ -288,13 +290,13 @@ for (const slug of sitemapSlugs) {
   }
 
   const title = `${info.name} - Codepackr`;
-  const canonicalUrl = `https://www.codepackr.com/${slug}.html`;
+  const canonicalUrl = `https://www.codepackr.com/${slug}`;
 
   metadataMap[slug] = {
     name: info.name,
     title,
     description: info.description,
-    canonicalPath: `/${slug}.html`,
+    canonicalPath: `/${slug}`,
     canonicalUrl,
     category: info.category,
     features: getCategoryFeatures(info.category, info.name),
@@ -308,13 +310,13 @@ for (const [toolId, tool] of baseTools) {
   if (!metadataMap[toolId]) {
     const title = `${tool.name} - Codepackr`;
     const canonicalSlug = toolId === 'edi-formatter' ? 'edi-x12-formatter' : (toolId === 'edi-to-json' ? 'edi-json-converter' : (toolId === 'markdown-preview' ? 'markdown' : toolId));
-    const canonicalUrl = `https://www.codepackr.com/${canonicalSlug}.html`;
+    const canonicalUrl = `https://www.codepackr.com/${canonicalSlug}`;
 
     metadataMap[toolId] = {
       name: tool.name,
       title,
       description: tool.description,
-      canonicalPath: `/${canonicalSlug}.html`,
+      canonicalPath: `/${canonicalSlug}`,
       canonicalUrl,
       category: tool.category,
       features: getCategoryFeatures(tool.category, tool.name),

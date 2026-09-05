@@ -67,6 +67,9 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'json-to-edi': 'json-to-edi',
   'edi-sample-generator': 'edi-sample-generator',
   'edi-delimiter-converter': 'edi-delimiter-converter',
+  'as2-tools': 'as2-tools',
+  'as2-encoder-decoder': 'as2-tools',
+  'as2-mdn-generator': 'as2-tools',
 
   // XML, XSD, XSLT Tools
   'xslt-transformer': 'xslt-transformer',
@@ -114,16 +117,16 @@ export const TOOL_ID_TO_CANONICAL_SLUG: Record<string, string> = {
 };
 
 /**
- * Returns the clean direct path for a tool: e.g. "/json-formatter.html"
+ * Returns the clean direct path for a tool: e.g. "/json-formatter"
  */
 export function getToolPath(tool: ToolDef | string): string {
   const toolId = typeof tool === 'string' ? tool : tool.id;
   const slug = TOOL_ID_TO_CANONICAL_SLUG[toolId] || toolId;
-  return `/${slug}.html`;
+  return `/${slug}`;
 }
 
 /**
- * Returns the full direct canonical URL: e.g. "https://www.codepackr.com/json-formatter.html"
+ * Returns the full direct canonical URL: e.g. "https://www.codepackr.com/json-formatter"
  */
 export function getToolDirectUrl(tool: ToolDef | string): string {
   return `https://www.codepackr.com${getToolPath(tool)}`;

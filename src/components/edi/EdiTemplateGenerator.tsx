@@ -1,7 +1,23 @@
 import React, { useState, useMemo } from 'react';
-import { Copy, Check, Download, RefreshCw, FileText, Settings, SlidersHorizontal, Sparkles } from 'lucide-react';
+import {
+  Copy,
+  Check,
+  Download,
+  FileText,
+  SlidersHorizontal,
+  Sparkles,
+  Search,
+  BookOpen,
+  ArrowRight,
+  Send,
+  Layers,
+  CheckCircle2,
+  X,
+  Trash2,
+} from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
+import { EDI_TRANSACTIONS, EdiTransactionDefinition } from '../../data/ediDictionary';
 
 interface EdiTemplateGeneratorProps {
   tool: ToolDef;
@@ -10,45 +26,47 @@ interface EdiTemplateGeneratorProps {
   initialInput?: string;
 }
 
-interface TemplateOption {
-  id: string;
-  name: string;
-  standard: 'X12' | 'EDIFACT';
-  code: string;
-  description: string;
-}
-
-const TEMPLATES: TemplateOption[] = [
-  { id: '850', name: '850 Purchase Order', standard: 'X12', code: '850', description: 'Retail and B2B ordering document with line items, prices, and ship-to addresses.' },
-  { id: '810', name: '810 Commercial Invoice', standard: 'X12', code: '810', description: 'Billing document detailing goods delivered, payment terms, and total amounts.' },
-  { id: '856', name: '856 Ship Notice / Manifest (ASN)', standard: 'X12', code: '856', description: 'Advance Shipping Notice with SOPI (Shipment-Order-Pack-Item) hierarchical packaging levels.' },
-  { id: '846', name: '846 Inventory Inquiry / Advice', standard: 'X12', code: '846', description: 'Inventory stock availability, warehouse quantities, and SKU status.' },
-  { id: '204', name: '204 Motor Carrier Load Tender', standard: 'X12', code: '204', description: 'Transportation tender offering freight pickup and delivery specifications to carriers.' },
-  { id: '214', name: '214 Carrier Shipment Status', standard: 'X12', code: '214', description: 'Tracking checkpoints, pickup/delivery status events, and carrier coordinates.' },
-  { id: '820', name: '820 Payment Order / Remittance', standard: 'X12', code: '820', description: 'Electronic payment advice referencing paid invoice numbers and settlement amounts.' },
-  { id: '997', name: '997 Functional Acknowledgment', standard: 'X12', code: '997', description: 'Standard receipt confirmation acknowledging EDI envelope and transaction set syntax.' },
-  { id: 'ORDERS', name: 'EDIFACT ORDERS', standard: 'EDIFACT', code: 'ORDERS', description: 'International purchase order message with UNB, UNH, BGM, and LIN structures.' },
-  { id: 'INVOIC', name: 'EDIFACT INVOIC', standard: 'EDIFACT', code: 'INVOIC', description: 'International invoice message with UNB, UNH, BGM, and MOA currency segments.' },
-  { id: 'DESADV', name: 'EDIFACT DESADV', standard: 'EDIFACT', code: 'DESADV', description: 'International despatch advice (shipping notice) detailing physical consignments.' },
-];
-
 export const EdiTemplateGenerator: React.FC<EdiTemplateGeneratorProps> = ({
   tool,
   onBackToHome,
   onSelectRelated,
 }) => {
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('850');
-  const [senderId, setSenderId] = useState<string>('SENDERCO');
-  const [receiverId, setReceiverId] = useState<string>('RECEIVERCO');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('860');
+  const [searchFilter, setSearchFilter] = useState<string>('');
+  const [senderId, setSenderId] = useState<string>('BUYER_RETAIL');
+  const [receiverId, setReceiverId] = useState<string>('ACME_SUPPLIER');
   const [senderQual, setSenderQual] = useState<string>('ZZ');
   const [receiverQual, setReceiverQual] = useState<string>('ZZ');
-  const [docNumber, setDocNumber] = useState<string>('PO-2026-9876');
+  const [docNumber, setDocNumber] = useState<string>('PO-2026-9901');
   const [itemCount, setItemCount] = useState<number>(2);
   const [elemSep, setElemSep] = useState<string>('*');
   const [segTerm, setSegTerm] = useState<string>('~');
   const [copied, setCopied] = useState<boolean>(false);
 
-  // Generate EDI Document based on parameters
+  // Categories list
+  const categories = ['All', 'Supply Chain & Retail', 'Logistics & Warehousing', 'Manufacturing & Automotive', 'Finance & Healthcare', 'Administrative & Acknowledgment'];
+
+  // Filtered transactions
+  const filteredTransactions = useMemo(() => {
+    return EDI_TRANSACTIONS.filter((t) => {
+      const matchCat = selectedCategory === 'All' || t.category === selectedCategory;
+      const matchSearch =
+        !searchFilter.trim() ||
+        t.code.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        t.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        t.description.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        t.functionalGroup.toLowerCase().includes(searchFilter.toLowerCase());
+      return matchCat && matchSearch;
+    });
+  }, [selectedCategory, searchFilter]);
+
+  // Current selected transaction definition
+  const currentTransaction = useMemo<EdiTransactionDefinition>(() => {
+    return EDI_TRANSACTIONS.find((t) => t.id === selectedTemplate) || EDI_TRANSACTIONS[0];
+  }, [selectedTemplate]);
+
+  // Dynamic EDI Generator adapting parameters to template
   const generatedEdi = useMemo(() => {
     const now = new Date();
     const yy = String(now.getFullYear()).slice(2);
@@ -65,221 +83,68 @@ export const EdiTemplateGenerator: React.FC<EdiTemplateGeneratorProps> = ({
     const pReceiver = receiverId.padEnd(15, ' ').slice(0, 15);
     const pSQual = senderQual.padEnd(2, ' ').slice(0, 2);
     const pRQual = receiverQual.padEnd(2, ' ').slice(0, 2);
-
-    const term = segTerm || '~';
     const sep = elemSep || '*';
+    const term = segTerm || '~';
 
-    const lines: string[] = [];
+    // If the template has sample payload, we customize sender, receiver, dates, docNumber, and separators
+    const base = currentTransaction.samplePayload;
 
-    if (selectedTemplate === '850') {
-      lines.push(`ISA*00*          *00*          *${pSQual}*${pSender}*${pRQual}*${pReceiver}*${yymmdd}*${hhmm}*U*00401*${ctrl}*0*P*>`);
-      lines.push(`GS*PO*${senderId.trim()}*${receiverId.trim()}*${ccyymmdd}*${hhmm}*1*X*004010`);
-      lines.push(`ST*850*0001`);
-      lines.push(`BEG*00*NE*${docNumber}**${ccyymmdd}`);
-      lines.push(`CUR*BY*USD`);
-      lines.push(`REF*DP*014`);
-      lines.push(`PER*BD*JANE DOE*TE*555-0199*EM*orders@${receiverId.toLowerCase().trim() || 'example'}.com`);
-      lines.push(`N1*ST*EAST DISTRIBUTION CENTER*92*104`);
-      lines.push(`N3*450 INDUSTRIAL PARKWAY`);
-      lines.push(`N4*NEW YORK*NY*10001*US`);
-      lines.push(`N1*BT*${receiverId.trim()} HQ*91*HQ01`);
-      lines.push(`N3*100 WALL STREET 22ND FL`);
-      lines.push(`N4*NEW YORK*NY*10005*US`);
-
-      let totalQty = 0;
-      for (let i = 1; i <= itemCount; i++) {
-        const qty = i * 25;
-        totalQty += qty;
-        const price = (15.5 + i * 4.25).toFixed(2);
-        lines.push(`PO1*${i}*${qty}*EA*${price}**VN*SKU-A${100 + i}*UP*01234567890${i}`);
-        lines.push(`PID*F****INDUSTRIAL COMPONENT SPECIFICATION MODEL #${i}`);
-      }
-      lines.push(`CTT*${itemCount}*${totalQty}`);
-      lines.push(`SE*${lines.length - 2 + 1}*0001`);
-      lines.push(`GE*1*1`);
-      lines.push(`IEA*1*${ctrl}`);
-    } else if (selectedTemplate === '810') {
-      lines.push(`ISA*00*          *00*          *${pSQual}*${pSender}*${pRQual}*${pReceiver}*${yymmdd}*${hhmm}*U*00401*${ctrl}*0*P*>`);
-      lines.push(`GS*IN*${senderId.trim()}*${receiverId.trim()}*${ccyymmdd}*${hhmm}*1*X*004010`);
-      lines.push(`ST*810*0001`);
-      lines.push(`BIG*${ccyymmdd}*${docNumber}*${ccyymmdd}*PO-987654`);
-      lines.push(`CUR*SE*USD`);
-      lines.push(`N1*RE*${senderId.trim()} REMIT TO*91*REMIT1`);
-      lines.push(`N3*PO BOX 500`);
-      lines.push(`N4*DALLAS*TX*75201*US`);
-      lines.push(`N1*BT*${receiverId.trim()} CORPORATE*92*BUY01`);
-      lines.push(`N3*100 WALL STREET`);
-      lines.push(`N4*NEW YORK*NY*10005*US`);
-      lines.push(`ITD*01*3*2**10*${ccyymmdd}*30`);
-
-      let totalCents = 0;
-      for (let i = 1; i <= itemCount; i++) {
-        const qty = i * 20;
-        const price = 25.0;
-        totalCents += qty * price * 100;
-        lines.push(`IT1*${i}*${qty}*EA*${price.toFixed(2)}**VN*ITEM-X${200 + i}`);
-        lines.push(`PID*F****COMMERCIAL GRADE DELIVERABLE PRODUCT #${i}`);
-      }
-      lines.push(`TDS*${totalCents}`);
-      lines.push(`CTT*${itemCount}`);
-      lines.push(`SE*${lines.length - 2 + 1}*0001`);
-      lines.push(`GE*1*1`);
-      lines.push(`IEA*1*${ctrl}`);
-    } else if (selectedTemplate === '856') {
-      // Advance Shipping Notice (ASN) SOPI
-      lines.push(`ISA*00*          *00*          *${pSQual}*${pSender}*${pRQual}*${pReceiver}*${yymmdd}*${hhmm}*U*00401*${ctrl}*0*P*>`);
-      lines.push(`GS*SH*${senderId.trim()}*${receiverId.trim()}*${ccyymmdd}*${hhmm}*1*X*004010`);
-      lines.push(`ST*856*0001`);
-      lines.push(`BSN*00*${docNumber}*${ccyymmdd}*${hhmm}*0001`);
-      lines.push(`DTM*011*${ccyymmdd}`);
-      // HL 1: Shipment
-      lines.push(`HL*1**S`);
-      lines.push(`TD1*CTN25*${itemCount}`);
-      lines.push(`TD5*B*2*FDEG*M*FEDEX FREIGHT`);
-      lines.push(`REF*BM*BOL-${docNumber}`);
-      lines.push(`N1*SF*SHIPPERS FACILITY*91*FAC01`);
-      lines.push(`N3*12 LOGISTICS WAY`);
-      lines.push(`N4*CHICAGO*IL*60601*US`);
-      lines.push(`N1*ST*RECEIVER DOCK*92*DC02`);
-      lines.push(`N3*800 CARRIER BLVD`);
-      lines.push(`N4*ATLANTA*GA*30301*US`);
-      // HL 2: Order
-      lines.push(`HL*2*1*O`);
-      lines.push(`PRF*PO-987654***${ccyymmdd}`);
-      // HL 3+: Items
-      for (let i = 1; i <= itemCount; i++) {
-        const hlIndex = 2 + i;
-        lines.push(`HL*${hlIndex}*2*I`);
-        lines.push(`LIN*${i}*VN*PROD-${i * 100}*UP*01234567890${i}`);
-        lines.push(`SN1*${i}*${i * 10}*EA`);
-        lines.push(`PID*F****LOGISTICS PACKAGED SHIPMENT UNITS #${i}`);
-      }
-      lines.push(`CTT*${2 + itemCount}`);
-      lines.push(`SE*${lines.length - 2 + 1}*0001`);
-      lines.push(`GE*1*1`);
-      lines.push(`IEA*1*${ctrl}`);
-    } else if (selectedTemplate === '204') {
-      lines.push(`ISA*00*          *00*          *${pSQual}*${pSender}*${pRQual}*${pReceiver}*${yymmdd}*${hhmm}*U*00401*${ctrl}*0*P*>`);
-      lines.push(`GS*SM*${senderId.trim()}*${receiverId.trim()}*${ccyymmdd}*${hhmm}*1*X*004010`);
-      lines.push(`ST*204*0001`);
-      lines.push(`B2**FDEG*${docNumber}**PP`);
-      lines.push(`B2A*00`);
-      lines.push(`MS3*FDEG*B`);
-      lines.push(`N1*SH*CONSIGNOR WAREHOUSE*91*WH01`);
-      lines.push(`N3*500 FREIGHT RD`);
-      lines.push(`N4*MEMPHIS*TN*38101*US`);
-      lines.push(`N1*CN*CONSIGNEE TERMINAL*92*CN02`);
-      lines.push(`N3*99 DISTRIBUTION PARK`);
-      lines.push(`N4*DALLAS*TX*75201*US`);
-      lines.push(`S5*1*CL*45000*G*1500*E`);
-      lines.push(`L11*BOL-9901*BM`);
-      lines.push(`SE*${lines.length - 2 + 1}*0001`);
-      lines.push(`GE*1*1`);
-      lines.push(`IEA*1*${ctrl}`);
-    } else if (selectedTemplate === '214') {
-      lines.push(`ISA*00*          *00*          *${pSQual}*${pSender}*${pRQual}*${pReceiver}*${yymmdd}*${hhmm}*U*00401*${ctrl}*0*P*>`);
-      lines.push(`GS*QM*${senderId.trim()}*${receiverId.trim()}*${ccyymmdd}*${hhmm}*1*X*004010`);
-      lines.push(`ST*214*0001`);
-      lines.push(`B10*BOL-${docNumber}*${docNumber}*FDEG`);
-      lines.push(`LX*1`);
-      lines.push(`AT7*X6*NS***${ccyymmdd}*${hhmm}*LT`);
-      lines.push(`MS1*MEMPHIS*TN*US`);
-      lines.push(`MS2*FDEG*1044`);
-      lines.push(`SE*${lines.length - 2 + 1}*0001`);
-      lines.push(`GE*1*1`);
-      lines.push(`IEA*1*${ctrl}`);
-    } else if (selectedTemplate === '846') {
-      lines.push(`ISA*00*          *00*          *${pSQual}*${pSender}*${pRQual}*${pReceiver}*${yymmdd}*${hhmm}*U*00401*${ctrl}*0*P*>`);
-      lines.push(`GS*IB*${senderId.trim()}*${receiverId.trim()}*${ccyymmdd}*${hhmm}*1*X*004010`);
-      lines.push(`ST*846*0001`);
-      lines.push(`BIA*00*MB*${docNumber}*${ccyymmdd}`);
-      lines.push(`N1*WH*CENTRAL STOCK LOCATION*91*STK01`);
-      for (let i = 1; i <= itemCount; i++) {
-        lines.push(`LIN*${i}*VN*SKU-PART${i}*UP*0123456789${i}0`);
-        lines.push(`QTY*33*${i * 500}*EA`);
-      }
-      lines.push(`CTT*${itemCount}`);
-      lines.push(`SE*${lines.length - 2 + 1}*0001`);
-      lines.push(`GE*1*1`);
-      lines.push(`IEA*1*${ctrl}`);
-    } else if (selectedTemplate === '820') {
-      lines.push(`ISA*00*          *00*          *${pSQual}*${pSender}*${pRQual}*${pReceiver}*${yymmdd}*${hhmm}*U*00401*${ctrl}*0*P*>`);
-      lines.push(`GS*RA*${senderId.trim()}*${receiverId.trim()}*${ccyymmdd}*${hhmm}*1*X*004010`);
-      lines.push(`ST*820*0001`);
-      lines.push(`BPR*C*12500.00*C*ACH*CTX*01*123456789*DA*987654321***01*987654321*DA*123456789*${ccyymmdd}`);
-      lines.push(`TRN*1*CHK-${docNumber}*1234567890`);
-      lines.push(`N1*PR*PAYER CORP*91*PAY01`);
-      lines.push(`N1*PE*PAYEE VENDOR*91*VEN01`);
-      lines.push(`RMR*IV*INV-2026-001*PO*12500.00`);
-      lines.push(`SE*${lines.length - 2 + 1}*0001`);
-      lines.push(`GE*1*1`);
-      lines.push(`IEA*1*${ctrl}`);
-    } else if (selectedTemplate === '997') {
-      lines.push(`ISA*00*          *00*          *${pSQual}*${pSender}*${pRQual}*${pReceiver}*${yymmdd}*${hhmm}*U*00401*${ctrl}*0*P*>`);
-      lines.push(`GS*FA*${senderId.trim()}*${receiverId.trim()}*${ccyymmdd}*${hhmm}*1*X*004010`);
-      lines.push(`ST*997*0001`);
-      lines.push(`AK1*PO*1`);
-      lines.push(`AK2*850*0001`);
-      lines.push(`AK5*A`);
-      lines.push(`AK9*A*1*1*1`);
-      lines.push(`SE*6*0001`);
-      lines.push(`GE*1*1`);
-      lines.push(`IEA*1*${ctrl}`);
-    } else if (selectedTemplate === 'ORDERS') {
-      // EDIFACT ORDERS
-      lines.push(`UNB+UNOA:2+${senderId.trim()}:ZZZ+${receiverId.trim()}:ZZZ+${yymmdd}:${hhmm}+${ctrl}'`);
-      lines.push(`UNH+1+ORDERS:D:96A:UN'`);
-      lines.push(`BGM+220+${docNumber}+9'`);
-      lines.push(`DTM+137:${ccyymmdd}:102'`);
-      lines.push(`NAD+BY+${receiverId.trim()}::92'`);
-      lines.push(`NAD+SU+${senderId.trim()}::91'`);
-      for (let i = 1; i <= itemCount; i++) {
-        lines.push(`LIN+${i}++PROD-${100 + i}:VN'`);
-        lines.push(`QTY+21:${i * 20}:EA'`);
-        lines.push(`PRI+AAA:${(20 + i * 5).toFixed(2)}'`);
-      }
-      lines.push(`UNS+S'`);
-      lines.push(`CNT+2:${itemCount}'`);
-      lines.push(`UNT*${7 + itemCount * 3}*1'`);
-      lines.push(`UNZ+1+${ctrl}'`);
-      return lines.join('\n');
-    } else if (selectedTemplate === 'INVOIC') {
-      // EDIFACT INVOIC
-      lines.push(`UNB+UNOA:2+${senderId.trim()}:ZZZ+${receiverId.trim()}:ZZZ+${yymmdd}:${hhmm}+${ctrl}'`);
-      lines.push(`UNH+1+INVOIC:D:96A:UN'`);
-      lines.push(`BGM+380+${docNumber}+9'`);
-      lines.push(`DTM+137:${ccyymmdd}:102'`);
-      lines.push(`NAD+BY+${receiverId.trim()}::92'`);
-      lines.push(`NAD+SU+${senderId.trim()}::91'`);
-      for (let i = 1; i <= itemCount; i++) {
-        lines.push(`LIN+${i}++ITEM-${200 + i}:VN'`);
-        lines.push(`QTY+47:${i * 15}:EA'`);
-        lines.push(`MOA+203:${(i * 15 * 30).toFixed(2)}'`);
-      }
-      lines.push(`UNT*${6 + itemCount * 3}*1'`);
-      lines.push(`UNZ+1+${ctrl}'`);
-      return lines.join('\n');
-    } else if (selectedTemplate === 'DESADV') {
-      // EDIFACT DESADV
-      lines.push(`UNB+UNOA:2+${senderId.trim()}:ZZZ+${receiverId.trim()}:ZZZ+${yymmdd}:${hhmm}+${ctrl}'`);
-      lines.push(`UNH+1+DESADV:D:96A:UN'`);
-      lines.push(`BGM+351+${docNumber}+9'`);
-      lines.push(`DTM+137:${ccyymmdd}:102'`);
-      lines.push(`NAD+CN+${receiverId.trim()}::92'`);
-      lines.push(`NAD+CZ+${senderId.trim()}::91'`);
-      for (let i = 1; i <= itemCount; i++) {
-        lines.push(`LIN+${i}++PART-${i * 50}:VN'`);
-        lines.push(`QTY+12:${i * 10}:EA'`);
-      }
-      lines.push(`UNT*${6 + itemCount * 2}*1'`);
-      lines.push(`UNZ+1+${ctrl}'`);
-      return lines.join('\n');
+    if (currentTransaction.standard === 'EDIFACT') {
+      let customized = base
+        .replace(/BUYER_GLOBAL/g, receiverId.trim())
+        .replace(/ACME_GLOBAL/g, senderId.trim())
+        .replace(/ORD-2026-8801/g, docNumber)
+        .replace(/INV-2026-7701/g, docNumber)
+        .replace(/DES-2026-9901/g, docNumber)
+        .replace(/260904/g, yymmdd)
+        .replace(/20260904/g, ccyymmdd);
+      return customized;
     }
 
-    // Apply delimiters for X12
-    const replaced = lines.map((l) => l.replace(/\*/g, sep));
-    return replaced.map((l) => `${l}${term}`).join('\n');
-  }, [selectedTemplate, senderId, receiverId, senderQual, receiverQual, docNumber, itemCount, elemSep, segTerm]);
+    // X12 Customization
+    const lines = base.split('\n').map((rawLine) => {
+      let l = rawLine.trim().replace(/~$/, '');
+      if (!l) return '';
+
+      const parts = l.split('*');
+      const tag = parts[0];
+
+      if (tag === 'ISA') {
+        parts[5] = pSQual;
+        parts[6] = pSender;
+        parts[7] = pRQual;
+        parts[8] = pReceiver;
+        parts[9] = yymmdd;
+        parts[10] = hhmm;
+        return parts.join(sep);
+      }
+      if (tag === 'GS') {
+        parts[2] = senderId.trim();
+        parts[3] = receiverId.trim();
+        parts[4] = ccyymmdd;
+        parts[5] = hhmm;
+        return parts.join(sep);
+      }
+      if (tag === 'BEG' || tag === 'BIG' || tag === 'BCH' || tag === 'BCA' || tag === 'BAK' || tag === 'BSN' || tag === 'B2') {
+        // Update document number if present
+        if (parts[3]) parts[3] = docNumber;
+        return parts.join(sep);
+      }
+      if (tag === 'N1' && (parts[1] === 'ST' || parts[1] === 'BY' || parts[1] === 'BT')) {
+        parts[2] = `${receiverId.trim()} FACILITY`;
+        return parts.join(sep);
+      }
+      if (tag === 'N1' && (parts[1] === 'SF' || parts[1] === 'SU' || parts[1] === 'VN' || parts[1] === 'RE')) {
+        parts[2] = `${senderId.trim()} OPERATIONS`;
+        return parts.join(sep);
+      }
+
+      // Default replacement of delimiter
+      return parts.join(sep);
+    }).filter(Boolean);
+
+    return lines.map((l) => `${l}${term}`).join('\n');
+  }, [currentTransaction, senderId, receiverId, senderQual, receiverQual, docNumber, elemSep, segTerm]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedEdi);
@@ -292,7 +157,7 @@ export const EdiTemplateGenerator: React.FC<EdiTemplateGeneratorProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${selectedTemplate}_sample.edi`;
+    a.download = `${currentTransaction.code}_sample.edi`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -301,32 +166,88 @@ export const EdiTemplateGenerator: React.FC<EdiTemplateGeneratorProps> = ({
     <div className="space-y-6">
       <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
 
-      {/* Template Selectors Grid */}
+      {/* Category Tabs & Search Bar */}
       <div
         className="p-4 rounded-2xl border space-y-3"
         style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
       >
-        <div className="flex items-center justify-between text-xs font-semibold">
-          <span style={{ color: 'var(--ink)' }}>Select EDI Transaction Specification:</span>
-          <span className="text-[var(--muted)]">{TEMPLATES.length} Standard Templates</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-[var(--brand)]" />
+            <span className="font-semibold text-xs" style={{ color: 'var(--ink)' }}>
+              EDI Transaction Standards Catalog ({EDI_TRANSACTIONS.length} Total Standards)
+            </span>
+          </div>
+
+          {/* Search Box */}
+          <div className="relative w-full sm:w-64">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
+            <input
+              type="text"
+              placeholder="Search 860, 856, 850, ASN, 204..."
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+              className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl border outline-none font-medium"
+              style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+            />
+            {searchFilter && (
+              <button
+                onClick={() => setSearchFilter('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--ink)] cursor-pointer"
+                title="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-          {TEMPLATES.map((tmpl) => {
+        {/* Category Pills */}
+        <div className="flex items-center gap-1.5 flex-wrap pt-1">
+          {categories.map((cat) => {
+            const isCatActive = selectedCategory === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  isCatActive
+                    ? 'bg-[var(--brand)] text-white shadow-xs'
+                    : 'border hover:opacity-80'
+                }`}
+                style={{
+                  borderColor: isCatActive ? 'var(--brand)' : 'var(--line)',
+                  backgroundColor: isCatActive ? 'var(--brand)' : 'var(--surface-2)',
+                  color: isCatActive ? '#ffffff' : 'var(--ink)',
+                }}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Transaction Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 pt-2">
+          {filteredTransactions.map((tmpl) => {
             const isSelected = selectedTemplate === tmpl.id;
             return (
               <button
                 key={tmpl.id}
                 onClick={() => {
                   setSelectedTemplate(tmpl.id);
-                  if (tmpl.id === '850') setDocNumber('PO-2026-9876');
-                  else if (tmpl.id === '810') setDocNumber('INV-2026-4401');
-                  else if (tmpl.id === '856') setDocNumber('ASN-2026-1102');
-                  else if (tmpl.id === '204') setDocNumber('LOAD-99441');
-                  else if (tmpl.id === '214') setDocNumber('STAT-88192');
-                  else if (tmpl.id === '846') setDocNumber('STK-2026-09');
-                  else if (tmpl.id === '820') setDocNumber('PAY-55019');
-                  else setDocNumber(`DOC-${tmpl.id}-1001`);
+                  if (tmpl.code.startsWith('850')) setDocNumber('PO-2026-9901');
+                  else if (tmpl.code.startsWith('855')) setDocNumber('PO-2026-9901');
+                  else if (tmpl.code.startsWith('860')) setDocNumber('PO-2026-9901');
+                  else if (tmpl.code.startsWith('856')) setDocNumber('ASN-2026-1102');
+                  else if (tmpl.code.startsWith('810')) setDocNumber('INV-2026-4401');
+                  else if (tmpl.code.startsWith('204')) setDocNumber('LOAD-99441');
+                  else if (tmpl.code.startsWith('214')) setDocNumber('LOAD-99441');
+                  else if (tmpl.code.startsWith('846')) setDocNumber('STK-2026-09');
+                  else if (tmpl.code.startsWith('820')) setDocNumber('PAY-55019');
+                  else if (tmpl.code.startsWith('940')) setDocNumber('SO-2026-88901');
+                  else if (tmpl.code.startsWith('837')) setDocNumber('CLM-99120');
+                  else setDocNumber(`DOC-${tmpl.code}-1001`);
                 }}
                 className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                   isSelected ? 'ring-2 ring-[var(--brand)] shadow-sm' : 'hover:opacity-80'
@@ -350,6 +271,61 @@ export const EdiTemplateGenerator: React.FC<EdiTemplateGeneratorProps> = ({
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* Transaction Details & Guide Card */}
+      <div
+        className="p-4 rounded-2xl border space-y-3"
+        style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3" style={{ borderColor: 'var(--line)' }}>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-mono font-bold text-sm px-2 py-0.5 rounded bg-[var(--brand)] text-white">
+                {currentTransaction.code}
+              </span>
+              <h3 className="font-semibold text-sm" style={{ color: 'var(--ink)' }}>
+                {currentTransaction.name}
+              </h3>
+              <span className="text-xs px-2 py-0.5 rounded-full font-medium border text-[var(--muted)]" style={{ borderColor: 'var(--line)' }}>
+                Group: {currentTransaction.functionalGroup}
+              </span>
+            </div>
+            <p className="text-xs text-[var(--muted)] mt-1">
+              {currentTransaction.description}
+            </p>
+          </div>
+
+          <div className="text-xs font-medium px-3 py-1.5 rounded-xl bg-[var(--surface-2)] border self-start sm:self-auto" style={{ borderColor: 'var(--line)' }}>
+            <span className="text-[var(--muted)]">Category: </span>
+            <span className="font-semibold text-[var(--brand)]">{currentTransaction.category}</span>
+          </div>
+        </div>
+
+        {/* Purpose & Key Segments */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div className="md:col-span-2 p-3 rounded-xl bg-[var(--surface-2)] border" style={{ borderColor: 'var(--line)' }}>
+            <span className="font-semibold block mb-1 text-[var(--ink)]">Business Purpose &amp; Usage:</span>
+            <p className="text-[var(--muted)] leading-relaxed">
+              {currentTransaction.purpose}
+            </p>
+          </div>
+
+          <div className="p-3 rounded-xl bg-[var(--surface-2)] border" style={{ borderColor: 'var(--line)' }}>
+            <span className="font-semibold block mb-1 text-[var(--ink)]">Key Envelope &amp; Loop Segments:</span>
+            <div className="flex flex-wrap gap-1">
+              {currentTransaction.keySegments.map((seg) => (
+                <span
+                  key={seg}
+                  className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg)] border font-semibold text-[var(--ink)]"
+                  style={{ borderColor: 'var(--line)' }}
+                >
+                  {seg}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -421,21 +397,22 @@ export const EdiTemplateGenerator: React.FC<EdiTemplateGeneratorProps> = ({
 
         <div>
           <label className="block text-[10px] font-semibold text-[var(--muted)] uppercase mb-1">
-            Line Items ({itemCount})
+            Line Items Count
           </label>
           <input
-            type="range"
+            type="number"
             min={1}
-            max={6}
+            max={10}
             value={itemCount}
-            onChange={(e) => setItemCount(Number(e.target.value))}
-            className="w-full mt-2 cursor-pointer"
+            onChange={(e) => setItemCount(Math.max(1, parseInt(e.target.value, 10) || 1))}
+            className="w-full p-2 rounded-lg border font-mono text-xs text-center"
+            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
           />
         </div>
 
         <div>
           <label className="block text-[10px] font-semibold text-[var(--muted)] uppercase mb-1">
-            Separators (Elem / Term)
+            Separators (* / ~)
           </label>
           <div className="flex items-center gap-2">
             <input
@@ -454,14 +431,14 @@ export const EdiTemplateGenerator: React.FC<EdiTemplateGeneratorProps> = ({
               className="w-9 p-1.5 rounded-lg border font-mono text-xs text-center font-bold"
               style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
             />
-            <span className="text-[11px] text-[var(--muted)]">e.g. * and ~</span>
+            <span className="text-[11px] text-[var(--muted)]">Elem &amp; Seg</span>
           </div>
         </div>
 
         <div className="flex items-end gap-2">
           <button
             onClick={handleCopy}
-            className="flex-1 flex items-center justify-center gap-1.5 p-2 rounded-xl font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
+            className="flex-1 flex items-center justify-center gap-1.5 p-2 rounded-xl font-semibold text-white shadow-sm transition-opacity hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: copied ? 'var(--ok)' : 'var(--brand)' }}
           >
             {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -469,7 +446,7 @@ export const EdiTemplateGenerator: React.FC<EdiTemplateGeneratorProps> = ({
           </button>
           <button
             onClick={handleDownload}
-            className="p-2 rounded-xl border font-semibold hover:opacity-80 transition-opacity"
+            className="p-2 rounded-xl border font-semibold hover:opacity-80 transition-opacity cursor-pointer"
             style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
             title="Download .edi file"
           >
@@ -483,14 +460,33 @@ export const EdiTemplateGenerator: React.FC<EdiTemplateGeneratorProps> = ({
         className="p-4 rounded-2xl border shadow-sm flex flex-col"
         style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
       >
-        <div className="flex items-center justify-between mb-3 text-xs">
+        <div className="flex items-center justify-between mb-3 text-xs flex-wrap gap-2">
           <span className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
             <Sparkles className="w-4 h-4" />
-            LIVE GENERATED {selectedTemplate} SPECIFICATION DOCUMENT
+            LIVE GENERATED {currentTransaction.code} ({currentTransaction.standard}) DOCUMENT
           </span>
-          <span className="text-[var(--muted)] font-mono">
-            {generatedEdi.split('\n').filter(Boolean).length} Segments
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[var(--muted)] font-mono">
+              {generatedEdi.split('\n').filter(Boolean).length} Segments
+            </span>
+            <button
+              onClick={handleCopy}
+              className="px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 hover:opacity-80 transition-opacity cursor-pointer"
+              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copied ? 'Copied' : 'Copy'}</span>
+            </button>
+            <button
+              onClick={handleDownload}
+              className="px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 hover:opacity-80 transition-opacity cursor-pointer"
+              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              title={`Download ${currentTransaction.code} template`}
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Download .edi</span>
+            </button>
+          </div>
         </div>
         <textarea
           readOnly

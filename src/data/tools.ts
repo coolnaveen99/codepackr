@@ -380,6 +380,16 @@ export const TOOLS: ToolDef[] = [
     popular: true,
     isNew: true,
   },
+  {
+    id: 'as2-tools',
+    name: 'AS2 Message Encoder, Decoder & MDN Generator',
+    category: 'edi',
+    description: 'Package, sign, encrypt, and inspect AS2 messages (RFC 4130) and generate or verify MDN receipts and MIC hashes.',
+    keywords: ['as2', 'mdn', 'encoder', 'decoder', 'edi', 'smime', 'rfc4130', 'mic', 'receipt', 'pkcs7', 'headers', 'walmart', 'b2b'],
+    icon: 'Send',
+    popular: true,
+    isNew: true,
+  },
 
   // XML, XSD & XSLT Tools
   {

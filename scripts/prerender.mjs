@@ -34,9 +34,9 @@ const pages = [];
 let match;
 
 while ((match = locRegex.exec(sitemap)) !== null) {
-  const file = match[1];
-  if (file.endsWith('.html')) {
-    pages.push(file);
+  const cleanSlug = match[1].replace(/^\/+|\/+$/g, '').replace(/\.html$/, '');
+  if (cleanSlug && !pages.includes(cleanSlug)) {
+    pages.push(cleanSlug);
   }
 }
 
@@ -44,8 +44,7 @@ console.log(`Prerendering ${pages.length} pages from sitemap.xml...`);
 
 let generatedCount = 0;
 
-for (const file of pages) {
-  const slug = file.replace(/\.html$/, '');
+for (const slug of pages) {
   const metaKey = metadata[slug] ? slug : (SLUG_MAPPINGS[slug] && metadata[SLUG_MAPPINGS[slug]] ? SLUG_MAPPINGS[slug] : slug);
   const meta = metadata[metaKey] || {
     name: slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
@@ -64,7 +63,7 @@ for (const file of pages) {
 
   const title = meta.title || `${meta.name} - Codepackr`;
   const desc = meta.description;
-  const canonicalUrl = `https://www.codepackr.com/${file}`;
+  const canonicalUrl = `https://www.codepackr.com/${slug}`;
 
   let html = template;
 
@@ -107,25 +106,53 @@ for (const file of pages) {
     `<meta name="twitter:description" content="${desc}"`
   );
 
-  // Inject per-tool SoftwareApplication JSON-LD into static HTML
-  if (slug !== 'privacy' && slug !== 'contact') {
+  // Inject per-tool SoftwareApplication and BreadcrumbList JSON-LD into static HTML
+  if (slug !== 'privacy' && slug !== 'contact' && slug !== 'terms') {
+    const categoryName = (meta.category || 'Utilities').charAt(0).toUpperCase() + (meta.category || 'Utilities').slice(1);
     const softwareAppJsonLd = `
-    <!-- Per-tool SoftwareApplication Schema for Rich Snippets -->
+    <!-- Per-tool SoftwareApplication & Breadcrumb Schema for Rich Snippets -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": ${JSON.stringify(meta.name)},
-      "description": ${JSON.stringify(meta.description)},
-      "url": ${JSON.stringify(canonicalUrl)},
-      "applicationCategory": "DeveloperApplication",
-      "operatingSystem": "All",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "browserRequirements": "Requires JavaScript. Requires HTML5."
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "name": ${JSON.stringify(meta.name)},
+          "description": ${JSON.stringify(meta.description)},
+          "url": ${JSON.stringify(canonicalUrl)},
+          "applicationCategory": "DeveloperApplication",
+          "operatingSystem": "All",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "browserRequirements": "Requires JavaScript. Requires HTML5."
+        },
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://www.codepackr.com/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": ${JSON.stringify(categoryName)},
+              "item": ${JSON.stringify(`https://www.codepackr.com/?cat=${meta.category || 'utilities'}`)}
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": ${JSON.stringify(meta.name)},
+              "item": ${JSON.stringify(canonicalUrl)}
+            }
+          ]
+        }
+      ]
     }
     </script>
     `;
@@ -172,9 +199,9 @@ for (const file of pages) {
 
         <footer style="margin-top: 32px; font-size: 0.875rem; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 16px; display: flex; gap: 16px; flex-wrap: wrap;">
           <a href="/" style="color: #5B52E8;">All Tools</a>
-          <a href="/contact.html" style="color: #5B52E8;">Contact &amp; Feedback</a>
-          <a href="/privacy.html" style="color: #5B52E8;">Privacy Policy</a>
-          <a href="/terms.html" style="color: #5B52E8;">Terms and Conditions</a>
+          <a href="/contact" style="color: #5B52E8;">Contact &amp; Feedback</a>
+          <a href="/privacy" style="color: #5B52E8;">Privacy Policy</a>
+          <a href="/terms" style="color: #5B52E8;">Terms and Conditions</a>
           <a href="/sitemap.xml" style="color: #5B52E8;">Sitemap</a>
         </footer>
       </main>
@@ -222,9 +249,9 @@ for (const file of pages) {
 
         <footer style="margin-top: 32px; font-size: 0.875rem; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 16px; display: flex; gap: 16px; flex-wrap: wrap;">
           <a href="/" style="color: #5B52E8;">All Tools</a>
-          <a href="/contact.html" style="color: #5B52E8;">Contact &amp; Feedback</a>
-          <a href="/privacy.html" style="color: #5B52E8;">Privacy Policy</a>
-          <a href="/terms.html" style="color: #5B52E8;">Terms and Conditions</a>
+          <a href="/contact" style="color: #5B52E8;">Contact &amp; Feedback</a>
+          <a href="/privacy" style="color: #5B52E8;">Privacy Policy</a>
+          <a href="/terms" style="color: #5B52E8;">Terms and Conditions</a>
           <a href="/sitemap.xml" style="color: #5B52E8;">Sitemap</a>
         </footer>
       </main>
@@ -247,8 +274,8 @@ for (const file of pages) {
 
         <footer style="margin-top: 32px; font-size: 0.875rem; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 16px;">
           <a href="/" style="color: #5B52E8; margin-right: 16px;">All Tools</a>
-          <a href="/contact.html" style="color: #5B52E8; margin-right: 16px;">Contact &amp; Feedback</a>
-          <a href="/privacy.html" style="color: #5B52E8; margin-right: 16px;">Privacy Policy</a>
+          <a href="/contact" style="color: #5B52E8; margin-right: 16px;">Contact &amp; Feedback</a>
+          <a href="/privacy" style="color: #5B52E8; margin-right: 16px;">Privacy Policy</a>
           <a href="/sitemap.xml" style="color: #5B52E8;">Sitemap</a>
         </footer>
       </main>
@@ -315,9 +342,9 @@ for (const file of pages) {
 
         <footer style="margin-top: 36px; font-size: 0.875rem; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 20px; display: flex; gap: 20px; flex-wrap: wrap;">
           <a href="/" style="color: #5B52E8; text-decoration: none; font-weight: 500;">&larr; Explore All Developer Tools</a>
-          <a href="/contact.html" style="color: #5B52E8; text-decoration: none;">Contact &amp; Feedback</a>
-          <a href="/privacy.html" style="color: #5B52E8; text-decoration: none;">Privacy Policy</a>
-          <a href="/terms.html" style="color: #5B52E8; text-decoration: none;">Terms and Conditions</a>
+          <a href="/contact" style="color: #5B52E8; text-decoration: none;">Contact &amp; Feedback</a>
+          <a href="/privacy" style="color: #5B52E8; text-decoration: none;">Privacy Policy</a>
+          <a href="/terms" style="color: #5B52E8; text-decoration: none;">Terms and Conditions</a>
           <a href="/sitemap.xml" style="color: #5B52E8; text-decoration: none;">Sitemap</a>
         </footer>
       </main>
@@ -327,7 +354,16 @@ for (const file of pages) {
 
   html = html.replace(/<div id="root"[\s\S]*?<\/div>/i, crawlerContent);
 
-  fs.writeFileSync(path.join(distDir, file), html);
+  // 1. Write dist/${slug}.html (Vercel cleanUrls maps /${slug} directly to this)
+  fs.writeFileSync(path.join(distDir, `${slug}.html`), html);
+
+  // 2. Write dist/${slug}/index.html for universal static hosting
+  const slugDir = path.join(distDir, slug);
+  if (!fs.existsSync(slugDir)) {
+    fs.mkdirSync(slugDir, { recursive: true });
+  }
+  fs.writeFileSync(path.join(slugDir, 'index.html'), html);
+
   generatedCount++;
 }
 
