@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Shield, Sparkles, ArrowRight, CheckCircle2, Star, Share2, Check, BookmarkCheck } from 'lucide-react';
+import { Search, Shield, Sparkles, ArrowRight, CheckCircle2, Star, Share2, Check, BookmarkCheck, Workflow } from 'lucide-react';
 import { ToolDef, CategoryFilter } from '../types';
 import { TOOLS, CATEGORIES } from '../data/tools';
 import { getIcon } from '../lib/icons';
@@ -44,12 +44,12 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     } else if (selectedCategory !== 'all') {
       matchesCat = tool.category === selectedCategory;
     }
-
     const matchesSearch =
       !searchFilter ||
       tool.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
       tool.description.toLowerCase().includes(searchFilter.toLowerCase()) ||
       tool.keywords.some((t) => t.toLowerCase().includes(searchFilter.toLowerCase()));
+
     return matchesCat && matchesSearch;
   });
 
@@ -59,7 +59,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     <div className="space-y-8 pb-12">
       {/* Hero Section */}
       <div className="text-center max-w-2xl mx-auto pt-4 space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border"
+        <div
+          className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border"
           style={{ backgroundColor: 'var(--brand-light)', borderColor: 'var(--brand)', color: 'var(--brand)' }}
         >
           <Sparkles className="w-3.5 h-3.5" />
@@ -85,19 +86,32 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               <Search className="w-4 h-4" />
               <span className="text-xs sm:text-sm">Search 30+ developer tools...</span>
             </div>
-            <kbd className="px-2 py-0.5 rounded text-[10px] font-mono border"
+            <kbd
+              className="px-2 py-0.5 rounded text-[10px] font-mono border"
               style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--muted)' }}
             >
-              ⌘K
+              Ctrl K
             </kbd>
           </div>
         </div>
 
-        {/* Popular Quick Pills */}
+        {/* Popular Quick Pills: In between Popular: and JSON Formatter add EDI tools */}
         <div className="flex flex-wrap items-center justify-center gap-1.5 pt-2">
           <span className="text-xs font-semibold mr-1" style={{ color: 'var(--muted)' }}>
             Popular:
           </span>
+
+          {/* EDI Tools Shortcut Button */}
+          <button
+            id="popular-pill-edi-tools"
+            onClick={() => onSelectCategory('edi')}
+            className="px-2.5 py-1 text-xs font-semibold rounded-full border border-[var(--brand)] text-[var(--brand)] bg-[var(--brand-light)] hover:opacity-90 transition-all cursor-pointer flex items-center gap-1 shadow-xs"
+            title="Browse all EDI X12, EDIFACT & AS2 Tools"
+          >
+            <Workflow className="w-3 h-3" />
+            <span>EDI Tools</span>
+          </button>
+
           {popularTools.slice(0, 6).map((t) => (
             <button
               key={t.id}
@@ -112,11 +126,13 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       </div>
 
       {/* Privacy Guarantee Pill */}
-      <div className="max-w-3xl mx-auto p-4 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm"
+      <div
+        className="max-w-3xl mx-auto p-4 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm"
         style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
       >
         <div className="flex items-center gap-3 text-left">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+          <div
+            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
             style={{ backgroundColor: 'var(--brand-light)', color: 'var(--brand)' }}
           >
             <Shield className="w-5 h-5" />
@@ -143,7 +159,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
       {/* Category Tabs Section */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between gap-4 border-b pb-3 overflow-x-auto"
+        <div
+          className="flex items-center justify-between gap-4 border-b pb-3 overflow-x-auto"
           style={{ borderColor: 'var(--line)' }}
         >
           <div className="flex items-center gap-1.5 shrink-0">
@@ -231,7 +248,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           {filteredTools.map((tool) => {
             const bookmarked = isBookmarked(tool.id);
             const isCopied = copiedId === tool.id;
-
             return (
               <div
                 key={tool.id}
@@ -241,15 +257,15 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105"
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105"
                       style={{ backgroundColor: 'var(--brand-light)', color: 'var(--brand)' }}
                     >
                       {getIcon(tool.icon)}
                     </div>
 
-                    {/* Top Action Pills: Bookmark & Share & Badges */}
+                    {/* Top Action Pills */}
                     <div className="flex items-center gap-1.5">
-                      {/* Share Button on Card */}
                       <button
                         onClick={(e) => handleCardShare(e, tool)}
                         className="p-1.5 rounded-lg border transition-colors hover:border-[var(--brand)] cursor-pointer"
@@ -263,7 +279,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                         {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
                       </button>
 
-                      {/* Bookmark Button on Card */}
                       <button
                         onClick={(e) => handleCardBookmark(e, tool.id)}
                         className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
@@ -280,7 +295,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                       >
                         <Star
                           className={`w-3.5 h-3.5 ${
-                            bookmarked ? 'text-amber-500 fill-amber-500' : 'text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300'
+                            bookmarked
+                              ? 'text-amber-500 fill-amber-500'
+                              : 'text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300'
                           }`}
                         />
                       </button>
@@ -290,6 +307,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                           Popular
                         </span>
                       )}
+
                       {tool.isNew && (
                         <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
                           New
@@ -299,7 +317,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                   </div>
 
                   <div>
-                    <h3 className="font-bold text-base group-hover:text-[var(--brand)] transition-colors"
+                    <h3
+                      className="font-bold text-base group-hover:text-[var(--brand)] transition-colors"
                       style={{ color: 'var(--ink)' }}
                     >
                       <a
@@ -321,7 +340,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                   </div>
                 </div>
 
-                <div className="pt-4 mt-4 border-t flex items-center justify-between text-xs"
+                <div
+                  className="pt-4 mt-4 border-t flex items-center justify-between text-xs"
                   style={{ borderColor: 'var(--line)' }}
                 >
                   <span className="font-medium capitalize text-[11px]" style={{ color: 'var(--muted)' }}>
@@ -348,7 +368,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
         {/* Empty State when Bookmarks are empty */}
         {selectedCategory === 'bookmarks' && filteredTools.length === 0 && (
-          <div className="text-center py-16 px-4 rounded-3xl border border-dashed space-y-4 max-w-md mx-auto"
+          <div
+            className="text-center py-16 px-4 rounded-3xl border border-dashed space-y-4 max-w-md mx-auto"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
             <div className="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center bg-amber-100 dark:bg-amber-950/50 text-amber-500">
@@ -359,7 +380,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 No Bookmarked Tools Yet
               </h3>
               <p className="text-xs leading-relaxed mt-1" style={{ color: 'var(--muted)' }}>
-                Click the star icon (★) on any developer tool to save your favorites for instant 1-click access anytime!
+                Click the star icon on any developer tool to save your favorites for instant 1-click access anytime!
               </p>
             </div>
             <button
@@ -379,7 +400,10 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               No developer tools found matching "{searchFilter}"
             </p>
             <button
-              onClick={() => { setSearchFilter(''); onSelectCategory('all'); }}
+              onClick={() => {
+                setSearchFilter('');
+                onSelectCategory('all');
+              }}
               className="text-xs text-[var(--brand)] underline font-medium cursor-pointer"
             >
               Reset filters
