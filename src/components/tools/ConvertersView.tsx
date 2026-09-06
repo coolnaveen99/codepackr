@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Copy, Check, ArrowLeftRight, Download, Upload, Image as ImageIcon } from 'lucide-react';
+import { Copy, Check, ArrowLeftRight, Download, Upload, Image as ImageIcon, Trash2, FileText, Sparkles, X, FileCode } from 'lucide-react';
 import yaml from 'js-yaml';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
@@ -23,6 +23,12 @@ export const ConvertersView: React.FC<ConvertersViewProps> = ({
   const [output, setOutput] = useState('');
   const [error, setError] = useState<string | null>(null);
 
+  // File upload state
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [uploadedFileSize, setUploadedFileSize] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // For Number base
   const [binVal, setBinVal] = useState('101010');
   const [octVal, setOctVal] = useState('52');
@@ -41,39 +47,52 @@ export const ConvertersView: React.FC<ConvertersViewProps> = ({
   const [imgHeight, setImgHeight] = useState(300);
   const [imgFormat, setImgFormat] = useState<'png' | 'jpeg' | 'webp'>('png');
   const [imgQuality, setImgQuality] = useState(90);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [imageFileName, setImageFileName] = useState<string | null>(null);
+  const [isImageDragging, setIsImageDragging] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    let sample = '';
-    switch (tool.id) {
+  const getSample = (toolId: string, dir: 'forward' | 'reverse') => {
+    switch (toolId) {
       case 'json-xml-converter':
-        sample = '{\n  "company": "Codepackr",\n  "tools": 35,\n  "rating": 5.0\n}';
-        break;
+        return dir === 'forward'
+          ? '{\n  "company": "Codepackr",\n  "tools": 35,\n  "rating": 5.0,\n  "services": ["API", "EDI", "Formatting"]\n}'
+          : '<company>\n  <name>Codepackr</name>\n  <tools>35</tools>\n  <rating>5.0</rating>\n</company>';
       case 'json-csv-converter':
-        sample = '[\n  {"id": 1, "name": "Naveen", "role": "Engineer"},\n  {"id": 2, "name": "Sarah", "role": "Architect"}\n]';
-        break;
+        return dir === 'forward'
+          ? '[\n  {"id": 1, "name": "Naveen", "role": "Engineer", "department": "Core"},\n  {"id": 2, "name": "Sarah", "role": "Architect", "department": "Cloud"},\n  {"id": 3, "name": "Alex", "role": "Lead", "department": "Security"}\n]'
+          : 'id,name,role,department\n1,Naveen,Engineer,Core\n2,Sarah,Architect,Cloud\n3,Alex,Lead,Security';
       case 'case-converter':
-        sample = 'User authentication token service';
-        break;
+        return 'User authentication token service for cloud applications';
       case 'yaml-json-converter':
-        sample = 'version: "3.8"\nservices:\n  web:\n    image: node:22\n    ports:\n      - "3000:3000"';
-        break;
+        return dir === 'forward'
+          ? 'version: "3.8"\nservices:\n  web:\n    image: node:22\n    ports:\n      - "3000:3000"\n    environment:\n      NODE_ENV: production'
+          : '{\n  "version": "3.8",\n  "services": {\n    "web": {\n      "image": "node:22",\n      "ports": ["3000:3000"],\n      "environment": {\n        "NODE_ENV": "production"\n      }\n    }\n  }\n}';
       case 'markdown-html-converter':
-        sample = '# Welcome to Codepackr\n\n- **Fast**: Runs locally\n- **Safe**: Zero data uploads\n- **Offline**: PWA enabled';
-        break;
+        return dir === 'forward'
+          ? '# Welcome to Codepackr\n\nCodepackr is a fast, **100% client-side** developer tool suite.\n\n- **Fast**: Runs locally in your browser\n- **Safe**: Zero data uploads\n- **Offline**: PWA enabled'
+          : '<h1>Welcome to Codepackr</h1>\n<p>Codepackr is a fast, <strong>100% client-side</strong> developer tool suite.</p>\n<ul>\n  <li>Fast: Runs locally in your browser</li>\n  <li>Safe: Zero data uploads</li>\n  <li>Offline: PWA enabled</li>\n</ul>';
       case 'csv-xml-converter':
-        sample = 'id,name,role,department\n1,Alex Rivera,Lead Architect,Cloud\n2,Taylor Chen,Security Engineer,SecOps';
-        break;
+        return dir === 'forward'
+          ? 'id,name,role,department\n1,Alex Rivera,Lead Architect,Cloud\n2,Taylor Chen,Security Engineer,SecOps\n3,Jordan Lee,Data Analyst,Analytics'
+          : '<?xml version="1.0" encoding="UTF-8"?>\n<records>\n  <record>\n    <id>1</id>\n    <name>Alex Rivera</name>\n    <role>Lead Architect</role>\n    <department>Cloud</department>\n  </record>\n  <record>\n    <id>2</id>\n    <name>Taylor Chen</name>\n    <role>Security Engineer</role>\n    <department>SecOps</department>\n  </record>\n</records>';
       case 'html-markdown-converter':
-        sample = '<h1>Developer Suite</h1>\n<p>Fast and <strong>private</strong> client-side tools.</p>\n<ul>\n  <li>Offline ready</li>\n  <li>Zero tracking</li>\n</ul>';
-        break;
+        return dir === 'forward'
+          ? '<h1>Developer Suite</h1>\n<p>Fast and <strong>private</strong> client-side tools.</p>\n<ul>\n  <li>Offline ready</li>\n  <li>Zero tracking</li>\n</ul>'
+          : '# Developer Suite\n\nFast and **private** client-side tools.\n\n- Offline ready\n- Zero tracking';
       case 'curl-code-converter':
-        sample = `curl -X POST https://api.example.com/v1/auth \\
+        return `curl -X POST https://api.example.com/v1/auth \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer token_xyz" \\
   -d '{"username": "admin", "role": "root"}'`;
-        break;
+      default:
+        return '';
     }
+  };
+
+  useEffect(() => {
+    setUploadedFileName(null);
+    setUploadedFileSize(null);
+    const sample = getSample(tool.id, direction);
     setInput(sample);
     convert(sample, direction);
   }, [tool.id]);
@@ -110,6 +129,10 @@ export const ConvertersView: React.FC<ConvertersViewProps> = ({
           // XML to JSON (basic tag extractor)
           const parser = new DOMParser();
           const xmlDoc = parser.parseFromString(val, 'text/xml');
+          const parseErrors = xmlDoc.getElementsByTagName('parsererror');
+          if (parseErrors.length > 0) {
+            throw new Error(parseErrors[0].textContent || 'Invalid XML syntax');
+          }
           const xmlToJson = (node: any): any => {
             if (node.nodeType === 3) return node.nodeValue?.trim();
             if (node.childNodes.length === 1 && node.childNodes[0].nodeType === 3) {
@@ -294,14 +317,12 @@ export const ConvertersView: React.FC<ConvertersViewProps> = ({
   };
 
   const generateCurlCode = (curlStr: string, lang: 'fetch' | 'axios' | 'python' | 'node') => {
-    // Parse url
     const urlMatch = curlStr.match(/curl\s+(?:-X\s+[A-Z]+\s+)?['"]?(https?:\/\/[^\s'"]+)/i) || curlStr.match(/['"](https?:\/\/[^\s'"]+)['"]/);
     const url = urlMatch ? urlMatch[1] : 'https://api.example.com/endpoint';
 
     const methodMatch = curlStr.match(/-X\s+([A-Z]+)/i);
     const method = methodMatch ? methodMatch[1] : curlStr.includes('-d ') || curlStr.includes('--data') ? 'POST' : 'GET';
 
-    // Headers
     const headerMatches = Array.from(curlStr.matchAll(/-H\s+['"]([^'"]+)['"]/gi));
     const headers: { [k: string]: string } = {};
     headerMatches.forEach((m) => {
@@ -309,7 +330,6 @@ export const ConvertersView: React.FC<ConvertersViewProps> = ({
       if (k && rest.length) headers[k.trim()] = rest.join(':').trim();
     });
 
-    // Body
     const dataMatch = curlStr.match(/(?:-d|--data(?:-raw)?)\s+['"]([\s\S]*?)['"](?:\s+-[A-Za-z]|\s*$)/);
     const data = dataMatch ? dataMatch[1] : '';
 
@@ -377,9 +397,9 @@ makeRequest();`);
   };
 
   // Image upload
-  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleImageFile = (file: File) => {
     if (!file) return;
+    setImageFileName(file.name);
     const reader = new FileReader();
     reader.onload = (ev) => {
       const src = ev.target?.result as string;
@@ -392,6 +412,11 @@ makeRequest();`);
       img.src = src;
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleImageFile(file);
   };
 
   const downloadProcessedImage = (w: number, h: number, filename: string) => {
@@ -411,6 +436,163 @@ makeRequest();`);
     img.src = imageSrc;
   };
 
+  // File Upload Handlers (for Text/Data Converters)
+  const getInputAccept = () => {
+    switch (tool.id) {
+      case 'json-xml-converter':
+        return direction === 'forward' ? '.json,.txt,application/json' : '.xml,.txt,application/xml,text/xml';
+      case 'json-csv-converter':
+        return direction === 'forward' ? '.json,.txt,application/json' : '.csv,.tsv,.txt,text/csv';
+      case 'csv-xml-converter':
+        return direction === 'forward' ? '.csv,.tsv,.txt,text/csv' : '.xml,.txt,application/xml,text/xml';
+      case 'yaml-json-converter':
+        return direction === 'forward' ? '.yaml,.yml,.txt,text/yaml' : '.json,.txt,application/json';
+      case 'markdown-html-converter':
+        return direction === 'forward' ? '.md,.markdown,.txt,text/markdown' : '.html,.htm,.txt,text/html';
+      case 'html-markdown-converter':
+        return direction === 'forward' ? '.html,.htm,.txt,text/html' : '.md,.markdown,.txt,text/markdown';
+      case 'curl-code-converter':
+        return '.sh,.bash,.txt,.curl';
+      case 'case-converter':
+        return '.txt,.text,.json,.md';
+      default:
+        return '.txt,*/*';
+    }
+  };
+
+  const handleFileUpload = (file: File) => {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      setError('File is too large. Please select a file under 10MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result;
+      if (typeof content === 'string') {
+        setInput(content);
+        setUploadedFileName(file.name);
+        setUploadedFileSize(file.size);
+        convert(content, direction);
+      }
+    };
+    reader.onerror = () => {
+      setError('Failed to read the uploaded file.');
+    };
+    reader.readAsText(file);
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+    // reset input so the same file can be re-uploaded if changed
+    if (e.target) e.target.value = '';
+  };
+
+  const clearInput = () => {
+    setInput('');
+    setOutput('');
+    setUploadedFileName(null);
+    setUploadedFileSize(null);
+    setError(null);
+  };
+
+  const loadSampleData = () => {
+    const sample = getSample(tool.id, direction);
+    setInput(sample);
+    setUploadedFileName(null);
+    setUploadedFileSize(null);
+    convert(sample, direction);
+  };
+
+  // Converted File Download Handlers
+  const getOutputFilename = () => {
+    let base = 'converted';
+    if (uploadedFileName) {
+      const dotIdx = uploadedFileName.lastIndexOf('.');
+      base = dotIdx > 0 ? uploadedFileName.substring(0, dotIdx) : uploadedFileName;
+    }
+
+    if (tool.id === 'json-xml-converter') {
+      return direction === 'forward' ? `${base}.xml` : `${base}.json`;
+    }
+    if (tool.id === 'json-csv-converter') {
+      return direction === 'forward' ? `${base}.csv` : `${base}.json`;
+    }
+    if (tool.id === 'csv-xml-converter') {
+      return direction === 'forward' ? `${base}.xml` : `${base}.csv`;
+    }
+    if (tool.id === 'yaml-json-converter') {
+      return direction === 'forward' ? `${base}.json` : `${base}.yaml`;
+    }
+    if (tool.id === 'markdown-html-converter') {
+      return direction === 'forward' ? `${base}.html` : `${base}.md`;
+    }
+    if (tool.id === 'html-markdown-converter') {
+      return direction === 'forward' ? `${base}.md` : `${base}.html`;
+    }
+    if (tool.id === 'curl-code-converter') {
+      switch (targetLang) {
+        case 'fetch': return `${base}-fetch.js`;
+        case 'axios': return `${base}-axios.js`;
+        case 'python': return `${base}-requests.py`;
+        case 'node': return `${base}-node.js`;
+      }
+    }
+    if (tool.id === 'case-converter') {
+      return `${base}-cases.txt`;
+    }
+    return `${base}.txt`;
+  };
+
+  const getOutputMimeType = () => {
+    if (tool.id === 'json-xml-converter') return direction === 'forward' ? 'application/xml' : 'application/json';
+    if (tool.id === 'json-csv-converter') return direction === 'forward' ? 'text/csv' : 'application/json';
+    if (tool.id === 'csv-xml-converter') return direction === 'forward' ? 'application/xml' : 'text/csv';
+    if (tool.id === 'yaml-json-converter') return direction === 'forward' ? 'application/json' : 'text/yaml';
+    if (tool.id === 'markdown-html-converter') return direction === 'forward' ? 'text/html' : 'text/markdown';
+    if (tool.id === 'html-markdown-converter') return direction === 'forward' ? 'text/markdown' : 'text/html';
+    if (tool.id === 'curl-code-converter') return targetLang === 'python' ? 'text/x-python' : 'text/javascript';
+    return 'text/plain';
+  };
+
+  const downloadOutputFile = () => {
+    if (!output) return;
+    const filename = getOutputFilename();
+    const mimeType = getOutputMimeType();
+    const blob = new Blob([output], { type: `${mimeType};charset=utf-8` });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadAllCases = () => {
+    if (Object.keys(caseSamples).length === 0) return;
+    const textLines = Object.entries(caseSamples).map(([k, v]) => `${k}:\n${v}\n`).join('\n');
+    const blob = new Blob([textLines], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'case-conversions.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  };
+
   const copyToClipboard = (txt: string) => {
     navigator.clipboard.writeText(txt);
     setCopied(true);
@@ -424,12 +606,109 @@ makeRequest();`);
       {/* Case Converter layout */}
       {tool.id === 'case-converter' ? (
         <div className="space-y-4">
-          <div className="p-4 rounded-2xl border shadow-sm"
+          {/* Action Toolbar */}
+          <div
+            className="p-3.5 rounded-2xl border flex flex-wrap items-center justify-between gap-3 shadow-sm"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <label className="block text-xs font-semibold mb-2" style={{ color: 'var(--muted)' }}>
-              INPUT PHRASE OR CODE IDENTIFIER
-            </label>
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Hidden file input */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept=".txt,.text,.json,.md"
+                onChange={handleFileInputChange}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
+                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                title="Upload a text document to convert cases"
+              >
+                <Upload className="w-3.5 h-3.5 text-[var(--brand)]" />
+                <span>Upload File</span>
+              </button>
+
+              <button
+                onClick={loadSampleData}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
+                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                title="Load sample identifier"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>Sample</span>
+              </button>
+
+              {input && (
+                <button
+                  onClick={clearInput}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
+                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--muted)' }}
+                  title="Clear input"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Clear</span>
+                </button>
+              )}
+            </div>
+
+            <button
+              onClick={downloadAllCases}
+              disabled={Object.keys(caseSamples).length === 0}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl text-white shadow-sm disabled:opacity-40 cursor-pointer"
+              style={{ backgroundColor: 'var(--brand)' }}
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Download All Cases (.txt)</span>
+            </button>
+          </div>
+
+          {/* Uploaded File Badge */}
+          {uploadedFileName && (
+            <div
+              className="p-2.5 px-3.5 rounded-xl border flex items-center justify-between text-xs font-medium"
+              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
+            >
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4 text-[var(--brand)]" />
+                <span className="font-semibold text-[var(--ink)]">{uploadedFileName}</span>
+                {uploadedFileSize && (
+                  <span className="text-[var(--muted)]">({formatFileSize(uploadedFileSize)})</span>
+                )}
+              </div>
+              <button
+                onClick={() => { setUploadedFileName(null); setUploadedFileSize(null); }}
+                className="text-[var(--muted)] hover:text-rose-500 p-0.5 rounded"
+                title="Remove file attachment"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          <div
+            className={`p-4 rounded-2xl border shadow-sm transition-all ${
+              isDragging ? 'ring-2 ring-[var(--brand)] border-transparent' : ''
+            }`}
+            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+            onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+            onDrop={(e) => {
+              e.preventDefault();
+              setIsDragging(false);
+              const file = e.dataTransfer.files[0];
+              if (file) handleFileUpload(file);
+            }}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-semibold" style={{ color: 'var(--muted)' }}>
+                INPUT PHRASE OR CODE IDENTIFIER (DRAG & DROP OR TYPE)
+              </label>
+              <span className="text-[10px] text-[var(--muted)]">
+                {input.length} chars
+              </span>
+            </div>
             <input
               type="text"
               value={input}
@@ -437,7 +716,7 @@ makeRequest();`);
                 setInput(e.target.value);
                 convert(e.target.value, direction);
               }}
-              placeholder="Type any phrase or identifier..."
+              placeholder="Type any phrase or drag a file here..."
               className="w-full p-3 font-mono text-sm rounded-xl border outline-none"
               style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
             />
@@ -451,21 +730,40 @@ makeRequest();`);
                 style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
               >
                 <span className="w-36 text-xs font-bold font-mono px-2.5 py-1 rounded"
-                  style={{ backgroundColor: 'var(--brand-light)', color: 'var(--brand)' }}
+                  style={{ backgroundColor: 'var(--brand-light, rgba(91,82,232,0.1))', color: 'var(--brand)' }}
                 >
                   {styleName}
                 </span>
                 <span className="font-mono text-sm break-all flex-1 select-all" style={{ color: 'var(--ink)' }}>
                   {transformed}
                 </span>
-                <button
-                  onClick={() => copyToClipboard(transformed)}
-                  className="px-2.5 py-1 text-xs font-medium rounded-lg border hover:opacity-80 flex items-center gap-1 shrink-0"
-                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-                >
-                  <Copy className="w-3 h-3" />
-                  <span>Copy</span>
-                </button>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={() => copyToClipboard(transformed)}
+                    className="px-2.5 py-1 text-xs font-medium rounded-lg border hover:opacity-80 flex items-center gap-1 cursor-pointer"
+                    style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
+                  >
+                    <Copy className="w-3 h-3" />
+                    <span>Copy</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const blob = new Blob([transformed], { type: 'text/plain;charset=utf-8' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `${styleName.replace(/[^a-zA-Z0-9]/g, '_')}.txt`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="px-2.5 py-1 text-xs font-medium rounded-lg border hover:opacity-80 flex items-center gap-1 cursor-pointer"
+                    style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
+                    title={`Download ${styleName}`}
+                  >
+                    <Download className="w-3 h-3 text-[var(--brand)]" />
+                    <span>Save</span>
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -475,6 +773,35 @@ makeRequest();`);
         <div className="p-4 rounded-2xl border shadow-sm space-y-4"
           style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
         >
+          <div className="flex items-center justify-between pb-2 border-b" style={{ borderColor: 'var(--line)' }}>
+            <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
+              Bi-Directional Radix Calculation
+            </span>
+            <button
+              onClick={() => {
+                const report = `Codepackr Number Base Conversion:
+Decimal (Base 10): ${decVal}
+Hexadecimal (Base 16): 0x${hexVal.toUpperCase()}
+Binary (Base 2): ${binVal}
+Octal (Base 8): ${octVal}
+Timestamp: ${new Date().toISOString()}
+`;
+                const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `number-base-${decVal}.txt`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-xl text-white shadow-sm cursor-pointer"
+              style={{ backgroundColor: 'var(--brand)' }}
+            >
+              <Download className="w-3 h-3" />
+              <span>Download Report (.txt)</span>
+            </button>
+          </div>
+
           <div>
             <label className="block text-xs font-bold mb-1 uppercase" style={{ color: 'var(--muted)' }}>
               Decimal (Base 10)
@@ -527,12 +854,104 @@ makeRequest();`);
       ) : tool.id === 'curl-code-converter' ? (
         /* cURL to code converter */
         <div className="space-y-4">
-          <div className="p-4 rounded-2xl border shadow-sm"
+          {/* Action Toolbar */}
+          <div
+            className="p-3.5 rounded-2xl border flex flex-wrap items-center justify-between gap-3 shadow-sm"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <span className="block text-xs font-semibold mb-2" style={{ color: 'var(--muted)' }}>
-              INPUT CURL COMMAND
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept=".sh,.bash,.txt,.curl"
+                onChange={handleFileInputChange}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
+                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              >
+                <Upload className="w-3.5 h-3.5 text-[var(--brand)]" />
+                <span>Upload cURL (.sh)</span>
+              </button>
+
+              <button
+                onClick={loadSampleData}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
+                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>Sample</span>
+              </button>
+
+              {input && (
+                <button
+                  onClick={clearInput}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
+                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--muted)' }}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Clear</span>
+                </button>
+              )}
+            </div>
+
+            <button
+              onClick={downloadOutputFile}
+              disabled={!output}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl text-white shadow-sm disabled:opacity-40 cursor-pointer"
+              style={{ backgroundColor: 'var(--brand)' }}
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Download {getOutputFilename()}</span>
+            </button>
+          </div>
+
+          {/* Uploaded File Badge */}
+          {uploadedFileName && (
+            <div
+              className="p-2.5 px-3.5 rounded-xl border flex items-center justify-between text-xs font-medium"
+              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
+            >
+              <div className="flex items-center gap-2">
+                <FileCode className="w-4 h-4 text-[var(--brand)]" />
+                <span className="font-semibold text-[var(--ink)]">{uploadedFileName}</span>
+                {uploadedFileSize && (
+                  <span className="text-[var(--muted)]">({formatFileSize(uploadedFileSize)})</span>
+                )}
+              </div>
+              <button
+                onClick={() => { setUploadedFileName(null); setUploadedFileSize(null); }}
+                className="text-[var(--muted)] hover:text-rose-500 p-0.5 rounded cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          <div
+            className={`p-4 rounded-2xl border shadow-sm transition-all ${
+              isDragging ? 'ring-2 ring-[var(--brand)] border-transparent' : ''
+            }`}
+            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+            onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+            onDrop={(e) => {
+              e.preventDefault();
+              setIsDragging(false);
+              const file = e.dataTransfer.files[0];
+              if (file) handleFileUpload(file);
+            }}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="block text-xs font-semibold" style={{ color: 'var(--muted)' }}>
+                INPUT CURL COMMAND (DRAG & DROP SCRIPT FILE HERE)
+              </span>
+              <span className="text-[10px] text-[var(--muted)]">
+                {input.length} chars
+              </span>
+            </div>
             <textarea
               value={input}
               onChange={(e) => {
@@ -540,6 +959,7 @@ makeRequest();`);
                 generateCurlCode(e.target.value, targetLang);
               }}
               rows={5}
+              placeholder="Paste curl command or drop a .sh / .curl file..."
               className="w-full p-3 font-mono text-xs rounded-xl border outline-none"
               style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
             />
@@ -556,7 +976,7 @@ makeRequest();`);
                   setTargetLang(lang);
                   generateCurlCode(input, lang);
                 }}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                   targetLang === lang ? 'bg-[var(--brand)] text-white' : 'hover:opacity-80'
                 }`}
                 style={{
@@ -576,13 +996,25 @@ makeRequest();`);
               <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
                 GENERATED CLIENT CODE
               </span>
-              <button
-                onClick={() => copyToClipboard(output)}
-                className="px-2.5 py-1 text-xs font-semibold rounded-lg border flex items-center gap-1"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-              >
-                <Copy className="w-3 h-3" /> Copy Code
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={downloadOutputFile}
+                  disabled={!output}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg border flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                >
+                  <Download className="w-3.5 h-3.5 text-[var(--brand)]" />
+                  <span>Download Code</span>
+                </button>
+                <button
+                  onClick={() => copyToClipboard(output)}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg border flex items-center gap-1 cursor-pointer"
+                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
+                >
+                  <Copy className="w-3 h-3" />
+                  <span>Copy</span>
+                </button>
+              </div>
             </div>
             <textarea
               readOnly
@@ -596,28 +1028,62 @@ makeRequest();`);
       ) : tool.id === 'image-resizer' || tool.id === 'favicon-generator' ? (
         /* Image tools */
         <div className="space-y-4">
-          <div className="p-6 rounded-2xl border border-dashed text-center"
+          <div
+            className={`p-8 rounded-2xl border border-dashed text-center transition-all cursor-pointer ${
+              isImageDragging ? 'ring-2 ring-[var(--brand)] bg-[var(--surface-2)]' : ''
+            }`}
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+            onDragOver={(e) => { e.preventDefault(); setIsImageDragging(true); }}
+            onDragLeave={(e) => { e.preventDefault(); setIsImageDragging(false); }}
+            onDrop={(e) => {
+              e.preventDefault();
+              setIsImageDragging(false);
+              const file = e.dataTransfer.files[0];
+              if (file && file.type.startsWith('image/')) {
+                handleImageFile(file);
+              }
+            }}
+            onClick={() => imageInputRef.current?.click()}
           >
-            <ImageIcon className="w-10 h-10 mx-auto mb-2 text-[var(--brand)]" />
-            <p className="text-sm font-semibold mb-1" style={{ color: 'var(--ink)' }}>
-              Choose an image to {tool.id === 'favicon-generator' ? 'generate favicons' : 'resize & compress'}
-            </p>
-            <p className="text-xs mb-3" style={{ color: 'var(--muted)' }}>
-              Processed client-side in your browser using HTML5 Canvas.
-            </p>
             <input
               type="file"
+              ref={imageInputRef}
               accept="image/*"
-              onChange={handleImage}
-              className="text-xs file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[var(--brand)] file:text-white hover:file:opacity-90 cursor-pointer"
+              onChange={handleImageChange}
+              className="hidden"
             />
+            <ImageIcon className="w-10 h-10 mx-auto mb-2 text-[var(--brand)]" />
+            <p className="text-sm font-semibold mb-1" style={{ color: 'var(--ink)' }}>
+              Click to select or drag & drop image here
+            </p>
+            <p className="text-xs mb-3" style={{ color: 'var(--muted)' }}>
+              Supports PNG, JPEG, WebP, SVG, and GIF. 100% processed client-side via HTML5 Canvas.
+            </p>
+            <button
+              type="button"
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-white cursor-pointer shadow-sm"
+              style={{ backgroundColor: 'var(--brand)' }}
+            >
+              Choose Image File
+            </button>
           </div>
 
           {imageSrc && (
             <div className="p-4 rounded-2xl border shadow-sm space-y-4"
               style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
             >
+              {imageFileName && (
+                <div className="flex items-center justify-between text-xs font-semibold pb-2 border-b" style={{ borderColor: 'var(--line)', color: 'var(--muted)' }}>
+                  <span>Source: {imageFileName} ({imgWidth} × {imgHeight} px)</span>
+                  <button
+                    onClick={() => { setImageSrc(null); setImageFileName(null); }}
+                    className="text-rose-500 hover:opacity-80 flex items-center gap-1 cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Remove
+                  </button>
+                </div>
+              )}
+
               <div className="flex items-center justify-center p-4 rounded-xl border bg-slate-900/5 max-h-60 overflow-hidden">
                 <img src={imageSrc} alt="Source Preview" className="max-h-52 object-contain" />
               </div>
@@ -625,7 +1091,7 @@ makeRequest();`);
               {tool.id === 'favicon-generator' ? (
                 <div>
                   <span className="block text-xs font-semibold mb-3" style={{ color: 'var(--muted)' }}>
-                    STANDARD FAVICON SIZES
+                    STANDARD FAVICON SIZES (CLICK TO DOWNLOAD)
                   </span>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {[
@@ -638,7 +1104,7 @@ makeRequest();`);
                         <span className="text-xs font-bold block mb-2">{label}</span>
                         <button
                           onClick={() => downloadProcessedImage(size, size, `favicon-${size}x${size}.png`)}
-                          className="w-full py-1.5 px-2 rounded-lg text-xs font-semibold text-white flex items-center justify-center gap-1"
+                          className="w-full py-1.5 px-2 rounded-lg text-xs font-semibold text-white flex items-center justify-center gap-1 cursor-pointer shadow-sm"
                           style={{ backgroundColor: 'var(--brand)' }}
                         >
                           <Download className="w-3 h-3" />
@@ -649,7 +1115,7 @@ makeRequest();`);
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                   <div>
                     <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>
                       WIDTH (PX)
@@ -674,14 +1140,29 @@ makeRequest();`);
                       style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
                     />
                   </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>
+                      FORMAT
+                    </label>
+                    <select
+                      value={imgFormat}
+                      onChange={(e) => setImgFormat(e.target.value as any)}
+                      className="w-full p-2.5 rounded-xl border text-xs outline-none"
+                      style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                    >
+                      <option value="png">PNG (Lossless)</option>
+                      <option value="jpeg">JPEG (Compressed)</option>
+                      <option value="webp">WebP (Modern)</option>
+                    </select>
+                  </div>
                   <div className="flex items-end">
                     <button
                       onClick={() => downloadProcessedImage(imgWidth, imgHeight, `resized-${imgWidth}x${imgHeight}.${imgFormat}`)}
-                      className="w-full py-2.5 rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-1.5 shadow-sm"
+                      className="w-full py-2.5 rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                       style={{ backgroundColor: 'var(--brand)' }}
                     >
                       <Download className="w-3.5 h-3.5" />
-                      <span>Download Resized Image</span>
+                      <span>Download Resized</span>
                     </button>
                   </div>
                 </div>
@@ -690,14 +1171,17 @@ makeRequest();`);
           )}
         </div>
       ) : (
-        /* Standard bi-directional converter (JSON/XML, JSON/CSV, YAML/JSON, Markdown/HTML) */
+        /* Standard bi-directional converter (JSON/XML, JSON/CSV, YAML/JSON, Markdown/HTML, CSV/XML, HTML/Markdown) */
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 rounded-xl border shadow-sm"
+          {/* Action Control Bar */}
+          <div
+            className="p-3.5 rounded-2xl border flex flex-wrap items-center justify-between gap-3 shadow-sm"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-                Conversion Mode:
+            {/* Left Action Group */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold mr-1" style={{ color: 'var(--muted)' }}>
+                Mode:
               </span>
               <button
                 onClick={() => {
@@ -706,75 +1190,247 @@ makeRequest();`);
                   // Swap input/output if output exists
                   if (output) {
                     setInput(output);
+                    setUploadedFileName(null);
+                    setUploadedFileSize(null);
                     convert(output, nextDir);
                   } else {
                     convert(input, nextDir);
                   }
                 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border hover:opacity-80 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-colors cursor-pointer"
                 style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
+                title="Switch conversion direction"
               >
-                <ArrowLeftRight className="w-3.5 h-3.5" />
+                <ArrowLeftRight className="w-3.5 h-3.5 text-[var(--brand)]" />
                 <span>
                   {direction === 'forward'
                     ? tool.name.split('/')[0] || 'Forward'
                     : tool.name.split('/')[1] || 'Reverse'}
                 </span>
               </button>
+
+              <div className="h-4 w-px bg-[var(--line)] mx-1 hidden sm:block" />
+
+              {/* Upload Button */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept={getInputAccept()}
+                onChange={handleFileInputChange}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
+                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                title="Upload file to convert"
+              >
+                <Upload className="w-3.5 h-3.5 text-[var(--brand)]" />
+                <span>Upload File</span>
+              </button>
+
+              {/* Sample Data */}
+              <button
+                onClick={loadSampleData}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
+                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                title="Load sample test data"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>Sample</span>
+              </button>
+
+              {/* Clear Input */}
+              {input && (
+                <button
+                  onClick={clearInput}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
+                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--muted)' }}
+                  title="Clear all data"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Clear</span>
+                </button>
+              )}
             </div>
 
-            <button
-              onClick={() => copyToClipboard(output)}
-              disabled={!output}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg border disabled:opacity-40"
-              style={{
-                backgroundColor: copied ? 'var(--ok)' : 'var(--surface)',
-                color: copied ? '#ffffff' : 'var(--ink)',
-                borderColor: copied ? 'var(--ok)' : 'var(--line)',
-              }}
-            >
-              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-              <span>{copied ? 'Copied' : 'Copy Output'}</span>
-            </button>
+            {/* Right Action Group */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={downloadOutputFile}
+                disabled={!output}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl text-white shadow-sm disabled:opacity-40 cursor-pointer"
+                style={{ backgroundColor: 'var(--brand)' }}
+                title={`Download converted ${getOutputFilename()}`}
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download {getOutputFilename()}</span>
+              </button>
+
+              <button
+                onClick={() => copyToClipboard(output)}
+                disabled={!output}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border disabled:opacity-40 cursor-pointer"
+                style={{
+                  backgroundColor: copied ? 'var(--ok, #10b981)' : 'var(--surface-2)',
+                  color: copied ? '#ffffff' : 'var(--ink)',
+                  borderColor: copied ? 'var(--ok, #10b981)' : 'var(--line)',
+                }}
+              >
+                {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copied ? 'Copied' : 'Copy Output'}</span>
+              </button>
+            </div>
           </div>
 
-          {error && (
-            <div className="p-3 rounded-xl border text-xs font-mono bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border-rose-200">
-              {error}
+          {/* Uploaded File Notification Banner */}
+          {uploadedFileName && (
+            <div
+              className="p-2.5 px-4 rounded-xl border flex items-center justify-between text-xs font-medium"
+              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
+            >
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4 text-[var(--brand)]" />
+                <span className="font-semibold text-[var(--ink)]">{uploadedFileName}</span>
+                {uploadedFileSize && (
+                  <span className="text-[var(--muted)]">({formatFileSize(uploadedFileSize)})</span>
+                )}
+                <span className="text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold bg-emerald-500/10 px-2 py-0.5 rounded">
+                  Loaded & Converted
+                </span>
+              </div>
+              <button
+                onClick={() => { setUploadedFileName(null); setUploadedFileSize(null); }}
+                className="text-[var(--muted)] hover:text-rose-500 p-0.5 rounded cursor-pointer"
+                title="Remove file attachment"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
             </div>
           )}
 
+          {error && (
+            <div className="p-3.5 rounded-xl border text-xs font-mono bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border-rose-200">
+              <span className="font-bold">Syntax/Conversion Warning:</span> {error}
+            </div>
+          )}
+
+          {/* Bi-directional Editor Grids */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="p-4 rounded-2xl border shadow-sm"
+            {/* Input Column with Drag & Drop Zone */}
+            <div
+              className={`p-4 rounded-2xl border shadow-sm flex flex-col transition-all relative ${
+                isDragging ? 'ring-2 ring-[var(--brand)] border-transparent' : ''
+              }`}
               style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                const file = e.dataTransfer.files[0];
+                if (file) handleFileUpload(file);
+              }}
             >
-              <span className="block text-xs font-semibold mb-2" style={{ color: 'var(--muted)' }}>
-                SOURCE INPUT
-              </span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
+                    SOURCE INPUT
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded border uppercase font-mono" style={{ borderColor: 'var(--line)', color: 'var(--muted)' }}>
+                    {direction === 'forward' ? tool.name.split('/')[0] : tool.name.split('/')[1] || 'Input'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono" style={{ color: 'var(--muted)' }}>
+                    {input.length} chars • {input ? input.split('\n').length : 0} lines
+                  </span>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-1 rounded text-[var(--muted)] hover:text-[var(--brand)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer"
+                    title="Upload file into editor"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {isDragging && (
+                <div className="absolute inset-0 bg-[var(--surface)]/90 backdrop-blur-xs rounded-2xl border-2 border-dashed border-[var(--brand)] z-10 flex flex-col items-center justify-center pointer-events-none">
+                  <Upload className="w-8 h-8 text-[var(--brand)] mb-2 animate-bounce" />
+                  <p className="text-sm font-semibold text-[var(--ink)]">Drop your file to convert</p>
+                  <p className="text-xs text-[var(--muted)]">{getInputAccept()}</p>
+                </div>
+              )}
+
               <textarea
                 value={input}
                 onChange={(e) => {
                   setInput(e.target.value);
                   convert(e.target.value, direction);
                 }}
-                rows={12}
-                className="w-full p-3 font-mono text-xs sm:text-sm rounded-xl border outline-none leading-relaxed"
+                placeholder={`Paste content or drop a ${getInputAccept()} file here...`}
+                rows={14}
+                className="w-full p-3 font-mono text-xs sm:text-sm rounded-xl border outline-none leading-relaxed resize-y"
                 style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
               />
+
+              <div className="mt-2 flex items-center justify-between text-[11px]" style={{ color: 'var(--muted)' }}>
+                <span>Drag & drop files directly or click Upload</span>
+                {uploadedFileName && <span>Source: {uploadedFileName}</span>}
+              </div>
             </div>
-            <div className="p-4 rounded-2xl border shadow-sm"
+
+            {/* Output Column */}
+            <div
+              className="p-4 rounded-2xl border shadow-sm flex flex-col"
               style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
             >
-              <span className="block text-xs font-semibold mb-2" style={{ color: 'var(--muted)' }}>
-                CONVERTED RESULT
-              </span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
+                    CONVERTED RESULT
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded border uppercase font-mono" style={{ borderColor: 'var(--line)', color: 'var(--muted)' }}>
+                    {direction === 'forward' ? tool.name.split('/')[1] || 'Output' : tool.name.split('/')[0]}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono" style={{ color: 'var(--muted)' }}>
+                    {output.length} chars • {output ? output.split('\n').length : 0} lines
+                  </span>
+                  <button
+                    onClick={downloadOutputFile}
+                    disabled={!output}
+                    className="p-1 rounded text-[var(--muted)] hover:text-[var(--brand)] hover:bg-[var(--surface-2)] transition-colors disabled:opacity-30 cursor-pointer"
+                    title={`Download ${getOutputFilename()}`}
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => copyToClipboard(output)}
+                    disabled={!output}
+                    className="p-1 rounded text-[var(--muted)] hover:text-[var(--brand)] hover:bg-[var(--surface-2)] transition-colors disabled:opacity-30 cursor-pointer"
+                    title="Copy to clipboard"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
               <textarea
                 readOnly
                 value={output}
-                rows={12}
-                className="w-full p-3 font-mono text-xs sm:text-sm rounded-xl border outline-none leading-relaxed"
+                placeholder="Converted output will appear here automatically..."
+                rows={14}
+                className="w-full p-3 font-mono text-xs sm:text-sm rounded-xl border outline-none leading-relaxed resize-y"
                 style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
               />
+
+              <div className="mt-2 flex items-center justify-between text-[11px]" style={{ color: 'var(--muted)' }}>
+                <span>Ready to download or copy</span>
+                <span className="font-mono font-medium text-[var(--brand)]">{getOutputFilename()}</span>
+              </div>
             </div>
           </div>
         </div>
