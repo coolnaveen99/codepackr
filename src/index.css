@@ -42,3 +42,59 @@ body {
 code, pre, kbd, samp, .font-mono {
   font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
+
+/* ==========================================================================
+   GS1 Logistics Shipping Label (4" x 6") Print Engine
+   ========================================================================== */
+
+#gs1-print-portal {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: 4in 6in;
+    margin: 0;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* When printing from GS1 label generator, completely hide web application layout */
+  body.printing-gs1-label > *:not(#gs1-print-portal),
+  body.gs1-tool-active > *:not(#gs1-print-portal) {
+    display: none !important;
+  }
+
+  /* Display ONLY the isolated 4x6 print portal */
+  body.printing-gs1-label #gs1-print-portal,
+  body.gs1-tool-active #gs1-print-portal {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 4in !important;
+    max-width: 4in !important;
+    height: 6in !important;
+    max-height: 6in !important;
+    margin: 0 auto !important;
+    padding: 0.1in !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: hidden !important;
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}

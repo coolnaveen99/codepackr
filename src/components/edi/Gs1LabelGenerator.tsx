@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Barcode,
   Copy,
@@ -268,9 +269,157 @@ IEA*1*000000856~`;
     URL.revokeObjectURL(url);
   };
 
+  useEffect(() => {
+    document.body.classList.add('gs1-tool-active');
+    const handleAfterPrint = () => {
+      document.body.classList.remove('printing-gs1-label');
+    };
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => {
+      window.removeEventListener('afterprint', handleAfterPrint);
+      document.body.classList.remove('printing-gs1-label');
+      document.body.classList.remove('gs1-tool-active');
+    };
+  }, []);
+
   const handlePrint = () => {
-    window.print();
+    document.body.classList.add('printing-gs1-label');
+    setTimeout(() => {
+      window.print();
+    }, 50);
   };
+
+  // Reusable 4" x 6" Logistics Shipping Container Label
+  const renderPhysicalLabel = (isPortal = false) => (
+    <div
+      ref={!isPortal ? labelPrintRef : undefined}
+      id={isPortal ? 'gs1-printable-label-card' : undefined}
+      className={`w-full bg-white text-black border-2 border-black font-sans text-[11px] leading-tight select-none ${
+        isPortal ? 'p-2.5 shadow-none' : 'max-w-[440px] p-4 shadow-lg'
+      }`}
+      style={
+        isPortal
+          ? {
+              width: '3.8in',
+              maxWidth: '3.8in',
+              height: '5.75in',
+              maxHeight: '5.75in',
+              boxSizing: 'border-box',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              overflow: 'hidden',
+            }
+          : { minHeight: '620px' }
+      }
+    >
+      {/* 1. Header: From & To */}
+      <div className="grid grid-cols-2 border-b-2 border-black pb-1.5">
+        <div className="pr-2 border-r border-black">
+          <span className="block font-bold text-[9px] uppercase tracking-wider text-neutral-600">
+            FROM:
+          </span>
+          <p className="font-bold text-xs leading-none">{shipFromCompany}</p>
+          <p className="text-[10px] mt-0.5">{shipFromStreet}</p>
+          <p className="text-[10px]">{shipFromCityStateZip}</p>
+        </div>
+        <div className="pl-2">
+          <span className="block font-bold text-[9px] uppercase tracking-wider text-neutral-600">
+            SHIP TO POSTAL (420):
+          </span>
+          <p className="font-mono font-bold text-sm leading-none">{shipToPostal}</p>
+          <div className="mt-1 flex justify-start">
+            <svg
+              viewBox={`0 0 ${postalBarcode.svgWidth} ${postalBarcode.svgHeight}`}
+              className="h-6 w-auto"
+            >
+              {postalBarcode.bars.map((b, i) => (
+                <rect key={i} x={b.x} y={0} width={b.width} height={postalBarcode.svgHeight} fill="#000000" />
+              ))}
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Ship To Destination Block */}
+      <div className="border-b-2 border-black py-1.5">
+        <span className="block font-bold text-[9px] uppercase tracking-wider text-neutral-600">
+          TO:
+        </span>
+        <p className="font-bold text-sm leading-tight uppercase">{shipToCompany}</p>
+        <p className="text-xs">{shipToStreet}</p>
+        <p className="text-xs font-bold">{shipToCityStateZip}</p>
+      </div>
+
+      {/* 3. Carrier, BOL, PO Row */}
+      <div className="grid grid-cols-3 border-b-2 border-black py-1 text-[10px]">
+        <div className="border-r border-black pr-1">
+          <span className="block font-semibold text-[8px] text-neutral-600">CARRIER:</span>
+          <p className="font-bold truncate">{carrierName}</p>
+        </div>
+        <div className="border-r border-black px-1">
+          <span className="block font-semibold text-[8px] text-neutral-600">B/L:</span>
+          <p className="font-mono font-bold truncate">{bolNumber}</p>
+        </div>
+        <div className="pl-1">
+          <span className="block font-semibold text-[8px] text-neutral-600">PO #:</span>
+          <p className="font-mono font-bold truncate">{poNumber}</p>
+        </div>
+      </div>
+
+      {/* 4. Content Block (GTIN, Qty, Batch) */}
+      <div className="border-b-2 border-black py-1.5">
+        <div className="flex justify-between items-baseline">
+          <span className="font-bold text-xs uppercase truncate max-w-[260px]">
+            {itemDescription}
+          </span>
+          <span className="font-mono text-xs font-bold">QTY: {quantity}</span>
+        </div>
+        <div className="flex justify-between text-[10px] mt-0.5 text-neutral-700">
+          <span>LOT: <strong className="font-mono">{batchLot}</strong></span>
+          <span>EXP: <strong className="font-mono">{expirationDate}</strong></span>
+        </div>
+        {/* Secondary Barcode */}
+        <div className="mt-1 flex flex-col items-center">
+          <svg
+            viewBox={`0 0 ${contentBarcode.svgWidth} ${contentBarcode.svgHeight}`}
+            className="h-8 w-auto"
+          >
+            {contentBarcode.bars.map((b, i) => (
+              <rect key={i} x={b.x} y={0} width={b.width} height={contentBarcode.svgHeight} fill="#000000" />
+            ))}
+          </svg>
+          <span className="font-mono text-[9px] tracking-wide mt-0.5">
+            (02) {gtin} (37) {quantity}
+          </span>
+        </div>
+      </div>
+
+      {/* 5. SSCC-18 Primary Barcode Block (GS1-128 AI 00) */}
+      <div className="pt-1.5 flex flex-col items-center">
+        <span className="font-bold text-xs tracking-wider uppercase mb-0.5">
+          SERIAL SHIPPING CONTAINER CODE (SSCC-18)
+        </span>
+
+        {/* Scannable SVG Barcode */}
+        <div className="w-full flex justify-center py-0.5">
+          <svg
+            viewBox={`0 0 ${ssccBarcode.svgWidth} ${ssccBarcode.svgHeight}`}
+            className="w-full max-h-20"
+          >
+            {ssccBarcode.bars.map((b, i) => (
+              <rect key={i} x={b.x} y={0} width={b.width} height={ssccBarcode.svgHeight} fill="#000000" />
+            ))}
+          </svg>
+        </div>
+
+        {/* Human Readable Interpretation */}
+        <p className="font-mono font-bold text-xs tracking-widest mt-0.5 text-center">
+          {formattedHri}
+        </p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -626,127 +775,18 @@ IEA*1*000000856~`;
               </div>
 
               {/* Physical 4x6 Label Card (White thermal sticker look) */}
-              <div
-                ref={labelPrintRef}
-                className="w-full max-w-[440px] bg-white text-black border-2 border-black p-4 font-sans shadow-lg text-[11px] leading-tight select-none"
-                style={{ minHeight: '620px' }}
-              >
-                {/* 1. Header: From & To */}
-                <div className="grid grid-cols-2 border-b-2 border-black pb-2">
-                  <div className="pr-2 border-r border-black">
-                    <span className="block font-bold text-[9px] uppercase tracking-wider text-neutral-600">
-                      FROM:
-                    </span>
-                    <p className="font-bold text-xs leading-none">{shipFromCompany}</p>
-                    <p className="text-[10px] mt-0.5">{shipFromStreet}</p>
-                    <p className="text-[10px]">{shipFromCityStateZip}</p>
-                  </div>
-                  <div className="pl-2">
-                    <span className="block font-bold text-[9px] uppercase tracking-wider text-neutral-600">
-                      SHIP TO POSTAL (420):
-                    </span>
-                    <p className="font-mono font-bold text-sm leading-none">{shipToPostal}</p>
-                    <div className="mt-1 flex justify-start">
-                      <svg
-                        viewBox={`0 0 ${postalBarcode.svgWidth} ${postalBarcode.svgHeight}`}
-                        className="h-7 w-auto"
-                      >
-                        {postalBarcode.bars.map((b, i) => (
-                          <rect key={i} x={b.x} y={0} width={b.width} height={postalBarcode.svgHeight} fill="#000000" />
-                        ))}
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. Ship To Destination Block */}
-                <div className="border-b-2 border-black py-2">
-                  <span className="block font-bold text-[9px] uppercase tracking-wider text-neutral-600">
-                    TO:
-                  </span>
-                  <p className="font-bold text-sm leading-tight uppercase">{shipToCompany}</p>
-                  <p className="text-xs">{shipToStreet}</p>
-                  <p className="text-xs font-bold">{shipToCityStateZip}</p>
-                </div>
-
-                {/* 3. Carrier, BOL, PO Row */}
-                <div className="grid grid-cols-3 border-b-2 border-black py-1.5 text-[10px]">
-                  <div className="border-r border-black pr-1">
-                    <span className="block font-semibold text-[8px] text-neutral-600">CARRIER:</span>
-                    <p className="font-bold truncate">{carrierName}</p>
-                  </div>
-                  <div className="border-r border-black px-1">
-                    <span className="block font-semibold text-[8px] text-neutral-600">B/L:</span>
-                    <p className="font-mono font-bold truncate">{bolNumber}</p>
-                  </div>
-                  <div className="pl-1">
-                    <span className="block font-semibold text-[8px] text-neutral-600">PO #:</span>
-                    <p className="font-mono font-bold truncate">{poNumber}</p>
-                  </div>
-                </div>
-
-                {/* 4. Content Block (GTIN, Qty, Batch) */}
-                <div className="border-b-2 border-black py-2">
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-bold text-xs uppercase truncate max-w-[260px]">
-                      {itemDescription}
-                    </span>
-                    <span className="font-mono text-xs font-bold">QTY: {quantity}</span>
-                  </div>
-                  <div className="flex justify-between text-[10px] mt-1 text-neutral-700">
-                    <span>LOT: <strong className="font-mono">{batchLot}</strong></span>
-                    <span>EXP: <strong className="font-mono">{expirationDate}</strong></span>
-                  </div>
-                  {/* Secondary Barcode */}
-                  <div className="mt-2 flex flex-col items-center">
-                    <svg
-                      viewBox={`0 0 ${contentBarcode.svgWidth} ${contentBarcode.svgHeight}`}
-                      className="h-10 w-auto"
-                    >
-                      {contentBarcode.bars.map((b, i) => (
-                        <rect key={i} x={b.x} y={0} width={b.width} height={contentBarcode.svgHeight} fill="#000000" />
-                      ))}
-                    </svg>
-                    <span className="font-mono text-[9px] tracking-wide mt-0.5">
-                      (02) {gtin} (37) {quantity}
-                    </span>
-                  </div>
-                </div>
-
-                {/* 5. SSCC-18 Primary Barcode Block (GS1-128 AI 00) */}
-                <div className="pt-2 flex flex-col items-center">
-                  <span className="font-bold text-xs tracking-wider uppercase mb-1">
-                    SERIAL SHIPPING CONTAINER CODE (SSCC-18)
-                  </span>
-
-                  {/* Scannable SVG Barcode */}
-                  <div className="w-full flex justify-center py-1">
-                    <svg
-                      viewBox={`0 0 ${ssccBarcode.svgWidth} ${ssccBarcode.svgHeight}`}
-                      className="w-full max-h-24"
-                    >
-                      {ssccBarcode.bars.map((b, i) => (
-                        <rect key={i} x={b.x} y={0} width={b.width} height={ssccBarcode.svgHeight} fill="#000000" />
-                      ))}
-                    </svg>
-                  </div>
-
-                  {/* Human Readable Interpretation */}
-                  <p className="font-mono font-bold text-xs tracking-widest mt-1 text-center">
-                    {formattedHri}
-                  </p>
-                </div>
-              </div>
+              {renderPhysicalLabel(false)}
 
               {/* Action Buttons under label */}
               <div className="flex flex-wrap items-center justify-center gap-3 mt-4 text-xs">
                 <button
-                  onClick={() => setViewMode('asn')}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl font-semibold text-white shadow-sm hover:opacity-90 transition-opacity cursor-pointer"
+                  onClick={handlePrint}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-semibold text-white shadow-sm hover:opacity-90 transition-opacity cursor-pointer"
                   style={{ backgroundColor: 'var(--brand)' }}
+                  title="Print 4x6 label only without webpage headers or extra pages"
                 >
-                  <FileText className="w-3.5 h-3.5" />
-                  <span>Insert into 856 ASN Sample &rarr;</span>
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Print Label (4&quot; x 6&quot;)</span>
                 </button>
                 <button
                   onClick={handleCopySscc}
@@ -756,7 +796,20 @@ IEA*1*000000856~`;
                   {copiedSscc ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>Copy SSCC-18</span>
                 </button>
+                <button
+                  onClick={() => setViewMode('asn')}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl border font-semibold hover:opacity-80 transition-opacity cursor-pointer"
+                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Insert into 856 ASN Sample &rarr;</span>
+                </button>
               </div>
+
+              {/* Printing Helper Guidance */}
+              <p className="text-[11px] text-[var(--muted)] text-center max-w-sm mt-2 leading-relaxed">
+                Single-page thermal 4&quot; x 6&quot; mode active. When printing, <strong>only the shipping label</strong> is sent to the printer. Select &quot;Margins: None&quot; in printer settings for full border alignment.
+              </p>
             </div>
           )}
 
@@ -921,6 +974,15 @@ IEA*1*000000856~`;
           )}
         </div>
       </div>
+
+      {/* Dedicated Clean Print Portal: Ensures 100% ONLY the 4" x 6" label is printed with 0 extra pages */}
+      {typeof document !== 'undefined' &&
+        createPortal(
+          <div id="gs1-print-portal" aria-hidden="true">
+            {renderPhysicalLabel(true)}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
