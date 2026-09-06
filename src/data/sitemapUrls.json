@@ -1,0 +1,816 @@
+{
+  "updatedAt": "2026-09-06",
+  "host": "www.codepackr.com",
+  "baseUrl": "https://www.codepackr.com",
+  "totalUrls": 101,
+  "urls": [
+    {
+      "loc": "https://www.codepackr.com/",
+      "path": "/",
+      "name": "Codepackr - Free Online Developer & EDI Tools",
+      "priority": "1.0",
+      "changefreq": "weekly",
+      "category": "home"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-tools",
+      "path": "/edi-tools",
+      "name": "EDI Tools & Business Transaction Suite",
+      "priority": "0.9",
+      "changefreq": "weekly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/formatters",
+      "path": "/formatters",
+      "name": "Code & Data Formatters",
+      "priority": "0.9",
+      "changefreq": "weekly",
+      "category": "formatters"
+    },
+    {
+      "loc": "https://www.codepackr.com/encoders",
+      "path": "/encoders",
+      "name": "Encoders, Decoders & Cryptography",
+      "priority": "0.9",
+      "changefreq": "weekly",
+      "category": "encoders"
+    },
+    {
+      "loc": "https://www.codepackr.com/validators",
+      "path": "/validators",
+      "name": "Syntax, Schema & Diff Validators",
+      "priority": "0.9",
+      "changefreq": "weekly",
+      "category": "validators"
+    },
+    {
+      "loc": "https://www.codepackr.com/converters",
+      "path": "/converters",
+      "name": "File & Data Format Converters",
+      "priority": "0.9",
+      "changefreq": "weekly",
+      "category": "converters"
+    },
+    {
+      "loc": "https://www.codepackr.com/calculators",
+      "path": "/calculators",
+      "name": "Financial, Loan & Math Calculators",
+      "priority": "0.9",
+      "changefreq": "weekly",
+      "category": "calculators"
+    },
+    {
+      "loc": "https://www.codepackr.com/utilities",
+      "path": "/utilities",
+      "name": "Developer Utilities & Generators",
+      "priority": "0.9",
+      "changefreq": "weekly",
+      "category": "utilities"
+    },
+    {
+      "loc": "https://www.codepackr.com/text-tools",
+      "path": "/text-tools",
+      "name": "Text Processing & Analysis Tools",
+      "priority": "0.9",
+      "changefreq": "weekly",
+      "category": "text"
+    },
+    {
+      "loc": "https://www.codepackr.com/xml-tools",
+      "path": "/xml-tools",
+      "name": "XML, XSD, XSLT & XPath Suite",
+      "priority": "0.9",
+      "changefreq": "weekly",
+      "category": "xml"
+    },
+    {
+      "loc": "https://www.codepackr.com/json-formatter",
+      "path": "/json-formatter",
+      "name": "JSON Formatter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "formatters"
+    },
+    {
+      "loc": "https://www.codepackr.com/html-formatter",
+      "path": "/html-formatter",
+      "name": "HTML Formatter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "formatters"
+    },
+    {
+      "loc": "https://www.codepackr.com/css-formatter",
+      "path": "/css-formatter",
+      "name": "CSS Formatter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "formatters"
+    },
+    {
+      "loc": "https://www.codepackr.com/sql-formatter",
+      "path": "/sql-formatter",
+      "name": "SQL Formatter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "formatters"
+    },
+    {
+      "loc": "https://www.codepackr.com/xml-formatter",
+      "path": "/xml-formatter",
+      "name": "XML Formatter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "formatters"
+    },
+    {
+      "loc": "https://www.codepackr.com/yaml-formatter",
+      "path": "/yaml-formatter",
+      "name": "YAML Formatter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "formatters"
+    },
+    {
+      "loc": "https://www.codepackr.com/js-minifier",
+      "path": "/js-minifier",
+      "name": "JavaScript Minifier",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "formatters"
+    },
+    {
+      "loc": "https://www.codepackr.com/base64",
+      "path": "/base64",
+      "name": "Base64 Encoder & Decoder",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "encoders"
+    },
+    {
+      "loc": "https://www.codepackr.com/url-encode",
+      "path": "/url-encode",
+      "name": "URL Encoder & Decoder",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "encoders"
+    },
+    {
+      "loc": "https://www.codepackr.com/html-entity",
+      "path": "/html-entity",
+      "name": "HTML Entity Encoder & Decoder",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "encoders"
+    },
+    {
+      "loc": "https://www.codepackr.com/hash-generator",
+      "path": "/hash-generator",
+      "name": "Hash Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "encoders"
+    },
+    {
+      "loc": "https://www.codepackr.com/jwt-decoder",
+      "path": "/jwt-decoder",
+      "name": "JWT Decoder",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "encoders"
+    },
+    {
+      "loc": "https://www.codepackr.com/jwt-encoder",
+      "path": "/jwt-encoder",
+      "name": "JWT Encoder",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "encoders"
+    },
+    {
+      "loc": "https://www.codepackr.com/base64-image",
+      "path": "/base64-image",
+      "name": "Base64 Image Converter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "encoders"
+    },
+    {
+      "loc": "https://www.codepackr.com/diff-checker",
+      "path": "/diff-checker",
+      "name": "Diff Checker",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "validators"
+    },
+    {
+      "loc": "https://www.codepackr.com/regex-tester",
+      "path": "/regex-tester",
+      "name": "Regex Tester",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "validators"
+    },
+    {
+      "loc": "https://www.codepackr.com/json-validator",
+      "path": "/json-validator",
+      "name": "JSON Validator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "validators"
+    },
+    {
+      "loc": "https://www.codepackr.com/json-path-tester",
+      "path": "/json-path-tester",
+      "name": "JSONPath Tester",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "validators"
+    },
+    {
+      "loc": "https://www.codepackr.com/csv-viewer",
+      "path": "/csv-viewer",
+      "name": "CSV Viewer",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "validators"
+    },
+    {
+      "loc": "https://www.codepackr.com/json-structural-diff",
+      "path": "/json-structural-diff",
+      "name": "Structural JSON Diff",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "validators"
+    },
+    {
+      "loc": "https://www.codepackr.com/dotenv-formatter",
+      "path": "/dotenv-formatter",
+      "name": "dotenv Formatter & Validator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "validators"
+    },
+    {
+      "loc": "https://www.codepackr.com/xsd-validator",
+      "path": "/xsd-validator",
+      "name": "XSD & XML Schema Validator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "validators"
+    },
+    {
+      "loc": "https://www.codepackr.com/json-xml-converter",
+      "path": "/json-xml-converter",
+      "name": "JSON to XML / XML to JSON",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "converters"
+    },
+    {
+      "loc": "https://www.codepackr.com/json-csv-converter",
+      "path": "/json-csv-converter",
+      "name": "JSON to CSV / CSV to JSON",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "converters"
+    },
+    {
+      "loc": "https://www.codepackr.com/case-converter",
+      "path": "/case-converter",
+      "name": "Case Converter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "converters"
+    },
+    {
+      "loc": "https://www.codepackr.com/yaml-json-converter",
+      "path": "/yaml-json-converter",
+      "name": "YAML to JSON Converter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "converters"
+    },
+    {
+      "loc": "https://www.codepackr.com/number-base-converter",
+      "path": "/number-base-converter",
+      "name": "Number Base Converter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "converters"
+    },
+    {
+      "loc": "https://www.codepackr.com/markdown-html-converter",
+      "path": "/markdown-html-converter",
+      "name": "Markdown to HTML / HTML to Markdown",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "converters"
+    },
+    {
+      "loc": "https://www.codepackr.com/curl-code-converter",
+      "path": "/curl-code-converter",
+      "name": "cURL to Code Converter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "converters"
+    },
+    {
+      "loc": "https://www.codepackr.com/image-resizer",
+      "path": "/image-resizer",
+      "name": "Image Resizer & Compressor",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "converters"
+    },
+    {
+      "loc": "https://www.codepackr.com/favicon-generator",
+      "path": "/favicon-generator",
+      "name": "Favicon Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "converters"
+    },
+    {
+      "loc": "https://www.codepackr.com/csv-xml-converter",
+      "path": "/csv-xml-converter",
+      "name": "CSV to XML Converter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "converters"
+    },
+    {
+      "loc": "https://www.codepackr.com/html-markdown-converter",
+      "path": "/html-markdown-converter",
+      "name": "HTML to Markdown Converter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "converters"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-formatter",
+      "path": "/edi-formatter",
+      "name": "EDI X12 Formatter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-segment-viewer",
+      "path": "/edi-segment-viewer",
+      "name": "EDI Segment Viewer",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-to-json",
+      "path": "/edi-to-json",
+      "name": "EDI to JSON Converter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-validator",
+      "path": "/edi-validator",
+      "name": "EDI Syntax & Envelope Validator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-997-generator",
+      "path": "/edi-997-generator",
+      "name": "EDI 997 & CONTRL Ack Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/json-to-edi",
+      "path": "/json-to-edi",
+      "name": "JSON to EDI Converter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-sample-generator",
+      "path": "/edi-sample-generator",
+      "name": "EDI Template & Sample Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-delimiter-converter",
+      "path": "/edi-delimiter-converter",
+      "name": "EDI Delimiter Swapper & Normalizer",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/as2-tools",
+      "path": "/as2-tools",
+      "name": "AS2 Message Encoder, Decoder & MDN Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/gs1-sscc-label-generator",
+      "path": "/gs1-sscc-label-generator",
+      "name": "GS1-128 / SSCC-18 Label Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-lifecycle-reconciliation",
+      "path": "/edi-lifecycle-reconciliation",
+      "name": "EDI Order Lifecycle Reconciliation Viewer",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/xslt-transformer",
+      "path": "/xslt-transformer",
+      "name": "XSLT Transformer & Tester",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "xml"
+    },
+    {
+      "loc": "https://www.codepackr.com/xml-to-xsd",
+      "path": "/xml-to-xsd",
+      "name": "XML to XSD Schema Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "xml"
+    },
+    {
+      "loc": "https://www.codepackr.com/xsd-to-xml",
+      "path": "/xsd-to-xml",
+      "name": "XSD to XML Sample Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "xml"
+    },
+    {
+      "loc": "https://www.codepackr.com/xpath-evaluator",
+      "path": "/xpath-evaluator",
+      "name": "XPath Tester & Evaluator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "xml"
+    },
+    {
+      "loc": "https://www.codepackr.com/xml-escape-tool",
+      "path": "/xml-escape-tool",
+      "name": "XML Entity & CDATA Escaper",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "xml"
+    },
+    {
+      "loc": "https://www.codepackr.com/calculator",
+      "path": "/calculator",
+      "name": "Scientific Calculator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "calculators"
+    },
+    {
+      "loc": "https://www.codepackr.com/percentage-calculator",
+      "path": "/percentage-calculator",
+      "name": "Percentage Calculator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "calculators"
+    },
+    {
+      "loc": "https://www.codepackr.com/tip-calculator",
+      "path": "/tip-calculator",
+      "name": "Tip Calculator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "calculators"
+    },
+    {
+      "loc": "https://www.codepackr.com/loan-calculator",
+      "path": "/loan-calculator",
+      "name": "Loan & EMI Calculator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "calculators"
+    },
+    {
+      "loc": "https://www.codepackr.com/uuid-generator",
+      "path": "/uuid-generator",
+      "name": "UUID Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "utilities"
+    },
+    {
+      "loc": "https://www.codepackr.com/qr-generator",
+      "path": "/qr-generator",
+      "name": "QR Code Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "utilities"
+    },
+    {
+      "loc": "https://www.codepackr.com/password-generator",
+      "path": "/password-generator",
+      "name": "Password Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "utilities"
+    },
+    {
+      "loc": "https://www.codepackr.com/lorem-ipsum",
+      "path": "/lorem-ipsum",
+      "name": "Lorem Ipsum Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "utilities"
+    },
+    {
+      "loc": "https://www.codepackr.com/color-converter",
+      "path": "/color-converter",
+      "name": "Color Converter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "utilities"
+    },
+    {
+      "loc": "https://www.codepackr.com/timestamp",
+      "path": "/timestamp",
+      "name": "Unix Timestamp Converter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "utilities"
+    },
+    {
+      "loc": "https://www.codepackr.com/cron-expression",
+      "path": "/cron-expression",
+      "name": "Cron Expression Builder",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "utilities"
+    },
+    {
+      "loc": "https://www.codepackr.com/slugify",
+      "path": "/slugify",
+      "name": "Slugify Tool",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "utilities"
+    },
+    {
+      "loc": "https://www.codepackr.com/http-status-codes",
+      "path": "/http-status-codes",
+      "name": "HTTP Status Code Lookup",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "utilities"
+    },
+    {
+      "loc": "https://www.codepackr.com/mock-json-generator",
+      "path": "/mock-json-generator",
+      "name": "Mock JSON Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "utilities"
+    },
+    {
+      "loc": "https://www.codepackr.com/markdown-preview",
+      "path": "/markdown-preview",
+      "name": "Markdown Live Preview",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "utilities"
+    },
+    {
+      "loc": "https://www.codepackr.com/text-tools",
+      "path": "/text-tools",
+      "name": "Text Tools & Statistics",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "text"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-x12-formatter",
+      "path": "/edi-x12-formatter",
+      "name": "EDI ANSI ASC X12 Formatter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-json-converter",
+      "path": "/edi-json-converter",
+      "name": "EDI to JSON Document Converter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-order-reconciliation",
+      "path": "/edi-order-reconciliation",
+      "name": "EDI Order Lifecycle Reconciliation",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/as2-encoder-decoder",
+      "path": "/as2-encoder-decoder",
+      "name": "AS2 S/MIME Encoder & Decoder",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/as2-mdn-generator",
+      "path": "/as2-mdn-generator",
+      "name": "AS2 Message Disposition Notification (MDN)",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/gs1-128-generator",
+      "path": "/gs1-128-generator",
+      "name": "GS1-128 Shipping Barcode Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/sscc-18-generator",
+      "path": "/sscc-18-generator",
+      "name": "Serial Shipping Container Code (SSCC-18)",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/json-minifier",
+      "path": "/json-minifier",
+      "name": "JSON Minifier & Compressor",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "formatters"
+    },
+    {
+      "loc": "https://www.codepackr.com/crc32-checksum-generator",
+      "path": "/crc32-checksum-generator",
+      "name": "CRC32 Checksum Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "encoders"
+    },
+    {
+      "loc": "https://www.codepackr.com/hmac-generator",
+      "path": "/hmac-generator",
+      "name": "HMAC Keyed-Hash Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "encoders"
+    },
+    {
+      "loc": "https://www.codepackr.com/sip-calculator",
+      "path": "/sip-calculator",
+      "name": "SIP Investment Calculator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "calculators"
+    },
+    {
+      "loc": "https://www.codepackr.com/markdown",
+      "path": "/markdown",
+      "name": "Markdown Live Editor",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "utilities"
+    },
+    {
+      "loc": "https://www.codepackr.com/what-is-my-screen-resolution",
+      "path": "/what-is-my-screen-resolution",
+      "name": "Screen Resolution & Viewport Checker",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "utilities"
+    },
+    {
+      "loc": "https://www.codepackr.com/what-is-my-user-agent",
+      "path": "/what-is-my-user-agent",
+      "name": "User Agent Inspector",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "utilities"
+    },
+    {
+      "loc": "https://www.codepackr.com/word-counter",
+      "path": "/word-counter",
+      "name": "Word Counter & Statistics",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "text"
+    },
+    {
+      "loc": "https://www.codepackr.com/character-counter",
+      "path": "/character-counter",
+      "name": "Character & Byte Counter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "text"
+    },
+    {
+      "loc": "https://www.codepackr.com/line-counter",
+      "path": "/line-counter",
+      "name": "Line Counter & Code Metrics",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "text"
+    },
+    {
+      "loc": "https://www.codepackr.com/sentence-counter",
+      "path": "/sentence-counter",
+      "name": "Sentence Counter & Readability",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "text"
+    },
+    {
+      "loc": "https://www.codepackr.com/remove-duplicate-lines",
+      "path": "/remove-duplicate-lines",
+      "name": "Remove Duplicate Lines",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "text"
+    },
+    {
+      "loc": "https://www.codepackr.com/remove-empty-lines",
+      "path": "/remove-empty-lines",
+      "name": "Remove Empty Lines",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "text"
+    },
+    {
+      "loc": "https://www.codepackr.com/remove-extra-spaces",
+      "path": "/remove-extra-spaces",
+      "name": "Remove Extra Whitespace",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "text"
+    },
+    {
+      "loc": "https://www.codepackr.com/sort-lines-alphabetically",
+      "path": "/sort-lines-alphabetically",
+      "name": "Sort Lines Alphabetically",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "text"
+    },
+    {
+      "loc": "https://www.codepackr.com/reverse-line-order",
+      "path": "/reverse-line-order",
+      "name": "Reverse Line Order",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "text"
+    },
+    {
+      "loc": "https://www.codepackr.com/contact",
+      "path": "/contact",
+      "name": "Contact & Support",
+      "priority": "0.7",
+      "changefreq": "monthly",
+      "category": "legal"
+    },
+    {
+      "loc": "https://www.codepackr.com/privacy",
+      "path": "/privacy",
+      "name": "Privacy Policy",
+      "priority": "0.6",
+      "changefreq": "monthly",
+      "category": "legal"
+    },
+    {
+      "loc": "https://www.codepackr.com/terms",
+      "path": "/terms",
+      "name": "Terms and Conditions",
+      "priority": "0.6",
+      "changefreq": "monthly",
+      "category": "legal"
+    }
+  ]
+}

@@ -1,19 +1,87 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Load tool metadata
-const metadata = JSON.parse(fs.readFileSync('src/data/toolMetadata.json', 'utf8'));
+// Load tool metadata and sitemap data if available
+let metadata = {};
+try {
+  metadata = JSON.parse(fs.readFileSync('src/data/toolMetadata.json', 'utf8'));
+} catch (e) {
+  // fallback if not generated yet
+}
+
+let sitemapUrls = [];
+try {
+  const sitemapData = JSON.parse(fs.readFileSync('src/data/sitemapUrls.json', 'utf8'));
+  sitemapUrls = sitemapData.urls || [];
+} catch (e) {
+  // fallback
+}
 
 // Curated live tools list with specific action descriptions and hashtags
 const toolsData = [
+  // 1. EDI & B2B Suite
   {
     slug: 'edi-tools',
-    name: 'EDI Tools Suite',
-    desc: 'Format, validate, convert, and inspect ANSI X12 and EDIFACT EDI documents',
+    name: 'EDI Tools & Business Transaction Suite',
+    desc: 'Format, validate, convert, and inspect ANSI ASC X12 and EDIFACT EDI documents',
     tags: ['#EDI', '#B2B', '#SupplyChain', '#EDITools', '#Enterprise']
   },
   {
+    slug: 'edi-order-reconciliation',
+    name: 'EDI Order Lifecycle Reconciliation',
+    desc: 'Audit POs (850), Acks (855), ASNs (856), and Invoices (810) with automated 3-way matching',
+    tags: ['#EDI', '#SupplyChain', '#OrderToCash', '#Invoicing', '#B2BIntegration']
+  },
+  {
+    slug: 'edi-lifecycle-reconciliation',
+    name: 'EDI Order Lifecycle Reconciliation',
+    desc: 'Audit POs (850), Acks (855), ASNs (856), and Invoices (810) with automated 3-way matching',
+    tags: ['#EDI', '#SupplyChain', '#OrderToCash', '#Invoicing', '#B2BIntegration']
+  },
+  {
+    slug: 'gs1-sscc-label-generator',
+    name: 'GS1 SSCC-18 Logistics Label Generator',
+    desc: 'Generate GS1-128 compliant pallet and carton shipping labels with SSCC-18 barcodes and Mod-10 check digits',
+    tags: ['#GS1', '#SSCC18', '#SupplyChain', '#Logistics', '#BarcodeGenerator']
+  },
+  {
+    slug: 'as2-tools',
+    name: 'AS2 Message Suite & MDN Generator',
+    desc: 'Encode, decode, parse MIME headers, calculate MICs, and generate AS2 MDN receipts',
+    tags: ['#AS2', '#EDI', '#CyberSecurity', '#MDN', '#B2BIntegration']
+  },
+  {
+    slug: 'as2-encoder-decoder',
+    name: 'AS2 S/MIME Encoder & Decoder',
+    desc: 'Sign, encrypt, and inspect AS2 S/MIME payloads for secure B2B electronic data interchange',
+    tags: ['#AS2', '#SMIME', '#CyberSecurity', '#Cryptography', '#B2B']
+  },
+  {
+    slug: 'as2-mdn-generator',
+    name: 'AS2 Message Disposition Notification Generator',
+    desc: 'Generate and parse synchronous or asynchronous AS2 Message Disposition Notifications (MDN)',
+    tags: ['#AS2', '#MDN', '#EDI', '#Receipts', '#B2BIntegration']
+  },
+  {
+    slug: 'gs1-128-generator',
+    name: 'GS1-128 Shipping Barcode Generator',
+    desc: 'Generate high-resolution GS1-128 shipping container barcodes with Application Identifiers',
+    tags: ['#GS1', '#Barcode', '#Packaging', '#Warehousing', '#Logistics']
+  },
+  {
+    slug: 'sscc-18-generator',
+    name: 'Serial Shipping Container Code (SSCC-18) Generator',
+    desc: 'Calculate Mod-10 check digits and generate standard 18-digit Serial Shipping Container Codes',
+    tags: ['#SSCC', '#GS1', '#Logistics', '#Shipping', '#SupplyChain']
+  },
+  {
     slug: 'edi-formatter',
+    name: 'EDI X12 Formatter & Beautifier',
+    desc: 'Format and inspect raw ANSI ASC X12 and EDIFACT EDI transactions',
+    tags: ['#EDI', '#X12', '#EDIX12FormatterBeautifier', '#Formatter', '#Beautifier']
+  },
+  {
+    slug: 'edi-x12-formatter',
     name: 'EDI X12 Formatter & Beautifier',
     desc: 'Format and inspect raw ANSI ASC X12 and EDIFACT EDI transactions',
     tags: ['#EDI', '#X12', '#EDIX12FormatterBeautifier', '#Formatter', '#Beautifier']
@@ -26,6 +94,12 @@ const toolsData = [
   },
   {
     slug: 'edi-to-json',
+    name: 'EDI to JSON Converter',
+    desc: 'Convert EDI transaction data to clean structured JSON representations',
+    tags: ['#EDI', '#JSON', '#EDIJSONConverter', '#Converter']
+  },
+  {
+    slug: 'edi-json-converter',
     name: 'EDI to JSON Converter',
     desc: 'Convert EDI transaction data to clean structured JSON representations',
     tags: ['#EDI', '#JSON', '#EDIJSONConverter', '#Converter']
@@ -60,11 +134,13 @@ const toolsData = [
     desc: 'Convert EDI delimiters to match required transaction partner formats',
     tags: ['#EDI', '#X12', '#EDIDelimiterConverter', '#Delimiter', '#Converter']
   },
+
+  // 2. Formatters
   {
-    slug: 'as2-tools',
-    name: 'AS2 Message Suite & MDN Generator',
-    desc: 'Encode, decode, parse MIME headers, calculate MICs, and generate AS2 MDN receipts',
-    tags: ['#AS2', '#EDI', '#CyberSecurity', '#MDN', '#B2BIntegration']
+    slug: 'formatters',
+    name: 'Code & Data Formatters Suite',
+    desc: 'Beautify, indent, and format JSON, SQL, HTML, CSS, XML, and YAML data',
+    tags: ['#Formatters', '#CodeBeautifier', '#CleanCode', '#WebDev', '#DevTools']
   },
   {
     slug: 'json-formatter',
@@ -108,367 +184,390 @@ const toolsData = [
     desc: 'Format, parse, and validate YAML configuration files',
     tags: ['#YAML', '#DevOps', '#YAMLFormatter', '#Formatter']
   },
+
+  // 3. XML Suite
   {
-    slug: 'js-minifier',
-    name: 'JavaScript Minifier',
-    desc: 'Minify JavaScript code to reduce unnecessary whitespace and bundle size',
-    tags: ['#JavaScript', '#WebDevelopment', '#JavaScriptMinifier', '#Minifier']
+    slug: 'xml-tools',
+    name: 'XML, XSD, XSLT & XPath Suite',
+    desc: 'Transform XML using XSLT, evaluate XPath expressions, validate schemas, and generate XSD structures',
+    tags: ['#XML', '#XSLT', '#XPath', '#XSD', '#DataArchitecture']
   },
   {
-    slug: 'base64',
+    slug: 'xml-xslt-transform',
+    name: 'XML XSLT 1.0/2.0 Transformer',
+    desc: 'Transform XML documents into HTML, text, or XML using XSLT stylesheets in your browser',
+    tags: ['#XML', '#XSLT', '#WebDevelopment', '#DataTransformation', '#Developer']
+  },
+  {
+    slug: 'xml-xpath-evaluator',
+    name: 'XML XPath Query Evaluator',
+    desc: 'Evaluate and test XPath 1.0 and 2.0 expressions against XML documents with instant nodeset highlighting',
+    tags: ['#XPath', '#XML', '#DataExtraction', '#Testing', '#APIs']
+  },
+  {
+    slug: 'xml-xsd-validator',
+    name: 'XML XSD Schema Validator',
+    desc: 'Validate XML data against W3C XSD schemas with detailed error line and column diagnostics',
+    tags: ['#XML', '#XSD', '#SchemaValidation', '#DataIntegrity', '#Developer']
+  },
+  {
+    slug: 'xml-xsd-generator',
+    name: 'XML to XSD Schema Generator',
+    desc: 'Automatically infer and generate W3C XSD schemas from sample XML data',
+    tags: ['#XML', '#XSD', '#SchemaGenerator', '#Architecture', '#DevTools']
+  },
+
+  // 4. Encoders & Cryptography
+  {
+    slug: 'encoders',
+    name: 'Encoders, Decoders & Cryptography Suite',
+    desc: 'Encode, decode, and hash data using Base64, URL, HTML, JWT, SHA, and HMAC algorithms',
+    tags: ['#Cryptography', '#Base64', '#Hashing', '#Security', '#WebDev']
+  },
+  {
+    slug: 'base64-encode-decode',
     name: 'Base64 Encoder & Decoder',
-    desc: 'Encode text to Base64 or decode Base64 strings back to text',
-    tags: ['#Base64', '#Programming', '#Base64EncoderDecoder', '#Encoder', '#Decoder']
+    desc: 'Encode and decode Base64 strings and files quickly in your browser',
+    tags: ['#Base64', '#Encoding', '#Base64EncoderDecoder', '#Encoder', '#Decoder']
   },
   {
-    slug: 'url-encode',
+    slug: 'url-encode-decode',
     name: 'URL Encoder & Decoder',
-    desc: 'Encode or decode URL query strings and path segments',
-    tags: ['#URL', '#WebDevelopment', '#URLEncoderDecoder', '#Encoder', '#Decoder']
+    desc: 'Encode and decode URL parameters and query strings safely',
+    tags: ['#URLs', '#WebDevelopment', '#URLEncoderDecoder', '#Encoder', '#Decoder']
   },
   {
-    slug: 'html-entity',
+    slug: 'html-entity-encoder',
     name: 'HTML Entity Encoder & Decoder',
-    desc: 'Encode or decode special characters as HTML entities',
-    tags: ['#HTML', '#WebDevelopment', '#HTMLEntityEncoderDecoder', '#Entity', '#Encoder', '#Decoder']
-  },
-  {
-    slug: 'hash-generator',
-    name: 'Hash Generator',
-    desc: 'Generate hashes including MD5 and SHA family algorithms',
-    tags: ['#Hashing', '#CyberSecurity', '#HashGenerator', '#Hash', '#Generator']
-  },
-  {
-    slug: 'crc32-checksum-generator',
-    name: 'CRC32 Checksum Generator',
-    desc: 'Generate CRC32 checksums for data integrity checks',
-    tags: ['#CRC32', '#Checksum', '#CRC32ChecksumGenerator', '#Generator']
-  },
-  {
-    slug: 'hmac-generator',
-    name: 'HMAC Generator & Authenticator',
-    desc: 'Generate and verify HMAC values for message authentication',
-    tags: ['#HMAC', '#Security', '#HMACGeneratorAuthenticator', '#Generator', '#Authenticator']
+    desc: 'Convert special characters to HTML entities and back',
+    tags: ['#HTML', '#Frontend', '#HTMLEntityEncoderDecoder', '#Encoder', '#Decoder']
   },
   {
     slug: 'jwt-decoder',
     name: 'JWT Decoder',
-    desc: 'Decode JWT tokens to inspect their header and payload',
-    tags: ['#JWT', '#APIs', '#JWTDecoder', '#Decoder']
+    desc: 'Decode JSON Web Tokens without transmitting your secret keys',
+    tags: ['#JWT', '#Authentication', '#JWTDecoder', '#Decoder']
   },
   {
-    slug: 'jwt-encoder',
-    name: 'JWT Encoder',
-    desc: 'Create JWT tokens from the required token components',
-    tags: ['#JWT', '#Authentication', '#JWTEncoder', '#Encoder']
+    slug: 'hash-generator',
+    name: 'Hash Generator (MD5, SHA-1, SHA-256)',
+    desc: 'Generate secure cryptographic hashes for text and data',
+    tags: ['#Security', '#Cryptography', '#HashGenerator', '#Generator']
   },
   {
-    slug: 'base64-image',
-    name: 'Base64 Image Converter',
-    desc: 'Convert images to Base64 data and work with Base64 image content',
-    tags: ['#Base64', '#WebDevelopment', '#Base64ImageConverter', '#Image', '#Converter']
+    slug: 'hmac-generator',
+    name: 'HMAC Generator & Authenticator',
+    desc: 'Generate keyed-hash message authentication codes (HMAC) using SHA-256 and SHA-512',
+    tags: ['#HMAC', '#Cryptography', '#HMACGenerator', '#Generator', '#Security']
   },
   {
-    slug: 'calculator',
-    name: 'Scientific Calculator',
-    desc: 'Perform scientific calculations directly in your browser',
-    tags: ['#Calculator', '#Productivity', '#ScientificCalculator', '#Scientific']
+    slug: 'crc32-checksum-generator',
+    name: 'CRC32 Checksum Generator',
+    desc: 'Compute 32-bit cyclic redundancy check (CRC32) checksums for text and data files',
+    tags: ['#CRC32', '#Checksum', '#Integrity', '#Programming', '#DevTools']
   },
+
+  // 5. Validators
   {
-    slug: 'percentage-calculator',
-    name: 'Percentage Calculator',
-    desc: 'Quickly calculate percentages and percentage changes',
-    tags: ['#Calculator', '#Productivity', '#PercentageCalculator', '#Percentage']
-  },
-  {
-    slug: 'tip-calculator',
-    name: 'Tip Calculator',
-    desc: 'Calculate tips and split the bill quickly',
-    tags: ['#Calculator', '#Productivity', '#TipCalculator', '#Tip']
-  },
-  {
-    slug: 'sip-calculator',
-    name: 'SIP Investment Calculator',
-    desc: 'Estimate SIP investment outcomes using your inputs',
-    tags: ['#SIP', '#Investing', '#SIPInvestmentCalculator', '#Investment', '#Calculator']
-  },
-  {
-    slug: 'loan-calculator',
-    name: 'Loan & EMI Calculator',
-    desc: 'Calculate loan EMI and repayment figures from your inputs',
-    tags: ['#LoanCalculator', '#Finance', '#LoanEMICalculator', '#Loan', '#EMI', '#Calculator']
-  },
-  {
-    slug: 'diff-checker',
-    name: 'Diff Checker',
-    desc: 'Compare two blocks of text or code and highlight differences',
-    tags: ['#Diff', '#DeveloperTools', '#DiffChecker', '#Checker']
-  },
-  {
-    slug: 'regex-tester',
-    name: 'Regex Tester',
-    desc: 'Test and debug regular expressions with interactive matches',
-    tags: ['#Regex', '#Programming', '#RegexTester', '#Tester']
+    slug: 'validators',
+    name: 'Syntax, Schema & Diff Validators Suite',
+    desc: 'Validate JSON syntax, XSD schemas, regex patterns, text diffs, and structured documents',
+    tags: ['#Validation', '#DataIntegrity', '#DiffChecker', '#Regex', '#CodeQuality']
   },
   {
     slug: 'json-validator',
     name: 'JSON Validator',
-    desc: 'Validate JSON syntax and identify errors in your JSON',
-    tags: ['#JSON', '#APIs', '#JSONValidator', '#Validator']
+    desc: 'Validate JSON syntax with detailed error messages and line pointers',
+    tags: ['#JSON', '#Debugging', '#JSONValidator', '#Validator']
   },
   {
-    slug: 'json-path-tester',
-    name: 'JSONPath Tester',
-    desc: 'Evaluate JSONPath queries against JSON structures',
-    tags: ['#JSONPath', '#JSON', '#JSONPathTester', '#Tester']
+    slug: 'regex-tester',
+    name: 'Regex Tester & Debugger',
+    desc: 'Test and debug regular expressions with live syntax highlighting and match groups',
+    tags: ['#Regex', '#Programming', '#RegexTesterDebugger', '#Tester', '#Debugger']
   },
   {
-    slug: 'xsd-validator',
-    name: 'XSD & XML Schema Validator',
-    desc: 'Validate XML structures against XSD schema definitions',
-    tags: ['#XSD', '#XML', '#XSDXMLSchemaValidator', '#Schema', '#Validator']
+    slug: 'diff-checker',
+    name: 'Diff Checker',
+    desc: 'Compare two text files or code snippets side by side with color-coded diffs',
+    tags: ['#Diff', '#CodeReview', '#DiffChecker', '#Checker']
+  },
+
+  // 6. Converters
+  {
+    slug: 'converters',
+    name: 'Data & File Format Converters Suite',
+    desc: 'Convert between JSON, XML, CSV, YAML, Markdown, cURL commands, and images effortlessly',
+    tags: ['#DataConversion', '#JSON', '#XML', '#CSV', '#YAML', '#Productivity']
   },
   {
-    slug: 'csv-viewer',
-    name: 'CSV Viewer',
-    desc: 'View CSV data as an interactive, sortable, searchable table',
-    tags: ['#CSV', '#Data', '#CSVViewer', '#Viewer']
+    slug: 'json-to-xml',
+    name: 'JSON to XML Converter',
+    desc: 'Convert JSON structures to valid, formatted XML documents',
+    tags: ['#JSON', '#XML', '#JSONtoXMLConverter', '#Converter']
   },
   {
-    slug: 'json-structural-diff',
-    name: 'Structural JSON Diff',
-    desc: 'Compare JSON objects key-by-key for added, removed, and changed nodes',
-    tags: ['#JSON', '#Diff', '#StructuralJSONDiff', '#Structural']
+    slug: 'xml-to-json',
+    name: 'XML to JSON Converter',
+    desc: 'Convert XML documents into readable JSON objects and arrays',
+    tags: ['#XML', '#JSON', '#XMLtoJSONConverter', '#Converter']
   },
   {
-    slug: 'dotenv-formatter',
-    name: 'dotenv Formatter & Validator',
-    desc: 'Format, sort, and validate .env environment-variable files',
-    tags: ['#Dotenv', '#DevOps', '#dotenvFormatterValidator', '#Formatter', '#Validator']
+    slug: 'json-to-csv',
+    name: 'JSON to CSV Converter',
+    desc: 'Export JSON data to CSV spreadsheets and tables',
+    tags: ['#JSON', '#CSV', '#JSONtoCSVConverter', '#Converter']
   },
   {
-    slug: 'json-xml-converter',
-    name: 'JSON to XML / XML to JSON',
-    desc: 'Convert data between JSON objects and XML markup',
-    tags: ['#JSON', '#XML', '#JSONXML', '#XMLJSON']
+    slug: 'csv-to-json',
+    name: 'CSV to JSON Converter',
+    desc: 'Convert CSV spreadsheets to structured JSON data',
+    tags: ['#CSV', '#JSON', '#CSVtoJSONConverter', '#Converter']
   },
   {
-    slug: 'json-csv-converter',
-    name: 'JSON to CSV / CSV to JSON',
-    desc: 'Convert JSON arrays to CSV and CSV rows to JSON objects',
-    tags: ['#JSON', '#CSV', '#JSONCSV', '#CSVJSON']
-  },
-  {
-    slug: 'csv-xml-converter',
-    name: 'CSV to XML Converter',
-    desc: 'Convert CSV data into XML and work between tabular and markup formats',
-    tags: ['#CSV', '#XML', '#CSVXMLConverter', '#Converter']
-  },
-  {
-    slug: 'case-converter',
-    name: 'Case Converter',
-    desc: 'Convert text between common letter-case formats',
-    tags: ['#TextTools', '#Productivity', '#CaseConverter', '#Case', '#Converter']
-  },
-  {
-    slug: 'yaml-json-converter',
+    slug: 'yaml-to-json',
     name: 'YAML to JSON Converter',
-    desc: 'Convert YAML data to JSON for easier interoperability',
-    tags: ['#YAML', '#JSON', '#YAMLJSONConverter', '#Converter']
+    desc: 'Convert YAML configuration files to JSON format',
+    tags: ['#YAML', '#JSON', '#YAMLtoJSONConverter', '#Converter']
   },
   {
-    slug: 'number-base-converter',
-    name: 'Number Base Converter',
-    desc: 'Convert numbers between common bases such as binary, decimal, and hexadecimal',
-    tags: ['#Programming', '#ComputerScience', '#NumberBaseConverter', '#Number', '#Base', '#Converter']
+    slug: 'json-to-yaml',
+    name: 'JSON to YAML Converter',
+    desc: 'Convert JSON data into clean, indented YAML syntax',
+    tags: ['#JSON', '#YAML', '#JSONtoYAMLConverter', '#Converter']
   },
   {
-    slug: 'markdown-html-converter',
-    name: 'Markdown to HTML / HTML to Markdown',
-    desc: 'Convert content between Markdown and HTML',
-    tags: ['#Markdown', '#HTML', '#MarkdownHTML', '#HTMLMarkdown']
+    slug: 'markdown-to-html',
+    name: 'Markdown to HTML Converter',
+    desc: 'Convert Markdown content to clean, semantic HTML markup',
+    tags: ['#Markdown', '#HTML', '#MarkdowntoHTMLConverter', '#Converter']
   },
   {
-    slug: 'html-markdown-converter',
-    name: 'HTML to Markdown Converter',
-    desc: 'Convert HTML markup into Markdown',
-    tags: ['#HTML', '#Markdown', '#HTMLMarkdownConverter', '#Converter']
-  },
-  {
-    slug: 'curl-code-converter',
+    slug: 'curl-to-code',
     name: 'cURL to Code Converter',
-    desc: 'Turn cURL requests into code you can use in development',
-    tags: ['#cURL', '#APIs', '#cURLCodeConverter', '#Code', '#Converter']
+    desc: 'Convert cURL commands to JavaScript fetch, Python requests, PHP, and Go code',
+    tags: ['#cURL', '#APIs', '#cURLtoCodeConverter', '#Converter']
   },
   {
     slug: 'image-resizer',
-    name: 'Image Resizer & Compressor',
-    desc: 'Resize and compress images for easier web use',
-    tags: ['#Images', '#WebDevelopment', '#ImageResizerCompressor', '#Image', '#Resizer', '#Compressor']
+    name: 'Image Resizer & Optimizer',
+    desc: 'Resize and optimize images directly in your browser without uploading files to a server',
+    tags: ['#Images', '#Optimization', '#ImageResizerOptimizer', '#Resizer', '#Optimizer']
   },
   {
-    slug: 'favicon-generator',
-    name: 'Favicon Generator',
-    desc: 'Create favicon assets for websites',
-    tags: ['#Favicon', '#WebDevelopment', '#FaviconGenerator', '#Generator']
+    slug: 'image-format-converter',
+    name: 'Image Format Converter',
+    desc: 'Convert images between PNG, JPEG, and WebP formats instantly with client-side privacy',
+    tags: ['#Images', '#WebP', '#ImageFormatConverter', '#Format', '#Converter']
+  },
+
+  // 7. Calculators
+  {
+    slug: 'calculators',
+    name: 'Financial & Math Calculators Suite',
+    desc: 'Calculate loans, monthly EMIs, amortization schedules, SIP returns, percentages, and tips with multi-currency support',
+    tags: ['#Finance', '#Calculators', '#LoanCalculator', '#EMI', '#Investing']
   },
   {
-    slug: 'xslt-transformer',
-    name: 'XSLT Transformer',
-    desc: 'Transform XML documents using XSLT stylesheets',
-    tags: ['#XSLT', '#XML', '#XSLTTransformer', '#Transformer']
+    slug: 'loan-calculator',
+    name: 'Loan & EMI Calculator',
+    desc: 'Calculate monthly loan EMI payments, total interest, and full amortization schedules in your preferred currency',
+    tags: ['#Finance', '#Mortgage', '#LoanCalculator', '#EMI', '#Interest']
   },
   {
-    slug: 'xml-to-xsd',
-    name: 'XML to XSD',
-    desc: 'Generate or derive XSD schema structures from XML',
-    tags: ['#XML', '#XSD', '#XMLXSD']
+    slug: 'sip-calculator',
+    name: 'SIP Investment Calculator',
+    desc: 'Calculate future wealth and expected returns for Systematic Investment Plans and mutual funds in any currency',
+    tags: ['#Finance', '#Investing', '#SIPCalculator', '#MutualFunds', '#Wealth']
   },
   {
-    slug: 'xsd-to-xml',
-    name: 'XSD to XML',
-    desc: 'Generate XML examples from XSD schema definitions',
-    tags: ['#XSD', '#XML', '#XSDXML']
+    slug: 'percentage-calculator',
+    name: 'Percentage & Ratio Calculator',
+    desc: 'Calculate percentage increases, discounts, fractional ratios, and differences instantly',
+    tags: ['#Math', '#Percentages', '#Calculator', '#Discounts', '#Ratios']
   },
   {
-    slug: 'xpath-evaluator',
-    name: 'XPath Evaluator',
-    desc: 'Evaluate XPath expressions against XML documents',
-    tags: ['#XPath', '#XML', '#XPathEvaluator', '#Evaluator']
+    slug: 'gratuity-calculator',
+    name: 'Gratuity & Retirement Calculator',
+    desc: 'Calculate statutory end-of-service gratuity and retirement severance benefits in multiple currencies',
+    tags: ['#Retirement', '#HR', '#Gratuity', '#Benefits', '#Salary']
   },
+
+  // 8. Utilities
   {
-    slug: 'xml-escape-tool',
-    name: 'XML Escape Tool',
-    desc: 'Escape or unescape XML special characters',
-    tags: ['#XML', '#WebDevelopment', '#XMLEscapeTool', '#Escape', '#Tool']
+    slug: 'utilities',
+    name: 'Developer Utilities & Generators Suite',
+    desc: 'Generate UUIDs, QR codes, strong passwords, cron expressions, and inspect headers and screen dimensions',
+    tags: ['#DevTools', '#Productivity', '#Generators', '#Utilities', '#WebDevelopment']
   },
   {
     slug: 'uuid-generator',
-    name: 'UUID Generator',
-    desc: 'Generate UUID values for development and testing',
-    tags: ['#UUID', '#Programming', '#UUIDGenerator', '#Generator']
+    name: 'UUID / GUID Generator',
+    desc: 'Generate cryptographically random UUID v4 and unique identifiers',
+    tags: ['#UUID', '#Development', '#UUIDGUIDGenerator', '#Generator']
   },
   {
-    slug: 'qr-generator',
+    slug: 'qr-code-generator',
     name: 'QR Code Generator',
-    desc: 'Generate QR codes from text or data',
-    tags: ['#QRCode', '#WebTools', '#QRCodeGenerator', '#QR', '#Code', '#Generator']
+    desc: 'Generate customizable, high-resolution QR codes for links, text, and Wi-Fi networks',
+    tags: ['#QRCode', '#Mobile', '#QRCodeGenerator', '#Generator']
   },
   {
     slug: 'password-generator',
-    name: 'Password Generator',
-    desc: 'Generate random passwords for development and security use cases',
-    tags: ['#PasswordSecurity', '#CyberSecurity', '#PasswordGenerator', '#Password', '#Generator']
+    name: 'Strong Password Generator',
+    desc: 'Generate secure, cryptographically random passwords with custom character rules',
+    tags: ['#Security', '#Privacy', '#StrongPasswordGenerator', '#Generator']
   },
   {
-    slug: 'lorem-ipsum',
+    slug: 'lorem-ipsum-generator',
     name: 'Lorem Ipsum Generator',
-    desc: 'Generate placeholder text for designs and development',
-    tags: ['#LoremIpsum', '#WebDesign', '#LoremIpsumGenerator', '#Lorem', '#Ipsum', '#Generator']
+    desc: 'Generate custom placeholder text by paragraphs, sentences, or words',
+    tags: ['#Design', '#Typography', '#LoremIpsumGenerator', '#Generator']
+  },
+  {
+    slug: 'timestamp-converter',
+    name: 'Unix Timestamp Converter',
+    desc: 'Convert Unix epoch timestamps to human-readable dates across timezones',
+    tags: ['#Time', '#Development', '#UnixTimestampConverter', '#Timestamp', '#Converter']
+  },
+  {
+    slug: 'cron-expression-generator',
+    name: 'Cron Expression Generator & Explainer',
+    desc: 'Build and explain cron schedule expressions with human-readable descriptions',
+    tags: ['#Cron', '#DevOps', '#CronExpressionGeneratorExplainer', '#Generator', '#Explainer']
+  },
+  {
+    slug: 'slug-generator',
+    name: 'URL Slug Generator',
+    desc: 'Convert titles and phrases into clean, SEO-friendly URL slugs',
+    tags: ['#SEO', '#URLs', '#URLSlugGenerator', '#Slug', '#Generator']
   },
   {
     slug: 'markdown-preview',
-    name: 'Markdown Editor & Live Preview',
-    desc: 'Write and preview Markdown content with live HTML rendering',
-    tags: ['#Markdown', '#Documentation', '#MarkdownEditor', '#MarkdownPreview', '#Editor']
+    name: 'Markdown Live Editor & Preview',
+    desc: 'Write Markdown with real-time preview, word counts, and HTML export',
+    tags: ['#Markdown', '#Documentation', '#Editor', '#Blogging', '#Writing']
   },
   {
-    slug: 'color-converter',
-    name: 'Color Converter',
-    desc: 'Convert colors between common color formats (HEX, RGB, HSL, CMYK)',
-    tags: ['#CSS', '#WebDesign', '#ColorConverter', '#Color', '#Converter']
+    slug: 'markdown',
+    name: 'Markdown Live Editor & Preview',
+    desc: 'Write Markdown with real-time preview, word counts, and HTML export',
+    tags: ['#Markdown', '#Documentation', '#Editor', '#Blogging', '#Writing']
   },
   {
-    slug: 'timestamp',
-    name: 'Timestamp Converter',
-    desc: 'Work with timestamps and convert time values for development tasks',
-    tags: ['#Timestamp', '#Programming', '#TimestampConverter', '#Converter']
+    slug: 'what-is-my-screen-resolution',
+    name: 'Screen Resolution & Viewport Checker',
+    desc: 'Inspect screen resolution, DPR, color depth, and responsive CSS viewport dimensions',
+    tags: ['#ResponsiveDesign', '#ScreenResolution', '#CSS', '#Frontend', '#WebDesign']
   },
   {
-    slug: 'cron-expression',
-    name: 'Cron Expression Tool',
-    desc: 'Work with cron expressions and preview schedules for recurring jobs',
-    tags: ['#Cron', '#DevOps', '#CronExpressionTool', '#Expression', '#Tool']
-  },
-  {
-    slug: 'slugify',
-    name: 'Slugify',
-    desc: 'Convert text into clean, URL-friendly slugs',
-    tags: ['#SEO', '#WebDevelopment', '#Slugify']
+    slug: 'what-is-my-user-agent',
+    name: 'User Agent Inspector',
+    desc: 'Inspect browser user agent strings, engine versions, and operating system details',
+    tags: ['#UserAgent', '#Browsers', '#DevTools', '#Debugging', '#WebDev']
   },
   {
     slug: 'http-status-codes',
-    name: 'HTTP Status Codes',
-    desc: 'Look up HTTP status codes and understand common response meanings',
-    tags: ['#HTTP', '#APIs', '#HTTPStatusCodes', '#Status', '#Codes']
+    name: 'HTTP Status Code Reference',
+    desc: 'Quick reference guide for standard HTTP status codes and response headers',
+    tags: ['#HTTP', '#APIs', '#HTTPStatusCodeReference', '#Status', '#Reference']
   },
-  {
-    slug: 'mock-json-generator',
-    name: 'Mock JSON Generator',
-    desc: 'Generate realistic mock JSON records for development and testing',
-    tags: ['#JSON', '#Testing', '#MockJSONGenerator', '#Mock', '#Generator']
-  },
+
+  // 9. Text Tools
   {
     slug: 'text-tools',
-    name: 'Text Tools',
-    desc: 'Work with text using a comprehensive collection of practical text utilities',
-    tags: ['#TextTools', '#Productivity', '#Text', '#Tools']
+    name: 'Text Processing & Analysis Suite',
+    desc: 'Count words, characters, remove duplicates, trim whitespace, and sort text in your browser',
+    tags: ['#TextTools', '#Copywriting', '#DataCleaning', '#Editing', '#Productivity']
+  },
+  {
+    slug: 'text-case-converter',
+    name: 'Text Case Converter',
+    desc: 'Convert text to UPPERCASE, lowercase, camelCase, kebab-case, and snake_case',
+    tags: ['#TextTools', '#Formatting', '#TextCaseConverter', '#Case', '#Converter']
   },
   {
     slug: 'word-counter',
-    name: 'Word Counter',
-    desc: 'Count words and reading time in text quickly',
-    tags: ['#WritingTools', '#Productivity', '#WordCounter', '#Word', '#Counter']
+    name: 'Word Counter & Statistics',
+    desc: 'Count words, characters, sentences, reading time, and speaking time in real time',
+    tags: ['#Writing', '#Productivity', '#WordCounterStatistics', '#Word', '#Counter', '#Statistics']
   },
   {
     slug: 'character-counter',
     name: 'Character Counter',
-    desc: 'Count characters and bytes in text with a simple browser tool',
-    tags: ['#TextTools', '#Productivity', '#CharacterCounter', '#Character', '#Counter']
+    desc: 'Count characters with or without spaces, bytes, and words in real time',
+    tags: ['#TextTools', '#SocialMedia', '#CharacterCounter', '#Character', '#Counter']
   },
   {
     slug: 'line-counter',
     name: 'Line Counter',
-    desc: 'Count lines and code metrics in text or source code quickly',
+    desc: 'Count total lines, non-empty lines, and blank rows in code or text documents',
     tags: ['#TextTools', '#Programming', '#LineCounter', '#Line', '#Counter']
   },
   {
     slug: 'sentence-counter',
     name: 'Sentence Counter',
-    desc: 'Count sentences and assess readability in a block of text',
+    desc: 'Count sentences and calculate readability statistics in text documents',
     tags: ['#TextTools', '#Writing', '#SentenceCounter', '#Sentence', '#Counter']
   },
   {
     slug: 'remove-duplicate-lines',
     name: 'Remove Duplicate Lines',
-    desc: 'Remove duplicate lines from text and lists quickly',
+    desc: 'Instantly remove duplicate lines from lists, text logs, and files',
     tags: ['#TextTools', '#DataCleaning', '#RemoveDuplicateLines', '#Remove', '#Duplicate', '#Lines']
   },
   {
     slug: 'remove-empty-lines',
     name: 'Remove Empty Lines',
-    desc: 'Remove blank and empty lines from text or code',
+    desc: 'Remove blank and empty lines from text or code snippets',
     tags: ['#TextTools', '#Programming', '#RemoveEmptyLines', '#Remove', '#Empty', '#Lines']
   },
   {
     slug: 'remove-extra-spaces',
     name: 'Remove Extra Spaces',
-    desc: 'Clean unnecessary whitespace and spaces from text',
+    desc: 'Clean unnecessary whitespace and multiple consecutive spaces from text',
     tags: ['#TextTools', '#DataCleaning', '#RemoveExtraSpaces', '#Remove', '#Extra', '#Spaces']
   },
   {
     slug: 'sort-lines-alphabetically',
     name: 'Sort Lines Alphabetically',
-    desc: 'Sort lines of text alphabetically for cleaner data and lists',
+    desc: 'Sort lines of text alphabetically (A-Z or Z-A) for cleaner data and lists',
     tags: ['#TextTools', '#DataCleaning', '#SortLinesAlphabetically', '#Sort', '#Lines', '#Alphabetically']
   },
   {
     slug: 'reverse-line-order',
     name: 'Reverse Line Order',
-    desc: 'Reverse the order of lines in text or lists',
+    desc: 'Reverse the order of lines in text, logs, or lists',
     tags: ['#TextTools', '#Programming', '#ReverseLineOrder', '#Reverse', '#Line', '#Order']
   }
 ];
+
+// Dynamically integrate any additional URLs from sitemapUrls.json that might not be in toolsData
+const existingSlugs = new Set(toolsData.map((t) => t.slug));
+
+if (Array.isArray(sitemapUrls)) {
+  for (const item of sitemapUrls) {
+    const slug = (item.path || '').replace(/^\/+|\/+$/g, '');
+    if (!slug || slug === 'privacy' || slug === 'terms' || slug === 'contact') continue;
+    if (!existingSlugs.has(slug)) {
+      existingSlugs.add(slug);
+      const meta = metadata[slug] || {};
+      const cat = item.category || meta.category || 'utilities';
+      const name = item.name || meta.name || slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      const desc = meta.description || `Fast, browser-based online developer utility for ${name}`;
+      
+      const tag = '#' + name.replace(/[^a-zA-Z0-9]/g, '');
+      const catTag = '#' + cat.charAt(0).toUpperCase() + cat.slice(1);
+      
+      toolsData.push({
+        slug,
+        name,
+        desc,
+        tags: [tag, catTag, '#Developer', '#DevTools']
+      });
+    }
+  }
+}
 
 function escapeCsvField(val) {
   if (typeof val !== 'string') val = String(val);
@@ -497,11 +596,11 @@ toolsData.forEach((tool, idx) => {
   const name = tool.name;
   const url = `https://www.codepackr.com/${tool.slug}`;
   const action = tool.desc;
-  
+
   // Mandatory base tags
   const mandatoryTags = ['#Codepackr', '#Developer', '#DevTools'];
   // Combine unique tags
-  const allTags = Array.from(new Set([...mandatoryTags, ...tool.tags]));
+  const allTags = Array.from(new Set([...mandatoryTags, ...(tool.tags || [])]));
   const tagString = allTags.join(' ');
 
   // LinkedIn Post
@@ -533,6 +632,25 @@ toolsData.forEach((tool, idx) => {
 });
 
 const csvContent = rows.join('\n');
-fs.writeFileSync('codepackr_social_media_promotions.csv', csvContent, 'utf8');
+
+// Write to public/codepackr_social_media_promotions.csv
 fs.writeFileSync('public/codepackr_social_media_promotions.csv', csvContent, 'utf8');
-console.log(`Generated ${toolsData.length} entries in codepackr_social_media_promotions.csv`);
+
+// Write to root
+fs.writeFileSync('codepackr_social_media_promotions.csv', csvContent, 'utf8');
+
+// Write to dist/ if it exists
+if (fs.existsSync('dist')) {
+  fs.writeFileSync('dist/codepackr_social_media_promotions.csv', csvContent, 'utf8');
+}
+
+console.log(`\n======================================================`);
+console.log(` Codepackr Social Media Promotions Generator`);
+console.log(`======================================================`);
+console.log(`[✓] Successfully generated ${toolsData.length} promotional entries.`);
+console.log(`[✓] Updated: public/codepackr_social_media_promotions.csv`);
+console.log(`[✓] Updated: codepackr_social_media_promotions.csv`);
+if (fs.existsSync('dist')) {
+  console.log(`[✓] Updated: dist/codepackr_social_media_promotions.csv`);
+}
+console.log(`======================================================\n`);

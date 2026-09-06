@@ -139,6 +139,24 @@ export function getToolDirectUrl(tool: ToolDef | string): string {
 }
 
 /**
+ * Mapping of direct category URL slugs to category filter keys
+ */
+export const CATEGORY_SLUG_MAP: Record<string, string> = {
+  'formatters': 'formatters',
+  'encoders': 'encoders',
+  'validators': 'validators',
+  'converters': 'converters',
+  'edi': 'edi',
+  'edi-tools': 'edi',
+  'xml': 'xml',
+  'xml-tools': 'xml',
+  'calculators': 'calculators',
+  'utilities': 'utilities',
+  'text': 'text',
+  'text-tools': 'text',
+};
+
+/**
  * Resolves the active route based on the current window location (pathname + search)
  */
 export function resolveCurrentRoute(): {
@@ -167,9 +185,15 @@ export function resolveCurrentRoute(): {
     return { page: 'privacy', tool: null, category: 'terms' };
   }
 
-  // 2. Check path slug (e.g. "json-formatter.html" or "json-formatter")
+  // 3. Check direct path slug (e.g. "json-formatter.html", "json-formatter", or "formatters")
   if (pathname && pathname !== 'index.html') {
     const rawSlug = pathname.replace(/\.html$/, '');
+
+    // Check category hubs first
+    if (CATEGORY_SLUG_MAP[rawSlug]) {
+      return { page: 'home', tool: null, category: CATEGORY_SLUG_MAP[rawSlug] };
+    }
+
     const mappedToolId = SLUG_TO_TOOL_ID[rawSlug] || rawSlug;
     const foundTool = TOOLS.find((t) => t.id === mappedToolId || t.id === rawSlug);
     if (foundTool) {
@@ -177,7 +201,7 @@ export function resolveCurrentRoute(): {
     }
   }
 
-  // 3. Check query param: ?tool=...
+  // 4. Check query param: ?tool=...
   const toolParam = searchParams.get('tool');
   if (toolParam) {
     const mappedToolId = SLUG_TO_TOOL_ID[toolParam] || toolParam;
@@ -187,7 +211,7 @@ export function resolveCurrentRoute(): {
     }
   }
 
-  // 4. Category filter param: ?cat=...
+  // 5. Category filter param: ?cat=... or ?category=...
   const catParam = searchParams.get('cat') || searchParams.get('category');
 
   return { page: 'home', tool: null, category: catParam || undefined };

@@ -148,6 +148,71 @@ const aliasDefinitions = {
     name: 'Privacy Policy',
     category: 'general',
     description: 'Learn how Codepackr protects developer privacy with 100% client-side code execution and zero server payload storage.'
+  },
+  'terms': {
+    name: 'Terms and Conditions',
+    category: 'general',
+    description: 'Terms of service, user guidelines, and disclaimer for using Codepackr free online developer and business utility tools.'
+  },
+  'formatters': {
+    name: 'Code & Data Formatters Suite',
+    category: 'formatters',
+    description: 'All-in-one developer suite of code beautifiers and minifiers for JSON, SQL, HTML, CSS, XML, and YAML data.'
+  },
+  'encoders': {
+    name: 'Encoders, Decoders & Cryptography Tools',
+    category: 'encoders',
+    description: 'Comprehensive suite of Base64, URL, HTML entity encoders, JWT decoders, and SHA/MD5/CRC32 cryptographic hashing tools.'
+  },
+  'validators': {
+    name: 'Syntax, Schema & Diff Validators',
+    category: 'validators',
+    description: 'Validate JSON syntax, XSD schemas, regex patterns, text diffs, and structured documents locally in your browser.'
+  },
+  'converters': {
+    name: 'Data & File Format Converters',
+    category: 'converters',
+    description: 'Convert between JSON, XML, CSV, YAML, Markdown, cURL code commands, and image formats effortlessly.'
+  },
+  'calculators': {
+    name: 'Financial & Math Calculators Suite',
+    category: 'calculators',
+    description: 'Calculate loans, monthly EMIs, amortization schedules, SIP returns, percentages, and gratuity tips with multi-currency support.'
+  },
+  'utilities': {
+    name: 'Developer Utilities & Generators',
+    category: 'utilities',
+    description: 'Essential developer tools including UUID generators, QR codes, strong password generators, cron expressions, and mock data.'
+  },
+  'text-tools': {
+    name: 'Text Processing & Analysis Tools',
+    category: 'text',
+    description: 'Real-time word and character counters, duplicate line removers, whitespace cleaners, and text sorters.'
+  },
+  'xml-tools': {
+    name: 'XML, XSD, XSLT & XPath Suite',
+    category: 'xml',
+    description: 'Transform XML using XSLT, evaluate XPath expressions, validate schemas, and generate XSD structures.'
+  },
+  'as2-encoder-decoder': {
+    name: 'AS2 S/MIME Encoder & Decoder',
+    category: 'edi',
+    description: 'Encode, sign, encrypt, and inspect AS2 S/MIME payloads for secure B2B electronic data interchange.'
+  },
+  'as2-mdn-generator': {
+    name: 'AS2 Message Disposition Notification (MDN) Generator',
+    category: 'edi',
+    description: 'Generate and parse synchronous or asynchronous AS2 Message Disposition Notifications (MDN) with MIC hashes.'
+  },
+  'gs1-128-generator': {
+    name: 'GS1-128 Shipping Barcode Generator',
+    category: 'edi',
+    description: 'Generate high-resolution GS1-128 shipping container barcodes with Application Identifiers (AI) and human-readable text.'
+  },
+  'sscc-18-generator': {
+    name: 'Serial Shipping Container Code (SSCC-18) Generator',
+    category: 'edi',
+    description: 'Calculate Mod-10 check digits and generate standard 18-digit Serial Shipping Container Code (SSCC-18) labels.'
   }
 };
 

@@ -2,127 +2,194 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const today = new Date().toISOString().split('T')[0];
+const HOST = process.env.HOST || 'www.codepackr.com';
+const BASE_URL = `https://${HOST}`;
 
-const urls = [
-  { loc: 'https://www.codepackr.com/', priority: '1.0', changefreq: 'weekly' },
-  { loc: 'https://www.codepackr.com/edi-tools', priority: '0.9', changefreq: 'monthly' },
-  
-  // EDI Tools
-  { loc: 'https://www.codepackr.com/edi-formatter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/edi-segment-viewer', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/edi-to-json', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/edi-validator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/edi-997-generator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/json-to-edi', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/edi-sample-generator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/edi-delimiter-converter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/as2-tools', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/gs1-sscc-label-generator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/edi-lifecycle-reconciliation', priority: '0.8', changefreq: 'monthly' },
+console.log(`\n========================================`);
+console.log(` Building Codepackr XML Sitemap`);
+console.log(` Host: ${BASE_URL} | Lastmod: ${today}`);
+console.log(`========================================`);
 
-  // Formatters & Beautifiers
-  { loc: 'https://www.codepackr.com/json-formatter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/json-minifier', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/html-formatter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/css-formatter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/sql-formatter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/xml-formatter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/yaml-formatter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/js-minifier', priority: '0.8', changefreq: 'monthly' },
+// 1. Read Tools from src/data/tools.ts
+const toolsSource = fs.readFileSync(path.resolve('src/data/tools.ts'), 'utf8');
+const toolsSection = toolsSource.slice(toolsSource.indexOf('export const TOOLS: ToolDef[] = ['));
+const regex = /{\s*id:\s*'([^']+)',\s*name:\s*'([^']+)',\s*category:\s*'([^']+)',\s*description:\s*'([^']+)'/g;
 
-  // Encoders & Decoders
-  { loc: 'https://www.codepackr.com/base64', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/url-encode', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/html-entity', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/hash-generator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/crc32-checksum-generator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/hmac-generator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/jwt-decoder', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/jwt-encoder', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/base64-image', priority: '0.8', changefreq: 'monthly' },
+const toolsMap = new Map();
+let m;
+while ((m = regex.exec(toolsSection)) !== null) {
+  toolsMap.set(m[1], {
+    id: m[1],
+    name: m[2],
+    category: m[3],
+    description: m[4],
+  });
+}
 
-  // Calculators
-  { loc: 'https://www.codepackr.com/calculator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/percentage-calculator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/tip-calculator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/sip-calculator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/loan-calculator', priority: '0.8', changefreq: 'monthly' },
-
-  // Validators & Testing
-  { loc: 'https://www.codepackr.com/diff-checker', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/regex-tester', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/json-validator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/json-path-tester', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/xsd-validator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/csv-viewer', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/json-structural-diff', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/dotenv-formatter', priority: '0.8', changefreq: 'monthly' },
-
-  // Converters
-  { loc: 'https://www.codepackr.com/json-xml-converter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/json-csv-converter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/csv-xml-converter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/case-converter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/yaml-json-converter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/number-base-converter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/markdown-html-converter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/html-markdown-converter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/curl-code-converter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/image-resizer', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/favicon-generator', priority: '0.8', changefreq: 'monthly' },
-
-  // XML, XSD & XSLT
-  { loc: 'https://www.codepackr.com/xslt-transformer', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/xml-to-xsd', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/xsd-to-xml', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/xpath-evaluator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/xml-escape-tool', priority: '0.8', changefreq: 'monthly' },
-
-  // Utilities
-  { loc: 'https://www.codepackr.com/uuid-generator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/qr-generator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/password-generator', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/lorem-ipsum', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/markdown-preview', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/color-converter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/timestamp', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/cron-expression', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/slugify', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/http-status-codes', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/mock-json-generator', priority: '0.8', changefreq: 'monthly' },
-
-  // Text tools & Text operations
-  { loc: 'https://www.codepackr.com/text-tools', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/word-counter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/character-counter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/line-counter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/sentence-counter', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/remove-duplicate-lines', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/remove-empty-lines', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/remove-extra-spaces', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/sort-lines-alphabetically', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/reverse-line-order', priority: '0.8', changefreq: 'monthly' },
-
-  // Legal & Meta
-  { loc: 'https://www.codepackr.com/contact', priority: '0.8', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/privacy', priority: '0.7', changefreq: 'monthly' },
-  { loc: 'https://www.codepackr.com/terms', priority: '0.7', changefreq: 'monthly' },
+// 2. High-priority Category Hubs
+const categoryHubs = [
+  { slug: 'edi-tools', name: 'EDI Tools & Business Transaction Suite', priority: '0.9', changefreq: 'weekly', category: 'edi' },
+  { slug: 'formatters', name: 'Code & Data Formatters', priority: '0.9', changefreq: 'weekly', category: 'formatters' },
+  { slug: 'encoders', name: 'Encoders, Decoders & Cryptography', priority: '0.9', changefreq: 'weekly', category: 'encoders' },
+  { slug: 'validators', name: 'Syntax, Schema & Diff Validators', priority: '0.9', changefreq: 'weekly', category: 'validators' },
+  { slug: 'converters', name: 'File & Data Format Converters', priority: '0.9', changefreq: 'weekly', category: 'converters' },
+  { slug: 'calculators', name: 'Financial, Loan & Math Calculators', priority: '0.9', changefreq: 'weekly', category: 'calculators' },
+  { slug: 'utilities', name: 'Developer Utilities & Generators', priority: '0.9', changefreq: 'weekly', category: 'utilities' },
+  { slug: 'text-tools', name: 'Text Processing & Analysis Tools', priority: '0.9', changefreq: 'weekly', category: 'text' },
+  { slug: 'xml-tools', name: 'XML, XSD, XSLT & XPath Suite', priority: '0.9', changefreq: 'weekly', category: 'xml' },
 ];
 
+// 3. Direct Sub-features and Specialized Aliases
+const specializedAliases = [
+  // EDI Sub-tools
+  { slug: 'edi-x12-formatter', name: 'EDI ANSI ASC X12 Formatter', priority: '0.8', changefreq: 'monthly', category: 'edi' },
+  { slug: 'edi-json-converter', name: 'EDI to JSON Document Converter', priority: '0.8', changefreq: 'monthly', category: 'edi' },
+  { slug: 'edi-order-reconciliation', name: 'EDI Order Lifecycle Reconciliation', priority: '0.8', changefreq: 'monthly', category: 'edi' },
+  { slug: 'as2-encoder-decoder', name: 'AS2 S/MIME Encoder & Decoder', priority: '0.8', changefreq: 'monthly', category: 'edi' },
+  { slug: 'as2-mdn-generator', name: 'AS2 Message Disposition Notification (MDN)', priority: '0.8', changefreq: 'monthly', category: 'edi' },
+  { slug: 'gs1-128-generator', name: 'GS1-128 Shipping Barcode Generator', priority: '0.8', changefreq: 'monthly', category: 'edi' },
+  { slug: 'sscc-18-generator', name: 'Serial Shipping Container Code (SSCC-18)', priority: '0.8', changefreq: 'monthly', category: 'edi' },
+  
+  // Formatters & Encoders Sub-features
+  { slug: 'json-minifier', name: 'JSON Minifier & Compressor', priority: '0.8', changefreq: 'monthly', category: 'formatters' },
+  { slug: 'crc32-checksum-generator', name: 'CRC32 Checksum Generator', priority: '0.8', changefreq: 'monthly', category: 'encoders' },
+  { slug: 'hmac-generator', name: 'HMAC Keyed-Hash Generator', priority: '0.8', changefreq: 'monthly', category: 'encoders' },
+  { slug: 'sip-calculator', name: 'SIP Investment Calculator', priority: '0.8', changefreq: 'monthly', category: 'calculators' },
+  { slug: 'markdown', name: 'Markdown Live Editor', priority: '0.8', changefreq: 'monthly', category: 'utilities' },
+  { slug: 'what-is-my-screen-resolution', name: 'Screen Resolution & Viewport Checker', priority: '0.8', changefreq: 'monthly', category: 'utilities' },
+  { slug: 'what-is-my-user-agent', name: 'User Agent Inspector', priority: '0.8', changefreq: 'monthly', category: 'utilities' },
+
+  // Text tools
+  { slug: 'word-counter', name: 'Word Counter & Statistics', priority: '0.8', changefreq: 'monthly', category: 'text' },
+  { slug: 'character-counter', name: 'Character & Byte Counter', priority: '0.8', changefreq: 'monthly', category: 'text' },
+  { slug: 'line-counter', name: 'Line Counter & Code Metrics', priority: '0.8', changefreq: 'monthly', category: 'text' },
+  { slug: 'sentence-counter', name: 'Sentence Counter & Readability', priority: '0.8', changefreq: 'monthly', category: 'text' },
+  { slug: 'remove-duplicate-lines', name: 'Remove Duplicate Lines', priority: '0.8', changefreq: 'monthly', category: 'text' },
+  { slug: 'remove-empty-lines', name: 'Remove Empty Lines', priority: '0.8', changefreq: 'monthly', category: 'text' },
+  { slug: 'remove-extra-spaces', name: 'Remove Extra Whitespace', priority: '0.8', changefreq: 'monthly', category: 'text' },
+  { slug: 'sort-lines-alphabetically', name: 'Sort Lines Alphabetically', priority: '0.8', changefreq: 'monthly', category: 'text' },
+  { slug: 'reverse-line-order', name: 'Reverse Line Order', priority: '0.8', changefreq: 'monthly', category: 'text' },
+];
+
+// 4. Legal & Company Pages
+const legalPages = [
+  { slug: 'contact', name: 'Contact & Support', priority: '0.7', changefreq: 'monthly', category: 'legal' },
+  { slug: 'privacy', name: 'Privacy Policy', priority: '0.6', changefreq: 'monthly', category: 'legal' },
+  { slug: 'terms', name: 'Terms and Conditions', priority: '0.6', changefreq: 'monthly', category: 'legal' },
+];
+
+// Assemble complete URL list
+const allEntries = [];
+
+// Homepage
+allEntries.push({
+  loc: `${BASE_URL}/`,
+  path: '/',
+  name: 'Codepackr - Free Online Developer & EDI Tools',
+  priority: '1.0',
+  changefreq: 'weekly',
+  category: 'home',
+});
+
+// Category Hubs
+for (const hub of categoryHubs) {
+  allEntries.push({
+    loc: `${BASE_URL}/${hub.slug}`,
+    path: `/${hub.slug}`,
+    name: hub.name,
+    priority: hub.priority,
+    changefreq: hub.changefreq,
+    category: hub.category,
+  });
+}
+
+// Tool Pages
+for (const [id, tool] of toolsMap.entries()) {
+  allEntries.push({
+    loc: `${BASE_URL}/${id}`,
+    path: `/${id}`,
+    name: tool.name,
+    priority: tool.popular ? '0.85' : '0.8',
+    changefreq: 'monthly',
+    category: tool.category,
+  });
+}
+
+// Specialized Aliases (if not already added)
+const existingSlugs = new Set(allEntries.map(e => e.path.replace(/^\//, '')));
+for (const alias of specializedAliases) {
+  if (!existingSlugs.has(alias.slug)) {
+    existingSlugs.add(alias.slug);
+    allEntries.push({
+      loc: `${BASE_URL}/${alias.slug}`,
+      path: `/${alias.slug}`,
+      name: alias.name,
+      priority: alias.priority,
+      changefreq: alias.changefreq,
+      category: alias.category,
+    });
+  }
+}
+
+// Legal Pages
+for (const legal of legalPages) {
+  if (!existingSlugs.has(legal.slug)) {
+    existingSlugs.add(legal.slug);
+    allEntries.push({
+      loc: `${BASE_URL}/${legal.slug}`,
+      path: `/${legal.slug}`,
+      name: legal.name,
+      priority: legal.priority,
+      changefreq: legal.changefreq,
+      category: legal.category,
+    });
+  }
+}
+
+// Build XML String
 let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
 xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
-for (const u of urls) {
+for (const entry of allEntries) {
   xml += '<url>\n';
-  xml += `  <loc>${u.loc}</loc>\n`;
+  xml += `  <loc>${entry.loc}</loc>\n`;
   xml += `  <lastmod>${today}</lastmod>\n`;
-  xml += `  <changefreq>${u.changefreq}</changefreq>\n`;
-  xml += `  <priority>${u.priority}</priority>\n`;
+  xml += `  <changefreq>${entry.changefreq}</changefreq>\n`;
+  xml += `  <priority>${entry.priority}</priority>\n`;
   xml += '</url>\n';
 }
 
 xml += '</urlset>\n';
 
-const sitemapPath = path.resolve('public/sitemap.xml');
-fs.writeFileSync(sitemapPath, xml, 'utf8');
-console.log(`Successfully generated public/sitemap.xml with ${urls.length} URLs (today: ${today})`);
+// Write to public/sitemap.xml
+const publicSitemap = path.resolve('public/sitemap.xml');
+fs.writeFileSync(publicSitemap, xml, 'utf8');
+console.log(`[✓] Written: ${publicSitemap} (${allEntries.length} URLs)`);
+
+// If dist/ directory exists, also write to dist/sitemap.xml
+const distDir = path.resolve('dist');
+if (fs.existsSync(distDir)) {
+  const distSitemap = path.join(distDir, 'sitemap.xml');
+  fs.writeFileSync(distSitemap, xml, 'utf8');
+  console.log(`[✓] Written: ${distSitemap} (${allEntries.length} URLs)`);
+}
+
+// Write to src/data/sitemapUrls.json for UI inspection
+const sitemapJsonPath = path.resolve('src/data/sitemapUrls.json');
+fs.writeFileSync(
+  sitemapJsonPath,
+  JSON.stringify(
+    {
+      updatedAt: today,
+      host: HOST,
+      baseUrl: BASE_URL,
+      totalUrls: allEntries.length,
+      urls: allEntries,
+    },
+    null,
+    2
+  ),
+  'utf8'
+);
+console.log(`[✓] Written: ${sitemapJsonPath}`);
+console.log(`========================================\n`);

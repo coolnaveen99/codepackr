@@ -18,7 +18,8 @@ import { XmlToolsView } from './components/xml/XmlToolsView';
 import { resolveCurrentRoute, getToolPath, getToolDirectUrl } from './lib/urls';
 import { updateDocumentMetadata } from './lib/seo';
 import { CurrencyProvider } from './lib/CurrencyContext';
-import { Shield, Terminal, Star } from 'lucide-react';
+import { SitemapModal } from './components/SitemapModal';
+import { Shield, Terminal, Star, Globe } from 'lucide-react';
 import { GithubIcon, XTwitterIcon, LinkedinIcon, YoutubeIcon, InstagramIcon } from './components/BrandIcons';
 
 export const App: React.FC = () => {
@@ -35,6 +36,7 @@ export const App: React.FC = () => {
   const [legalTab, setLegalTab] = useState<'privacy' | 'terms'>('privacy');
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSitemapModalOpen, setIsSitemapModalOpen] = useState(false);
 
   // Apply theme to DOM
   useEffect(() => {
@@ -254,13 +256,20 @@ export const App: React.FC = () => {
               <button onClick={() => navigateToPrivacy('terms')} className="hover:text-[var(--brand)] transition-colors cursor-pointer">
                 Terms &amp; Conditions
               </button>
+              <button
+                onClick={() => setIsSitemapModalOpen(true)}
+                className="hover:text-[var(--brand)] transition-colors cursor-pointer flex items-center gap-1"
+              >
+                <Globe className="w-3.5 h-3.5 text-[var(--brand)]" />
+                <span>Sitemap &amp; Index</span>
+              </button>
               <a
                 href="/sitemap.xml"
                 target="_blank"
                 rel="noreferrer"
-                className="hover:text-[var(--brand)] transition-colors cursor-pointer"
+                className="hover:text-[var(--brand)] transition-colors cursor-pointer opacity-75 hover:opacity-100"
               >
-                Sitemap
+                XML
               </a>
             </div>
           </div>
@@ -285,14 +294,12 @@ export const App: React.FC = () => {
                 Terms and Conditions
               </button>
               {', and view the '}
-              <a
-                href="/sitemap.xml"
-                target="_blank"
-                rel="noreferrer"
+              <button
+                onClick={() => setIsSitemapModalOpen(true)}
                 className="font-medium underline underline-offset-4 decoration-dotted hover:text-[var(--ink)] hover:decoration-solid transition-colors cursor-pointer"
               >
-                Sitemap
-              </a>.
+                Sitemap &amp; Search Index
+              </button>.
             </div>
 
             {/* Clean Minimalist Social Icons */}
@@ -361,6 +368,12 @@ export const App: React.FC = () => {
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
         onSelectTool={navigateToTool}
+      />
+
+      {/* Live Sitemap & Search Indexing Hub Modal */}
+      <SitemapModal
+        isOpen={isSitemapModalOpen}
+        onClose={() => setIsSitemapModalOpen(false)}
       />
     </div>
     </CurrencyProvider>
