@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 3000",
-    "build": "node scripts/build-sitemap.mjs && node scripts/generate-metadata.mjs && node scripts/generate-social-promotions.mjs && vite build && node scripts/prerender.mjs && node scripts/indexnow.mjs",
+    "build": "node scripts/generate-icons.mjs && node scripts/build-sitemap.mjs && node scripts/generate-metadata.mjs && node scripts/generate-social-promotions.mjs && vite build && node scripts/prerender.mjs && node scripts/indexnow.mjs",
     "build:sitemap": "node scripts/build-sitemap.mjs",
     "generate-social": "node scripts/generate-social-promotions.mjs",
     "submit:index": "node scripts/build-sitemap.mjs && node scripts/indexnow.mjs",
