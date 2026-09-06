@@ -17,6 +17,7 @@ import { EdiToolsView } from './components/tools/EdiToolsView';
 import { XmlToolsView } from './components/xml/XmlToolsView';
 import { resolveCurrentRoute, getToolPath, getToolDirectUrl } from './lib/urls';
 import { updateDocumentMetadata } from './lib/seo';
+import { CurrencyProvider } from './lib/CurrencyContext';
 import { Shield, Terminal, Star } from 'lucide-react';
 import { GithubIcon, XTwitterIcon, LinkedinIcon, YoutubeIcon, InstagramIcon } from './components/BrandIcons';
 
@@ -178,9 +179,10 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col selection:bg-[var(--brand)] selection:text-white"
-      style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)' }}
-    >
+    <CurrencyProvider>
+      <div className="min-h-screen flex flex-col selection:bg-[var(--brand)] selection:text-white"
+        style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)' }}
+      >
       {/* Top Navigation */}
       <Navbar
         theme={theme}
@@ -361,5 +363,6 @@ export const App: React.FC = () => {
         onSelectTool={navigateToTool}
       />
     </div>
+    </CurrencyProvider>
   );
 };

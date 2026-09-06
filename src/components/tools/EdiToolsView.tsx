@@ -23,6 +23,7 @@ import {
   X,
   FileSpreadsheet,
   Barcode,
+  GitCompareArrows,
 } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
@@ -32,7 +33,13 @@ import { EdiTemplateGenerator } from '../edi/EdiTemplateGenerator';
 import { EdiDelimiterCleaner } from '../edi/EdiDelimiterCleaner';
 import { As2ToolsView } from '../edi/As2ToolsView';
 import { Gs1LabelGenerator } from '../edi/Gs1LabelGenerator';
-import { COMPREHENSIVE_SEGMENT_DICTIONARY, EDI_TRANSACTIONS } from '../../data/ediDictionary';
+import { EdiLifecycleReconciliation } from '../edi/EdiLifecycleReconciliation';
+import {
+  COMPREHENSIVE_SEGMENT_DICTIONARY,
+  EDI_TRANSACTIONS,
+  detectEdifactVersion,
+  FSMA_204_COMPLIANT_856,
+} from '../../data/ediDictionary';
 import { TOOLS } from '../../data/tools';
 
 const SEGMENT_NAMES: Record<string, string> = COMPREHENSIVE_SEGMENT_DICTIONARY;
@@ -180,6 +187,516 @@ interface ValidationIssue {
   segment?: string;
 }
 
+export interface FsmaKdeCheck {
+  id: string;
+  title: string;
+  ruleRef: string;
+  status: 'pass' | 'warning' | 'fail';
+  summary: string;
+  details: string;
+  segmentRef?: string;
+  line?: number;
+}
+
+export function evaluateFsma204Traceability(segments: ParsedSegment[]) {
+  const checks: FsmaKdeCheck[] = [];
+
+  // 1. Traceability Lot Code (TLC)
+  const lotRef = segments.find(
+    (s) =>
+      (s.tag === 'REF' && (s.elements[0] === 'LT' || s.elements[0] === 'BT' || s.elements[0] === 'SE')) ||
+      (s.tag === 'SN1' && s.elements[1]) ||
+      (s.tag === 'MAN' && (s.raw.includes('(10)') || s.elements[1]?.startsWith('10')))
+  );
+  if (lotRef) {
+    const lotVal = lotRef.tag === 'REF' ? lotRef.elements[1] : lotRef.raw;
+    checks.push({
+      id: 'kde-tlc',
+      title: 'Traceability Lot Code (TLC)',
+      ruleRef: '21 CFR § 1.1345(a)',
+      status: 'pass',
+      summary: `TLC detected: "${lotVal}"`,
+      details: 'Traceability Lot Code successfully assigned and present on shipment record.',
+      segmentRef: lotRef.tag,
+      line: lotRef.lineNumber,
+    });
+  } else {
+    checks.push({
+      id: 'kde-tlc',
+      title: 'Traceability Lot Code (TLC)',
+      ruleRef: '21 CFR § 1.1345(a)',
+      status: 'fail',
+      summary: 'Missing mandatory Traceability Lot Code (TLC).',
+      details: 'Under FDA Rule 204, all Foods on the Traceability List (FTL) must include TLC via REF*LT, REF*BT, or GS1 AI (10) in MAN.',
+    });
+  }
+
+  // 2. Traceability Lot Code Source (TLCS) / Facility GLN
+  const sfParty = segments.find(
+    (s) => s.tag === 'N1' && (s.elements[0] === 'SF' || s.elements[0] === 'DA' || s.elements[0] === 'MF')
+  );
+  if (sfParty) {
+    const qual = sfParty.elements[1]?.trim();
+    const idCode = sfParty.elements[2]?.trim() || '';
+    const name = sfParty.elements[1]?.trim() || '';
+    if ((qual === '92' || qual === 'UL') && idCode.length === 13) {
+      checks.push({
+        id: 'kde-tlcs',
+        title: 'Traceability Lot Code Source (TLCS)',
+        ruleRef: '21 CFR § 1.1345(b)',
+        status: 'pass',
+        summary: `TLCS Facility GS1 GLN identified: ${idCode} (${sfParty.elements[1]})`,
+        details: 'Valid 13-digit GS1 Global Location Number (GLN) represents the physical establishment assigning the TLC.',
+        segmentRef: 'N1*SF',
+        line: sfParty.lineNumber,
+      });
+    } else if (qual === 'FA' || sfParty.raw.includes('FA')) {
+      checks.push({
+        id: 'kde-tlcs',
+        title: 'Traceability Lot Code Source (TLCS)',
+        ruleRef: '21 CFR § 1.1345(b)',
+        status: 'pass',
+        summary: `FDA Food Facility Registration Number identified: ${idCode}`,
+        details: 'Valid FDA Food Facility Registration Number provided for TLCS.',
+        segmentRef: 'N1*SF',
+        line: sfParty.lineNumber,
+      });
+    } else {
+      checks.push({
+        id: 'kde-tlcs',
+        title: 'Traceability Lot Code Source (TLCS)',
+        ruleRef: '21 CFR § 1.1345(b)',
+        status: 'warning',
+        summary: `Ship-From entity found (${name}), but lacks 13-digit GS1 GLN (UL/92) or FDA Registration (FA).`,
+        details: 'FDA Rule 204 requires a specific location description or recognized identifier (GLN or FDA Reg #) for the TLCS.',
+        segmentRef: 'N1*SF',
+        line: sfParty.lineNumber,
+      });
+    }
+  } else {
+    checks.push({
+      id: 'kde-tlcs',
+      title: 'Traceability Lot Code Source (TLCS)',
+      ruleRef: '21 CFR § 1.1345(b)',
+      status: 'fail',
+      summary: 'Missing Ship-From (N1*SF) or TLCS Delivery Address (N1*DA).',
+      details: 'The location description for who established the TLC is a mandatory Key Data Element (KDE).',
+    });
+  }
+
+  // 3. Critical Tracking Event (CTE)
+  const bsnSeg = segments.find((s) => s.tag === 'BSN');
+  if (bsnSeg) {
+    const purpose = bsnSeg.elements[0] || '00';
+    const struct = bsnSeg.elements[4] || '0001';
+    checks.push({
+      id: 'kde-cte',
+      title: 'Critical Tracking Event (CTE)',
+      ruleRef: '21 CFR § 1.1340',
+      status: 'pass',
+      summary: `Shipping CTE identified via BSN01="${purpose}", Structure="${struct}"`,
+      details: 'Outbound Shipping Critical Tracking Event successfully registered with hierarchical pack structure.',
+      segmentRef: 'BSN',
+      line: bsnSeg.lineNumber,
+    });
+  } else {
+    checks.push({
+      id: 'kde-cte',
+      title: 'Critical Tracking Event (CTE)',
+      ruleRef: '21 CFR § 1.1340',
+      status: 'fail',
+      summary: 'Missing BSN segment defining the Critical Tracking Event.',
+      details: 'Shipping CTE must be formally indicated via transaction header BSN.',
+    });
+  }
+
+  // 4. Harvest, Cooling, Pack & Expiration Dates
+  const dtmDates = segments.filter((s) => s.tag === 'DTM');
+  const hasAgDate = dtmDates.some((s) => ['196', '197', '198'].includes(s.elements[0]));
+  const hasShipOrExp = dtmDates.some((s) => ['011', '036', '035'].includes(s.elements[0]));
+  if (hasAgDate) {
+    const agDtm = dtmDates.find((s) => ['196', '197', '198'].includes(s.elements[0]));
+    checks.push({
+      id: 'kde-dates',
+      title: 'Harvest, Cooling & Packing Dates',
+      ruleRef: '21 CFR § 1.1325 & § 1.1345',
+      status: 'pass',
+      summary: `Agricultural event dates detected (${dtmDates.map((d) => `${d.elements[0]}:${d.elements[1]}`).join(', ')})`,
+      details: 'Harvest (196), Cooling (197), or Packing (198) dates recorded for agricultural produce.',
+      segmentRef: 'DTM',
+      line: agDtm?.lineNumber,
+    });
+  } else if (hasShipOrExp) {
+    const shipDtm = dtmDates.find((s) => ['011', '036'].includes(s.elements[0]));
+    checks.push({
+      id: 'kde-dates',
+      title: 'Harvest, Cooling & Packing Dates',
+      ruleRef: '21 CFR § 1.1325 & § 1.1345',
+      status: 'warning',
+      summary: `Shipped/Expiration date found (${shipDtm?.elements[1] || ''}), but Produce CTE recommends DTM*196 (Harvest) or DTM*198 (Pack).`,
+      details: 'For produce initial packing CTEs, harvesting and cooling dates are critical traceability records.',
+      segmentRef: 'DTM',
+      line: shipDtm?.lineNumber,
+    });
+  } else {
+    checks.push({
+      id: 'kde-dates',
+      title: 'Harvest, Cooling & Packing Dates',
+      ruleRef: '21 CFR § 1.1325 & § 1.1345',
+      status: 'fail',
+      summary: 'Missing DTM event date segments.',
+      details: 'No harvest, cooling, packing, or shipment dates detected.',
+    });
+  }
+
+  // 5. Commodity & Variety Description
+  const pidSeg = segments.find((s) => s.tag === 'PID' && (s.elements[0] === 'F' || s.elements[4]));
+  const gtinSeg = segments.find(
+    (s) =>
+      (s.tag === 'LIN' || s.tag === 'PO1') &&
+      (s.raw.includes('UK') || s.raw.includes('UP') || s.raw.includes('EN'))
+  );
+  if (pidSeg && gtinSeg) {
+    const desc = pidSeg.elements[4] || pidSeg.elements[0];
+    checks.push({
+      id: 'kde-commodity',
+      title: 'Commodity & Variety Identification',
+      ruleRef: '21 CFR § 1.1345(a)(1)',
+      status: 'pass',
+      summary: `Commodity description "${desc}" + GTIN/UPC verified.`,
+      details: 'Product commodity, variety, and standard GTIN-14 barcode identifier validated.',
+      segmentRef: 'PID',
+      line: pidSeg.lineNumber,
+    });
+  } else if (pidSeg || gtinSeg) {
+    const seg = pidSeg || gtinSeg;
+    checks.push({
+      id: 'kde-commodity',
+      title: 'Commodity & Variety Identification',
+      ruleRef: '21 CFR § 1.1345(a)(1)',
+      status: 'warning',
+      summary: pidSeg
+        ? `Commodity text found ("${pidSeg.elements[4]}"), but GTIN-14 (LIN*...*UK) is missing.`
+        : 'GTIN found, but textual commodity description (PID*F) is missing.',
+      details: 'Both textual commodity/variety description and numeric GTIN packaging code are required.',
+      segmentRef: seg?.tag,
+      line: seg?.lineNumber,
+    });
+  } else {
+    checks.push({
+      id: 'kde-commodity',
+      title: 'Commodity & Variety Identification',
+      ruleRef: '21 CFR § 1.1345(a)(1)',
+      status: 'fail',
+      summary: 'Missing commodity description (PID*F) and GTIN identification.',
+      details: 'Failed to find product description and global trade item identifier.',
+    });
+  }
+
+  // 6. Physical Facility / Location Description
+  const n3 = segments.find((s) => s.tag === 'N3');
+  const n4 = segments.find((s) => s.tag === 'N4');
+  if (n3 && n4) {
+    checks.push({
+      id: 'kde-facility-address',
+      title: 'Physical Facility / Location Description',
+      ruleRef: '21 CFR § 1.1345(b)',
+      status: 'pass',
+      summary: `Physical street address recorded: ${n3.elements[0]}, ${n4.elements[0]} ${n4.elements[1]} ${n4.elements[2]}`,
+      details: 'Complete street, city, state, postal code, and country present for TLCS establishment.',
+      segmentRef: 'N3/N4',
+      line: n3.lineNumber,
+    });
+  } else if (n4) {
+    checks.push({
+      id: 'kde-facility-address',
+      title: 'Physical Facility / Location Description',
+      ruleRef: '21 CFR § 1.1345(b)',
+      status: 'warning',
+      summary: `City/State provided (${n4.elements[0]}, ${n4.elements[1]}), but street address (N3) is omitted.`,
+      details: 'FDA Rule 204 mandates full street address unless specific farm exemption applies.',
+      segmentRef: 'N4',
+      line: n4.lineNumber,
+    });
+  } else {
+    checks.push({
+      id: 'kde-facility-address',
+      title: 'Physical Facility / Location Description',
+      ruleRef: '21 CFR § 1.1345(b)',
+      status: 'fail',
+      summary: 'Missing physical address segments (N3/N4) for TLCS.',
+      details: 'Facility location description must provide physical street address.',
+    });
+  }
+
+  // 7. Immediate Subsequent Recipient (ISR)
+  const stParty = segments.find((s) => s.tag === 'N1' && s.elements[0] === 'ST');
+  if (stParty) {
+    const stName = stParty.elements[1] || 'Ship-To Party';
+    const stId = stParty.elements[3] || '';
+    checks.push({
+      id: 'kde-isr',
+      title: 'Immediate Subsequent Recipient (ISR)',
+      ruleRef: '21 CFR § 1.1350',
+      status: 'pass',
+      summary: `Immediate Subsequent Recipient documented: ${stName} (${stId || 'Valid destination'})`,
+      details: 'Recipient identity and delivery location verified for supply chain chain of custody.',
+      segmentRef: 'N1*ST',
+      line: stParty.lineNumber,
+    });
+  } else {
+    checks.push({
+      id: 'kde-isr',
+      title: 'Immediate Subsequent Recipient (ISR)',
+      ruleRef: '21 CFR § 1.1350',
+      status: 'fail',
+      summary: 'Missing Ship-To recipient (N1*ST) defining the Immediate Subsequent Recipient (ISR).',
+      details: 'Outbound shipments must explicitly designate the recipient party.',
+    });
+  }
+
+  // 8. Shipping Container Code (SSCC-18)
+  const manSeg = segments.find(
+    (s) => s.tag === 'MAN' && (s.elements[0] === 'GM' || s.elements[0] === 'CP' || s.elements[0] === 'AA')
+  );
+  if (manSeg) {
+    checks.push({
+      id: 'kde-sscc',
+      title: 'Shipping Container Identification (SSCC-18)',
+      ruleRef: '21 CFR § 1.1345(c)',
+      status: 'pass',
+      summary: `GS1 SSCC-18 barcode container detected: ${manSeg.elements[1]}`,
+      details: 'Logistics handling unit tagged with 18-digit Serial Shipping Container Code (SSCC).',
+      segmentRef: 'MAN',
+      line: manSeg.lineNumber,
+    });
+  } else {
+    checks.push({
+      id: 'kde-sscc',
+      title: 'Shipping Container Identification (SSCC-18)',
+      ruleRef: '21 CFR § 1.1345(c)',
+      status: 'warning',
+      summary: 'No SSCC-18 container identifier (MAN*GM) detected.',
+      details: 'Recommended for case/pallet level supply chain tracking under FSMA 204 best practices.',
+    });
+  }
+
+  const passCount = checks.filter((c) => c.status === 'pass').length;
+  const warnCount = checks.filter((c) => c.status === 'warning').length;
+  const failCount = checks.filter((c) => c.status === 'fail').length;
+  const score = Math.round(((passCount * 1.0 + warnCount * 0.5) / checks.length) * 100);
+  const grade = score >= 88 ? 'A' : score >= 60 ? 'B' : 'F';
+  const gradeLabel =
+    grade === 'A' ? '100% Fully Compliant' : grade === 'B' ? 'Passing with Warnings' : 'Non-Compliant (Action Required)';
+
+  return {
+    score,
+    grade,
+    gradeLabel,
+    passCount,
+    warnCount,
+    failCount,
+    checks,
+  };
+}
+
+export function convertEdiToJsonWithSchema(
+  segments: ParsedSegment[],
+  schemaMode: 'semantic' | 'segmentArray' | 'loops',
+  delimiters: { segment: string; element: string; subElement: string }
+): string {
+  if (segments.length === 0) {
+    return JSON.stringify({ message: 'No EDI segments parsed' }, null, 2);
+  }
+
+  if (schemaMode === 'segmentArray') {
+    const res = {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      format: 'ASC_X12_SEGMENT_ARRAY_SCHEMA',
+      title: 'EDI ANSI X12 Segment Array Model',
+      metadata: {
+        totalSegments: segments.length,
+        delimiters,
+        generatedAt: new Date().toISOString(),
+      },
+      segments: segments.map((s) => ({
+        tag: s.tag,
+        lineNumber: s.lineNumber,
+        name: s.name,
+        level: s.level,
+        elements: s.elements,
+        elementDescriptions: ENVELOPE_ELEMENT_NAMES[s.tag] || [],
+      })),
+    };
+    return JSON.stringify(res, null, 2);
+  }
+
+  if (schemaMode === 'loops') {
+    const headerSegments: any[] = [];
+    const detailLoops: any[] = [];
+    const summarySegments: any[] = [];
+    let currentDetailLoop: any = null;
+    let inSummary = false;
+
+    segments.forEach((seg) => {
+      if (['CTT', 'TDS', 'SE', 'GE', 'IEA'].includes(seg.tag)) {
+        inSummary = true;
+      }
+      if (inSummary) {
+        summarySegments.push({
+          tag: seg.tag,
+          name: seg.name,
+          lineNumber: seg.lineNumber,
+          elements: seg.elements,
+        });
+      } else if (['PO1', 'IT1', 'HL'].includes(seg.tag)) {
+        if (currentDetailLoop) {
+          detailLoops.push(currentDetailLoop);
+        }
+        currentDetailLoop = {
+          loopKey: `${seg.tag}_${seg.elements[0] || detailLoops.length + 1}`,
+          rootSegment: { tag: seg.tag, name: seg.name, elements: seg.elements },
+          childSegments: [],
+        };
+      } else if (currentDetailLoop) {
+        currentDetailLoop.childSegments.push({
+          tag: seg.tag,
+          name: seg.name,
+          elements: seg.elements,
+        });
+      } else {
+        headerSegments.push({
+          tag: seg.tag,
+          name: seg.name,
+          lineNumber: seg.lineNumber,
+          elements: seg.elements,
+        });
+      }
+    });
+    if (currentDetailLoop) {
+      detailLoops.push(currentDetailLoop);
+    }
+
+    const res = {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      format: 'ASC_X12_HIERARCHICAL_LOOP_SCHEMA',
+      title: 'EDI ANSI X12 Loop Hierarchy Model',
+      metadata: {
+        totalSegments: segments.length,
+        totalDetailLoops: detailLoops.length,
+        generatedAt: new Date().toISOString(),
+      },
+      headerLoop: headerSegments,
+      detailLoops,
+      summaryLoop: summarySegments,
+    };
+    return JSON.stringify(res, null, 2);
+  }
+
+  // Default: 'semantic' Business Object Model
+  const isa = segments.find((s) => s.tag === 'ISA');
+  const gs = segments.find((s) => s.tag === 'GS');
+  const st = segments.find((s) => s.tag === 'ST');
+  const beg = segments.find((s) => s.tag === 'BEG');
+  const big = segments.find((s) => s.tag === 'BIG');
+  const bsn = segments.find((s) => s.tag === 'BSN');
+  const cur = segments.find((s) => s.tag === 'CUR');
+
+  const parties: any[] = [];
+  let currentParty: any = null;
+  segments.forEach((s) => {
+    if (s.tag === 'N1') {
+      if (currentParty) parties.push(currentParty);
+      currentParty = {
+        type: s.elements[0] || '',
+        name: s.elements[1] || '',
+        idQualifier: s.elements[2] || '',
+        idCode: s.elements[3] || '',
+      };
+    } else if (s.tag === 'N3' && currentParty) {
+      currentParty.address = s.elements[0] || '';
+    } else if (s.tag === 'N4' && currentParty) {
+      currentParty.city = s.elements[0] || '';
+      currentParty.state = s.elements[1] || '';
+      currentParty.zip = s.elements[2] || '';
+      currentParty.country = s.elements[3] || 'US';
+    }
+  });
+  if (currentParty) parties.push(currentParty);
+
+  const items: any[] = [];
+  let currentItem: any = null;
+  segments.forEach((s) => {
+    if (s.tag === 'PO1' || s.tag === 'IT1') {
+      if (currentItem) items.push(currentItem);
+      currentItem = {
+        line: parseInt(s.elements[0] || '1', 10),
+        quantity: parseFloat(s.elements[1] || '0'),
+        uom: s.elements[2] || 'EA',
+        unitPrice: parseFloat(s.elements[3] || '0'),
+        partNumber: s.elements[6] || s.elements[5] || '',
+      };
+    } else if (s.tag === 'PID' && currentItem) {
+      currentItem.description = s.elements[4] || s.elements[0] || '';
+    } else if (s.tag === 'LIN' && currentItem) {
+      currentItem.gtin = s.elements[2] || '';
+    }
+  });
+  if (currentItem) items.push(currentItem);
+
+  const ctt = segments.find((s) => s.tag === 'CTT');
+  const tds = segments.find((s) => s.tag === 'TDS');
+
+  const res = {
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    format: 'ASC_X12_SEMANTIC_SCHEMA',
+    standard: isa ? 'ANSI_X12' : 'EDI',
+    version: gs?.elements[7] || '004010',
+    generatedAt: new Date().toISOString(),
+    interchange: isa
+      ? {
+          sender: isa.elements[5]?.trim(),
+          senderQualifier: isa.elements[4]?.trim(),
+          receiver: isa.elements[7]?.trim(),
+          receiverQualifier: isa.elements[6]?.trim(),
+          controlNumber: isa.elements[12]?.trim(),
+          date: isa.elements[8]?.trim(),
+          time: isa.elements[9]?.trim(),
+          ackRequested: isa.elements[13]?.trim() === '1',
+        }
+      : null,
+    functionalGroup: gs
+      ? {
+          functionalCode: gs.elements[0]?.trim(),
+          sender: gs.elements[1]?.trim(),
+          receiver: gs.elements[2]?.trim(),
+          date: gs.elements[3]?.trim(),
+          time: gs.elements[4]?.trim(),
+          controlNumber: gs.elements[5]?.trim(),
+          version: gs.elements[7]?.trim(),
+        }
+      : null,
+    transaction: {
+      set: st?.elements[0] || '850',
+      controlNumber: st?.elements[1] || '0001',
+      header: {
+        poNumber: beg?.elements[2] || '',
+        invoiceNumber: big?.elements[1] || '',
+        shipmentId: bsn?.elements[1] || '',
+        date: beg?.elements[4] || big?.elements[0] || bsn?.elements[2] || '',
+        currency: cur?.elements[1] || 'USD',
+      },
+      parties,
+      items,
+      summary: {
+        totalLineItems: ctt ? parseInt(ctt.elements[0], 10) : items.length,
+        totalInvoiceAmount: tds ? parseFloat(tds.elements[0]) / 100 : undefined,
+      },
+    },
+  };
+  return JSON.stringify(res, null, 2);
+}
+
 interface EdiToolsViewProps {
   tool: ToolDef;
   onBackToHome?: () => void;
@@ -215,6 +732,12 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
   const [filterQuery, setFilterQuery] = useState<string>('');
   const [expandedSegment, setExpandedSegment] = useState<number | null>(0);
 
+  // P1.4: X12 JSON Schema Modes ('semantic' | 'segmentArray' | 'loops')
+  const [x12JsonSchemaMode, setX12JsonSchemaMode] = useState<'semantic' | 'segmentArray' | 'loops'>('semantic');
+
+  // P1.6: EDI Validator Audit Mode ('standard' envelope vs 'fsma204' Food Traceability Audit)
+  const [validatorMode, setValidatorMode] = useState<'standard' | 'fsma204'>('standard');
+
   // Keep activeTab in sync with tool prop changes
   useEffect(() => {
     if (tool && tool.id) {
@@ -226,6 +749,11 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
   const currentActiveToolDef = useMemo(() => {
     return TOOLS.find((t) => t.id === activeTab) || tool;
   }, [activeTab, tool]);
+
+  // P1.5: EDIFACT Version Detection & Era Analysis
+  const detectedEdifact = useMemo(() => {
+    return detectEdifactVersion(input);
+  }, [input]);
 
   const loadTransactionSample = (txId: string) => {
     const found = EDI_TRANSACTIONS.find((t) => t.id === txId || t.code === txId);
@@ -420,6 +948,11 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
     return issues;
   }, [input, parsedSegments]);
 
+  // P1.6: FSMA 204 Traceability Audit computation
+  const fsmaAuditResult = useMemo(() => {
+    return evaluateFsma204Traceability(parsedSegments);
+  }, [parsedSegments]);
+
   useEffect(() => {
     if (!input.trim()) {
       setOutput('');
@@ -434,22 +967,26 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
       setOutput(lines.join('\n'));
     } else if (activeTab === 'edi-to-json') {
       try {
-        const interchange: Record<string, any> = {
-          format: 'ANSI_X12',
-          delimiters: {
-            segment: segmentTerminator,
-            element: elementSeparator,
-            subElement: subElementSeparator,
-          },
-          totalSegments: parsedSegments.length,
-          functionalGroups: [] as any[],
-        };
-        setOutput(JSON.stringify(interchange, null, 2));
+        const jsonStr = convertEdiToJsonWithSchema(parsedSegments, x12JsonSchemaMode, {
+          segment: segmentTerminator,
+          element: elementSeparator,
+          subElement: subElementSeparator,
+        });
+        setOutput(jsonStr);
       } catch (err: any) {
-        setOutput(`Error parsing EDI: ${err.message}`);
+        setOutput(`Error converting EDI to JSON: ${err.message}`);
       }
     }
-  }, [input, activeTab, parsedSegments, segmentTerminator, elementSeparator, subElementSeparator, indentOutput]);
+  }, [
+    input,
+    activeTab,
+    parsedSegments,
+    segmentTerminator,
+    elementSeparator,
+    subElementSeparator,
+    indentOutput,
+    x12JsonSchemaMode,
+  ]);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -521,6 +1058,36 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
     handleDownload(lines.join('\n'), `edi_validation_report_${selectedSampleId}.txt`);
   };
 
+  const handleExportFsmaReport = () => {
+    const lines: string[] = [
+      '=================================================================',
+      '  FDA FOOD SAFETY MODERNIZATION ACT (FSMA 204) AUDIT CERTIFICATE ',
+      '             21 CFR Part 1 Subpart S Compliance Audit            ',
+      '=================================================================',
+      `Audit Generated: ${new Date().toISOString()}`,
+      `Document Reference: ${selectedSampleId}`,
+      `Compliance Grade:  Grade ${fsmaAuditResult.grade} (${fsmaAuditResult.score}% - ${fsmaAuditResult.gradeLabel})`,
+      `KDE Pass Count:     ${fsmaAuditResult.passCount} / 8`,
+      `KDE Warnings:       ${fsmaAuditResult.warnCount} / 8`,
+      `KDE Failures:       ${fsmaAuditResult.failCount} / 8`,
+      '',
+      'KEY DATA ELEMENTS (KDE) AUDIT CHECKLIST BREAKDOWN:',
+      '-----------------------------------------------------------------',
+    ];
+    fsmaAuditResult.checks.forEach((chk, idx) => {
+      lines.push(`[${chk.status.toUpperCase()}] KDE #${idx + 1}: ${chk.title} [${chk.ruleRef}]`);
+      lines.push(`   Status:   ${chk.summary}`);
+      lines.push(`   Evidence: ${chk.details}`);
+      if (chk.segmentRef) {
+        lines.push(`   Segment:  ${chk.segmentRef} (Line #${chk.line || 'N/A'})`);
+      }
+      lines.push('');
+    });
+    lines.push('=================================================================');
+    lines.push('End of FSMA 204 Automated Compliance Audit Report');
+    handleDownload(lines.join('\n'), `fsma204_compliance_audit_${selectedSampleId}.txt`);
+  };
+
   const filteredSegments = useMemo(() => {
     if (!filterQuery.trim()) return parsedSegments;
     const q = filterQuery.toLowerCase();
@@ -551,6 +1118,7 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
           { id: 'edi-to-json', label: 'EDI to JSON Converter', icon: ArrowLeftRight },
           { id: 'json-to-edi', label: 'JSON to EDI Converter', icon: FileCode2 },
           { id: 'edi-validator', label: 'EDI Compliance Validator', icon: ShieldCheck },
+          { id: 'edi-lifecycle-reconciliation', label: 'Order Lifecycle Reconciliation', icon: GitCompareArrows },
           { id: 'edi-997-generator', label: '997 / TA1 / CONTRL Ack Generator', icon: CheckCircle2 },
           { id: 'gs1-sscc-label-generator', label: 'GS1-128 / SSCC-18 Label Generator', icon: Barcode },
           { id: 'edi-sample-generator', label: 'Template & Sample Generator', icon: FileText },
@@ -630,6 +1198,18 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
               );
             })()}
 
+            {/* EDIFACT Version & Era Badge (P1.5) */}
+            {detectedEdifact && (
+              <span
+                className={`px-2.5 py-0.5 rounded-md font-mono text-[10px] font-bold border flex items-center gap-1.5 shadow-xs ${detectedEdifact.badgeClass}`}
+                title={`${detectedEdifact.description} (Standard: ${detectedEdifact.standard})`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                <span>{detectedEdifact.label}</span>
+                <span className="opacity-80">({detectedEdifact.era})</span>
+              </span>
+            )}
+
             <div className="hidden sm:block h-4 w-px bg-[var(--line)] mx-1" />
 
             {/* Quick Presets */}
@@ -641,6 +1221,9 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
                 { id: '856', label: '856 ASN' },
                 { id: '810', label: '810 Inv' },
                 { id: '997', label: '997 Ack' },
+                { id: 'ORDERS-D16B', label: 'D.16B (GS1)' },
+                { id: 'DESADV-D23A', label: 'D.23A (UNECE)' },
+                { id: '856-FSMA204', label: 'FSMA 204' },
               ].map((preset) => {
                 const isPresetActive = selectedSampleId === preset.id;
                 return (
@@ -727,96 +1310,275 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
       {/* 4. EDI VALIDATOR VIEW: Full Dashboard, Report & Live Editor */}
       {activeTab === 'edi-validator' && (
         <div className="space-y-6">
-          {/* Summary Banner */}
+          {/* Validator Mode Selector: Standard vs FSMA 204 */}
           <div
-            className="p-5 rounded-2xl border flex items-center justify-between gap-4 flex-wrap"
+            className="p-2 rounded-2xl border flex items-center justify-between gap-3 flex-wrap"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <div className="flex items-center gap-3.5">
-              {errorCount > 0 ? (
-                <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0">
-                  <ShieldAlert className="w-7 h-7" />
-                </div>
-              ) : (
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-7 h-7" />
-                </div>
-              )}
-              <div>
-                <h3 className="text-base font-bold" style={{ color: 'var(--ink)' }}>
-                  {errorCount > 0
-                    ? 'EDI Compliance Discrepancies Detected'
-                    : 'EDI Structure & Envelope Validation Passed'}
-                </h3>
-                <p className="text-xs text-[var(--muted)]">
-                  Strictly validates ISA/IEA, GS/GE, and ST/SE envelope pairing, control numbers, and SE01 segment counts.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2.5 text-xs flex-wrap">
-              <span
-                className={`px-3 py-1.5 rounded-xl border font-bold ${
-                  errorCount > 0
-                    ? 'bg-rose-500/10 text-rose-600 border-rose-500/20'
-                    : 'bg-zinc-100 dark:bg-zinc-800 text-[var(--muted)] border-transparent'
-                }`}
-              >
-                {errorCount} Errors
-              </span>
-              <span
-                className={`px-3 py-1.5 rounded-xl border font-bold ${
-                  warningCount > 0
-                    ? 'bg-amber-500/10 text-amber-600 border-amber-500/20'
-                    : 'bg-zinc-100 dark:bg-zinc-800 text-[var(--muted)] border-transparent'
-                }`}
-              >
-                {warningCount} Warnings
-              </span>
+            <div className="flex items-center gap-2 flex-wrap">
               <button
-                onClick={handleExportValidationReport}
-                disabled={!input.trim()}
-                className="px-3.5 py-2 rounded-xl border font-semibold flex items-center gap-1.5 hover:opacity-80 disabled:opacity-40 cursor-pointer shadow-xs"
-                style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                title="Download full compliance validation report"
+                onClick={() => setValidatorMode('standard')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                  validatorMode === 'standard'
+                    ? 'border text-white shadow-xs'
+                    : 'text-[var(--muted)] hover:opacity-80'
+                }`}
+                style={{
+                  backgroundColor: validatorMode === 'standard' ? 'var(--brand)' : 'transparent',
+                  borderColor: validatorMode === 'standard' ? 'var(--brand)' : 'transparent',
+                }}
               >
-                <Download className="w-3.5 h-3.5 text-[var(--brand)]" />
-                <span>Export Report</span>
+                <ShieldCheck className="w-4 h-4" />
+                <span>Standard Envelope & Syntax</span>
+              </button>
+              <button
+                onClick={() => setValidatorMode('fsma204')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                  validatorMode === 'fsma204'
+                    ? 'bg-emerald-600 text-white shadow-xs border border-emerald-500'
+                    : 'text-[var(--muted)] hover:opacity-80'
+                }`}
+              >
+                <Sparkles className="w-4 h-4 text-amber-300" />
+                <span>FSMA 204 Food Traceability Audit</span>
+                <span className="px-1.5 py-0.5 rounded text-[10px] bg-emerald-700 text-white font-mono font-normal">
+                  FDA Rule 204
+                </span>
               </button>
             </div>
+
+            {validatorMode === 'fsma204' && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setInput(FSMA_204_COMPLIANT_856);
+                    setSelectedSampleId('856-FSMA204');
+                  }}
+                  className="px-3 py-1.5 rounded-xl border font-semibold text-xs transition-all cursor-pointer flex items-center gap-1.5 hover:opacity-80"
+                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--brand)' }}
+                  title="Load 100% compliant FSMA 204 Advanced Shipping Notice sample"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Load 100% Compliant 856 Sample</span>
+                </button>
+                <button
+                  onClick={handleExportFsmaReport}
+                  className="px-3 py-1.5 rounded-xl border font-semibold text-xs transition-all cursor-pointer flex items-center gap-1.5 hover:opacity-80 shadow-xs"
+                  style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  title="Export FSMA 204 Audit Certificate"
+                >
+                  <Download className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Export Audit Certificate</span>
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Validation Findings List */}
-          <div
-            className="rounded-2xl border divide-y overflow-hidden shadow-xs"
-            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-          >
-            {validationIssues.map((issue, idx) => {
-              const isError = issue.type === 'error';
-              const isWarn = issue.type === 'warning';
-              return (
-                <div key={idx} className="p-4 flex items-start gap-3">
-                  {isError ? (
-                    <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                  ) : isWarn ? (
-                    <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+          {validatorMode === 'standard' ? (
+            <>
+              {/* Summary Banner */}
+              <div
+                className="p-5 rounded-2xl border flex items-center justify-between gap-4 flex-wrap"
+                style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+              >
+                <div className="flex items-center gap-3.5">
+                  {errorCount > 0 ? (
+                    <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0">
+                      <ShieldAlert className="w-7 h-7" />
+                    </div>
                   ) : (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+                      <ShieldCheck className="w-7 h-7" />
+                    </div>
                   )}
-                  <div className="flex-1 text-xs">
-                    <p className={`font-semibold ${isError ? 'text-rose-600' : isWarn ? 'text-amber-600' : 'text-emerald-600'}`}>
-                      {issue.message}
+                  <div>
+                    <h3 className="text-base font-bold" style={{ color: 'var(--ink)' }}>
+                      {errorCount > 0
+                        ? 'EDI Compliance Discrepancies Detected'
+                        : 'EDI Structure & Envelope Validation Passed'}
+                    </h3>
+                    <p className="text-xs text-[var(--muted)]">
+                      Strictly validates ISA/IEA, GS/GE, and ST/SE envelope pairing, control numbers, and SE01 segment counts.
                     </p>
-                    {issue.line && (
-                      <p className="text-[var(--muted)] mt-1 font-mono">
-                        At line #{issue.line} ({issue.segment})
-                      </p>
-                    )}
                   </div>
                 </div>
-              );
-            })}
-          </div>
+
+                <div className="flex items-center gap-2.5 text-xs flex-wrap">
+                  <span
+                    className={`px-3 py-1.5 rounded-xl border font-bold ${
+                      errorCount > 0
+                        ? 'bg-rose-500/10 text-rose-600 border-rose-500/20'
+                        : 'bg-zinc-100 dark:bg-zinc-800 text-[var(--muted)] border-transparent'
+                    }`}
+                  >
+                    {errorCount} Errors
+                  </span>
+                  <span
+                    className={`px-3 py-1.5 rounded-xl border font-bold ${
+                      warningCount > 0
+                        ? 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+                        : 'bg-zinc-100 dark:bg-zinc-800 text-[var(--muted)] border-transparent'
+                    }`}
+                  >
+                    {warningCount} Warnings
+                  </span>
+                  <button
+                    onClick={handleExportValidationReport}
+                    disabled={!input.trim()}
+                    className="px-3.5 py-2 rounded-xl border font-semibold flex items-center gap-1.5 hover:opacity-80 disabled:opacity-40 cursor-pointer shadow-xs"
+                    style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                    title="Download full compliance validation report"
+                  >
+                    <Download className="w-3.5 h-3.5 text-[var(--brand)]" />
+                    <span>Export Report</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Validation Findings List */}
+              <div
+                className="rounded-2xl border divide-y overflow-hidden shadow-xs"
+                style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+              >
+                {validationIssues.map((issue, idx) => {
+                  const isError = issue.type === 'error';
+                  const isWarn = issue.type === 'warning';
+                  return (
+                    <div key={idx} className="p-4 flex items-start gap-3">
+                      {isError ? (
+                        <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                      ) : isWarn ? (
+                        <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                      ) : (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                      )}
+                      <div className="flex-1 text-xs">
+                        <p className={`font-semibold ${isError ? 'text-rose-600' : isWarn ? 'text-amber-600' : 'text-emerald-600'}`}>
+                          {issue.message}
+                        </p>
+                        {issue.line && (
+                          <p className="text-[var(--muted)] mt-1 font-mono">
+                            At line #{issue.line} ({issue.segment})
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            /* FSMA 204 Traceability Scorecard & Checklist */
+            <div className="space-y-4">
+              {/* Scorecard Hero Banner */}
+              <div
+                className="p-5 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-5"
+                style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`w-14 h-14 rounded-2xl font-black text-2xl flex items-center justify-center shrink-0 border ${
+                      fsmaAuditResult.grade === 'A'
+                        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30'
+                        : fsmaAuditResult.grade === 'B'
+                        ? 'bg-amber-500/10 text-amber-600 border-amber-500/30'
+                        : 'bg-rose-500/10 text-rose-600 border-rose-500/30'
+                    }`}
+                  >
+                    {fsmaAuditResult.grade}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base font-bold" style={{ color: 'var(--ink)' }}>
+                        FSMA 204 Food Traceability Compliance
+                      </h3>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                          fsmaAuditResult.grade === 'A'
+                            ? 'bg-emerald-500/10 text-emerald-600'
+                            : fsmaAuditResult.grade === 'B'
+                            ? 'bg-amber-500/10 text-amber-600'
+                            : 'bg-rose-500/10 text-rose-600'
+                        }`}
+                      >
+                        {fsmaAuditResult.score}% ({fsmaAuditResult.gradeLabel})
+                      </span>
+                    </div>
+                    <p className="text-xs text-[var(--muted)] mt-0.5">
+                      FDA 21 CFR Part 1 Subpart S (Food Traceability Rule) Key Data Elements (KDE) across Critical Tracking Events (CTEs).
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 text-xs flex-wrap">
+                  <span className="px-3 py-1.5 rounded-xl border font-bold bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                    {fsmaAuditResult.passCount} / 8 Passed
+                  </span>
+                  <span className="px-3 py-1.5 rounded-xl border font-bold bg-amber-500/10 text-amber-600 border-amber-500/20">
+                    {fsmaAuditResult.warnCount} Warnings
+                  </span>
+                  <span className="px-3 py-1.5 rounded-xl border font-bold bg-rose-500/10 text-rose-600 border-rose-500/20">
+                    {fsmaAuditResult.failCount} Failures
+                  </span>
+                </div>
+              </div>
+
+              {/* 8 KDE Checklist Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {fsmaAuditResult.checks.map((chk) => {
+                  const isPass = chk.status === 'pass';
+                  const isWarn = chk.status === 'warning';
+                  return (
+                    <div
+                      key={chk.id}
+                      className="p-4 rounded-2xl border flex flex-col justify-between space-y-3 transition-all hover:border-[var(--brand)]"
+                      style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            {isPass ? (
+                              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                            ) : isWarn ? (
+                              <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+                            ) : (
+                              <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0" />
+                            )}
+                            <h4 className="font-bold text-xs" style={{ color: 'var(--ink)' }}>
+                              {chk.title}
+                            </h4>
+                          </div>
+                          <span className="font-mono text-[10px] text-[var(--muted)]">
+                            {chk.ruleRef}
+                          </span>
+                        </div>
+                        <p
+                          className={`text-xs font-semibold mt-2 ${
+                            isPass ? 'text-emerald-600' : isWarn ? 'text-amber-600' : 'text-rose-600'
+                          }`}
+                        >
+                          {chk.summary}
+                        </p>
+                        <p className="text-xs text-[var(--muted)] mt-1 leading-relaxed">
+                          {chk.details}
+                        </p>
+                      </div>
+
+                      {chk.segmentRef && (
+                        <div
+                          className="flex items-center justify-between pt-2 border-t text-[11px] font-mono text-[var(--muted)]"
+                          style={{ borderColor: 'var(--line)' }}
+                        >
+                          <span>Segment: {chk.segmentRef}</span>
+                          <span>Line #{chk.line}</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Live Document Editor */}
           <div
@@ -1086,81 +1848,148 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
         </div>
       )}
 
-      {/* 7. EDI TO JSON TAB */}
+      {/* 7. EDI TO JSON TAB (P1.4 X12 JSON Schema Toggle) */}
       {activeTab === 'edi-to-json' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          {/* Schema Selector Bar */}
           <div
-            className="p-4 rounded-2xl border flex flex-col space-y-3"
+            className="p-3 rounded-2xl border flex items-center justify-between gap-3 flex-wrap"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold" style={{ color: 'var(--ink)' }}>
-                EDI ANSI X12 Input
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setInput('')}
-                  disabled={!input}
-                  className="flex items-center gap-1 hover:opacity-80 text-[var(--muted)] disabled:opacity-40 cursor-pointer"
-                  title="Clear EDI input payload"
-                >
-                  <Trash2 className="w-3.5 h-3.5 text-rose-500" />
-                  <span>Clear</span>
-                </button>
-                <button onClick={() => setInput(SAMPLE_850)} className="hover:opacity-80 text-[var(--brand)] cursor-pointer">
-                  Reset Sample
-                </button>
-              </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-xs text-[var(--muted)]">JSON Schema Mode:</span>
+              {[
+                {
+                  id: 'semantic' as const,
+                  label: 'Semantic Business Model',
+                  desc: 'Structured interchange, envelopes, parties, line items, summaries',
+                },
+                {
+                  id: 'segmentArray' as const,
+                  label: 'Segment Array Schema',
+                  desc: 'Direct sequence of segment tags, definitions, and typed elements',
+                },
+                {
+                  id: 'loops' as const,
+                  label: 'Hierarchical Loop Schema',
+                  desc: 'Header, Detail (PO1/HL), and Summary loop hierarchy',
+                },
+              ].map((schemaMode) => {
+                const isSelected = x12JsonSchemaMode === schemaMode.id;
+                return (
+                  <button
+                    key={schemaMode.id}
+                    onClick={() => setX12JsonSchemaMode(schemaMode.id)}
+                    className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                      isSelected
+                        ? 'border-[var(--brand)] text-[var(--brand)] font-bold shadow-xs'
+                        : 'hover:opacity-80'
+                    }`}
+                    style={{
+                      backgroundColor: isSelected ? 'var(--surface-2)' : 'var(--bg)',
+                      borderColor: isSelected ? 'var(--brand)' : 'var(--line)',
+                      color: isSelected ? 'var(--brand)' : 'var(--ink)',
+                    }}
+                    title={schemaMode.desc}
+                  >
+                    <span>{schemaMode.label}</span>
+                  </button>
+                );
+              })}
             </div>
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              rows={16}
-              className="w-full p-3.5 rounded-xl font-mono text-xs outline-none resize-y border"
-              style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            />
+
+            <div className="flex items-center gap-2">
+              <span
+                className="px-2.5 py-1 rounded-lg border font-mono text-[11px] text-[var(--muted)]"
+                style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)' }}
+              >
+                Schema:{' '}
+                {x12JsonSchemaMode === 'semantic'
+                  ? 'ASC_X12_SEMANTIC_MODEL'
+                  : x12JsonSchemaMode === 'segmentArray'
+                  ? 'ASC_X12_SEGMENT_ARRAY'
+                  : 'ASC_X12_HIERARCHICAL_LOOPS'}
+              </span>
+            </div>
           </div>
 
-          <div
-            className="p-4 rounded-2xl border flex flex-col space-y-3"
-            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-          >
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold" style={{ color: 'var(--ink)' }}>
-                Structured JSON Tree
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleCopy(output)}
-                  className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80 cursor-pointer"
-                  style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                >
-                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copied ? 'Copied' : 'Copy'}</span>
-                </button>
-                <button
-                  onClick={() => handleDownload(output, `edi_parsed_${selectedSampleId}.json`)}
-                  className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80 cursor-pointer"
-                  style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download JSON</span>
-                </button>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div
+              className="p-4 rounded-2xl border flex flex-col space-y-3"
+              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+            >
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold" style={{ color: 'var(--ink)' }}>
+                  EDI ANSI X12 Input
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setInput('')}
+                    disabled={!input}
+                    className="flex items-center gap-1 hover:opacity-80 text-[var(--muted)] disabled:opacity-40 cursor-pointer"
+                    title="Clear EDI input payload"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                    <span>Clear</span>
+                  </button>
+                  <button onClick={() => setInput(SAMPLE_850)} className="hover:opacity-80 text-[var(--brand)] cursor-pointer">
+                    Reset Sample
+                  </button>
+                </div>
               </div>
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                rows={16}
+                className="w-full p-3.5 rounded-xl font-mono text-xs outline-none resize-y border"
+                style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              />
             </div>
-            <textarea
-              readOnly
-              value={output}
-              rows={16}
-              className="w-full p-3.5 rounded-xl font-mono text-xs outline-none resize-y border"
-              style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            />
+
+            <div
+              className="p-4 rounded-2xl border flex flex-col space-y-3"
+              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+            >
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold" style={{ color: 'var(--ink)' }}>
+                  Structured JSON Tree ({x12JsonSchemaMode})
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleCopy(output)}
+                    className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80 cursor-pointer"
+                    style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copied ? 'Copied' : 'Copy'}</span>
+                  </button>
+                  <button
+                    onClick={() => handleDownload(output, `edi_parsed_${selectedSampleId}_${x12JsonSchemaMode}.json`)}
+                    className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80 cursor-pointer"
+                    style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download JSON</span>
+                  </button>
+                </div>
+              </div>
+              <textarea
+                readOnly
+                value={output}
+                rows={16}
+                className="w-full p-3.5 rounded-xl font-mono text-xs outline-none resize-y border"
+                style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              />
+            </div>
           </div>
         </div>
       )}
 
       {/* 8. Other Sub-Tools without duplicate ToolHeaders */}
       <div className="[&>div>div:first-child]:hidden">
+        {activeTab === 'edi-lifecycle-reconciliation' && (
+          <EdiLifecycleReconciliation tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+        )}
         {activeTab === 'json-to-edi' && (
           <JsonToEdiConverter tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
         )}

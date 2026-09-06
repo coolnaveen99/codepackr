@@ -3,6 +3,7 @@ import { Search, Moon, Sun, Terminal, MessageSquare, Star } from 'lucide-react';
 import { ToolCategory, CategoryFilter } from '../types';
 import { CATEGORIES } from '../data/tools';
 import { useBookmarks } from '../lib/bookmarks';
+import { CurrencySelector } from './CurrencySelector';
 
 interface NavbarProps {
   theme: 'light' | 'dark';
@@ -161,6 +162,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               <MessageSquare className="w-3.5 h-3.5" />
               <span className="hidden md:inline">Contact</span>
             </a>
+
+            {/* Global Currency Selector Dropdown Button */}
+            <CurrencySelector idPrefix="nav-currency" variant="nav" />
 
             {/* Dark Mode Toggle */}
             <button

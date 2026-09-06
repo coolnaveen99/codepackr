@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Calculator as CalcIcon, Percent, Receipt, DollarSign } from 'lucide-react';
+import { Calculator as CalcIcon, Percent, Receipt, DollarSign, Calendar, ChevronDown, ChevronUp, PieChart } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
+import { useCurrency } from '../../lib/CurrencyContext';
+import { CurrencySelector } from '../CurrencySelector';
 
 interface CalculatorsViewProps {
   tool: ToolDef;
@@ -33,6 +35,10 @@ export const CalculatorsView: React.FC<CalculatorsViewProps> = ({
   const [loanPrincipal, setLoanPrincipal] = useState(50000);
   const [loanRate, setLoanRate] = useState(6.5);
   const [loanYears, setLoanYears] = useState(5);
+  const [showAmortization, setShowAmortization] = useState(false);
+
+  // Global Currency Hook
+  const { currency, formatAmount } = useCurrency();
 
   // Calc buttons helper
   const handleCalcButton = (val: string) => {
@@ -201,13 +207,27 @@ export const CalculatorsView: React.FC<CalculatorsViewProps> = ({
       )}
 
       {tool.id === 'tip-calculator' && (
-        <div className="max-w-xl mx-auto p-6 rounded-2xl border shadow-md space-y-4"
+        <div className="max-w-xl mx-auto p-6 rounded-2xl border shadow-md space-y-5"
           style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
         >
+          {/* Quick Currency Selector Bar */}
+          <div className="flex items-center justify-between pb-3 border-b flex-wrap gap-2" style={{ borderColor: 'var(--line)' }}>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
+                Currency:
+              </span>
+              <span className="text-xs font-mono font-bold text-[var(--brand)] flex items-center gap-1">
+                <span>{currency.flag}</span>
+                <span>{currency.code} ({currency.symbol.trim()})</span>
+              </span>
+            </div>
+            <CurrencySelector idPrefix="tip-currency" variant="pill" />
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>
-                BILL AMOUNT ($)
+                BILL AMOUNT ({currency.symbol.trim()})
               </label>
               <input
                 type="number"
@@ -249,19 +269,19 @@ export const CalculatorsView: React.FC<CalculatorsViewProps> = ({
             <div>
               <span className="text-xs text-gray-500 block">Total Tip</span>
               <span className="text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400">
-                ${tipAmount.toFixed(2)}
+                {formatAmount(tipAmount)}
               </span>
             </div>
             <div>
               <span className="text-xs text-gray-500 block">Total Bill</span>
               <span className="text-lg font-bold font-mono" style={{ color: 'var(--ink)' }}>
-                ${totalBill.toFixed(2)}
+                {formatAmount(totalBill)}
               </span>
             </div>
             <div>
               <span className="text-xs text-gray-500 block">Per Person</span>
               <span className="text-lg font-bold font-mono text-[var(--brand)]">
-                ${perPerson.toFixed(2)}
+                {formatAmount(perPerson)}
               </span>
             </div>
           </div>
@@ -272,16 +292,31 @@ export const CalculatorsView: React.FC<CalculatorsViewProps> = ({
         <div className="max-w-2xl mx-auto p-6 rounded-2xl border shadow-md space-y-5"
           style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
         >
+          {/* Quick Currency Selector Toolbar */}
+          <div className="flex items-center justify-between pb-3 border-b flex-wrap gap-2" style={{ borderColor: 'var(--line)' }}>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
+                Active Currency:
+              </span>
+              <span className="text-xs font-mono font-bold text-[var(--brand)] flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--brand)]/10">
+                <span>{currency.flag}</span>
+                <span>{currency.code} ({currency.symbol.trim()})</span>
+                <span className="text-[10px] text-[var(--muted)] font-normal hidden sm:inline">— {currency.name}</span>
+              </span>
+            </div>
+            <CurrencySelector idPrefix="loan-currency" variant="pill" />
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>
-                PRINCIPAL AMOUNT ($)
+                PRINCIPAL AMOUNT ({currency.symbol.trim()})
               </label>
               <input
                 type="number"
                 value={loanPrincipal}
-                onChange={(e) => setLoanPrincipal(Number(e.target.value))}
-                className="w-full p-2.5 rounded-xl border font-mono text-sm outline-none"
+                onChange={(e) => setLoanPrincipal(Math.max(0, Number(e.target.value)))}
+                className="w-full p-2.5 rounded-xl border font-mono text-sm outline-none font-bold"
                 style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
               />
             </div>
@@ -293,7 +328,7 @@ export const CalculatorsView: React.FC<CalculatorsViewProps> = ({
                 type="number"
                 step="0.1"
                 value={loanRate}
-                onChange={(e) => setLoanRate(Number(e.target.value))}
+                onChange={(e) => setLoanRate(Math.max(0, Number(e.target.value)))}
                 className="w-full p-2.5 rounded-xl border font-mono text-sm outline-none"
                 style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
               />
@@ -304,35 +339,131 @@ export const CalculatorsView: React.FC<CalculatorsViewProps> = ({
               </label>
               <input
                 type="number"
+                min="1"
+                max="40"
                 value={loanYears}
-                onChange={(e) => setLoanYears(Number(e.target.value))}
+                onChange={(e) => setLoanYears(Math.max(1, Number(e.target.value)))}
                 className="w-full p-2.5 rounded-xl border font-mono text-sm outline-none"
                 style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
               />
             </div>
           </div>
 
+          {/* KPI Cards with Currency Symbols */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5 rounded-xl border"
             style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
           >
             <div className="text-center p-2">
               <span className="text-xs font-medium text-gray-500 block mb-1">Monthly EMI</span>
               <span className="text-2xl font-extrabold font-mono text-[var(--brand)]">
-                ${emi.toFixed(2)}
+                {formatAmount(emi)}
               </span>
             </div>
             <div className="text-center p-2 border-t sm:border-t-0 sm:border-x border-gray-200 dark:border-gray-800">
               <span className="text-xs font-medium text-gray-500 block mb-1">Total Interest</span>
               <span className="text-2xl font-extrabold font-mono text-rose-500">
-                ${totalInterest.toFixed(2)}
+                {formatAmount(totalInterest)}
               </span>
             </div>
             <div className="text-center p-2">
               <span className="text-xs font-medium text-gray-500 block mb-1">Total Payment</span>
               <span className="text-2xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400">
-                ${totalPayment.toFixed(2)}
+                {formatAmount(totalPayment)}
               </span>
             </div>
+          </div>
+
+          {/* Breakdown Proportion Bar */}
+          {totalPayment > 0 && (
+            <div className="space-y-1.5 pt-1">
+              <div className="flex items-center justify-between text-xs text-[var(--muted)] font-medium">
+                <span>Principal: {Math.round((loanPrincipal / totalPayment) * 100)}%</span>
+                <span>Interest: {Math.round((totalInterest / totalPayment) * 100)}%</span>
+              </div>
+              <div className="w-full h-3 rounded-full bg-[var(--surface-2)] overflow-hidden flex border" style={{ borderColor: 'var(--line)' }}>
+                <div
+                  className="h-full bg-[var(--brand)] transition-all duration-300"
+                  style={{ width: `${Math.min(100, Math.max(0, (loanPrincipal / totalPayment) * 100))}%` }}
+                  title={`Principal: ${formatAmount(loanPrincipal)}`}
+                />
+                <div
+                  className="h-full bg-rose-500 transition-all duration-300"
+                  style={{ width: `${Math.min(100, Math.max(0, (totalInterest / totalPayment) * 100))}%` }}
+                  title={`Interest: ${formatAmount(totalInterest)}`}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Toggle Amortization Schedule */}
+          <div className="pt-2 border-t" style={{ borderColor: 'var(--line)' }}>
+            <button
+              onClick={() => setShowAmortization(!showAmortization)}
+              className="w-full flex items-center justify-between py-2 text-xs font-semibold text-[var(--brand)] hover:opacity-80 transition-opacity cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                <span>Annual Amortization Schedule ({currency.code} {currency.symbol.trim()})</span>
+              </div>
+              {showAmortization ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+
+            {showAmortization && (
+              <div className="overflow-x-auto mt-3 border rounded-xl" style={{ borderColor: 'var(--line)' }}>
+                <table className="w-full text-xs text-left">
+                  <thead>
+                    <tr className="border-b bg-[var(--surface-2)]" style={{ borderColor: 'var(--line)', color: 'var(--muted)' }}>
+                      <th className="py-2.5 px-3 font-semibold">Year</th>
+                      <th className="py-2.5 px-3 font-semibold text-right">Opening Balance</th>
+                      <th className="py-2.5 px-3 font-semibold text-right">Principal Paid</th>
+                      <th className="py-2.5 px-3 font-semibold text-right">Interest Paid</th>
+                      <th className="py-2.5 px-3 font-semibold text-right">Closing Balance</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y font-mono" style={{ borderColor: 'var(--line)' }}>
+                    {(() => {
+                      let balance = loanPrincipal;
+                      const rows = [];
+                      const annualEMI = emi * 12;
+
+                      for (let y = 1; y <= loanYears; y++) {
+                        const opening = balance;
+                        let interestYear = 0;
+                        let principalYear = 0;
+
+                        for (let m = 0; m < 12; m++) {
+                          if (balance <= 0) break;
+                          const monthlyInt = balance * monthlyRate;
+                          const monthlyPrin = Math.min(balance, emi - monthlyInt);
+                          interestYear += monthlyInt;
+                          principalYear += monthlyPrin;
+                          balance -= monthlyPrin;
+                        }
+
+                        const closing = Math.max(0, balance);
+                        rows.push(
+                          <tr key={y} className="hover:bg-[var(--surface-2)]">
+                            <td className="py-2 px-3 font-bold text-[var(--brand)]">Year {y}</td>
+                            <td className="py-2 px-3 text-right">{formatAmount(opening)}</td>
+                            <td className="py-2 px-3 text-right text-emerald-600 dark:text-emerald-400 font-semibold">
+                              {formatAmount(principalYear)}
+                            </td>
+                            <td className="py-2 px-3 text-right text-rose-500 font-semibold">
+                              {formatAmount(interestYear)}
+                            </td>
+                            <td className="py-2 px-3 text-right font-bold">
+                              {formatAmount(closing)}
+                            </td>
+                          </tr>
+                        );
+                        if (balance <= 0) break;
+                      }
+                      return rows;
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}

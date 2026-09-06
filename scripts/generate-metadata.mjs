@@ -64,6 +64,16 @@ const aliasDefinitions = {
     category: 'edi',
     description: 'Convert ANSI ASC X12 EDI documents into structured JSON objects and arrays for fast software integration.'
   },
+  'edi-lifecycle-reconciliation': {
+    name: 'EDI Order Lifecycle Reconciliation Viewer',
+    category: 'edi',
+    description: 'Cross-reference 850, 855, 856, 810, and 997 documents by PO and control number to visualize the full order lifecycle and flag missing or mismatched stages.'
+  },
+  'edi-order-reconciliation': {
+    name: 'EDI Order Lifecycle Reconciliation Viewer',
+    category: 'edi',
+    description: 'Cross-reference 850, 855, 856, 810, and 997 documents by PO and control number to visualize the full order lifecycle and flag missing or mismatched stages.'
+  },
   'markdown-preview': {
     name: 'Markdown Editor & Live Preview',
     category: 'utilities',

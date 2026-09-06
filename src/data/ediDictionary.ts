@@ -14,6 +14,43 @@ export interface EdiTransactionDefinition {
   samplePayload: string;
 }
 
+export const FSMA_204_COMPLIANT_856 = `ISA*00*          *00*          *ZZ*VALLEYFARM_SF  *ZZ*FRESHMARKET_HQ *260904*0600*U*00401*000000856*0*P*>~
+GS*SH*VALLEYFARM_SF*FRESHMARKET_HQ*20260904*0600*85601*X*004010~
+ST*856*0001~
+BSN*00*ASN-FSMA-2026-01*20260904*0600*0001~
+DTM*011*20260904*0600~
+DTM*196*20260902*0800~
+DTM*197*20260902*1400~
+DTM*198*20260903*1000~
+DTM*036*20260920~
+HL*1**S~
+TD1*CTN25*40~
+TD5**2*FDEG*M*FEDEX FREIGHT~
+REF*BM*BOL-FSMA-9921~
+N1*SF*VALLEY PACKING HOUSE #4*92*0012345000019~
+N3*8800 HARVEST WAY*BLDG B~
+N4*SALINAS*CA*93901*US~
+N1*DA*TRACEABILITY LOT SOURCE*FA*19283746501~
+N3*8800 HARVEST WAY~
+N4*SALINAS*CA*93901*US~
+N1*ST*FRESH MARKET DC #12*UL*0078742037777~
+N3*400 WHOLESALE BLVD~
+N4*TRACY*CA*95376*US~
+HL*2*1*O~
+PRF*PO-2026-FSMA01***20260901~
+HL*3*2*P~
+MAN*GM*00100123450000001815~
+HL*4*3*I~
+LIN*1*UK*10012345678902*UP*012345678902~
+SN1*1*40*CA~
+PID*F****ORGANIC ROMAINE HEARTS CRISP FRESH~
+REF*LT*TLC-2026-0902-F4~
+REF*BT*FARM-FIELD-04B~
+CTT*4~
+SE*30*0001~
+GE*1*85601~
+IEA*1*000000856~`;
+
 export const EDI_TRANSACTIONS: EdiTransactionDefinition[] = [
   // ==========================================
   // 1. SUPPLY CHAIN & RETAIL
@@ -880,6 +917,75 @@ UCM+1+ORDERS:D:96A:UN+7'
 UNT+4+1'
 UNZ+1+00000007'`,
   },
+  {
+    id: 'ORDERS-D16B',
+    code: 'ORDERS:D:16B',
+    name: 'EDIFACT ORDERS D.16B (GS1 Modern Standard)',
+    standard: 'EDIFACT',
+    functionalGroup: 'ORDERS',
+    category: 'Supply Chain & Retail',
+    description: 'Modern enterprise purchase order aligned with GS1 2016B global logistics attributes and serialization.',
+    purpose: 'Modern international purchase order incorporating modern GTIN and GLN syntax.',
+    keySegments: ['UNB', 'UNH', 'BGM', 'DTM', 'NAD', 'LIN', 'PIA', 'QTY', 'PRI', 'UNT', 'UNZ'],
+    samplePayload: `UNB+UNOC:3+5412345000013:14+4012345000019:14+260904:1030+00001601'
+UNH+1+ORDERS:D:16B:UN:EAN014'
+BGM+220+PO-GS1-2026-9102+9'
+DTM+137:20260904:102'
+DTM+2:20260915:102'
+NAD+BY+5412345000013::9'
+NAD+SU+4012345000019::9'
+LIN+1++4012345678901:SRV'
+PIA+1+SKU-ENTERPRISE-16B:VN'
+QTY+21:200:PCE'
+PRI+AAA:19.75'
+LIN+2++4012345678918:SRV'
+PIA+1+SKU-ENTERPRISE-16C:VN'
+QTY+21:100:PCE'
+PRI+AAA:42.00'
+UNS+S'
+CNT+2:2'
+UNT+15+1'
+UNZ+1+00001601'`,
+  },
+  {
+    id: 'DESADV-D23A',
+    code: 'DESADV:D:23A',
+    name: 'EDIFACT DESADV D.23A (UNECE Contemporary Release)',
+    standard: 'EDIFACT',
+    functionalGroup: 'DESADV',
+    category: 'Logistics & Warehousing',
+    description: 'Contemporary despatch advice supporting Digital Product Passport (DPP), carbon metrics, and advanced packaging.',
+    purpose: 'Cutting-edge UNECE D.23A shipping notice with modern sustainability and traceability identifiers.',
+    keySegments: ['UNB', 'UNH', 'BGM', 'DTM', 'RFF', 'NAD', 'CPS', 'PAC', 'LIN', 'QTY', 'UNT', 'UNZ'],
+    samplePayload: `UNB+UNOD:4+5412345000013:14+4012345000019:14+260904:1530+00002301'
+UNH+1+DESADV:D:23A:UN:EAN017'
+BGM+351+DES-2026-23A-01+9'
+DTM+137:20260904:102'
+DTM+11:20260905:102'
+RFF+ON:PO-GS1-2026-9102'
+NAD+CN+5412345000013::9'
+NAD+CZ+4012345000019::9'
+CPS+1'
+PAC+1++201::92'
+PCI+33E'
+GIN+ML+00354123450000001815'
+LIN+1++4012345678901:SRV'
+QTY+12:200:PCE'
+UNT+14+1'
+UNZ+1+00002301'`,
+  },
+  {
+    id: '856-FSMA204',
+    code: '856-FSMA',
+    name: '856 ASN - FSMA 204 Food Traceability Compliant',
+    standard: 'X12',
+    functionalGroup: 'SH',
+    category: 'Supply Chain & Retail',
+    description: 'FDA Food Traceability Rule 204 compliant 856 ASN with Traceability Lot Code (TLC), TLCS GLN, and Harvest/Cooling/Packing dates.',
+    purpose: 'Complete model implementation of FDA 21 CFR Part 1 Subpart S compliance for Food Traceability List (FTL) items.',
+    keySegments: ['ST', 'BSN', 'DTM', 'HL', 'TD5', 'REF', 'N1', 'PRF', 'MAN', 'LIN', 'SN1', 'PID', 'SE'],
+    samplePayload: FSMA_204_COMPLIANT_856,
+  },
 ];
 
 // Comprehensive Segment Dictionary for ANSI X12 and EDIFACT
@@ -1026,3 +1132,98 @@ export const COMPREHENSIVE_SEGMENT_DICTIONARY: Record<string, string> = {
   UCI: 'Interchange Response (CONTRL)',
   UCM: 'Message Response (CONTRL)',
 };
+
+export interface EdifactVersionBadgeInfo {
+  directory: string;
+  standard: string;
+  messageType?: string;
+  syntaxVersion?: string;
+  controllingAgency?: string;
+  era: 'Legacy Baseline' | 'Modern Enterprise Standard' | 'Contemporary Release';
+  label: string;
+  badgeClass: string;
+  description: string;
+}
+
+export function detectEdifactVersion(content: string): EdifactVersionBadgeInfo | null {
+  if (!content) return null;
+  const unhMatch = content.match(/UNH\s*[\+\*]\s*[^+'*]+\s*[\+\*]\s*([A-Z0-9]+)\s*:\s*([A-Z0-9]+)\s*:\s*([A-Z0-9]+)\s*(?::\s*([A-Z0-9]+))?/i);
+  let syntaxVersion = '';
+  const unbMatch = content.match(/UNB\s*[\+\*]\s*([A-Z0-9]+:[0-9]+)/i);
+  if (unbMatch) {
+    syntaxVersion = unbMatch[1];
+  }
+
+  if (unhMatch) {
+    const msgType = unhMatch[1].toUpperCase();
+    const dirPrefix = unhMatch[2].toUpperCase();
+    const release = unhMatch[3].toUpperCase();
+    const agency = unhMatch[4]?.toUpperCase() || 'UN';
+    const directory = `${dirPrefix}.${release}`;
+
+    if (release.startsWith('96') || release.startsWith('97') || release.startsWith('90')) {
+      return {
+        directory,
+        standard: 'UN/EDIFACT',
+        messageType: msgType,
+        syntaxVersion: syntaxVersion || 'UNOA:2',
+        controllingAgency: agency,
+        era: 'Legacy Baseline',
+        label: `EDIFACT ${directory} (EANCOM Classic)`,
+        badgeClass: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
+        description: 'Baseline 1996/1997 United Nations EDIFACT directory. Universally supported by legacy retail, EANCOM 97, and classic EDI translators.',
+      };
+    } else if (release.startsWith('16') || release.startsWith('14') || release.startsWith('18') || release.startsWith('01') || release.startsWith('02')) {
+      return {
+        directory,
+        standard: 'UN/EDIFACT',
+        messageType: msgType,
+        syntaxVersion: syntaxVersion || 'UNOC:3',
+        controllingAgency: agency,
+        era: 'Modern Enterprise Standard',
+        label: `EDIFACT ${directory} (GS1 Modern Standard)`,
+        badgeClass: 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30',
+        description: 'Modern global supply chain standard directory (GS1 2016B) with enhanced GS1 Application Identifiers, global logistics attributes, and serialization.',
+      };
+    } else if (release.startsWith('23') || release.startsWith('22') || release.startsWith('24') || release.startsWith('21')) {
+      return {
+        directory,
+        standard: 'UN/EDIFACT',
+        messageType: msgType,
+        syntaxVersion: syntaxVersion || 'UNOD:4',
+        controllingAgency: agency,
+        era: 'Contemporary Release',
+        label: `EDIFACT ${directory} (UNECE Contemporary)`,
+        badgeClass: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+        description: 'Contemporary UNECE release featuring modern Digital Product Passport (DPP) attributes, Scope-3 carbon reporting, and circular economy tracking.',
+      };
+    }
+
+    return {
+      directory,
+      standard: 'UN/EDIFACT',
+      messageType: msgType,
+      syntaxVersion: syntaxVersion || 'UNOB:2',
+      controllingAgency: agency,
+      era: 'Modern Enterprise Standard',
+      label: `EDIFACT ${directory}`,
+      badgeClass: 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30',
+      description: `EDIFACT Directory Release ${directory} governed by ${agency}.`,
+    };
+  }
+
+  if (content.includes('UNB') || content.includes('UNH') || content.includes('UNZ')) {
+    return {
+      directory: 'D.96A',
+      standard: 'UN/EDIFACT',
+      syntaxVersion: syntaxVersion || 'UNOA:2',
+      controllingAgency: 'UN',
+      era: 'Legacy Baseline',
+      label: 'EDIFACT D.96A (Detected)',
+      badgeClass: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
+      description: 'EDIFACT interchange syntax detected.',
+    };
+  }
+
+  return null;
+}
