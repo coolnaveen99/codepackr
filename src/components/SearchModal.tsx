@@ -69,7 +69,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search all 35+ developer tools (e.g. json, jwt, uuid, diff)..."
+            placeholder="Search all 70+ developer tools (e.g. json, edi, xml, jwt, uuid)..."
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);

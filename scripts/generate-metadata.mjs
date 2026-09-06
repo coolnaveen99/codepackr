@@ -39,6 +39,21 @@ const aliasDefinitions = {
     category: 'calculators',
     description: 'Calculate future wealth and expected maturity values for Systematic Investment Plans (SIP) and mutual fund investments.'
   },
+  'edi-tools': {
+    name: 'EDI Tools & Business Transaction Suite',
+    category: 'edi',
+    description: 'All-in-one developer toolkit for ANSI ASC X12, UN/EDIFACT, 997 & CONTRL acknowledgments, AS2 messaging, JSON converters, and syntax validation.'
+  },
+  'edi-formatter': {
+    name: 'EDI X12 Formatter & Beautifier',
+    category: 'edi',
+    description: 'Format, beautify, and indent raw ANSI ASC X12 and EDIFACT EDI transactions with automatic segment terminator and element delimiter detection.'
+  },
+  'edi-to-json': {
+    name: 'EDI to JSON Converter',
+    category: 'edi',
+    description: 'Convert ANSI ASC X12 and UN/EDIFACT EDI documents into structured JSON objects and arrays for fast software integration.'
+  },
   'edi-x12-formatter': {
     name: 'EDI X12 Formatter & Beautifier',
     category: 'edi',
@@ -48,6 +63,11 @@ const aliasDefinitions = {
     name: 'EDI to JSON Converter',
     category: 'edi',
     description: 'Convert ANSI ASC X12 EDI documents into structured JSON objects and arrays for fast software integration.'
+  },
+  'markdown-preview': {
+    name: 'Markdown Editor & Live Preview',
+    category: 'utilities',
+    description: 'Write, edit, and preview GitHub-flavored Markdown text with live HTML rendering and syntax formatting.'
   },
   'markdown': {
     name: 'Markdown Editor & Live Preview',

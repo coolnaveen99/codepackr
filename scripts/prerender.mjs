@@ -40,6 +40,14 @@ while ((match = locRegex.exec(sitemap)) !== null) {
   }
 }
 
+// Ensure legacy aliases are also prerendered so older indexed URLs never 404
+const LEGACY_ALIASES = ['edi-x12-formatter', 'edi-json-converter', 'markdown'];
+for (const alias of LEGACY_ALIASES) {
+  if (!pages.includes(alias)) {
+    pages.push(alias);
+  }
+}
+
 console.log(`Prerendering ${pages.length} pages from sitemap.xml...`);
 
 let generatedCount = 0;

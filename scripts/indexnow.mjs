@@ -22,13 +22,37 @@ while ((match = locRegex.exec(sitemapContent)) !== null) {
   urlList.push(match[1]);
 }
 
+// Also include legacy alias URLs for comprehensive web indexing
+const legacyAliases = [
+  `https://${HOST}/edi-x12-formatter`,
+  `https://${HOST}/edi-json-converter`
+];
+for (const alias of legacyAliases) {
+  if (!urlList.includes(alias)) {
+    urlList.push(alias);
+  }
+}
+
 console.log(`\n========================================`);
-console.log(` IndexNow Submission`);
+console.log(` IndexNow Web Index Submission`);
 console.log(`========================================`);
-console.log(`Host:        ${HOST}`);
-console.log(`Key:         ${KEY}`);
+console.log(`Host:         ${HOST}`);
+console.log(`Key:          ${KEY}`);
 console.log(`Key Location: ${KEY_LOCATION}`);
-console.log(`Total URLs:  ${urlList.length}\n`);
+console.log(`Total URLs:   ${urlList.length}\n`);
+
+// Filter and print EDI tools specifically
+const ediUrls = urlList.filter(u => 
+  u.includes('edi') || u.includes('as2')
+);
+
+console.log(`----------------------------------------`);
+console.log(` EDI Tools Included for Web Indexing (${ediUrls.length}):`);
+console.log(`----------------------------------------`);
+ediUrls.forEach((u, idx) => {
+  console.log(`  ${idx + 1}. [✓] ${u}`);
+});
+console.log(`----------------------------------------\n`);
 
 const payload = {
   host: HOST,
@@ -39,17 +63,17 @@ const payload = {
 
 async function submitToIndexNow() {
   const endpoints = [
-    'https://api.indexnow.org/indexnow',
-    'https://www.bing.com/indexnow',
-    'https://yandex.com/indexnow'
+    { name: 'IndexNow Master API', url: 'https://api.indexnow.org/indexnow' },
+    { name: 'Bing Webmaster IndexNow', url: 'https://www.bing.com/indexnow' },
+    { name: 'Yandex Webmaster IndexNow', url: 'https://yandex.com/indexnow' }
   ];
 
-  let success = false;
+  const results = [];
 
-  for (const endpoint of endpoints) {
+  for (const { name, url } of endpoints) {
     try {
-      console.log(`Submitting to ${endpoint}...`);
-      const response = await fetch(endpoint, {
+      console.log(`Submitting to ${name} (${url})...`);
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
@@ -58,30 +82,33 @@ async function submitToIndexNow() {
         body: JSON.stringify(payload),
       });
 
-      console.log(`Response: ${response.status} ${response.statusText}`);
+      console.log(`  -> Response: ${response.status} ${response.statusText}`);
 
       if (response.status === 200 || response.status === 202) {
-        console.log(`\n✓ Successfully submitted ${urlList.length} URLs to IndexNow via ${endpoint}!\n`);
-        success = true;
-        break; // Master IndexNow endpoint will propagate to Bing, Yandex, etc.
+        console.log(`  -> [SUCCESS] Submitted ${urlList.length} URLs (including ${ediUrls.length} EDI tools) via ${name}!\n`);
+        results.push({ name, status: 'Success', code: response.status });
       } else {
         const text = await response.text();
-        console.warn(`Endpoint returned notice: ${text}`);
-
+        console.warn(`  -> [NOTICE] ${name} returned: ${text.slice(0, 160)}`);
         if (response.status === 403) {
-          console.warn(`\n[Note]: If status is 403 "User is unauthorized":`);
-          console.warn(`1. Ensure ${KEY}.txt is accessible at ${KEY_LOCATION}`);
-          console.warn(`2. Confirm domain verification in Bing Webmaster Tools under "IndexNow".\n`);
+          console.warn(`     [Action Required on Live Server]: Ensure ${KEY}.txt is reachable at ${KEY_LOCATION} once deployed to production, or verify domain ownership in Bing Webmaster Tools.`);
         }
+        console.log('');
+        results.push({ name, status: 'HTTP ' + response.status, code: response.status });
       }
     } catch (err) {
-      console.error(`Failed to submit to ${endpoint}:`, err.message);
+      console.error(`Failed to submit to ${name}:`, err.message);
+      results.push({ name, status: 'Error', error: err.message });
     }
   }
 
-  if (!success) {
-    console.log(`\nSubmission finished. If this was a first-time run, Bing/IndexNow may take a short time to verify the key file.`);
-  }
+  console.log(`========================================`);
+  console.log(` Submission Summary:`);
+  console.log(`========================================`);
+  results.forEach(r => {
+    console.log(`- ${r.name}: ${r.status}`);
+  });
+  console.log(`\nNote: IndexNow protocol automatically shares URLs across all participating search engines (Bing, Yandex, Seznam, Naver).\n`);
 }
 
 submitToIndexNow();

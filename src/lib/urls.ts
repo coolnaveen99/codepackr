@@ -57,6 +57,7 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'favicon-generator': 'favicon-generator',
 
   // EDI Tools
+  'edi-tools': 'edi-formatter',
   'edi-x12-formatter': 'edi-formatter',
   'edi-formatter': 'edi-formatter',
   'edi-segment-viewer': 'edi-segment-viewer',
@@ -111,9 +112,9 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
  * Preferred direct canonical URL slug for each tool ID
  */
 export const TOOL_ID_TO_CANONICAL_SLUG: Record<string, string> = {
-  'edi-formatter': 'edi-x12-formatter',
-  'edi-to-json': 'edi-json-converter',
-  'markdown-preview': 'markdown',
+  'edi-formatter': 'edi-formatter',
+  'edi-to-json': 'edi-to-json',
+  'markdown-preview': 'markdown-preview',
 };
 
 /**
