@@ -63,9 +63,10 @@ const payload = {
 
 async function submitToIndexNow() {
   const endpoints = [
+    { name: 'Yandex Webmaster IndexNow', url: 'https://yandex.com/indexnow' },
+    { name: 'Naver Search Advisor IndexNow', url: 'https://searchadvisor.naver.com/indexnow' },
     { name: 'IndexNow Master API', url: 'https://api.indexnow.org/indexnow' },
-    { name: 'Bing Webmaster IndexNow', url: 'https://www.bing.com/indexnow' },
-    { name: 'Yandex Webmaster IndexNow', url: 'https://yandex.com/indexnow' }
+    { name: 'Bing Webmaster IndexNow', url: 'https://www.bing.com/indexnow' }
   ];
 
   const results = [];

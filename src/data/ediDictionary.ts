@@ -642,6 +642,20 @@ IEA*1*000000271~`,
   // 4. ADMINISTRATIVE & ACKNOWLEDGMENTS
   // ==========================================
   {
+    id: 'TA1',
+    code: 'TA1',
+    name: 'TA1 Interchange Acknowledgment',
+    standard: 'X12',
+    functionalGroup: 'TI',
+    category: 'Administrative & Acknowledgment',
+    description: 'Technical envelope acknowledgment verifying outer ISA/IEA syntax, control numbers, and partner identifiers before group translation.',
+    purpose: 'Generated directly by EDI gateways to report immediate acceptance (A), errors (E), or rejection (R) of the interchange header (ISA13 vs IEA02 control number, version, separators).',
+    keySegments: ['ISA', 'TA1', 'IEA'],
+    samplePayload: `ISA*00*          *00*          *ZZ*RECEIVER_CO    *ZZ*SENDER_CO      *260905*1200*U*00401*000000001*0*P*>~
+TA1*000000850*260904*1000*A*000~
+IEA*0*000000001~`,
+  },
+  {
     id: '997',
     code: '997',
     name: '997 Functional Acknowledgment',
@@ -963,6 +977,7 @@ export const COMPREHENSIVE_SEGMENT_DICTIONARY: Record<string, string> = {
   ZA: 'Product Activity Reporting (POS/Sales 852)',
 
   // Acknowledgments
+  TA1: 'Interchange Acknowledgment (Outer Envelope)',
   AK1: 'Functional Group Response Header (997)',
   AK2: 'Transaction Set Response Header (997)',
   AK3: 'Data Segment Note (997)',

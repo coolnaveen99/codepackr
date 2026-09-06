@@ -926,20 +926,54 @@ export const As2ToolsView: React.FC<As2ToolsViewProps> = ({
               </div>
 
               {/* MIC Algorithm */}
-              <div className="space-y-1">
-                <label className="font-semibold text-[var(--muted)]">MIC Algorithm (Integrity Hash)</label>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="font-semibold text-[var(--muted)]">MIC Algorithm (Integrity Hash)</label>
+                  {micAlgorithm === 'sha-1' && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      Legacy / Deprecated
+                    </span>
+                  )}
+                  {micAlgorithm === 'sha-256' && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3" />
+                      Drummond Standard
+                    </span>
+                  )}
+                </div>
                 <select
                   value={micAlgorithm}
                   onChange={(e: any) => setMicAlgorithm(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border font-mono outline-none"
-                  style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  className={`w-full p-2.5 rounded-xl border font-mono outline-none transition-colors ${
+                    micAlgorithm === 'sha-1' ? 'border-amber-500/60 bg-amber-500/5' : ''
+                  }`}
+                  style={{ backgroundColor: micAlgorithm === 'sha-1' ? undefined : 'var(--bg)', borderColor: micAlgorithm === 'sha-1' ? undefined : 'var(--line)', color: 'var(--ink)' }}
                 >
-                  <option value="sha-256">SHA-256 (Modern Standard)</option>
-                  <option value="sha-1">SHA-1 (Legacy RFC 4130)</option>
+                  <option value="sha-256">SHA-256 (Modern Standard — Recommended)</option>
+                  <option value="sha-1">⚠️ SHA-1 (Legacy RFC 4130 — Deprecated)</option>
                   <option value="sha-384">SHA-384 (High Security)</option>
                   <option value="sha-512">SHA-512 (Ultra High Security)</option>
-                  <option value="md5">MD5 (Legacy Only)</option>
+                  <option value="md5">❌ MD5 (Insecure / Legacy Only)</option>
                 </select>
+
+                {/* Inline Deprecation Warning for SHA-1 */}
+                {micAlgorithm === 'sha-1' && (
+                  <div className="p-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-800 dark:text-amber-200 text-[11px] leading-relaxed flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+                    <div>
+                      <span className="font-bold block">Legacy — Deprecated Algorithm:</span>
+                      SHA-1 MICs are cryptographically weak and are actively being phased out by modern AS2 trading hubs (including Walmart, Amazon, and Drummond Certified profiles). Use only for older trading partners whose specifications strictly require RFC 4130 SHA-1.
+                    </div>
+                  </div>
+                )}
+
+                {/* Standard note for SHA-256 */}
+                {micAlgorithm === 'sha-256' && (
+                  <p className="text-[10px] text-[var(--muted)] leading-tight">
+                    Pre-selected default adhering to modern Drummond Group certification and RFC 5402 AS2 profiles.
+                  </p>
+                )}
               </div>
 
               {/* Content-Type */}
@@ -1718,11 +1752,18 @@ export const As2ToolsView: React.FC<As2ToolsViewProps> = ({
                             {mdnParsedResult.disposition || 'N/A'}
                           </span>
                         </div>
-                        <div className="flex justify-between border-b pb-1.5" style={{ borderColor: 'var(--line)' }}>
+                        <div className="flex justify-between items-center border-b pb-1.5" style={{ borderColor: 'var(--line)' }}>
                           <span className="text-[var(--muted)]">Partner Received MIC:</span>
-                          <span className="font-mono font-semibold text-emerald-600 truncate max-w-[240px]">
-                            {mdnParsedResult.receivedMic || 'None'}
-                          </span>
+                          <div className="flex items-center gap-1.5 truncate max-w-[280px]">
+                            {mdnParsedResult.receivedMic?.toLowerCase().includes('sha-1') && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 shrink-0">
+                                SHA-1 Legacy
+                              </span>
+                            )}
+                            <span className="font-mono font-semibold text-emerald-600 truncate">
+                              {mdnParsedResult.receivedMic || 'None'}
+                            </span>
+                          </div>
                         </div>
                       </div>
 

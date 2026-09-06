@@ -390,6 +390,25 @@ export const TOOLS: ToolDef[] = [
     popular: true,
     isNew: true,
   },
+  {
+    id: 'gs1-sscc-label-generator',
+    name: 'GS1-128 / SSCC-18 Label Generator',
+    category: 'edi',
+    description: 'Generate GS1-128 compliant SSCC-18 shipping labels with GTIN, quantity, batch, and expiration Application Identifiers, and sync them into your 856 ASN.',
+    keywords: ['gs1', 'gs1-128', 'sscc', 'sscc-18', 'barcode', 'shipping label', 'ucc-128', 'asn', '856', 'gtin', 'application identifier'],
+    icon: 'Barcode',
+    popular: true,
+    isNew: true,
+  },
+  {
+    id: 'edi-lifecycle-reconciliation',
+    name: 'EDI Order Lifecycle Reconciliation Viewer',
+    category: 'edi',
+    description: 'Cross-reference 850, 855, 856, 810, and 997 documents by PO and control number to visualize the full order lifecycle and flag missing or mismatched stages.',
+    keywords: ['edi', 'reconciliation', '850', '855', '856', '810', '997', 'order lifecycle', 'audit', 'compliance', 'purchase order tracking'],
+    icon: 'GitCompareArrows',
+    isNew: true,
+  },
 
   // XML, XSD & XSLT Tools
   {

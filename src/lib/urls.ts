@@ -71,6 +71,11 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'as2-tools': 'as2-tools',
   'as2-encoder-decoder': 'as2-tools',
   'as2-mdn-generator': 'as2-tools',
+  'gs1-sscc-label-generator': 'gs1-sscc-label-generator',
+  'gs1-128-generator': 'gs1-sscc-label-generator',
+  'sscc-18-generator': 'gs1-sscc-label-generator',
+  'edi-lifecycle-reconciliation': 'edi-lifecycle-reconciliation',
+  'edi-order-reconciliation': 'edi-lifecycle-reconciliation',
 
   // XML, XSD, XSLT Tools
   'xslt-transformer': 'xslt-transformer',

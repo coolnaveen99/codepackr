@@ -55,6 +55,8 @@ import {
   ShieldAlert,
   ShieldCheck,
   FileCode2,
+  Barcode,
+  GitCompareArrows,
 } from 'lucide-react';
 
 export const getIcon = (name: string, className = 'w-5 h-5') => {
@@ -165,6 +167,10 @@ export const getIcon = (name: string, className = 'w-5 h-5') => {
       return <Eye className={className} />;
     case 'ShieldAlert':
       return <ShieldAlert className={className} />;
+    case 'Barcode':
+      return <Barcode className={className} />;
+    case 'GitCompareArrows':
+      return <GitCompareArrows className={className} />;
     default:
       return <Terminal className={className} />;
   }

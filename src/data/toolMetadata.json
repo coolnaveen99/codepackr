@@ -3085,6 +3085,84 @@
       }
     ]
   },
+  "gs1-sscc-label-generator": {
+    "name": "GS1-128 / SSCC-18 Label Generator",
+    "title": "GS1-128 / SSCC-18 Label Generator - Codepackr",
+    "description": "Generate GS1-128 compliant SSCC-18 shipping labels with GTIN, quantity, batch, and expiration Application Identifiers, and sync them into your 856 ASN.",
+    "canonicalPath": "/gs1-sscc-label-generator",
+    "canonicalUrl": "https://www.codepackr.com/gs1-sscc-label-generator",
+    "category": "edi",
+    "features": [
+      "Specialized parsing for ANSI ASC X12 and EDIFACT standard transactions.",
+      "Automatic detection of segment terminators (~, newline) and element separators (*).",
+      "Structured segment tree viewer for loops, headers, and trailers (ISA, GS, ST, SE, GE, IEA).",
+      "Zero server transmission — EDI payloads with sensitive PII/PHI remain strictly local.",
+      "Standard compliance checks and export options for integration workflows."
+    ],
+    "howToUse": [
+      "Paste your raw EDI transaction (e.g. 834, 837, 850, 855) into the EDI workspace.",
+      "The tool auto-detects segment delimiters (like ~ or newline) and element separators (*).",
+      "Inspect formatted segments, loop hierarchies, or generated JSON/997 outputs.",
+      "Copy or save your clean EDI output for testing and trading partner integration."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using GS1-128 / SSCC-18 Label Generator?",
+        "answer": "No. All operations in GS1-128 / SSCC-18 Label Generator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use GS1-128 / SSCC-18 Label Generator offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using GS1-128 / SSCC-18 Label Generator offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does GS1-128 / SSCC-18 Label Generator handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "edi-lifecycle-reconciliation": {
+    "name": "EDI Order Lifecycle Reconciliation Viewer",
+    "title": "EDI Order Lifecycle Reconciliation Viewer - Codepackr",
+    "description": "Cross-reference 850, 855, 856, 810, and 997 documents by PO and control number to visualize the full order lifecycle and flag missing or mismatched stages.",
+    "canonicalPath": "/edi-lifecycle-reconciliation",
+    "canonicalUrl": "https://www.codepackr.com/edi-lifecycle-reconciliation",
+    "category": "edi",
+    "features": [
+      "Specialized parsing for ANSI ASC X12 and EDIFACT standard transactions.",
+      "Automatic detection of segment terminators (~, newline) and element separators (*).",
+      "Structured segment tree viewer for loops, headers, and trailers (ISA, GS, ST, SE, GE, IEA).",
+      "Zero server transmission — EDI payloads with sensitive PII/PHI remain strictly local.",
+      "Standard compliance checks and export options for integration workflows."
+    ],
+    "howToUse": [
+      "Paste your raw EDI transaction (e.g. 834, 837, 850, 855) into the EDI workspace.",
+      "The tool auto-detects segment delimiters (like ~ or newline) and element separators (*).",
+      "Inspect formatted segments, loop hierarchies, or generated JSON/997 outputs.",
+      "Copy or save your clean EDI output for testing and trading partner integration."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using EDI Order Lifecycle Reconciliation Viewer?",
+        "answer": "No. All operations in EDI Order Lifecycle Reconciliation Viewer execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use EDI Order Lifecycle Reconciliation Viewer offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using EDI Order Lifecycle Reconciliation Viewer offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does EDI Order Lifecycle Reconciliation Viewer handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
   "home": {
     "name": "Codepackr",
     "title": "Codepackr - Free Online Developer Tools",

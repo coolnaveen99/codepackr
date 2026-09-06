@@ -22,6 +22,7 @@ import {
   Trash2,
   X,
   FileSpreadsheet,
+  Barcode,
 } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
@@ -30,6 +31,7 @@ import { JsonToEdiConverter } from '../edi/JsonToEdiConverter';
 import { EdiTemplateGenerator } from '../edi/EdiTemplateGenerator';
 import { EdiDelimiterCleaner } from '../edi/EdiDelimiterCleaner';
 import { As2ToolsView } from '../edi/As2ToolsView';
+import { Gs1LabelGenerator } from '../edi/Gs1LabelGenerator';
 import { COMPREHENSIVE_SEGMENT_DICTIONARY, EDI_TRANSACTIONS } from '../../data/ediDictionary';
 import { TOOLS } from '../../data/tools';
 
@@ -312,13 +314,28 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
     const stList = segments.filter((s) => s.tag === 'ST');
     const seList = segments.filter((s) => s.tag === 'SE');
 
-    // 1. Interchange Envelope (ISA/IEA)
+    // 1. Interchange Envelope (ISA/IEA & TA1 Level 1 Compliance)
+    const ta1Segment = segments.find((s) => s.tag === 'TA1');
+    if (ta1Segment) {
+      const ackCtrl = ta1Segment.elements[0]?.trim() || '';
+      const ackStatus = ta1Segment.elements[3]?.trim() || '';
+      const noteCode = ta1Segment.elements[4]?.trim() || '000';
+      const statusLabel =
+        ackStatus === 'A' ? 'Accepted (A)' : ackStatus === 'E' ? 'Accepted with Errors (E)' : 'Rejected (R)';
+      issues.push({
+        type: ackStatus === 'A' ? 'info' : 'warning',
+        message: `TA1 Interchange Acknowledgment detected: Control #${ackCtrl}, Status: ${statusLabel}, Note Code: ${noteCode}.`,
+        line: ta1Segment.lineNumber,
+        segment: 'TA1',
+      });
+    }
+
     if (!isa) {
       issues.push({ type: 'error', message: 'Missing mandatory Interchange Header (ISA).' });
     } else if (isa.elements.length !== 16) {
       issues.push({
         type: 'warning',
-        message: `ISA segment has ${isa.elements.length} elements. Standard ANSI X12 requires exactly 16 elements.`,
+        message: `ISA segment has ${isa.elements.length} elements. Standard ANSI X12 requires exactly 16 elements (TA1 Error Code 006).`,
         line: isa.lineNumber,
         segment: 'ISA',
       });
@@ -331,7 +348,7 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
       if (isaCtrl && ieaCtrl && isaCtrl !== ieaCtrl) {
         issues.push({
           type: 'error',
-          message: `Interchange Control Number mismatch: ISA13 (${isaCtrl}) != IEA02 (${ieaCtrl}).`,
+          message: `Interchange Control Number mismatch: ISA13 (${isaCtrl}) != IEA02 (${ieaCtrl}). Triggers Gateway TA1 Rejection with Note Code 001.`,
           line: iea.lineNumber,
           segment: 'IEA',
         });
@@ -534,7 +551,8 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
           { id: 'edi-to-json', label: 'EDI to JSON Converter', icon: ArrowLeftRight },
           { id: 'json-to-edi', label: 'JSON to EDI Converter', icon: FileCode2 },
           { id: 'edi-validator', label: 'EDI Compliance Validator', icon: ShieldCheck },
-          { id: 'edi-997-generator', label: '997 & CONTRL Ack Generator', icon: CheckCircle2 },
+          { id: 'edi-997-generator', label: '997 / TA1 / CONTRL Ack Generator', icon: CheckCircle2 },
+          { id: 'gs1-sscc-label-generator', label: 'GS1-128 / SSCC-18 Label Generator', icon: Barcode },
           { id: 'edi-sample-generator', label: 'Template & Sample Generator', icon: FileText },
           { id: 'edi-delimiter-converter', label: 'Delimiter Swapper & Normalizer', icon: SlidersHorizontal },
           { id: 'as2-tools', label: 'AS2 Encoder, Decoder & MDN', icon: Send },
@@ -1148,6 +1166,20 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
         )}
         {activeTab === 'edi-997-generator' && (
           <EdiAckGenerator tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} initialInput={input} />
+        )}
+        {activeTab === 'gs1-sscc-label-generator' && (
+          <Gs1LabelGenerator
+            tool={tool}
+            onBackToHome={onBackToHome}
+            onSelectRelated={onSelectRelated}
+            onNavigateToTab={(tabId) => {
+              setActiveTab(tabId);
+              const targetTool = TOOLS.find((t) => t.id === tabId);
+              if (targetTool) {
+                window.history.pushState({}, '', `/${targetTool.id}`);
+              }
+            }}
+          />
         )}
         {activeTab === 'edi-sample-generator' && (
           <EdiTemplateGenerator tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />

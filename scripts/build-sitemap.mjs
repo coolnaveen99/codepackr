@@ -17,6 +17,8 @@ const urls = [
   { loc: 'https://www.codepackr.com/edi-sample-generator', priority: '0.8', changefreq: 'monthly' },
   { loc: 'https://www.codepackr.com/edi-delimiter-converter', priority: '0.8', changefreq: 'monthly' },
   { loc: 'https://www.codepackr.com/as2-tools', priority: '0.8', changefreq: 'monthly' },
+  { loc: 'https://www.codepackr.com/gs1-sscc-label-generator', priority: '0.8', changefreq: 'monthly' },
+  { loc: 'https://www.codepackr.com/edi-lifecycle-reconciliation', priority: '0.8', changefreq: 'monthly' },
 
   // Formatters & Beautifiers
   { loc: 'https://www.codepackr.com/json-formatter', priority: '0.8', changefreq: 'monthly' },
