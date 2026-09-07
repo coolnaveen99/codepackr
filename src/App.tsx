@@ -25,26 +25,35 @@ import { SitemapModal } from './components/SitemapModal';
 import { Sidebar } from './components/Sidebar';
 import { Terminal, Globe, AlertTriangle, Lock } from 'lucide-react';
 import { GithubIcon, XTwitterIcon, LinkedinIcon, YoutubeIcon, InstagramIcon } from './components/BrandIcons';
+import { safeLocalStorage } from './lib/storage';
 
 export const App: React.FC = () => {
   // Theme state
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    const saved = localStorage.getItem('codepackr_theme');
+    const saved = safeLocalStorage.getItem('codepackr_theme');
     if (saved === 'dark' || saved === 'light') return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    try {
+      if (typeof window !== 'undefined' && window.matchMedia) {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+    } catch {
+      // Fallback for restricted environments
+    }
+    return 'light';
   });
 
-  // Navigation state
-  const [activeTool, setActiveTool] = useState<ToolDef | null>(null);
-  const [activePage, setActivePage] = useState<'home' | 'contact' | 'privacy' | 'admin'>(() => {
-    if (typeof window !== 'undefined') {
-      const path = window.location.pathname;
-      if (path === '/admin' || path === '/admin.html') return 'admin';
-    }
-    return 'home';
+  // Navigation state initialized synchronously from current URL
+  const [initialRoute] = useState(() => resolveCurrentRoute());
+  const [activeTool, setActiveTool] = useState<ToolDef | null>(() => initialRoute.tool);
+  const [activePage, setActivePage] = useState<'home' | 'contact' | 'privacy' | 'admin'>(() => initialRoute.page);
+  const [legalTab, setLegalTab] = useState<'privacy' | 'terms'>(() => {
+    if (initialRoute.category === 'terms') return 'terms';
+    if (typeof window !== 'undefined' && window.location.pathname.includes('terms')) return 'terms';
+    return 'privacy';
   });
-  const [legalTab, setLegalTab] = useState<'privacy' | 'terms'>('privacy');
-  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all');
+  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>(() => {
+    return (initialRoute.category as CategoryFilter) || 'all';
+  });
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSitemapModalOpen, setIsSitemapModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -58,7 +67,7 @@ export const App: React.FC = () => {
     } else {
       document.documentElement.classList.remove('dark');
     }
-    localStorage.setItem('codepackr_theme', theme);
+    safeLocalStorage.setItem('codepackr_theme', theme);
   }, [theme]);
 
   // Synchronize document title, canonical tag, meta descriptions, social tags, and JSON-LD for SEO

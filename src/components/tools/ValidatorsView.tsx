@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Copy, Check, CheckCircle2, AlertTriangle, Search, Split, Table, Columns, AlignJustify, GitCompare, Edit3, ChevronDown, ChevronUp } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
+import { safeLocalStorage } from '../../lib/storage';
 
 interface ValidatorsViewProps {
   tool: ToolDef;
@@ -23,10 +24,8 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
   const [leftText, setLeftText] = useState('');
   const [rightText, setRightText] = useState('');
   const [diffViewMode, setDiffViewMode] = useState<'split' | 'unified'>(() => {
-    try {
-      const saved = localStorage.getItem('codepackr_diff_view_mode');
-      if (saved === 'unified' || saved === 'split') return saved;
-    } catch {}
+    const saved = safeLocalStorage.getItem('codepackr_diff_view_mode');
+    if (saved === 'unified' || saved === 'split') return saved;
     return 'split';
   });
   const [showInputsInUnified, setShowInputsInUnified] = useState(false);
@@ -41,9 +40,7 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
 
   const handleViewModeChange = (mode: 'split' | 'unified') => {
     setDiffViewMode(mode);
-    try {
-      localStorage.setItem('codepackr_diff_view_mode', mode);
-    } catch {}
+    safeLocalStorage.setItem('codepackr_diff_view_mode', mode);
   };
 
   // Regex Tester

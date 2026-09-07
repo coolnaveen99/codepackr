@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Mail, Send, CheckCircle2, MessageSquare, ShieldCheck, ArrowLeft, Loader2, AlertCircle, Settings, Check, RefreshCw } from 'lucide-react';
+import { safeLocalStorage } from '../lib/storage';
 
 interface ContactViewProps {
   onBack: () => void;
@@ -23,7 +24,7 @@ export const ContactView: React.FC<ContactViewProps> = ({ onBack }) => {
   // Script URL priority: localStorage override > Vite env > default deployed script
   const [scriptUrl, setScriptUrl] = useState<string>(() => {
     return (
-      localStorage.getItem('codepackr_contact_script_url') ||
+      safeLocalStorage.getItem('codepackr_contact_script_url') ||
       (import.meta.env.VITE_CONTACT_GOOGLE_SCRIPT_URL as string) ||
       DEFAULT_SCRIPT_URL
     );
@@ -38,7 +39,7 @@ export const ContactView: React.FC<ContactViewProps> = ({ onBack }) => {
     const finalUrl = trimmed || DEFAULT_SCRIPT_URL;
     setScriptUrl(finalUrl);
     setCustomUrlInput(finalUrl);
-    localStorage.setItem('codepackr_contact_script_url', finalUrl);
+    safeLocalStorage.setItem('codepackr_contact_script_url', finalUrl);
     setShowConfig(false);
     setError(null);
   };
@@ -46,7 +47,7 @@ export const ContactView: React.FC<ContactViewProps> = ({ onBack }) => {
   const handleResetUrl = () => {
     setScriptUrl(DEFAULT_SCRIPT_URL);
     setCustomUrlInput(DEFAULT_SCRIPT_URL);
-    localStorage.removeItem('codepackr_contact_script_url');
+    safeLocalStorage.removeItem('codepackr_contact_script_url');
     setShowConfig(false);
     setError(null);
   };

@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getToolDirectUrl } from './urls';
+import { safeLocalStorage } from './storage';
 
 const STORAGE_KEY = 'codepackr_bookmarks';
 const EVENT_NAME = 'codepackr-bookmarks-changed';
 
 export function getBookmarks(): string[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = safeLocalStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
@@ -34,7 +35,7 @@ export function toggleBookmark(toolId: string): boolean {
       isNowBookmarked = true;
     }
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    safeLocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: { toolId, isBookmarked: isNowBookmarked, bookmarks: updated } }));
     return isNowBookmarked;
   } catch (e) {

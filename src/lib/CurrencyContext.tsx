@@ -7,6 +7,7 @@ import {
   getCurrency,
   formatCurrencyAmount,
 } from './currency';
+import { safeLocalStorage } from './storage';
 
 export type ConversionMode = 'face-value' | 'fx-convert';
 
@@ -29,18 +30,14 @@ const STORAGE_KEY_MODE = 'codepackr_currency_mode';
 
 export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currencyCode, setCurrencyCodeState] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(STORAGE_KEY_CODE);
-      if (saved) return saved.toUpperCase();
-    }
+    const saved = safeLocalStorage.getItem(STORAGE_KEY_CODE);
+    if (saved) return saved.toUpperCase();
     return DEFAULT_CURRENCY_CODE;
   });
 
   const [conversionMode, setConversionModeState] = useState<ConversionMode>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(STORAGE_KEY_MODE);
-      if (saved === 'face-value' || saved === 'fx-convert') return saved;
-    }
+    const saved = safeLocalStorage.getItem(STORAGE_KEY_MODE);
+    if (saved === 'face-value' || saved === 'fx-convert') return saved;
     return 'face-value';
   });
 
@@ -49,8 +46,8 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const setCurrencyCode = (code: string) => {
     const valid = getCurrency(code);
     setCurrencyCodeState(valid.code);
+    safeLocalStorage.setItem(STORAGE_KEY_CODE, valid.code);
     if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY_CODE, valid.code);
       // Dispatch a custom storage event so all components react instantly if needed
       window.dispatchEvent(new CustomEvent('codepackr-currency-change', { detail: valid.code }));
     }
@@ -58,9 +55,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const setConversionMode = (mode: ConversionMode) => {
     setConversionModeState(mode);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY_MODE, mode);
-    }
+    safeLocalStorage.setItem(STORAGE_KEY_MODE, mode);
   };
 
   useEffect(() => {

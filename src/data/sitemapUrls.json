@@ -2,7 +2,7 @@
   "updatedAt": "2026-09-07",
   "host": "www.codepackr.com",
   "baseUrl": "https://www.codepackr.com",
-  "totalUrls": 100,
+  "totalUrls": 105,
   "urls": [
     {
       "loc": "https://www.codepackr.com/",
@@ -349,6 +349,14 @@
       "category": "converters"
     },
     {
+      "loc": "https://www.codepackr.com/json-definition-generator",
+      "path": "/json-definition-generator",
+      "name": "JSON Definition Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "converters"
+    },
+    {
       "loc": "https://www.codepackr.com/edi-formatter",
       "path": "/edi-formatter",
       "name": "EDI X12 Formatter",
@@ -477,6 +485,30 @@
       "category": "xml"
     },
     {
+      "loc": "https://www.codepackr.com/loan-calculator",
+      "path": "/loan-calculator",
+      "name": "Loan & EMI Calculator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "calculators"
+    },
+    {
+      "loc": "https://www.codepackr.com/sip-calculator",
+      "path": "/sip-calculator",
+      "name": "SIP Calculator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "calculators"
+    },
+    {
+      "loc": "https://www.codepackr.com/investment-calculator",
+      "path": "/investment-calculator",
+      "name": "Investment Calculator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "calculators"
+    },
+    {
       "loc": "https://www.codepackr.com/calculator",
       "path": "/calculator",
       "name": "Scientific Calculator",
@@ -496,14 +528,6 @@
       "loc": "https://www.codepackr.com/tip-calculator",
       "path": "/tip-calculator",
       "name": "Tip Calculator",
-      "priority": "0.8",
-      "changefreq": "monthly",
-      "category": "calculators"
-    },
-    {
-      "loc": "https://www.codepackr.com/loan-calculator",
-      "path": "/loan-calculator",
-      "name": "Loan & EMI Calculator",
       "priority": "0.8",
       "changefreq": "monthly",
       "category": "calculators"
@@ -677,12 +701,28 @@
       "category": "encoders"
     },
     {
-      "loc": "https://www.codepackr.com/sip-calculator",
-      "path": "/sip-calculator",
-      "name": "SIP Investment Calculator",
+      "loc": "https://www.codepackr.com/compound-investment-calculator",
+      "path": "/compound-investment-calculator",
+      "name": "Compound Investment Calculator",
       "priority": "0.8",
       "changefreq": "monthly",
       "category": "calculators"
+    },
+    {
+      "loc": "https://www.codepackr.com/compound-interest-calculator",
+      "path": "/compound-interest-calculator",
+      "name": "Compound Interest Calculator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "calculators"
+    },
+    {
+      "loc": "https://www.codepackr.com/json-to-definition",
+      "path": "/json-to-definition",
+      "name": "JSON to Type Definition Converter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "converters"
     },
     {
       "loc": "https://www.codepackr.com/markdown",

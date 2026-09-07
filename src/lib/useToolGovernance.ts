@@ -3,18 +3,17 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import { ToolGovernanceItem, ToolGovernanceMap } from '../types/admin';
 import { ToolDef } from '../types';
+import { safeLocalStorage } from './storage';
 
 const STORAGE_KEY = 'codepackr_tool_governance';
 
 export function useToolGovernance() {
   const [governance, setGovernance] = useState<ToolGovernanceMap>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const cached = localStorage.getItem(STORAGE_KEY);
-        if (cached) return JSON.parse(cached);
-      } catch (e) {
-        console.warn('Failed to parse cached governance', e);
-      }
+    try {
+      const cached = safeLocalStorage.getItem(STORAGE_KEY);
+      if (cached) return JSON.parse(cached);
+    } catch (e) {
+      console.warn('Failed to parse cached governance', e);
     }
     return {};
   });
@@ -37,7 +36,7 @@ export function useToolGovernance() {
             const data = snapshot.data() as ToolGovernanceMap;
             setGovernance(data);
             try {
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+              safeLocalStorage.setItem(STORAGE_KEY, JSON.stringify(data));
             } catch (e) {
               // ignore
             }
@@ -98,7 +97,7 @@ export function useToolGovernance() {
     const docRef = doc(db, 'system_config', 'tools_status');
     await setDoc(docRef, updatedMap, { merge: true });
     setGovernance(updatedMap);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedMap));
+    safeLocalStorage.setItem(STORAGE_KEY, JSON.stringify(updatedMap));
   };
 
   return {
