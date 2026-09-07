@@ -1,183 +1,127 @@
 import React from 'react';
 import {
-  Braces,
-  Code,
-  Palette,
-  Database,
-  FileCode,
-  FileSpreadsheet,
-  Binary,
-  Link,
-  Shield,
-  Key,
-  QrCode,
-  Split,
-  Search,
-  CheckCircle,
-  FileDiff,
-  FileText,
-  FileCheck,
-  RefreshCw,
-  Sliders,
-  Calculator,
-  Percent,
-  Receipt,
-  CreditCard,
-  Hash,
-  Lock,
-  Type,
-  Clock,
-  Globe,
-  Shuffle,
-  AlignLeft,
-  Minimize2,
-  Terminal,
-  HelpCircle,
-  Table,
-  Workflow,
-  Layers,
-  Send,
-  Repeat,
-  CaseSensitive,
-  ArrowLeftRight,
-  Sparkles,
-  DollarSign,
-  Fingerprint,
-  Pipette,
-  CalendarClock,
-  Tag,
-  SearchCode,
-  CheckCircle2,
-  SlidersHorizontal,
-  Maximize2,
-  Eye,
-  FileCheck2,
-  ShieldAlert,
-  ShieldCheck,
-  FileCode2,
-  Barcode,
-  GitCompareArrows,
-  TrendingUp,
-  PiggyBank,
-} from 'lucide-react';
+  JsonIcon,
+  XmlIcon,
+  CodeIcon,
+  SqlIcon,
+  DatabaseIcon,
+  Base64Icon,
+  JwtIcon,
+  HashIcon,
+  SecurityIcon,
+  CheckIcon,
+  ConvertIcon,
+  TerminalIcon,
+  RegexIcon,
+  UrlIcon,
+  UuidIcon,
+  TimestampIcon,
+  ColorIcon,
+  HtmlIcon,
+  CssIcon,
+  JavascriptIcon,
+  TypescriptIcon,
+  ApiIcon,
+  SearchIcon,
+  EdiWorkflowIcon,
+  EdiTransactionIcon,
+  EdiAckIcon,
+  EdiInspectorIcon,
+  CalculatorIcon,
+  TrendingUpIcon,
+  CurrencyIcon,
+} from '../components/CodePackrIcons';
 
-export const getIcon = (name: string, className = 'w-5 h-5') => {
-  switch (name) {
-    case 'TrendingUp':
-      return <TrendingUp className={className} />;
-    case 'PiggyBank':
-      return <PiggyBank className={className} />;
-    case 'Braces':
-      return <Braces className={className} />;
-    case 'Code':
-      return <Code className={className} />;
-    case 'Palette':
-      return <Palette className={className} />;
-    case 'Database':
-      return <Database className={className} />;
-    case 'FileCode':
-      return <FileCode className={className} />;
-    case 'FileCode2':
-      return <FileCode2 className={className} />;
-    case 'FileSpreadsheet':
-      return <FileSpreadsheet className={className} />;
-    case 'Binary':
-      return <Binary className={className} />;
-    case 'Link':
-      return <Link className={className} />;
-    case 'Shield':
-      return <Shield className={className} />;
-    case 'ShieldCheck':
-      return <ShieldCheck className={className} />;
-    case 'Key':
-      return <Key className={className} />;
-    case 'QrCode':
-      return <QrCode className={className} />;
-    case 'Split':
-      return <Split className={className} />;
-    case 'Search':
-      return <Search className={className} />;
-    case 'SearchCode':
-      return <SearchCode className={className} />;
-    case 'CheckCircle':
-      return <CheckCircle className={className} />;
-    case 'CheckCircle2':
-      return <CheckCircle2 className={className} />;
-    case 'FileDiff':
-      return <FileDiff className={className} />;
-    case 'FileText':
-      return <FileText className={className} />;
-    case 'FileCheck':
-      return <FileCheck className={className} />;
-    case 'FileCheck2':
-      return <FileCheck2 className={className} />;
-    case 'RefreshCw':
-      return <RefreshCw className={className} />;
-    case 'Sliders':
-      return <Sliders className={className} />;
-    case 'SlidersHorizontal':
-      return <SlidersHorizontal className={className} />;
-    case 'Calculator':
-      return <Calculator className={className} />;
-    case 'Percent':
-      return <Percent className={className} />;
-    case 'Receipt':
-      return <Receipt className={className} />;
-    case 'CreditCard':
-      return <CreditCard className={className} />;
-    case 'Hash':
-      return <Hash className={className} />;
-    case 'Lock':
-      return <Lock className={className} />;
-    case 'Type':
-      return <Type className={className} />;
-    case 'Clock':
-      return <Clock className={className} />;
-    case 'Globe':
-      return <Globe className={className} />;
-    case 'Shuffle':
-      return <Shuffle className={className} />;
-    case 'AlignLeft':
-      return <AlignLeft className={className} />;
-    case 'Minimize2':
-      return <Minimize2 className={className} />;
-    case 'Table':
-      return <Table className={className} />;
-    case 'Workflow':
-      return <Workflow className={className} />;
-    case 'Layers':
-      return <Layers className={className} />;
-    case 'Send':
-      return <Send className={className} />;
-    case 'Repeat':
-      return <Repeat className={className} />;
-    case 'CaseSensitive':
-      return <CaseSensitive className={className} />;
-    case 'ArrowLeftRight':
-      return <ArrowLeftRight className={className} />;
-    case 'Sparkles':
-      return <Sparkles className={className} />;
-    case 'DollarSign':
-      return <DollarSign className={className} />;
-    case 'Fingerprint':
-      return <Fingerprint className={className} />;
-    case 'Pipette':
-      return <Pipette className={className} />;
-    case 'CalendarClock':
-      return <CalendarClock className={className} />;
-    case 'Tag':
-      return <Tag className={className} />;
-    case 'Maximize2':
-      return <Maximize2 className={className} />;
-    case 'Eye':
-      return <Eye className={className} />;
-    case 'ShieldAlert':
-      return <ShieldAlert className={className} />;
-    case 'Barcode':
-      return <Barcode className={className} />;
-    case 'GitCompareArrows':
-      return <GitCompareArrows className={className} />;
+export const getIcon = (iconName: string, size = 18, className = ''): React.ReactNode => {
+  const props = { size, className };
+
+  switch (iconName.toLowerCase()) {
+    case 'json':
+      return <JsonIcon {...props} />;
+    case 'xml':
+      return <XmlIcon {...props} />;
+    case 'code':
+      return <CodeIcon {...props} />;
+    case 'sql':
+    case 'database':
+      return <SqlIcon {...props} />;
+    case 'base64':
+      return <Base64Icon {...props} />;
+    case 'jwt':
+    case 'lock':
+      return <JwtIcon {...props} />;
+    case 'hash':
+      return <HashIcon {...props} />;
+    case 'shield':
+    case 'security':
+      return <SecurityIcon {...props} />;
+    case 'check':
+    case 'validator':
+      return <CheckIcon {...props} />;
+    case 'convert':
+    case 'transform':
+      return <ConvertIcon {...props} />;
+    case 'terminal':
+      return <TerminalIcon {...props} />;
+    case 'regex':
+      return <RegexIcon {...props} />;
+    case 'url':
+    case 'link':
+      return <UrlIcon {...props} />;
+    case 'uuid':
+    case 'fingerprint':
+      return <UuidIcon {...props} />;
+    case 'clock':
+    case 'timestamp':
+      return <TimestampIcon {...props} />;
+    case 'color':
+    case 'palette':
+      return <ColorIcon {...props} />;
+    case 'html':
+      return <HtmlIcon {...props} />;
+    case 'css':
+      return <CssIcon {...props} />;
+    case 'javascript':
+    case 'js':
+      return <JavascriptIcon {...props} />;
+    case 'typescript':
+    case 'ts':
+      return <TypescriptIcon {...props} />;
+    case 'api':
+      return <ApiIcon {...props} />;
+    case 'search':
+      return <SearchIcon {...props} />;
+
+    // Dedicated EDI & Financial Icons
+    case 'workflow':
+    case 'edi':
+    case 'ediflow':
+      return <EdiWorkflowIcon {...props} />;
+    case 'editransaction':
+    case 'filetext':
+    case 'filecode':
+      return <EdiTransactionIcon {...props} />;
+    case 'ediack':
+    case 'clipboardcheck':
+      return <EdiAckIcon {...props} />;
+    case 'ediinspect':
+    case 'inspect':
+      return <EdiInspectorIcon {...props} />;
+    case 'calculator':
+    case 'calc':
+      return <CalculatorIcon {...props} />;
+    case 'trendingup':
+    case 'chart':
+    case 'sip':
+    case 'investment':
+      return <TrendingUpIcon {...props} />;
+    case 'currency':
+    case 'dollar':
+    case 'loan':
+    case 'emi':
+      return <CurrencyIcon {...props} />;
+
     default:
-      return <Terminal className={className} />;
+      return <CodeIcon {...props} />;
   }
 };

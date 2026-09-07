@@ -16,11 +16,14 @@ import { TextToolsView } from './components/tools/TextToolsView';
 import { JsonDefinitionView } from './components/tools/JsonDefinitionView';
 import { EdiToolsView } from './components/tools/EdiToolsView';
 import { XmlToolsView } from './components/xml/XmlToolsView';
+import { AdminPortal } from './components/admin/AdminPortal';
+import { useToolGovernance } from './lib/useToolGovernance';
 import { resolveCurrentRoute, getToolPath, getToolDirectUrl } from './lib/urls';
 import { updateDocumentMetadata } from './lib/seo';
 import { CurrencyProvider } from './lib/CurrencyContext';
 import { SitemapModal } from './components/SitemapModal';
-import { Shield, Terminal, Star, Globe } from 'lucide-react';
+import { Sidebar } from './components/Sidebar';
+import { Terminal, Globe, AlertTriangle, Lock } from 'lucide-react';
 import { GithubIcon, XTwitterIcon, LinkedinIcon, YoutubeIcon, InstagramIcon } from './components/BrandIcons';
 
 export const App: React.FC = () => {
@@ -33,11 +36,20 @@ export const App: React.FC = () => {
 
   // Navigation state
   const [activeTool, setActiveTool] = useState<ToolDef | null>(null);
-  const [activePage, setActivePage] = useState<'home' | 'contact' | 'privacy'>('home');
+  const [activePage, setActivePage] = useState<'home' | 'contact' | 'privacy' | 'admin'>(() => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      if (path === '/admin' || path === '/admin.html') return 'admin';
+    }
+    return 'home';
+  });
   const [legalTab, setLegalTab] = useState<'privacy' | 'terms'>('privacy');
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSitemapModalOpen, setIsSitemapModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const { getToolStatus, isToolVisible } = useToolGovernance();
 
   // Apply theme to DOM
   useEffect(() => {
@@ -78,7 +90,10 @@ export const App: React.FC = () => {
         setSelectedCategory(route.category as CategoryFilter);
       }
 
-      if (route.page === 'contact') {
+      if (route.page === 'admin') {
+        setActivePage('admin');
+        setActiveTool(null);
+      } else if (route.page === 'contact') {
         setActivePage('contact');
         setActiveTool(null);
       } else if (route.page === 'privacy') {
@@ -168,31 +183,87 @@ export const App: React.FC = () => {
 
   // Render active tool component
   const renderTool = (tool: ToolDef) => {
+    const gov = getToolStatus(tool.id);
+
+    if (gov.status === 'hidden' && !isToolVisible(tool.id)) {
+      return (
+        <div className="max-w-md mx-auto py-16 text-center space-y-4">
+          <div className="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center bg-[var(--surface-2)] text-[var(--muted)]">
+            <Lock className="w-6 h-6" />
+          </div>
+          <h2 className="text-lg font-bold" style={{ color: 'var(--ink)' }}>Tool Unavailable</h2>
+          <p className="text-xs text-[var(--muted)]">This utility is currently unlisted or undergoing administrative review.</p>
+          <button
+            onClick={navigateToHome}
+            className="px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--brand)] text-white hover:opacity-90 transition-opacity cursor-pointer"
+          >
+            Browse Available Tools
+          </button>
+        </div>
+      );
+    }
+
+    const renderMaintenanceBanner = () => {
+      if (gov.status !== 'maintenance' && !gov.noticeMessage) return null;
+      return (
+        <div className="mb-6 p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex items-start gap-3 text-amber-800 dark:text-amber-200">
+          <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-amber-500" />
+          <div>
+            <div className="font-bold text-xs uppercase tracking-wider text-amber-700 dark:text-amber-300">
+              {gov.status === 'maintenance' ? 'Scheduled Maintenance Notice' : 'Notice'}
+            </div>
+            <p className="text-xs mt-0.5 leading-relaxed">
+              {gov.noticeMessage || 'This utility is currently undergoing scheduled maintenance and updates by the Codepackr team. Some features may be temporarily limited.'}
+            </p>
+          </div>
+        </div>
+      );
+    };
+
+    let toolViewContent: React.ReactNode = null;
     if (tool.id === 'json-definition-generator') {
-      return <JsonDefinitionView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
+      toolViewContent = <JsonDefinitionView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
+    } else {
+      switch (tool.category) {
+        case 'formatters':
+          toolViewContent = <FormattersView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
+          break;
+        case 'encoders':
+          toolViewContent = <EncodersView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
+          break;
+        case 'validators':
+          toolViewContent = <ValidatorsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
+          break;
+        case 'converters':
+          toolViewContent = <ConvertersView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
+          break;
+        case 'edi':
+          toolViewContent = <EdiToolsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
+          break;
+        case 'xml':
+          toolViewContent = <XmlToolsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
+          break;
+        case 'calculators':
+          toolViewContent = <CalculatorsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
+          break;
+        case 'utilities':
+          toolViewContent = <UtilitiesView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
+          break;
+        case 'text':
+          toolViewContent = <TextToolsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
+          break;
+        default:
+          toolViewContent = <FormattersView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
+          break;
+      }
     }
-    switch (tool.category) {
-      case 'formatters':
-        return <FormattersView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
-      case 'encoders':
-        return <EncodersView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
-      case 'validators':
-        return <ValidatorsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
-      case 'converters':
-        return <ConvertersView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
-      case 'edi':
-        return <EdiToolsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
-      case 'xml':
-        return <XmlToolsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
-      case 'calculators':
-        return <CalculatorsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
-      case 'utilities':
-        return <UtilitiesView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
-      case 'text':
-        return <TextToolsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
-      default:
-        return <FormattersView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
-    }
+
+    return (
+      <div className="space-y-4">
+        {renderMaintenanceBanner()}
+        {toolViewContent}
+      </div>
+    );
   };
 
   return (
@@ -210,29 +281,55 @@ export const App: React.FC = () => {
         onGoHome={navigateToHome}
         onGoContact={navigateToContact}
         onGoBookmarks={() => handleSelectCategory('bookmarks')}
+        onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
-        {activePage === 'contact' ? (
-          <ContactView onBack={navigateToHome} />
-        ) : activePage === 'privacy' ? (
-          <PrivacyPolicyView
-            onBack={navigateToHome}
-            onContactClick={navigateToContact}
-            initialTab={legalTab}
-          />
-        ) : activeTool ? (
-          renderTool(activeTool)
-        ) : (
-          <HomeDashboard
-            onSelectTool={navigateToTool}
-            onOpenSearch={() => setIsSearchOpen(true)}
-            selectedCategory={selectedCategory}
-            onSelectCategory={handleSelectCategory}
-          />
-        )}
-      </main>
+      {/* App Shell: Developer Sidebar + Main Content Workbench */}
+      <div className="flex-1 flex w-full max-w-[1600px] mx-auto">
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
+          selectedCategory={selectedCategory}
+          onSelectCategory={(cat) => {
+            handleSelectCategory(cat);
+            setIsSidebarOpen(false);
+          }}
+          onGoHome={navigateToHome}
+          onGoBookmarks={() => {
+            handleSelectCategory('bookmarks');
+            setIsSidebarOpen(false);
+          }}
+          onGoContact={navigateToContact}
+          onGoPrivacy={() => navigateToPrivacy('privacy')}
+          onGoTerms={() => navigateToPrivacy('terms')}
+        />
+
+        {/* Main Content Area */}
+        <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-6">
+          {activePage === 'admin' ? (
+            <AdminPortal onBack={navigateToHome} />
+          ) : activePage === 'contact' ? (
+            <ContactView onBack={navigateToHome} />
+          ) : activePage === 'privacy' ? (
+            <PrivacyPolicyView
+              onBack={navigateToHome}
+              onContactClick={navigateToContact}
+              initialTab={legalTab}
+            />
+          ) : activeTool ? (
+            renderTool(activeTool)
+          ) : (
+            <HomeDashboard
+              onSelectTool={navigateToTool}
+              onOpenSearch={() => setIsSearchOpen(true)}
+              selectedCategory={selectedCategory}
+              onSelectCategory={handleSelectCategory}
+            />
+          )}
+        </main>
+      </div>
 
       {/* Footer */}
       <footer className="border-t mt-16 py-8"
@@ -286,10 +383,24 @@ export const App: React.FC = () => {
               >
                 XML
               </a>
+              <a
+                href="/admin"
+                onClick={(e) => {
+                  if (!e.ctrlKey && !e.metaKey && e.button === 0) {
+                    e.preventDefault();
+                    setActivePage('admin');
+                    window.history.pushState({}, '', '/admin');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                }}
+                className="hover:text-[var(--brand)] transition-colors cursor-pointer opacity-40 hover:opacity-100 font-mono text-[11px]"
+              >
+                Admin
+              </a>
             </div>
           </div>
 
-          {/* Clean Bottom Bar matching reference image */}
+          {/* Clean Bottom Bar */}
           <div className="border-t pt-5 flex flex-col md:flex-row items-center justify-between gap-4 text-xs"
             style={{ borderColor: 'var(--line)', color: 'var(--muted)' }}
           >
@@ -317,7 +428,7 @@ export const App: React.FC = () => {
               </button>.
             </div>
 
-            {/* Clean Minimalist Social Icons */}
+            {/* Social Icons */}
             <div className="flex items-center gap-3 text-[var(--muted)]">
               <a
                 href="https://github.com/coolnaveen99/codepackr"
@@ -357,8 +468,8 @@ export const App: React.FC = () => {
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-[#FF0000] transition-colors p-1 opacity-70 hover:opacity-100"
-                aria-label="YouTube (Placeholder)"
-                title="YouTube (Placeholder)"
+                aria-label="YouTube"
+                title="YouTube"
               >
                 <YoutubeIcon className="w-4 h-4" />
               </a>
@@ -368,8 +479,8 @@ export const App: React.FC = () => {
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-[#E1306C] transition-colors p-1 opacity-70 hover:opacity-100"
-                aria-label="Instagram (Placeholder)"
-                title="Instagram (Placeholder)"
+                aria-label="Instagram"
+                title="Instagram"
               >
                 <InstagramIcon className="w-4 h-4" />
               </a>

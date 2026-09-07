@@ -171,7 +171,7 @@ export const CATEGORY_SLUG_MAP: Record<string, string> = {
  * Resolves the active route based on the current window location (pathname + search)
  */
 export function resolveCurrentRoute(): {
-  page: 'home' | 'contact' | 'privacy';
+  page: 'home' | 'contact' | 'privacy' | 'admin';
   tool: ToolDef | null;
   category?: string;
 } {
@@ -181,6 +181,11 @@ export function resolveCurrentRoute(): {
 
   const pathname = window.location.pathname.replace(/^\/+|\/+$/g, '');
   const searchParams = new URLSearchParams(window.location.search);
+
+  // 0. Check admin console page
+  if (pathname === 'admin.html' || pathname === 'admin' || searchParams.get('page') === 'admin') {
+    return { page: 'admin', tool: null };
+  }
 
   // 1. Check contact page
   if (pathname === 'contact.html' || pathname === 'contact' || searchParams.get('page') === 'contact') {

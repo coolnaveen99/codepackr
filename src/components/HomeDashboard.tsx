@@ -1,10 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Search, Shield, Sparkles, ArrowRight, CheckCircle2, Star, Share2, Check, BookmarkCheck, Workflow, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import {
+  Search,
+  ArrowRight,
+  Star,
+  Share2,
+  Check,
+  Workflow,
+  Sparkles,
+  ShieldCheck,
+  Lock,
+  Layers,
+  SlidersHorizontal,
+} from 'lucide-react';
 import { ToolDef, CategoryFilter } from '../types';
 import { TOOLS, CATEGORIES } from '../data/tools';
 import { getIcon } from '../lib/icons';
 import { useBookmarks, shareToolUrl } from '../lib/bookmarks';
 import { getToolPath } from '../lib/urls';
+import { useToolGovernance } from '../lib/useToolGovernance';
 
 interface HomeDashboardProps {
   onSelectTool: (tool: ToolDef) => void;
@@ -19,35 +32,10 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   selectedCategory,
   onSelectCategory,
 }) => {
+  const [searchQuery, setSearchQuery] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const { isBookmarked, toggleBookmark, count: bookmarkCount } = useBookmarks();
-  const tabsContainerRef = useRef<HTMLDivElement>(null);
-
-  // Automatically scroll the active category tab into view so it is always visible
-  useEffect(() => {
-    if (!selectedCategory || !tabsContainerRef.current) return;
-    const targetId = `dash-cat-${selectedCategory}`;
-    const activeBtn = tabsContainerRef.current.querySelector(`#${targetId}`) as HTMLElement | null;
-    if (activeBtn) {
-      const container = tabsContainerRef.current;
-      const btnLeft = activeBtn.offsetLeft;
-      const btnWidth = activeBtn.offsetWidth;
-      const containerWidth = container.clientWidth;
-      const targetScroll = btnLeft - (containerWidth / 2) + (btnWidth / 2);
-
-      container.scrollTo({
-        left: Math.max(0, targetScroll),
-        behavior: 'smooth',
-      });
-    }
-  }, [selectedCategory]);
-
-  const scrollTabs = (direction: 'left' | 'right') => {
-    if (tabsContainerRef.current) {
-      const scrollAmount = direction === 'left' ? -220 : 220;
-      tabsContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
+  const { isToolVisible, getToolStatus } = useToolGovernance();
 
   const handleCardShare = async (e: React.MouseEvent, tool: ToolDef) => {
     e.stopPropagation();
@@ -63,396 +51,317 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     toggleBookmark(toolId);
   };
 
-  const filteredTools = TOOLS.filter((tool) => {
-    if (selectedCategory === 'bookmarks') {
-      return isBookmarked(tool.id);
-    }
-    if (selectedCategory !== 'all') {
-      return tool.category === selectedCategory;
-    }
-    return true;
-  });
+  // Filter tools by category, governance status, and instant in-page query
+  const filteredTools = useMemo(() => {
+    return TOOLS.filter((tool) => {
+      // Governance check: Hide hidden/admin-only tools from public view
+      if (!isToolVisible(tool.id)) return false;
 
-  const popularTools = TOOLS.filter((t) => t.popular);
+      // Category filter
+      if (selectedCategory === 'bookmarks') {
+        if (!isBookmarked(tool.id)) return false;
+      } else if (selectedCategory !== 'all') {
+        if (tool.category !== selectedCategory) return false;
+      }
+
+      // Query filter
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchesName = tool.name.toLowerCase().includes(q);
+        const matchesDesc = tool.description.toLowerCase().includes(q);
+        const matchesKeywords = tool.keywords?.some((k) => k.toLowerCase().includes(q));
+        const matchesCategory = tool.category.toLowerCase().includes(q);
+        return matchesName || matchesDesc || matchesKeywords || matchesCategory;
+      }
+
+      return true;
+    });
+  }, [selectedCategory, searchQuery, isBookmarked, isToolVisible]);
+
+  const activeCategoryLabel = useMemo(() => {
+    if (selectedCategory === 'all') return 'All Developer Tools';
+    if (selectedCategory === 'bookmarks') return 'Saved Favorites';
+    const cat = CATEGORIES.find((c) => c.id === selectedCategory);
+    return cat ? cat.label : selectedCategory;
+  }, [selectedCategory]);
 
   return (
-    <div className="space-y-8 pb-12">
-      {/* Hero Section */}
-      <div className="text-center max-w-2xl mx-auto pt-4 space-y-4">
-        <div
-          className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border"
-          style={{ backgroundColor: 'var(--brand-light)', borderColor: 'var(--brand)', color: 'var(--brand)' }}
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Local Developer Utilities Suite</span>
-        </div>
-
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight" style={{ color: 'var(--ink)' }}>
-          Format, Convert, Inspect &amp; Validate Code
-        </h1>
-
-        <p className="text-sm sm:text-base leading-relaxed" style={{ color: 'var(--muted)' }}>
-          Over 30+ browser-based tools for developers. Fully offline-capable, lightning fast, with zero server uploads.
-        </p>
-
-        {/* Quick Search Trigger */}
-        <div className="max-w-md mx-auto pt-2">
-          <div
-            onClick={onOpenSearch}
-            className="flex items-center justify-between px-4 py-3 rounded-2xl border cursor-pointer shadow-sm hover:border-[var(--brand)] transition-all"
-            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-          >
-            <div className="flex items-center gap-2.5" style={{ color: 'var(--muted)' }}>
-              <Search className="w-4 h-4" />
-              <span className="text-xs sm:text-sm">Search 30+ developer tools...</span>
+    <div className="space-y-8 pb-16">
+      {/* Sleek Minimalist Developer Hero */}
+      <div className="relative pt-2 pb-4 space-y-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--line)] pb-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium border border-[var(--line)] bg-[var(--surface)] text-[var(--muted)]">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>100% Client-Side In-Memory Sandbox</span>
             </div>
-            <kbd
-              className="px-2 py-0.5 rounded text-[10px] font-mono border"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--muted)' }}
-            >
-              Ctrl K
-            </kbd>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight" style={{ color: 'var(--ink)' }}>
+              Developer Tools &amp; EDI Suite
+            </h1>
+            <p className="text-xs sm:text-sm leading-relaxed text-[var(--muted)]">
+              High-performance formatters, converters, EDI processors, calculators, and encoders. Zero data leaves your browser.
+            </p>
+          </div>
+
+          {/* In-Page Quick Filter Search Input */}
+          <div className="w-full md:w-72 shrink-0">
+            <div className="relative">
+              <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Filter current view..."
+                className="w-full pl-9 pr-8 py-2 rounded-xl text-xs border border-[var(--line)] bg-[var(--surface)] text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand)] transition-colors shadow-2xs"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[var(--muted)] hover:text-[var(--ink)] cursor-pointer"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Popular Quick Pills: In between Popular: and JSON Formatter add EDI tools */}
-        <div className="flex flex-wrap items-center justify-center gap-1.5 pt-2">
-          <span className="text-xs font-semibold mr-1" style={{ color: 'var(--muted)' }}>
-            Popular:
-          </span>
-
-          {/* EDI Tools Shortcut Button */}
-          <button
-            id="popular-pill-edi-tools"
-            onClick={() => onSelectCategory('edi')}
-            className="px-2.5 py-1 text-xs font-semibold rounded-full border border-[var(--brand)] text-[var(--brand)] bg-[var(--brand-light)] hover:opacity-90 transition-all cursor-pointer flex items-center gap-1 shadow-xs"
-            title="Browse all EDI X12, EDIFACT & AS2 Tools"
-          >
-            <Workflow className="w-3 h-3" />
-            <span>EDI Tools</span>
-          </button>
-
-          {popularTools.slice(0, 6).map((t) => (
+        {/* Category Pills Strip */}
+        <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar py-1 text-xs">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <button
-              key={t.id}
-              onClick={() => onSelectTool(t)}
-              className="px-2.5 py-1 text-xs rounded-full border hover:border-[var(--brand)] hover:text-[var(--brand)] transition-colors cursor-pointer"
-              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              id="dash-cat-all"
+              onClick={() => onSelectCategory('all')}
+              className={`px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 border ${
+                selectedCategory === 'all'
+                  ? 'bg-[var(--brand)] text-white border-[var(--brand)] shadow-xs'
+                  : 'border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] hover:text-[var(--ink)] hover:border-zinc-400 dark:hover:border-zinc-600'
+              }`}
             >
-              {t.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Privacy Guarantee Pill */}
-      <div
-        className="max-w-3xl mx-auto p-4 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm"
-        style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-      >
-        <div className="flex items-center gap-3 text-left">
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-            style={{ backgroundColor: 'var(--brand-light)', color: 'var(--brand)' }}
-          >
-            <Shield className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-xs font-bold block" style={{ color: 'var(--ink)' }}>
-              Zero Data Sent to Servers
-            </span>
-            <span className="text-[11px]" style={{ color: 'var(--muted)' }}>
-              All formatting, hashing, and conversions happen 100% inside your browser's JavaScript sandbox.
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
-          <span className="flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5" /> No Cookies
-          </span>
-          <span className="flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5" /> Offline-Ready
-          </span>
-        </div>
-      </div>
-
-      {/* Category Tabs Section */}
-      <div id="categories-section" className="space-y-4">
-        <div
-          className="flex items-center justify-between border-b pb-3"
-          style={{ borderColor: 'var(--line)' }}
-        >
-          {/* Scrollable category pills container with left/right scroll arrows and no-scrollbar */}
-          <div className="relative flex items-center w-full min-w-0">
-            <button
-              onClick={() => scrollTabs('left')}
-              className="flex items-center justify-center w-7 h-7 rounded-lg border mr-1.5 shrink-0 text-[var(--muted)] hover:text-[var(--ink)] hover:border-[var(--brand)] transition-colors cursor-pointer"
-              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-              title="Scroll categories left"
-              aria-label="Scroll categories left"
-            >
-              <ChevronLeft className="w-4 h-4" />
+              <span>All Tools</span>
+              <span className={`text-[10px] font-mono px-1 rounded ${selectedCategory === 'all' ? 'bg-white/20 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-[var(--muted)]'}`}>
+                {TOOLS.length}
+              </span>
             </button>
 
-            <div
-              ref={tabsContainerRef}
-              className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-1 w-full"
+            {/* EDI Category Highlight */}
+            <button
+              id="dash-cat-edi"
+              onClick={() => onSelectCategory('edi')}
+              className={`px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 border ${
+                selectedCategory === 'edi'
+                  ? 'bg-[var(--brand)] text-white border-[var(--brand)] shadow-xs'
+                  : 'border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] hover:text-[var(--ink)] hover:border-zinc-400 dark:hover:border-zinc-600'
+              }`}
             >
-              {/* All Tools tab */}
-              <button
-                id="dash-cat-all"
-                onClick={() => onSelectCategory('all')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 border ${
-                  selectedCategory === 'all'
-                    ? 'bg-[var(--brand)] text-white border-[var(--brand)] shadow-xs'
-                    : 'border-[var(--line)] hover:border-[var(--brand)]/50 hover:bg-[var(--surface-3)] text-[var(--muted)] hover:text-[var(--ink)]'
-                }`}
-                style={{
-                  backgroundColor: selectedCategory === 'all' ? 'var(--brand)' : 'var(--surface)',
-                }}
-              >
-                <span>All Tools</span>
-                <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-md ${
-                    selectedCategory === 'all'
-                      ? 'bg-white/20 text-white'
-                      : 'bg-black/5 dark:bg-white/10 opacity-75'
-                  }`}
-                >
-                  {TOOLS.length}
-                </span>
-              </button>
+              <Workflow className="w-3.5 h-3.5" />
+              <span>EDI Tools</span>
+              <span className={`text-[10px] font-mono px-1 rounded ${selectedCategory === 'edi' ? 'bg-white/20 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-[var(--muted)]'}`}>
+                {TOOLS.filter((t) => t.category === 'edi').length}
+              </span>
+            </button>
 
-              {/* Bookmarked / Favorites Tab */}
-              <button
-                id="dash-cat-bookmarks"
-                onClick={() => onSelectCategory('bookmarks')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 border ${
-                  selectedCategory === 'bookmarks'
-                    ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
-                    : 'border-[var(--line)] hover:border-amber-500/50 hover:bg-[var(--surface-3)] text-[var(--muted)] hover:text-[var(--ink)]'
-                }`}
-                style={{
-                  backgroundColor: selectedCategory === 'bookmarks' ? '#f59e0b' : 'var(--surface)',
-                }}
-              >
-                <Star
-                  className={`w-3.5 h-3.5 ${
-                    selectedCategory === 'bookmarks'
-                      ? 'text-white fill-white'
-                      : bookmarkCount > 0
-                      ? 'text-amber-500 fill-amber-500'
-                      : 'text-zinc-400'
-                  }`}
-                />
-                <span>Favorites</span>
-                <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-md ${
-                    selectedCategory === 'bookmarks'
-                      ? 'bg-white/20 text-white'
-                      : 'bg-black/5 dark:bg-white/10 opacity-75'
+            {/* Other Categories */}
+            {CATEGORIES.filter((c) => c.id !== 'all' && c.id !== 'edi').map((cat) => {
+              const count = TOOLS.filter((t) => t.category === cat.id).length;
+              const isSelected = selectedCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  id={`dash-cat-${cat.id}`}
+                  onClick={() => onSelectCategory(cat.id)}
+                  className={`px-2.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 border ${
+                    isSelected
+                      ? 'bg-[var(--brand)] text-white border-[var(--brand)] shadow-xs'
+                      : 'border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] hover:text-[var(--ink)] hover:border-zinc-400 dark:hover:border-zinc-600'
                   }`}
                 >
+                  <span>{cat.label}</span>
+                  <span className={`text-[10px] font-mono px-1 rounded ${isSelected ? 'bg-white/20 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-[var(--muted)]'}`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+
+            {/* Bookmarks */}
+            <button
+              id="dash-cat-bookmarks"
+              onClick={() => onSelectCategory('bookmarks')}
+              className={`px-2.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1.5 border ${
+                selectedCategory === 'bookmarks'
+                  ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
+                  : 'border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] hover:text-[var(--ink)] hover:border-amber-400'
+              }`}
+            >
+              <Star className={`w-3.5 h-3.5 ${selectedCategory === 'bookmarks' ? 'fill-white' : bookmarkCount > 0 ? 'text-amber-500 fill-amber-500' : ''}`} />
+              <span>Favorites</span>
+              {bookmarkCount > 0 && (
+                <span className={`text-[10px] font-mono px-1 rounded ${selectedCategory === 'bookmarks' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-300'}`}>
                   {bookmarkCount}
                 </span>
-              </button>
-
-              {/* Other Categories */}
-              {CATEGORIES.filter((c) => c.id !== 'all').map((cat) => {
-                const count = TOOLS.filter((t) => t.category === cat.id).length;
-                const isSelected = selectedCategory === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    id={`dash-cat-${cat.id}`}
-                    onClick={() => onSelectCategory(cat.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 border ${
-                      isSelected
-                        ? 'bg-[var(--brand)] text-white border-[var(--brand)] shadow-xs'
-                        : 'border-[var(--line)] hover:border-[var(--brand)]/50 hover:bg-[var(--surface-3)] text-[var(--muted)] hover:text-[var(--ink)]'
-                    }`}
-                    style={{
-                      backgroundColor: isSelected ? 'var(--brand)' : 'var(--surface)',
-                    }}
-                  >
-                    <span>{cat.label}</span>
-                    <span
-                      className={`text-[10px] px-1.5 py-0.2 rounded-md ${
-                        isSelected
-                          ? 'bg-white/20 text-white'
-                          : 'bg-black/5 dark:bg-white/10 opacity-75'
-                      }`}
-                    >
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <button
-              onClick={() => scrollTabs('right')}
-              className="flex items-center justify-center w-7 h-7 rounded-lg border ml-1.5 shrink-0 text-[var(--muted)] hover:text-[var(--ink)] hover:border-[var(--brand)] transition-colors cursor-pointer"
-              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-              title="Scroll categories right"
-              aria-label="Scroll categories right"
-            >
-              <ChevronRight className="w-4 h-4" />
+              )}
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Tools Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredTools.map((tool) => {
-            const bookmarked = isBookmarked(tool.id);
-            const isCopied = copiedId === tool.id;
-            return (
-              <div
-                key={tool.id}
-                onClick={() => onSelectTool(tool)}
-                className="group p-5 rounded-2xl border shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between hover:border-[var(--brand)] relative"
-                style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105"
-                      style={{ backgroundColor: 'var(--brand-light)', color: 'var(--brand)' }}
-                    >
-                      {getIcon(tool.icon)}
-                    </div>
-
-                    {/* Top Action Pills */}
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={(e) => handleCardShare(e, tool)}
-                        className="p-1.5 rounded-lg border transition-colors hover:border-[var(--brand)] cursor-pointer"
-                        style={{
-                          backgroundColor: isCopied ? 'var(--brand-light)' : 'var(--surface-2)',
-                          borderColor: isCopied ? 'var(--brand)' : 'var(--line)',
-                          color: isCopied ? 'var(--brand)' : 'var(--muted)',
-                        }}
-                        title={isCopied ? 'Link Copied!' : 'Share Tool Link'}
-                      >
-                        {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
-                      </button>
-
-                      <button
-                        onClick={(e) => handleCardBookmark(e, tool.id)}
-                        className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
-                          bookmarked
-                            ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800'
-                            : 'hover:border-[var(--brand)]'
-                        }`}
-                        style={
-                          bookmarked
-                            ? {}
-                            : { backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }
-                        }
-                        title={bookmarked ? 'Remove Bookmark' : 'Save Tool to Bookmarks'}
-                      >
-                        <Star
-                          className={`w-3.5 h-3.5 ${
-                            bookmarked
-                              ? 'text-amber-500 fill-amber-500'
-                              : 'text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300'
-                          }`}
-                        />
-                      </button>
-
-                      {tool.popular && (
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
-                          Popular
-                        </span>
-                      )}
-
-                      {tool.isNew && (
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
-                          New
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3
-                      className="font-bold text-base group-hover:text-[var(--brand)] transition-colors"
-                      style={{ color: 'var(--ink)' }}
-                    >
-                      <a
-                        href={getToolPath(tool)}
-                        onClick={(e) => {
-                          if (!e.ctrlKey && !e.metaKey && e.button === 0) {
-                            e.preventDefault();
-                            onSelectTool(tool);
-                          }
-                        }}
-                        className="hover:underline focus:outline-none"
-                      >
-                        {tool.name}
-                      </a>
-                    </h3>
-                    <p className="text-xs leading-relaxed mt-1" style={{ color: 'var(--muted)' }}>
-                      {tool.description}
-                    </p>
-                  </div>
-                </div>
-
-                <div
-                  className="pt-4 mt-4 border-t flex items-center justify-between text-xs"
-                  style={{ borderColor: 'var(--line)' }}
-                >
-                  <span className="font-medium capitalize text-[11px]" style={{ color: 'var(--muted)' }}>
-                    {tool.category}
-                  </span>
-                  <a
-                    href={getToolPath(tool)}
-                    onClick={(e) => {
-                      if (!e.ctrlKey && !e.metaKey && e.button === 0) {
-                        e.preventDefault();
-                        onSelectTool(tool);
-                      }
-                    }}
-                    className="flex items-center gap-1 font-semibold text-[var(--brand)] group-hover:translate-x-1 transition-transform"
-                  >
-                    <span>Launch tool</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Empty State when Bookmarks are empty */}
-        {selectedCategory === 'bookmarks' && filteredTools.length === 0 && (
-          <div
-            className="text-center py-16 px-4 rounded-3xl border border-dashed space-y-4 max-w-md mx-auto"
-            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-          >
-            <div className="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center bg-amber-100 dark:bg-amber-950/50 text-amber-500">
-              <Star className="w-6 h-6 fill-amber-500" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold" style={{ color: 'var(--ink)' }}>
-                No Bookmarked Tools Yet
-              </h3>
-              <p className="text-xs leading-relaxed mt-1" style={{ color: 'var(--muted)' }}>
-                Click the star icon on any developer tool to save your favorites for instant 1-click access anytime!
-              </p>
-            </div>
-            <button
-              onClick={() => onSelectCategory('all')}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-white shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: 'var(--brand)' }}
-            >
-              Browse All 30+ Tools
-            </button>
-          </div>
+      {/* Grid Header / Counter */}
+      <div className="flex items-center justify-between text-xs text-[var(--muted)] font-mono">
+        <span>
+          {activeCategoryLabel} • {filteredTools.length} {filteredTools.length === 1 ? 'utility' : 'utilities'}
+        </span>
+        {searchQuery && (
+          <span className="text-[var(--brand)]">
+            Matching "{searchQuery}"
+          </span>
         )}
       </div>
+
+      {/* Bento Grid: Clean Modern Developer Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+        {filteredTools.map((tool) => {
+          const bookmarked = isBookmarked(tool.id);
+          const isCopied = copiedId === tool.id;
+          const gov = getToolStatus(tool.id);
+
+          return (
+            <div
+              key={tool.id}
+              onClick={() => onSelectTool(tool)}
+              className="group relative flex flex-col justify-between p-4 rounded-xl border transition-all duration-200 cursor-pointer hover:border-[var(--brand)] shadow-2xs hover:shadow-sm"
+              style={{
+                backgroundColor: 'var(--surface)',
+                borderColor: 'var(--line)',
+              }}
+            >
+              <div className="space-y-3">
+                {/* Card Header: Icon & Badges / Actions */}
+                <div className="flex items-center justify-between">
+                  <div
+                    className="w-9 h-9 rounded-lg flex items-center justify-center border border-[var(--line)] bg-[var(--surface-2)] text-[var(--ink)] group-hover:text-[var(--brand)] group-hover:border-[var(--brand)] transition-colors"
+                  >
+                    {getIcon(tool.icon)}
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    {gov.status === 'maintenance' ? (
+                      <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        Maintenance
+                      </span>
+                    ) : gov.status === 'beta' ? (
+                      <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md border border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                        Beta
+                      </span>
+                    ) : (
+                      <>
+                        {tool.popular && (
+                          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md border border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                            Popular
+                          </span>
+                        )}
+                        {tool.isNew && (
+                          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                            New
+                          </span>
+                        )}
+                      </>
+                    )}
+
+                    {/* Bookmark Action */}
+                    <button
+                      onClick={(e) => handleCardBookmark(e, tool.id)}
+                      className={`p-1.5 rounded-md border transition-colors cursor-pointer ${
+                        bookmarked
+                          ? 'border-amber-400 bg-amber-50 dark:bg-amber-950/40 text-amber-500'
+                          : 'border-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-[var(--surface-3)]'
+                      }`}
+                      title={bookmarked ? 'Remove from favorites' : 'Save to favorites'}
+                      aria-label="Bookmark tool"
+                    >
+                      <Star className={`w-3.5 h-3.5 ${bookmarked ? 'fill-amber-500' : ''}`} />
+                    </button>
+
+                    {/* Share Link Action */}
+                    <button
+                      onClick={(e) => handleCardShare(e, tool)}
+                      className="p-1.5 rounded-md border border-transparent text-zinc-400 hover:text-[var(--ink)] hover:bg-[var(--surface-3)] transition-colors cursor-pointer"
+                      title={isCopied ? 'URL copied!' : 'Share tool'}
+                      aria-label="Share tool URL"
+                    >
+                      {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Card Title & Description */}
+                <div>
+                  <h3 className="font-bold text-sm leading-snug group-hover:text-[var(--brand)] transition-colors" style={{ color: 'var(--ink)' }}>
+                    <a
+                      href={getToolPath(tool)}
+                      onClick={(e) => {
+                        if (!e.ctrlKey && !e.metaKey && e.button === 0) {
+                          e.preventDefault();
+                          onSelectTool(tool);
+                        }
+                      }}
+                      className="hover:underline focus:outline-none"
+                    >
+                      {tool.name}
+                    </a>
+                  </h3>
+                  <p className="text-xs text-[var(--muted)] leading-relaxed line-clamp-2 mt-1">
+                    {tool.description}
+                  </p>
+                  {gov.noticeMessage && (
+                    <div className="mt-2 px-2 py-1 rounded-md text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400">
+                      {gov.noticeMessage}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Card Footer: Category Pill & Launch Arrow */}
+              <div className="pt-3 mt-3 border-t border-[var(--line)] flex items-center justify-between text-xs">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--muted)]">
+                  {tool.category}
+                </span>
+
+                <span className="flex items-center gap-1 font-semibold text-[11px] text-[var(--brand)] group-hover:translate-x-0.5 transition-transform">
+                  <span>Launch</span>
+                  <ArrowRight className="w-3 h-3" />
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Empty State */}
+      {filteredTools.length === 0 && (
+        <div className="text-center py-16 px-4 rounded-2xl border border-dashed border-[var(--line)] bg-[var(--surface)] max-w-md mx-auto space-y-3">
+          <div className="w-10 h-10 rounded-xl mx-auto flex items-center justify-center bg-[var(--surface-2)] text-[var(--muted)]">
+            <Search className="w-5 h-5" />
+          </div>
+          <h3 className="text-sm font-bold" style={{ color: 'var(--ink)' }}>
+            No matching utilities found
+          </h3>
+          <p className="text-xs text-[var(--muted)]">
+            {selectedCategory === 'bookmarks'
+              ? 'You have not added any tools to your favorites yet. Click the star icon on any tool card to bookmark it.'
+              : `No tools matched "${searchQuery}". Try searching for another keyword or EDI segment.`}
+          </p>
+          <button
+            onClick={() => {
+              setSearchQuery('');
+              onSelectCategory('all');
+            }}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--brand)] text-white hover:opacity-90 transition-opacity cursor-pointer"
+          >
+            Clear Filters &amp; View All Tools
+          </button>
+        </div>
+      )}
     </div>
   );
 };

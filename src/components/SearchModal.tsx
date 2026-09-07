@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, ArrowRight, CornerDownLeft } from 'lucide-react';
 import { TOOLS } from '../data/tools';
 import { ToolDef } from '../types';
+import { useToolGovernance } from '../lib/useToolGovernance';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { isToolVisible, getToolStatus } = useToolGovernance();
 
   useEffect(() => {
     if (isOpen) {
@@ -23,6 +25,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
   }, [isOpen]);
 
   const filteredTools = TOOLS.filter((tool) => {
+    if (!isToolVisible(tool.id)) return false;
     const q = query.toLowerCase().trim();
     if (!q) return true;
     return (
