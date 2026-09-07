@@ -376,9 +376,21 @@ const toolsData = [
   },
   {
     slug: 'sip-calculator',
-    name: 'SIP Investment Calculator',
-    desc: 'Calculate future wealth and expected returns for Systematic Investment Plans and mutual funds in any currency',
+    name: 'SIP Calculator',
+    desc: 'Calculate future wealth and expected returns for Systematic Investment Plans and mutual funds in any currency with interactive compounding graphs',
     tags: ['#Finance', '#Investing', '#SIPCalculator', '#MutualFunds', '#Wealth']
+  },
+  {
+    slug: 'investment-calculator',
+    name: 'Investment Calculator',
+    desc: 'Calculate exponential investment growth, custom deposit frequencies, compound returns, and visual balance timelines',
+    tags: ['#Finance', '#Investing', '#InvestmentCalculator', '#WealthBuilding', '#Calculators']
+  },
+  {
+    slug: 'json-definition-generator',
+    name: 'JSON Definition & Type Generator',
+    desc: 'Convert any JSON structure into TypeScript types, JSON Schema, Python Pydantic, C# POCO, Java POJO, Go structs, and Rust Serde types',
+    tags: ['#JSON', '#TypeScript', '#Python', '#Pydantic', '#SoftwareEngineering', '#CodeGeneration']
   },
   {
     slug: 'percentage-calculator',

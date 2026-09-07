@@ -1151,7 +1151,7 @@ export const As2ToolsView: React.FC<As2ToolsViewProps> = ({
 
       {/* Main Suite Navigation Tabs */}
       <div
-        className="flex items-center gap-2 border-b overflow-x-auto pb-2 text-xs font-semibold"
+        className="flex items-center gap-2 border-b overflow-x-auto no-scrollbar pb-2 text-xs font-semibold"
         style={{ borderColor: 'var(--line)' }}
       >
         <button

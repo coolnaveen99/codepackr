@@ -7,12 +7,6 @@ import {
   Check,
   Download,
   Globe,
-  Send,
-  Sparkles,
-  Layers,
-  FileCode,
-  ShieldCheck,
-  RefreshCw,
 } from 'lucide-react';
 import sitemapData from '../data/sitemapUrls.json';
 
@@ -25,10 +19,20 @@ export const SitemapModal: React.FC<SitemapModalProps> = ({ isOpen, onClose }) =
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submissionResult, setSubmissionResult] = useState<string | null>(null);
 
-  const urls = sitemapData.urls || [];
+  // Deduplicated URL inventory
+  const urls = useMemo(() => {
+    const seen = new Set<string>();
+    const unique: any[] = [];
+    (sitemapData.urls || []).forEach((u: any) => {
+      const locKey = u.loc || u.path;
+      if (!seen.has(locKey)) {
+        seen.add(locKey);
+        unique.push(u);
+      }
+    });
+    return unique;
+  }, []);
   const sitemapXmlUrl = `${sitemapData.baseUrl}/sitemap.xml`;
 
   // Categories list
@@ -63,36 +67,6 @@ export const SitemapModal: React.FC<SitemapModalProps> = ({ isOpen, onClose }) =
 
   const handleDownloadSitemap = () => {
     window.open('/sitemap.xml', '_blank');
-  };
-
-  const handleSimulateIndexNow = async () => {
-    setIsSubmitting(true);
-    setSubmissionResult(null);
-
-    try {
-      // Direct IndexNow ping via browser if possible or guidance
-      const res = await fetch('https://api.indexnow.org/indexnow', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        mode: 'no-cors', // handle CORS gracefully
-        body: JSON.stringify({
-          host: sitemapData.host,
-          key: 'bc8b27f46bbcd43f50a45f870843689d',
-          keyLocation: `${sitemapData.baseUrl}/bc8b27f46bbcd43f50a45f870843689d.txt`,
-          urlList: urls.map((u: any) => u.loc),
-        }),
-      });
-
-      setSubmissionResult(
-        `Batch of ${urls.length} live URLs dispatched to IndexNow protocol (Yandex, Naver, Bing & IndexNow network).`
-      );
-    } catch (e: any) {
-      setSubmissionResult(
-        `Submission dispatched. Ensure bc8b27f46bbcd43f50a45f870843689d.txt is verified on your custom domain.`
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   if (!isOpen) return null;
@@ -134,13 +108,15 @@ export const SitemapModal: React.FC<SitemapModalProps> = ({ isOpen, onClose }) =
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl border hover:opacity-80 transition-opacity cursor-pointer"
-            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--muted)' }}
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onClose}
+              className="p-2 rounded-xl border hover:opacity-80 transition-opacity cursor-pointer"
+              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--muted)' }}
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Action Banner */}
@@ -148,6 +124,7 @@ export const SitemapModal: React.FC<SitemapModalProps> = ({ isOpen, onClose }) =
           className="p-4 border-b flex flex-wrap items-center justify-between gap-3"
           style={{ borderColor: 'var(--line)', backgroundColor: 'rgba(var(--brand-rgb, 99, 102, 241), 0.03)' }}
         >
+          {/* Public Sitemap Links */}
           <div className="flex items-center gap-2 flex-wrap text-xs">
             <span className="text-[var(--muted)] font-mono text-[11px] px-2.5 py-1 rounded-lg border bg-[var(--bg)] border-[var(--line)]">
               {sitemapXmlUrl}
@@ -168,59 +145,8 @@ export const SitemapModal: React.FC<SitemapModalProps> = ({ isOpen, onClose }) =
               <Download className="w-3.5 h-3.5" />
               <span>View XML</span>
             </button>
-            <a
-              href="/codepackr_social_media_promotions.csv"
-              download="codepackr_social_media_promotions.csv"
-              className="px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 hover:opacity-80 transition-opacity cursor-pointer text-xs"
-              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Promotions CSV</span>
-            </a>
-          </div>
-
-          {/* Quick Submit Buttons */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <a
-              href={`https://search.google.com/search-console/sitemaps?resource_id=${encodeURIComponent(
-                sitemapData.baseUrl + '/'
-              )}`}
-              target="_blank"
-              rel="noreferrer"
-              className="px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 hover:opacity-90 transition-opacity cursor-pointer bg-[#4285F4] text-white border-transparent shadow-xs"
-            >
-              <span>Submit to Google</span>
-              <ExternalLink className="w-3 h-3" />
-            </a>
-
-            <a
-              href={`https://www.bing.com/webmasters/sitemaps?siteUrl=${encodeURIComponent(sitemapData.baseUrl + '/')}`}
-              target="_blank"
-              rel="noreferrer"
-              className="px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 hover:opacity-90 transition-opacity cursor-pointer bg-[#008272] text-white border-transparent shadow-xs"
-            >
-              <span>Submit to Bing</span>
-              <ExternalLink className="w-3 h-3" />
-            </a>
-
-            <button
-              onClick={handleSimulateIndexNow}
-              disabled={isSubmitting}
-              className="px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 hover:opacity-90 transition-opacity cursor-pointer text-white shadow-xs"
-              style={{ backgroundColor: 'var(--brand)' }}
-            >
-              <Send className={`w-3 h-3 ${isSubmitting ? 'animate-spin' : ''}`} />
-              <span>{isSubmitting ? 'Submitting...' : 'IndexNow Push'}</span>
-            </button>
           </div>
         </div>
-
-        {submissionResult && (
-          <div className="px-5 py-2.5 bg-emerald-500/10 border-b border-emerald-500/20 text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-600" />
-            <span>{submissionResult}</span>
-          </div>
-        )}
 
         {/* Search & Category Filter */}
         <div className="p-4 border-b space-y-3" style={{ borderColor: 'var(--line)' }}>
@@ -270,7 +196,7 @@ export const SitemapModal: React.FC<SitemapModalProps> = ({ isOpen, onClose }) =
               const isCopied = copiedUrl === u.loc;
               return (
                 <div
-                  key={u.loc}
+                  key={`${u.loc || u.path}-${idx}`}
                   className="py-2.5 px-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-[var(--bg)] rounded-xl transition-colors group"
                 >
                   <div className="flex-1 min-w-0">

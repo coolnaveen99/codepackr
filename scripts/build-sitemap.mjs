@@ -54,7 +54,12 @@ const specializedAliases = [
   { slug: 'json-minifier', name: 'JSON Minifier & Compressor', priority: '0.8', changefreq: 'monthly', category: 'formatters' },
   { slug: 'crc32-checksum-generator', name: 'CRC32 Checksum Generator', priority: '0.8', changefreq: 'monthly', category: 'encoders' },
   { slug: 'hmac-generator', name: 'HMAC Keyed-Hash Generator', priority: '0.8', changefreq: 'monthly', category: 'encoders' },
-  { slug: 'sip-calculator', name: 'SIP Investment Calculator', priority: '0.8', changefreq: 'monthly', category: 'calculators' },
+  { slug: 'sip-calculator', name: 'SIP Calculator', priority: '0.85', changefreq: 'monthly', category: 'calculators' },
+  { slug: 'investment-calculator', name: 'Investment Calculator', priority: '0.85', changefreq: 'monthly', category: 'calculators' },
+  { slug: 'compound-investment-calculator', name: 'Compound Investment Calculator', priority: '0.8', changefreq: 'monthly', category: 'calculators' },
+  { slug: 'compound-interest-calculator', name: 'Compound Interest Calculator', priority: '0.8', changefreq: 'monthly', category: 'calculators' },
+  { slug: 'json-definition-generator', name: 'JSON Definition & Type Generator', priority: '0.85', changefreq: 'monthly', category: 'converters' },
+  { slug: 'json-to-definition', name: 'JSON to Type Definition Converter', priority: '0.8', changefreq: 'monthly', category: 'converters' },
   { slug: 'markdown', name: 'Markdown Live Editor', priority: '0.8', changefreq: 'monthly', category: 'utilities' },
   { slug: 'what-is-my-screen-resolution', name: 'Screen Resolution & Viewport Checker', priority: '0.8', changefreq: 'monthly', category: 'utilities' },
   { slug: 'what-is-my-user-agent', name: 'User Agent Inspector', priority: '0.8', changefreq: 'monthly', category: 'utilities' },
@@ -78,11 +83,20 @@ const legalPages = [
   { slug: 'terms', name: 'Terms and Conditions', priority: '0.6', changefreq: 'monthly', category: 'legal' },
 ];
 
-// Assemble complete URL list
+// Assemble complete URL list with strict deduplication
 const allEntries = [];
+const existingSlugs = new Set();
+
+const addEntry = (entry) => {
+  const cleanSlug = entry.path.replace(/^\//, '') || '__root__';
+  if (!existingSlugs.has(cleanSlug)) {
+    existingSlugs.add(cleanSlug);
+    allEntries.push(entry);
+  }
+};
 
 // Homepage
-allEntries.push({
+addEntry({
   loc: `${BASE_URL}/`,
   path: '/',
   name: 'Codepackr - Free Online Developer & EDI Tools',
@@ -93,7 +107,7 @@ allEntries.push({
 
 // Category Hubs
 for (const hub of categoryHubs) {
-  allEntries.push({
+  addEntry({
     loc: `${BASE_URL}/${hub.slug}`,
     path: `/${hub.slug}`,
     name: hub.name,
@@ -105,7 +119,7 @@ for (const hub of categoryHubs) {
 
 // Tool Pages
 for (const [id, tool] of toolsMap.entries()) {
-  allEntries.push({
+  addEntry({
     loc: `${BASE_URL}/${id}`,
     path: `/${id}`,
     name: tool.name,
@@ -116,34 +130,27 @@ for (const [id, tool] of toolsMap.entries()) {
 }
 
 // Specialized Aliases (if not already added)
-const existingSlugs = new Set(allEntries.map(e => e.path.replace(/^\//, '')));
 for (const alias of specializedAliases) {
-  if (!existingSlugs.has(alias.slug)) {
-    existingSlugs.add(alias.slug);
-    allEntries.push({
-      loc: `${BASE_URL}/${alias.slug}`,
-      path: `/${alias.slug}`,
-      name: alias.name,
-      priority: alias.priority,
-      changefreq: alias.changefreq,
-      category: alias.category,
-    });
-  }
+  addEntry({
+    loc: `${BASE_URL}/${alias.slug}`,
+    path: `/${alias.slug}`,
+    name: alias.name,
+    priority: alias.priority,
+    changefreq: alias.changefreq,
+    category: alias.category,
+  });
 }
 
 // Legal Pages
 for (const legal of legalPages) {
-  if (!existingSlugs.has(legal.slug)) {
-    existingSlugs.add(legal.slug);
-    allEntries.push({
-      loc: `${BASE_URL}/${legal.slug}`,
-      path: `/${legal.slug}`,
-      name: legal.name,
-      priority: legal.priority,
-      changefreq: legal.changefreq,
-      category: legal.category,
-    });
-  }
+  addEntry({
+    loc: `${BASE_URL}/${legal.slug}`,
+    path: `/${legal.slug}`,
+    name: legal.name,
+    priority: legal.priority,
+    changefreq: legal.changefreq,
+    category: legal.category,
+  });
 }
 
 // Build XML String

@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-09-06",
+  "updatedAt": "2026-09-07",
   "host": "www.codepackr.com",
   "baseUrl": "https://www.codepackr.com",
-  "totalUrls": 101,
+  "totalUrls": 100,
   "urls": [
     {
       "loc": "https://www.codepackr.com/",
@@ -595,14 +595,6 @@
       "priority": "0.8",
       "changefreq": "monthly",
       "category": "utilities"
-    },
-    {
-      "loc": "https://www.codepackr.com/text-tools",
-      "path": "/text-tools",
-      "name": "Text Tools & Statistics",
-      "priority": "0.8",
-      "changefreq": "monthly",
-      "category": "text"
     },
     {
       "loc": "https://www.codepackr.com/edi-x12-formatter",

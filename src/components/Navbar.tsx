@@ -1,5 +1,5 @@
-import React from 'react';
-import { Search, Moon, Sun, Terminal, MessageSquare, Star } from 'lucide-react';
+import React, { useRef, useEffect } from 'react';
+import { Search, Moon, Sun, Terminal, MessageSquare, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ToolCategory, CategoryFilter } from '../types';
 import { CATEGORIES } from '../data/tools';
 import { useBookmarks } from '../lib/bookmarks';
@@ -28,6 +28,33 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const darkMode = theme === 'dark';
   const { count: bookmarkCount } = useBookmarks();
+  const navTabsRef = useRef<HTMLDivElement>(null);
+
+  // Automatically scroll active category pill into view in the navbar
+  useEffect(() => {
+    if (!selectedCategory || !navTabsRef.current) return;
+    const targetId = `cat-tab-${selectedCategory}`;
+    const activeBtn = navTabsRef.current.querySelector(`#${targetId}`) as HTMLElement | null;
+    if (activeBtn) {
+      const container = navTabsRef.current;
+      const btnLeft = activeBtn.offsetLeft;
+      const btnWidth = activeBtn.offsetWidth;
+      const containerWidth = container.clientWidth;
+      const targetScroll = btnLeft - (containerWidth / 2) + (btnWidth / 2);
+
+      container.scrollTo({
+        left: Math.max(0, targetScroll),
+        behavior: 'smooth',
+      });
+    }
+  }, [selectedCategory]);
+
+  const scrollNavTabs = (direction: 'left' | 'right') => {
+    if (navTabsRef.current) {
+      const scrollAmount = direction === 'left' ? -200 : 200;
+      navTabsRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   const handleSelectBookmarks = () => {
     if (onGoBookmarks) {
@@ -186,88 +213,111 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Category Horizontal Navigation (Heading Sub-menu) */}
         {onSelectCategory && (
-          <div className="flex items-center gap-1.5 overflow-x-auto py-2.5 scrollbar-none text-xs border-t"
-            style={{ borderColor: 'var(--line)' }}
-          >
-            {/* All Tools Tab */}
+          <div className="relative flex items-center border-t py-1.5" style={{ borderColor: 'var(--line)' }}>
             <button
-              id="cat-tab-all"
-              onClick={() => onSelectCategory('all')}
-              className={`px-3 py-1 rounded-full whitespace-nowrap font-medium transition-all cursor-pointer ${
-                selectedCategory === 'all' ? 'shadow-sm font-semibold' : 'hover:opacity-80'
-              }`}
-              style={{
-                backgroundColor: selectedCategory === 'all' ? 'var(--brand)' : 'var(--surface)',
-                color: selectedCategory === 'all' ? '#ffffff' : 'var(--ink)',
-                border: selectedCategory === 'all' ? '1px solid var(--brand)' : '1px solid var(--line)',
-              }}
+              onClick={() => scrollNavTabs('left')}
+              className="flex items-center justify-center w-6 h-6 rounded-md border mr-1 shrink-0 text-[var(--muted)] hover:text-[var(--ink)] hover:border-[var(--brand)] transition-colors cursor-pointer"
+              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+              title="Scroll categories left"
+              aria-label="Scroll categories left"
             >
-              All Tools
+              <ChevronLeft className="w-3.5 h-3.5" />
             </button>
 
-            {/* Bookmarks Tab in Heading Menu */}
-            <button
-              id="cat-tab-bookmarks"
-              onClick={() => onSelectCategory('bookmarks')}
-              className={`px-3 py-1 rounded-full whitespace-nowrap font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
-                selectedCategory === 'bookmarks'
-                  ? 'shadow-sm font-semibold bg-amber-500 text-white border border-amber-500'
-                  : 'hover:opacity-80'
-              }`}
-              style={
-                selectedCategory === 'bookmarks'
-                  ? { backgroundColor: '#f59e0b', color: '#ffffff', border: '1px solid #f59e0b' }
-                  : {
-                      backgroundColor: 'var(--surface)',
-                      color: 'var(--ink)',
-                      border: '1px solid var(--line)',
-                    }
-              }
+            <div
+              ref={navTabsRef}
+              className="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar scrollbar-none text-xs scroll-smooth flex-1"
             >
-              <Star
-                className={`w-3 h-3 ${
-                  selectedCategory === 'bookmarks'
-                    ? 'text-white fill-white'
-                    : bookmarkCount > 0
-                    ? 'text-amber-500 fill-amber-500'
-                    : 'text-zinc-400'
+              {/* All Tools Tab */}
+              <button
+                id="cat-tab-all"
+                onClick={() => onSelectCategory('all')}
+                className={`px-3 py-1 rounded-full whitespace-nowrap font-medium transition-all cursor-pointer ${
+                  selectedCategory === 'all' ? 'shadow-sm font-semibold' : 'hover:opacity-80'
                 }`}
-              />
-              <span>Favorites</span>
-              {bookmarkCount > 0 && (
-                <span
-                  className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
-                    selectedCategory === 'bookmarks'
-                      ? 'bg-white text-amber-600'
-                      : 'bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300'
-                  }`}
-                >
-                  {bookmarkCount}
-                </span>
-              )}
-            </button>
+                style={{
+                  backgroundColor: selectedCategory === 'all' ? 'var(--brand)' : 'var(--surface)',
+                  color: selectedCategory === 'all' ? '#ffffff' : 'var(--ink)',
+                  border: selectedCategory === 'all' ? '1px solid var(--brand)' : '1px solid var(--line)',
+                }}
+              >
+                All Tools
+              </button>
 
-            {/* Other Categories */}
-            {CATEGORIES.filter((c) => c.id !== 'all').map((cat) => {
-              const isActive = selectedCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  id={`cat-tab-${cat.id}`}
-                  onClick={() => onSelectCategory(cat.id)}
-                  className={`px-3 py-1 rounded-full whitespace-nowrap font-medium transition-all cursor-pointer ${
-                    isActive ? 'shadow-sm font-semibold' : 'hover:opacity-80'
+              {/* Bookmarks Tab in Heading Menu */}
+              <button
+                id="cat-tab-bookmarks"
+                onClick={() => onSelectCategory('bookmarks')}
+                className={`px-3 py-1 rounded-full whitespace-nowrap font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                  selectedCategory === 'bookmarks'
+                    ? 'shadow-sm font-semibold bg-amber-500 text-white border border-amber-500'
+                    : 'hover:opacity-80'
+                }`}
+                style={
+                  selectedCategory === 'bookmarks'
+                    ? { backgroundColor: '#f59e0b', color: '#ffffff', border: '1px solid #f59e0b' }
+                    : {
+                        backgroundColor: 'var(--surface)',
+                        color: 'var(--ink)',
+                        border: '1px solid var(--line)',
+                      }
+                }
+              >
+                <Star
+                  className={`w-3 h-3 ${
+                    selectedCategory === 'bookmarks'
+                      ? 'text-white fill-white'
+                      : bookmarkCount > 0
+                      ? 'text-amber-500 fill-amber-500'
+                      : 'text-zinc-400'
                   }`}
-                  style={{
-                    backgroundColor: isActive ? 'var(--brand)' : 'var(--surface)',
-                    color: isActive ? '#ffffff' : 'var(--ink)',
-                    border: isActive ? '1px solid var(--brand)' : '1px solid var(--line)',
-                  }}
-                >
-                  {cat.label}
-                </button>
-              );
-            })}
+                />
+                <span>Favorites</span>
+                {bookmarkCount > 0 && (
+                  <span
+                    className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                      selectedCategory === 'bookmarks'
+                        ? 'bg-white text-amber-600'
+                        : 'bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300'
+                    }`}
+                  >
+                    {bookmarkCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Other Categories */}
+              {CATEGORIES.filter((c) => c.id !== 'all').map((cat) => {
+                const isActive = selectedCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    id={`cat-tab-${cat.id}`}
+                    onClick={() => onSelectCategory(cat.id)}
+                    className={`px-3 py-1 rounded-full whitespace-nowrap font-medium transition-all cursor-pointer ${
+                      isActive ? 'shadow-sm font-semibold' : 'hover:opacity-80'
+                    }`}
+                    style={{
+                      backgroundColor: isActive ? 'var(--brand)' : 'var(--surface)',
+                      color: isActive ? '#ffffff' : 'var(--ink)',
+                      border: isActive ? '1px solid var(--brand)' : '1px solid var(--line)',
+                    }}
+                  >
+                    {cat.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => scrollNavTabs('right')}
+              className="flex items-center justify-center w-6 h-6 rounded-md border ml-1 shrink-0 text-[var(--muted)] hover:text-[var(--ink)] hover:border-[var(--brand)] transition-colors cursor-pointer"
+              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+              title="Scroll categories right"
+              aria-label="Scroll categories right"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
         )}
       </div>

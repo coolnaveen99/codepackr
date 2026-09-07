@@ -13,6 +13,7 @@ import { ConvertersView } from './components/tools/ConvertersView';
 import { CalculatorsView } from './components/tools/CalculatorsView';
 import { UtilitiesView } from './components/tools/UtilitiesView';
 import { TextToolsView } from './components/tools/TextToolsView';
+import { JsonDefinitionView } from './components/tools/JsonDefinitionView';
 import { EdiToolsView } from './components/tools/EdiToolsView';
 import { XmlToolsView } from './components/xml/XmlToolsView';
 import { resolveCurrentRoute, getToolPath, getToolDirectUrl } from './lib/urls';
@@ -66,7 +67,7 @@ export const App: React.FC = () => {
     }
 
     updateDocumentMetadata(routeKey);
-  }, [activeTool, activePage]);
+  }, [activeTool, activePage, legalTab]);
 
   // Read URL query parameters and pathname on initial load & popstate
   useEffect(() => {
@@ -132,7 +133,7 @@ export const App: React.FC = () => {
   const navigateToContact = () => {
     setActiveTool(null);
     setActivePage('contact');
-    window.history.pushState({}, '', '/contact.html');
+    window.history.pushState({}, '', '/contact');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -140,7 +141,7 @@ export const App: React.FC = () => {
     setLegalTab(tab);
     setActiveTool(null);
     setActivePage('privacy');
-    const path = tab === 'terms' ? '/terms.html' : '/privacy.html';
+    const path = tab === 'terms' ? '/terms' : '/privacy';
     window.history.pushState({}, '', path);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -151,11 +152,25 @@ export const App: React.FC = () => {
     setActivePage('home');
     const newPath = cat !== 'all' ? `/?cat=${cat}` : '/';
     window.history.pushState({}, '', newPath);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (cat !== 'all') {
+      setTimeout(() => {
+        const catSection = document.getElementById('categories-section');
+        if (catSection) {
+          const navOffset = 110;
+          const targetY = catSection.getBoundingClientRect().top + window.pageYOffset - navOffset;
+          window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+        }
+      }, 50);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   // Render active tool component
   const renderTool = (tool: ToolDef) => {
+    if (tool.id === 'json-definition-generator') {
+      return <JsonDefinitionView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
+    }
     switch (tool.category) {
       case 'formatters':
         return <FormattersView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;

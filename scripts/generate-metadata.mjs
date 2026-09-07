@@ -35,9 +35,34 @@ const aliasDefinitions = {
     description: 'Generate keyed-hash message authentication codes (HMAC) using SHA-256, SHA-512, and MD5 algorithms.'
   },
   'sip-calculator': {
-    name: 'SIP Investment Calculator',
+    name: 'SIP Calculator',
     category: 'calculators',
-    description: 'Calculate future wealth and expected maturity values for Systematic Investment Plans (SIP) and mutual fund investments.'
+    description: 'Calculate future wealth and expected maturity values for Systematic Investment Plans (SIP) and mutual fund investments with compounding graphs.'
+  },
+  'investment-calculator': {
+    name: 'Investment Calculator',
+    category: 'calculators',
+    description: 'Calculate long-term investment growth, future portfolio values, and compound interest earnings with customizable deposit schedules and interactive graphs.'
+  },
+  'compound-investment-calculator': {
+    name: 'Compound Investment Calculator',
+    category: 'calculators',
+    description: 'Calculate long-term compound growth, future investment values, and interest earnings with customizable deposit schedules and interactive graphs.'
+  },
+  'compound-interest-calculator': {
+    name: 'Compound Interest Calculator',
+    category: 'calculators',
+    description: 'Calculate future compound interest, effective annual rate, and portfolio appreciation over time with visual growth breakdown.'
+  },
+  'json-definition-generator': {
+    name: 'JSON Definition & Type Generator',
+    category: 'converters',
+    description: 'Convert JSON payloads into TypeScript interfaces, JSON Schema, Python Pydantic models, C# POCO, Java POJO, Go structs, and Rust Serde types.'
+  },
+  'json-to-definition': {
+    name: 'JSON to Type Definition Converter',
+    category: 'converters',
+    description: 'Generate strongly-typed schemas and interfaces from raw JSON data across 7+ popular programming languages.'
   },
   'edi-tools': {
     name: 'EDI Tools & Business Transaction Suite',
@@ -404,7 +429,7 @@ for (const slug of sitemapSlugs) {
 for (const [toolId, tool] of baseTools) {
   if (!metadataMap[toolId]) {
     const title = `${tool.name} - Codepackr`;
-    const canonicalSlug = toolId === 'edi-formatter' ? 'edi-x12-formatter' : (toolId === 'edi-to-json' ? 'edi-json-converter' : (toolId === 'markdown-preview' ? 'markdown' : toolId));
+    const canonicalSlug = toolId;
     const canonicalUrl = `https://www.codepackr.com/${canonicalSlug}`;
 
     metadataMap[toolId] = {

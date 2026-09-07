@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, Shield, Sparkles, ArrowRight, CheckCircle2, Star, Share2, Check, BookmarkCheck, Workflow } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Search, Shield, Sparkles, ArrowRight, CheckCircle2, Star, Share2, Check, BookmarkCheck, Workflow, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ToolDef, CategoryFilter } from '../types';
 import { TOOLS, CATEGORIES } from '../data/tools';
 import { getIcon } from '../lib/icons';
@@ -19,9 +19,35 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   selectedCategory,
   onSelectCategory,
 }) => {
-  const [searchFilter, setSearchFilter] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const { isBookmarked, toggleBookmark, count: bookmarkCount } = useBookmarks();
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+
+  // Automatically scroll the active category tab into view so it is always visible
+  useEffect(() => {
+    if (!selectedCategory || !tabsContainerRef.current) return;
+    const targetId = `dash-cat-${selectedCategory}`;
+    const activeBtn = tabsContainerRef.current.querySelector(`#${targetId}`) as HTMLElement | null;
+    if (activeBtn) {
+      const container = tabsContainerRef.current;
+      const btnLeft = activeBtn.offsetLeft;
+      const btnWidth = activeBtn.offsetWidth;
+      const containerWidth = container.clientWidth;
+      const targetScroll = btnLeft - (containerWidth / 2) + (btnWidth / 2);
+
+      container.scrollTo({
+        left: Math.max(0, targetScroll),
+        behavior: 'smooth',
+      });
+    }
+  }, [selectedCategory]);
+
+  const scrollTabs = (direction: 'left' | 'right') => {
+    if (tabsContainerRef.current) {
+      const scrollAmount = direction === 'left' ? -220 : 220;
+      tabsContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   const handleCardShare = async (e: React.MouseEvent, tool: ToolDef) => {
     e.stopPropagation();
@@ -38,19 +64,13 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   };
 
   const filteredTools = TOOLS.filter((tool) => {
-    let matchesCat = true;
     if (selectedCategory === 'bookmarks') {
-      matchesCat = isBookmarked(tool.id);
-    } else if (selectedCategory !== 'all') {
-      matchesCat = tool.category === selectedCategory;
+      return isBookmarked(tool.id);
     }
-    const matchesSearch =
-      !searchFilter ||
-      tool.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
-      tool.description.toLowerCase().includes(searchFilter.toLowerCase()) ||
-      tool.keywords.some((t) => t.toLowerCase().includes(searchFilter.toLowerCase()));
-
-    return matchesCat && matchesSearch;
+    if (selectedCategory !== 'all') {
+      return tool.category === selectedCategory;
+    }
+    return true;
   });
 
   const popularTools = TOOLS.filter((t) => t.popular);
@@ -158,88 +178,128 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       </div>
 
       {/* Category Tabs Section */}
-      <div className="space-y-4">
+      <div id="categories-section" className="space-y-4">
         <div
-          className="flex items-center justify-between gap-4 border-b pb-3 overflow-x-auto"
+          className="flex items-center justify-between border-b pb-3"
           style={{ borderColor: 'var(--line)' }}
         >
-          <div className="flex items-center gap-1.5 shrink-0">
-            {/* All Tools tab */}
+          {/* Scrollable category pills container with left/right scroll arrows and no-scrollbar */}
+          <div className="relative flex items-center w-full min-w-0">
             <button
-              id="dash-cat-all"
-              onClick={() => onSelectCategory('all')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
-                selectedCategory === 'all' ? 'bg-[var(--brand)] text-white shadow-sm' : 'hover:opacity-80'
-              }`}
-              style={{
-                backgroundColor: selectedCategory === 'all' ? 'var(--brand)' : 'transparent',
-                color: selectedCategory === 'all' ? '#ffffff' : 'var(--muted)',
-              }}
+              onClick={() => scrollTabs('left')}
+              className="flex items-center justify-center w-7 h-7 rounded-lg border mr-1.5 shrink-0 text-[var(--muted)] hover:text-[var(--ink)] hover:border-[var(--brand)] transition-colors cursor-pointer"
+              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+              title="Scroll categories left"
+              aria-label="Scroll categories left"
             >
-              <span>All Tools</span>
-              <span className="text-[10px] opacity-70">({TOOLS.length})</span>
+              <ChevronLeft className="w-4 h-4" />
             </button>
 
-            {/* Bookmarked / Favorites Tab */}
-            <button
-              id="dash-cat-bookmarks"
-              onClick={() => onSelectCategory('bookmarks')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
-                selectedCategory === 'bookmarks'
-                  ? 'bg-amber-500 text-white shadow-sm'
-                  : 'hover:opacity-80'
-              }`}
-              style={{
-                backgroundColor: selectedCategory === 'bookmarks' ? '#f59e0b' : 'transparent',
-                color: selectedCategory === 'bookmarks' ? '#ffffff' : 'var(--muted)',
-              }}
+            <div
+              ref={tabsContainerRef}
+              className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-1 w-full"
             >
-              <Star
-                className={`w-3.5 h-3.5 ${
-                  selectedCategory === 'bookmarks'
-                    ? 'text-white fill-white'
-                    : bookmarkCount > 0
-                    ? 'text-amber-500 fill-amber-500'
-                    : 'text-zinc-400'
+              {/* All Tools tab */}
+              <button
+                id="dash-cat-all"
+                onClick={() => onSelectCategory('all')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 border ${
+                  selectedCategory === 'all'
+                    ? 'bg-[var(--brand)] text-white border-[var(--brand)] shadow-xs'
+                    : 'border-[var(--line)] hover:border-[var(--brand)]/50 hover:bg-[var(--surface-3)] text-[var(--muted)] hover:text-[var(--ink)]'
                 }`}
-              />
-              <span>Favorites</span>
-              <span className="text-[10px] opacity-80">({bookmarkCount})</span>
-            </button>
-
-            {/* Other Categories */}
-            {CATEGORIES.filter((c) => c.id !== 'all').map((cat) => {
-              const count = TOOLS.filter((t) => t.category === cat.id).length;
-              const isSelected = selectedCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  id={`dash-cat-${cat.id}`}
-                  onClick={() => onSelectCategory(cat.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
-                    isSelected ? 'bg-[var(--brand)] text-white shadow-sm' : 'hover:opacity-80'
+                style={{
+                  backgroundColor: selectedCategory === 'all' ? 'var(--brand)' : 'var(--surface)',
+                }}
+              >
+                <span>All Tools</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-md ${
+                    selectedCategory === 'all'
+                      ? 'bg-white/20 text-white'
+                      : 'bg-black/5 dark:bg-white/10 opacity-75'
                   }`}
-                  style={{
-                    backgroundColor: isSelected ? 'var(--brand)' : 'transparent',
-                    color: isSelected ? '#ffffff' : 'var(--muted)',
-                  }}
                 >
-                  <span>{cat.label}</span>
-                  <span className="text-[10px] opacity-70">({count})</span>
-                </button>
-              );
-            })}
-          </div>
+                  {TOOLS.length}
+                </span>
+              </button>
 
-          <div className="w-56 shrink-0 hidden md:block">
-            <input
-              type="text"
-              placeholder="Filter current view..."
-              value={searchFilter}
-              onChange={(e) => setSearchFilter(e.target.value)}
-              className="w-full px-3 py-1.5 rounded-xl border text-xs outline-none focus:border-[var(--brand)]"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            />
+              {/* Bookmarked / Favorites Tab */}
+              <button
+                id="dash-cat-bookmarks"
+                onClick={() => onSelectCategory('bookmarks')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 border ${
+                  selectedCategory === 'bookmarks'
+                    ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
+                    : 'border-[var(--line)] hover:border-amber-500/50 hover:bg-[var(--surface-3)] text-[var(--muted)] hover:text-[var(--ink)]'
+                }`}
+                style={{
+                  backgroundColor: selectedCategory === 'bookmarks' ? '#f59e0b' : 'var(--surface)',
+                }}
+              >
+                <Star
+                  className={`w-3.5 h-3.5 ${
+                    selectedCategory === 'bookmarks'
+                      ? 'text-white fill-white'
+                      : bookmarkCount > 0
+                      ? 'text-amber-500 fill-amber-500'
+                      : 'text-zinc-400'
+                  }`}
+                />
+                <span>Favorites</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-md ${
+                    selectedCategory === 'bookmarks'
+                      ? 'bg-white/20 text-white'
+                      : 'bg-black/5 dark:bg-white/10 opacity-75'
+                  }`}
+                >
+                  {bookmarkCount}
+                </span>
+              </button>
+
+              {/* Other Categories */}
+              {CATEGORIES.filter((c) => c.id !== 'all').map((cat) => {
+                const count = TOOLS.filter((t) => t.category === cat.id).length;
+                const isSelected = selectedCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    id={`dash-cat-${cat.id}`}
+                    onClick={() => onSelectCategory(cat.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 border ${
+                      isSelected
+                        ? 'bg-[var(--brand)] text-white border-[var(--brand)] shadow-xs'
+                        : 'border-[var(--line)] hover:border-[var(--brand)]/50 hover:bg-[var(--surface-3)] text-[var(--muted)] hover:text-[var(--ink)]'
+                    }`}
+                    style={{
+                      backgroundColor: isSelected ? 'var(--brand)' : 'var(--surface)',
+                    }}
+                  >
+                    <span>{cat.label}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-md ${
+                        isSelected
+                          ? 'bg-white/20 text-white'
+                          : 'bg-black/5 dark:bg-white/10 opacity-75'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => scrollTabs('right')}
+              className="flex items-center justify-center w-7 h-7 rounded-lg border ml-1.5 shrink-0 text-[var(--muted)] hover:text-[var(--ink)] hover:border-[var(--brand)] transition-colors cursor-pointer"
+              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+              title="Scroll categories right"
+              aria-label="Scroll categories right"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
@@ -389,24 +449,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               style={{ backgroundColor: 'var(--brand)' }}
             >
               Browse All 30+ Tools
-            </button>
-          </div>
-        )}
-
-        {/* Regular Search Empty State */}
-        {selectedCategory !== 'bookmarks' && filteredTools.length === 0 && (
-          <div className="text-center py-12 space-y-2">
-            <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>
-              No developer tools found matching "{searchFilter}"
-            </p>
-            <button
-              onClick={() => {
-                setSearchFilter('');
-                onSelectCategory('all');
-              }}
-              className="text-xs text-[var(--brand)] underline font-medium cursor-pointer"
-            >
-              Reset filters
             </button>
           </div>
         )}

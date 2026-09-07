@@ -101,7 +101,7 @@ export const ToolHeader: React.FC<ToolHeaderProps> = ({ tool, onBackToHome, onSe
 
       {/* Related tools shortcuts */}
       {relatedTools.length > 0 && onSelectRelated && (
-        <div className="flex items-center gap-2 overflow-x-auto pt-2 pb-1 text-xs">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-2 pb-1 text-xs">
           <span className="text-[11px] font-medium whitespace-nowrap" style={{ color: 'var(--muted)' }}>
             Related:
           </span>

@@ -1067,7 +1067,7 @@ export const EdiLifecycleReconciliation: React.FC<EdiLifecycleReconciliationProp
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex items-center gap-2 border-b pb-2 overflow-x-auto text-xs" style={{ borderColor: 'var(--line)' }}>
+        <div className="flex items-center gap-2 border-b pb-2 overflow-x-auto no-scrollbar text-xs" style={{ borderColor: 'var(--line)' }}>
           {[
             { id: '850', label: '850 Purchase Order' },
             { id: '855', label: '855 PO Acknowledgment' },

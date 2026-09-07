@@ -299,6 +299,15 @@ export const TOOLS: ToolDef[] = [
     keywords: ['html', 'markdown', 'convert', 'md', 'markup'],
     icon: 'FileCode',
   },
+  {
+    id: 'json-definition-generator',
+    name: 'JSON Definition Generator',
+    category: 'converters',
+    description: 'Generate TypeScript interfaces, JSON Schema, Python Pydantic, C# POCO, Java POJO, Go, Rust, and SQL definitions from raw JSON.',
+    keywords: ['json', 'definition', 'typescript', 'schema', 'types', 'pydantic', 'pojo', 'generator', 'interface'],
+    icon: 'FileCode',
+    popular: true,
+  },
 
   // EDI Tools
   {
@@ -463,6 +472,32 @@ export const TOOLS: ToolDef[] = [
 
   // Calculators
   {
+    id: 'loan-calculator',
+    name: 'Loan & EMI Calculator',
+    category: 'calculators',
+    description: 'Calculate monthly loan EMI, total interest, and comprehensive repayment timeline.',
+    keywords: ['loan', 'emi', 'mortgage', 'interest', 'finance'],
+    icon: 'DollarSign',
+  },
+  {
+    id: 'sip-calculator',
+    name: 'SIP Calculator',
+    category: 'calculators',
+    description: 'Calculate Systematic Investment Plan (SIP) returns, wealth gain, and interactive growth charts.',
+    keywords: ['sip', 'mutual-funds', 'investment', 'wealth', 'finance', 'returns', 'calculator', 'graph'],
+    icon: 'TrendingUp',
+    popular: true,
+  },
+  {
+    id: 'investment-calculator',
+    name: 'Investment Calculator',
+    category: 'calculators',
+    description: 'Calculate investment growth with periodic deposits, tenure switcher, and interactive circular graphs.',
+    keywords: ['investment', 'compound-interest', 'savings', 'growth', 'apy', 'finance', 'calculator', 'graph'],
+    icon: 'PiggyBank',
+    popular: true,
+  },
+  {
     id: 'calculator',
     name: 'Scientific Calculator',
     category: 'calculators',
@@ -485,14 +520,6 @@ export const TOOLS: ToolDef[] = [
     description: 'Quickly calculate bill tips, total payable amount, and split by person count.',
     keywords: ['tip', 'bill', 'split', 'restaurant', 'calculator'],
     icon: 'Receipt',
-  },
-  {
-    id: 'loan-calculator',
-    name: 'Loan & EMI Calculator',
-    category: 'calculators',
-    description: 'Calculate monthly loan EMI, total interest, and comprehensive repayment timeline.',
-    keywords: ['loan', 'emi', 'mortgage', 'interest', 'finance'],
-    icon: 'DollarSign',
   },
 
   // Utilities

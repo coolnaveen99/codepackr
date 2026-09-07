@@ -30,7 +30,10 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'calculator': 'calculator',
   'percentage-calculator': 'percentage-calculator',
   'tip-calculator': 'tip-calculator',
-  'sip-calculator': 'loan-calculator',
+  'sip-calculator': 'sip-calculator',
+  'investment-calculator': 'investment-calculator',
+  'compound-investment-calculator': 'investment-calculator',
+  'compound-interest-calculator': 'investment-calculator',
   'loan-calculator': 'loan-calculator',
 
   // Validators
@@ -55,6 +58,10 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'curl-code-converter': 'curl-code-converter',
   'image-resizer': 'image-resizer',
   'favicon-generator': 'favicon-generator',
+  'json-definition-generator': 'json-definition-generator',
+  'json-to-definition': 'json-definition-generator',
+  'json-schema-generator': 'json-definition-generator',
+  'json-to-typescript': 'json-definition-generator',
 
   // EDI Tools
   'edi-tools': 'edi-formatter',
@@ -120,6 +127,10 @@ export const TOOL_ID_TO_CANONICAL_SLUG: Record<string, string> = {
   'edi-formatter': 'edi-formatter',
   'edi-to-json': 'edi-to-json',
   'markdown-preview': 'markdown-preview',
+  'sip-calculator': 'sip-calculator',
+  'investment-calculator': 'investment-calculator',
+  'compound-investment-calculator': 'investment-calculator',
+  'json-definition-generator': 'json-definition-generator',
 };
 
 /**

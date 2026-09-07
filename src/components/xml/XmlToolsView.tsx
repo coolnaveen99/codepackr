@@ -37,7 +37,7 @@ export const XmlToolsView: React.FC<XmlToolsViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Sub-tool navigation switcher */}
-      <div className="flex items-center gap-2 border-b overflow-x-auto pb-2" style={{ borderColor: 'var(--line)' }}>
+      <div className="flex items-center gap-2 border-b overflow-x-auto no-scrollbar pb-2" style={{ borderColor: 'var(--line)' }}>
         {tabs.map((tab) => {
           const TabIcon = tab.icon;
           const isActive = activeTab === tab.id;

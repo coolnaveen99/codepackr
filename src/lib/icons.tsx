@@ -57,10 +57,16 @@ import {
   FileCode2,
   Barcode,
   GitCompareArrows,
+  TrendingUp,
+  PiggyBank,
 } from 'lucide-react';
 
 export const getIcon = (name: string, className = 'w-5 h-5') => {
   switch (name) {
+    case 'TrendingUp':
+      return <TrendingUp className={className} />;
+    case 'PiggyBank':
+      return <PiggyBank className={className} />;
     case 'Braces':
       return <Braces className={className} />;
     case 'Code':

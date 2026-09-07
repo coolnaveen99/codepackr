@@ -88,8 +88,7 @@ export const PrivacyPolicyView: React.FC<PrivacyPolicyViewProps> = ({
             <p style={{ color: 'var(--ink)' }}>
               By accessing, browsing, testing, or executing payloads on Codepackr, you explicitly agree that any and all legal
               actions, disputes, claims, or arbitrations shall be instituted <strong>exclusively</strong> in the competent civil
-              and criminal courts situated within <strong>Vaniyambadi or the Principal District Court of Tirupattur District,
-              Tamil Nadu, India</strong>. Jurisdiction of all other courts in India and worldwide is expressly ousted and barred.
+              and criminal courts situated within the <strong>Codepackr owner's native jurisdiction only</strong>. Jurisdiction of all other courts in India and worldwide is expressly ousted and barred.
             </p>
           </div>
         </div>
@@ -214,17 +213,17 @@ export const PrivacyPolicyView: React.FC<PrivacyPolicyViewProps> = ({
                     affecting, or relating to Codepackr, its developers, or its owner shall be instituted <strong>SOLEY AND EXCLUSIVELY</strong> in
                     the:
                     <div className="my-2 p-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-rose-300 dark:border-rose-800 font-mono text-xs font-bold text-center">
-                      Competent Courts at Vaniyambadi OR the Principal District Court of Tirupattur District, Tamil Nadu, India
+                      Competent Courts of Codepackr Owner's Native Jurisdiction Only
                     </div>
                   </li>
                   <li>
                     <strong>Strict Ouster of All Other Courts:</strong> The jurisdiction of all other civil courts, High Courts (other than
-                    the High Court of Judicature at Madras in appellate proceedings), consumer forums, and foreign or international tribunals
+                    the competent appellate High Court having territorial authority over the Codepackr owner's native jurisdiction), consumer forums, and foreign or international tribunals
                     is <strong>EXPRESSLY OUSTED, BARRED, AND EXCLUDED</strong>.
                   </li>
                   <li>
                     <strong>Waiver of Inconvenient Forum:</strong> You irrevocably waive any objection which you may now or hereafter have to
-                    the laying of venue of any proceeding in the Courts of Vaniyambadi or Tirupattur District, Tamil Nadu, including any claim
+                    the laying of venue of any proceeding in the competent courts of the Codepackr owner's native jurisdiction, including any claim
                     of <em>forum non conveniens</em>.
                   </li>
                 </ol>
