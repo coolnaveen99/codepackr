@@ -151,23 +151,71 @@ code, pre, kbd, samp, .font-mono {
   animation: fadeIn 0.2s ease-in-out;
 }
 
-/* GS1 Logistics Shipping Label (4" x 6") Print Engine */
-#gs1-print-portal { display: none; }
+/* ==========================================================================
+   CodePackr Print & PDF Engine (A4 Portrait & Specialized Media)
+   ========================================================================== */
+
+#gs1-print-portal {
+  display: none;
+}
+
 @media print {
-  @page { size: 4in 6in; margin: 0; }
+  /* Default Document & Financial Advisory PDF Layout: A4 Portrait with 15mm margins */
+  @page {
+    size: A4 portrait;
+    margin: 15mm;
+  }
+
+  /* Reset layout canvas for high-fidelity PDF printing */
   html, body {
     margin: 0 !important;
     padding: 0 !important;
     background: #ffffff !important;
+    color: #0f172a !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  body.printing-gs1-label > *:not(#gs1-print-portal),
-  body.gs1-tool-active > *:not(#gs1-print-portal) {
+
+  /* Hide app navigation shell, sidebars, headers, footers, and interactive buttons */
+  #main-header,
+  #app-sidebar,
+  #main-footer,
+  #sidebar-toggle-btn,
+  #global-banner,
+  .print\:hidden,
+  button:not(.print-allow),
+  input:not(.print-allow),
+  select:not(.print-allow) {
     display: none !important;
   }
-  body.printing-gs1-label #gs1-print-portal,
-  body.gs1-tool-active #gs1-print-portal {
+
+  /* Ensure the Financial Planner PDF report displays cleanly */
+  #financial-planner-pdf-report {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Prevent awkward page cuts across cards and rows */
+  tr,
+  section,
+  .print-avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* GS1 Logistics Shipping Label (4" x 6") Specific Thermal Overrides */
+  body.printing-gs1-label {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body.printing-gs1-label > *:not(#gs1-print-portal) {
+    display: none !important;
+  }
+
+  body.printing-gs1-label #gs1-print-portal {
     display: flex !important;
     flex-direction: column !important;
     justify-content: flex-start !important;

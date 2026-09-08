@@ -15,6 +15,10 @@ import {
   Activity,
   Settings2,
   RefreshCw,
+  Eye,
+  Check,
+  Loader2,
+  X,
 } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
@@ -26,6 +30,8 @@ import {
   FinancialInputs,
   FINANCIAL_MODEL_VERSION,
 } from '../../lib/financial/engine';
+import { FinancialPlannerPdfReport } from './FinancialPlannerPdfReport';
+import { generateFinancialAdvisoryPdf } from '../../lib/financial/generateFinancialPdf';
 
 interface FinancialPlannerViewProps {
   tool: ToolDef;
@@ -47,6 +53,9 @@ export const FinancialPlannerView: React.FC<FinancialPlannerViewProps> = ({
   const [mode, setMode] = useState<Mode>('basic');
   const [inputs, setInputs] = useState<FinancialInputs>({ ...DEFAULT_FINANCIAL_INPUTS });
   const [realValues, setRealValues] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [pdfSavedSuccess, setPdfSavedSuccess] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const plan = useMemo(() => calculateFinancialPlan(inputs), [inputs]);
 
@@ -94,12 +103,16 @@ export const FinancialPlannerView: React.FC<FinancialPlannerViewProps> = ({
       ? '🟠 Significant gap'
       : '🔴 Shortfall';
 
-  // ---- Exports ----
+  // ---- Exports & PDF Report ----
   const buildReportData = () => ({
     version: FINANCIAL_MODEL_VERSION,
+    clientName: plan.clientName,
     currency: currency.code,
     generated: new Date().toISOString(),
-    inputs,
+    inputs: {
+      ...inputs,
+      clientName: plan.clientName,
+    },
     summary: {
       financialHealth: plan.scores.financialHealth,
       retirementReadiness: plan.scores.retirementReadiness,
@@ -129,10 +142,31 @@ export const FinancialPlannerView: React.FC<FinancialPlannerViewProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  const exportJson = () =>
-    download('financial-plan.json', JSON.stringify(buildReportData(), null, 2), 'application/json');
+  const getSlug = (name?: string) =>
+    (name && name.trim() ? name.trim() : 'client')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '') || 'client';
+
+  const exportJson = () => {
+    const slug = getSlug(inputs.clientName);
+    download(`financial-plan-${slug}.json`, JSON.stringify(buildReportData(), null, 2), 'application/json');
+  };
 
   const exportCsv = () => {
+    const client = (inputs.clientName && inputs.clientName.trim()) ? inputs.clientName.trim() : 'Valued Client';
+    const metadata = [
+      ['# CodePackr Enterprise Financial Plan', ''],
+      ['# Client / Plan Holder', client],
+      ['# Currency', currency.code],
+      ['# Generated', new Date().toISOString()],
+      ['# Financial Health Score', `${plan.scores.financialHealth.toFixed(0)}/100`],
+      ['# Projected Corpus', Math.round(plan.projectedCorpus)],
+      ['# Required Corpus', Math.round(plan.requiredCorpus)],
+      ['# Funding Ratio', `${(plan.fundingRatio * 100).toFixed(1)}%`],
+      ['# Sustainability Status', plan.sustainabilityStatus],
+      [''],
+    ];
     const header = [
       'Phase',
       'Year',
@@ -144,7 +178,7 @@ export const FinancialPlannerView: React.FC<FinancialPlannerViewProps> = ({
       'Growth',
       'ClosingCorpus',
     ];
-    const rows: (string | number)[][] = [];
+    const rows: (string | number)[][] = [...metadata, header];
     plan.accumulation.forEach((r) =>
       rows.push([
         'Accumulation',
@@ -171,8 +205,50 @@ export const FinancialPlannerView: React.FC<FinancialPlannerViewProps> = ({
         Math.round(r.closingCorpus),
       ])
     );
-    const csv = [header, ...rows].map((r) => r.join(',')).join('\n');
-    download('financial-plan.csv', csv, 'text/csv');
+    const csv = rows.map((r) => r.join(',')).join('\n');
+    const slug = getSlug(inputs.clientName);
+    download(`financial-plan-${slug}.csv`, csv, 'text/csv');
+  };
+
+  const handleSavePdf = async () => {
+    try {
+      setIsGeneratingPdf(true);
+      const client = (inputs.clientName && inputs.clientName.trim()) ? inputs.clientName.trim() : 'Valued_Client';
+      const safeClient = client.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const filename = `CodePackr_Financial_Advisory_Report_${safeClient}_${dateStr}.pdf`;
+
+      // Allow UI spinner to mount before generating PDF
+      await new Promise((resolve) => setTimeout(resolve, 80));
+
+      const doc = generateFinancialAdvisoryPdf({
+        plan,
+        inputs,
+        currency,
+        formatAmount,
+      });
+
+      doc.save(filename);
+      setPdfSavedSuccess(true);
+      setTimeout(() => setPdfSavedSuccess(false), 3500);
+    } catch (err) {
+      console.error('Failed to generate PDF via jsPDF:', err);
+      window.print();
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const handleBrowserPrint = () => {
+    const originalTitle = document.title;
+    const client = (inputs.clientName && inputs.clientName.trim()) ? inputs.clientName.trim() : 'Valued_Client';
+    const safeClient = client.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    document.title = `CodePackr_Financial_Advisory_Report_${safeClient}_${dateStr}`;
+    window.print();
+    setTimeout(() => {
+      document.title = originalTitle;
+    }, 1500);
   };
 
   // ---- Small SVG chart helpers ----
@@ -187,63 +263,125 @@ export const FinancialPlannerView: React.FC<FinancialPlannerViewProps> = ({
 
   return (
     <div className="space-y-6 pb-10">
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      {/* Dedicated Executive PDF Report (Print-only) */}
+      <FinancialPlannerPdfReport
+        plan={plan}
+        inputs={inputs}
+        currency={currency}
+        formatAmount={formatAmount}
+      />
 
-      {/* Controls bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <div className="inline-flex rounded-xl border overflow-hidden" style={{ borderColor: 'var(--line)' }}>
-            {(['basic', 'advanced'] as Mode[]).map((m) => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className="px-4 py-2 text-xs font-semibold capitalize cursor-pointer transition-colors"
-                style={{
-                  backgroundColor: mode === m ? 'var(--brand)' : 'var(--surface)',
-                  color: mode === m ? '#fff' : 'var(--muted)',
-                }}
-              >
-                {m} mode
-              </button>
-            ))}
+      {/* Interactive Web Workspace (Hidden during print) */}
+      <div className="space-y-6 print:hidden">
+        <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+
+        {/* Controls bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div className="inline-flex rounded-xl border overflow-hidden" style={{ borderColor: 'var(--line)' }}>
+              {(['basic', 'advanced'] as Mode[]).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setMode(m)}
+                  className="px-4 py-2 text-xs font-semibold capitalize cursor-pointer transition-colors"
+                  style={{
+                    backgroundColor: mode === m ? 'var(--brand)' : 'var(--surface)',
+                    color: mode === m ? '#fff' : 'var(--muted)',
+                  }}
+                >
+                  {m} mode
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setRealValues((v) => !v)}
+              className="px-3 py-2 text-xs font-semibold rounded-xl border cursor-pointer flex items-center gap-1.5"
+              style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface)', color: 'var(--muted)' }}
+              title="Toggle between future nominal values and today's money"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              {realValues ? "Today's money" : 'Nominal values'}
+            </button>
           </div>
-          <button
-            onClick={() => setRealValues((v) => !v)}
-            className="px-3 py-2 text-xs font-semibold rounded-xl border cursor-pointer flex items-center gap-1.5"
-            style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface)', color: 'var(--muted)' }}
-            title="Toggle between future nominal values and today's money"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            {realValues ? "Today's money" : 'Nominal values'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsPreviewOpen(true)}
+              className="px-3.5 py-2 text-xs font-semibold rounded-xl border cursor-pointer flex items-center gap-1.5 transition-colors"
+              style={{
+                borderColor: 'var(--line)',
+                backgroundColor: 'var(--surface)',
+                color: 'var(--ink)',
+              }}
+              title="Preview formal client advisory PDF report"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              Preview Report
+            </button>
+            <button
+              onClick={handleSavePdf}
+              disabled={isGeneratingPdf}
+              className="px-3.5 py-2 text-xs font-semibold rounded-xl border cursor-pointer flex items-center gap-1.5 shadow-xs transition-colors disabled:opacity-75"
+              style={{
+                borderColor: pdfSavedSuccess ? '#16a34a' : 'var(--brand)',
+                backgroundColor: pdfSavedSuccess ? '#16a34a' : 'var(--brand)',
+                color: '#ffffff',
+              }}
+              title="Save high-resolution executive PDF advisory report"
+            >
+              {isGeneratingPdf ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  Generating PDF...
+                </>
+              ) : pdfSavedSuccess ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-white" />
+                  PDF Downloaded!
+                </>
+              ) : (
+                <>
+                  <Download className="w-3.5 h-3.5" />
+                  Save PDF Report
+                </>
+              )}
+            </button>
+            <CurrencySelector />
+            <button onClick={() => setInputs({ ...DEFAULT_FINANCIAL_INPUTS })} className="px-3 py-2 text-xs font-semibold rounded-xl border cursor-pointer" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface)', color: 'var(--muted)' }}>
+              Reset
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <CurrencySelector />
-          <button onClick={() => setInputs({ ...DEFAULT_FINANCIAL_INPUTS })} className="px-3 py-2 text-xs font-semibold rounded-xl border cursor-pointer" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface)', color: 'var(--muted)' }}>
-            Reset
-          </button>
-        </div>
-      </div>
 
-      {errors.length > 0 && (
-        <div className="p-3 rounded-xl border flex items-start gap-2 text-xs" style={{ borderColor: '#f59e0b55', backgroundColor: '#f59e0b15', color: '#b45309' }}>
-          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-          <ul className="space-y-0.5">
-            {errors.map((e) => (
-              <li key={e}>{e}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {errors.length > 0 && (
+          <div className="p-3 rounded-xl border flex items-start gap-2 text-xs" style={{ borderColor: '#f59e0b55', backgroundColor: '#f59e0b15', color: '#b45309' }}>
+            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+            <ul className="space-y-0.5">
+              {errors.map((e) => (
+                <li key={e}>{e}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* ---------- INPUTS ---------- */}
-        <div className="lg:col-span-1 space-y-4">
-          <Section title="Personal Profile" icon={<Settings2 className="w-4 h-4" />}>
-            <NumField label="Current age" value={inputs.currentAge} min={18} max={80} onChange={(v) => update('currentAge', v)} />
-            <NumField label="Retirement age" value={inputs.retirementAge} min={inputs.currentAge + 1} max={90} onChange={(v) => update('retirementAge', v)} />
-            <NumField label="Life expectancy" value={inputs.lifeExpectancy} min={inputs.retirementAge + 1} max={110} onChange={(v) => update('lifeExpectancy', v)} />
-          </Section>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* ---------- INPUTS ---------- */}
+          <div className="lg:col-span-1 space-y-4">
+            <Section title="Personal Profile" icon={<Settings2 className="w-4 h-4" />}>
+              <div className="block">
+                <span className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Client / Plan Holder Name</span>
+                <input
+                  type="text"
+                  value={inputs.clientName ?? ''}
+                  placeholder="e.g. Valued Client / John Doe"
+                  onChange={(e) => setInputs((prev) => ({ ...prev, clientName: e.target.value }))}
+                  className="mt-1 w-full px-3 py-2 rounded-xl text-sm border focus:outline-none focus:border-[var(--brand)] transition-colors"
+                  style={{ borderColor: 'var(--line)', backgroundColor: 'var(--bg)', color: 'var(--ink)' }}
+                />
+              </div>
+              <NumField label="Current age" value={inputs.currentAge} min={18} max={80} onChange={(v) => update('currentAge', v)} />
+              <NumField label="Retirement age" value={inputs.retirementAge} min={inputs.currentAge + 1} max={90} onChange={(v) => update('retirementAge', v)} />
+              <NumField label="Life expectancy" value={inputs.lifeExpectancy} min={inputs.retirementAge + 1} max={110} onChange={(v) => update('lifeExpectancy', v)} />
+            </Section>
 
           <Section title="Income & Expenses" icon={<Wallet className="w-4 h-4" />}>
             <NumField label="Annual income (after deductions)" value={inputs.annualIncome} onChange={(v) => update('annualIncome', v)} />
@@ -482,10 +620,25 @@ export const FinancialPlannerView: React.FC<FinancialPlannerViewProps> = ({
           {/* Export center */}
           <div className="p-4 rounded-2xl border" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface)' }}>
             <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--ink)' }}>
-              <Download className="w-4 h-4" /> Download Report
+              <Download className="w-4 h-4" /> Download &amp; Export Advisory Report
             </h3>
             <div className="flex flex-wrap gap-2">
-              <ExportBtn onClick={() => window.print()} icon={<Printer className="w-4 h-4" />} label="Print / PDF" primary />
+              <ExportBtn
+                onClick={handleSavePdf}
+                icon={
+                  isGeneratingPdf ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : pdfSavedSuccess ? (
+                    <Check className="w-4 h-4 text-emerald-300" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )
+                }
+                label={isGeneratingPdf ? 'Generating PDF...' : pdfSavedSuccess ? 'PDF Downloaded!' : 'Save PDF Report'}
+                primary
+              />
+              <ExportBtn onClick={() => setIsPreviewOpen(true)} icon={<Eye className="w-4 h-4" />} label="Preview Report" />
+              <ExportBtn onClick={handleBrowserPrint} icon={<Printer className="w-4 h-4" />} label="Print (Browser)" />
               <ExportBtn onClick={exportCsv} icon={<FileSpreadsheet className="w-4 h-4" />} label="Export CSV" />
               <ExportBtn onClick={exportJson} icon={<FileJson className="w-4 h-4" />} label="Export JSON" />
             </div>
@@ -499,6 +652,96 @@ export const FinancialPlannerView: React.FC<FinancialPlannerViewProps> = ({
           </div>
         </div>
       </div>
+      </div>
+
+      {/* Report Preview Modal */}
+      {isPreviewOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-xs">
+          <div
+            className="relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-2xl border shadow-2xl overflow-hidden"
+            style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)' }}
+          >
+            {/* Modal Header */}
+            <div
+              className="p-4 border-b flex items-center justify-between gap-3 shrink-0"
+              style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface)' }}
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                  <Eye className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold" style={{ color: 'var(--ink)' }}>
+                    Executive Advisory Report Preview
+                  </h3>
+                  <p className="text-xs" style={{ color: 'var(--muted)' }}>
+                    Formal Actuarial Plan for {inputs.clientName || 'Valued Client'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleSavePdf}
+                  disabled={isGeneratingPdf}
+                  className="px-3.5 py-1.5 text-xs font-semibold rounded-xl border cursor-pointer flex items-center gap-1.5 shadow-xs transition-colors disabled:opacity-75"
+                  style={{
+                    borderColor: pdfSavedSuccess ? '#16a34a' : 'var(--brand)',
+                    backgroundColor: pdfSavedSuccess ? '#16a34a' : 'var(--brand)',
+                    color: '#ffffff',
+                  }}
+                >
+                  {isGeneratingPdf ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Generating...
+                    </>
+                  ) : pdfSavedSuccess ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-white" />
+                      PDF Downloaded!
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-3.5 h-3.5" />
+                      Download PDF
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={handleBrowserPrint}
+                  className="px-3 py-1.5 text-xs font-semibold rounded-xl border cursor-pointer flex items-center gap-1.5"
+                  style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface)', color: 'var(--ink)' }}
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  Print
+                </button>
+                <button
+                  onClick={() => setIsPreviewOpen(false)}
+                  className="p-1.5 rounded-xl border cursor-pointer transition-colors"
+                  style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface)', color: 'var(--muted)' }}
+                  title="Close preview"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body: Scrollable Preview of Report */}
+            <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-slate-100 dark:bg-slate-950">
+              <div className="max-w-3xl mx-auto">
+                <FinancialPlannerPdfReport
+                  plan={plan}
+                  inputs={inputs}
+                  currency={currency}
+                  formatAmount={formatAmount}
+                  isPreview={true}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

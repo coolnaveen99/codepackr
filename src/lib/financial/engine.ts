@@ -13,6 +13,7 @@ export const FINANCIAL_MODEL_VERSION = '1.0';
 
 export interface FinancialInputs {
   // Personal profile
+  clientName?: string;
   currentAge: number;
   retirementAge: number;
   lifeExpectancy: number;
@@ -109,6 +110,7 @@ export interface FinancialScores {
 
 export interface FinancialPlan {
   version: string;
+  clientName: string;
   inputs: FinancialInputs;
   yearsToRetirement: number;
   retirementYears: number;
@@ -627,9 +629,15 @@ export function calculateFinancialPlan(inputs: FinancialInputs): FinancialPlan {
     requiredMonthlySip
   );
 
+  const clientName = (inputs.clientName && inputs.clientName.trim()) ? inputs.clientName.trim() : 'Valued Client';
+
   return {
     version: FINANCIAL_MODEL_VERSION,
-    inputs,
+    clientName,
+    inputs: {
+      ...inputs,
+      clientName,
+    },
     yearsToRetirement,
     retirementYears,
     annualSavings,
@@ -664,6 +672,7 @@ export function calculateFinancialPlan(inputs: FinancialInputs): FinancialPlan {
 }
 
 export const DEFAULT_FINANCIAL_INPUTS: FinancialInputs = {
+  clientName: 'Valued Client',
   currentAge: 30,
   retirementAge: 60,
   lifeExpectancy: 85,
