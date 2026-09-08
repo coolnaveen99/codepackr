@@ -11,12 +11,14 @@ interface XmlToolsViewProps {
   tool: ToolDef;
   onBackToHome?: () => void;
   onSelectRelated?: (t: ToolDef) => void;
+  initialInput?: string;
 }
 
 export const XmlToolsView: React.FC<XmlToolsViewProps> = ({
   tool,
   onBackToHome,
   onSelectRelated,
+  initialInput = '',
 }) => {
   const [activeTab, setActiveTab] = useState<string>(tool.id || 'xslt-transformer');
 

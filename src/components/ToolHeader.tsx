@@ -3,6 +3,7 @@ import { Share2, Check, ArrowLeft, Star } from 'lucide-react';
 import { ToolDef } from '../types';
 import { TOOLS } from '../data/tools';
 import { useBookmarks, shareToolUrl } from '../lib/bookmarks';
+import { getIcon } from '../lib/icons';
 
 interface ToolHeaderProps {
   tool: ToolDef;
@@ -23,94 +24,73 @@ export const ToolHeader: React.FC<ToolHeaderProps> = ({ tool, onBackToHome, onSe
     }
   };
 
-  const handleToggleBookmark = () => {
-    toggleBookmark(tool.id);
-  };
-
   const relatedTools = TOOLS.filter((t) => t.category === tool.category && t.id !== tool.id).slice(0, 4);
 
   return (
-    <div className="mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
-        <div className="flex items-center gap-3">
+    <div className="mb-8 animate-fade-in">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <div className="flex items-start gap-4">
           {onBackToHome && (
             <button
               onClick={onBackToHome}
-              className="p-2 rounded-xl border hover:opacity-80 transition-colors cursor-pointer"
-              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--muted)' }}
+              className="p-2.5 mt-1 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:border-[color:var(--brand)] transition-colors shadow-sm cursor-pointer"
               title="Back to all tools"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-5 h-5" />
             </button>
           )}
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--ink)' }}>
-                {tool.name}
-              </h1>
-              <span className="text-[11px] font-semibold uppercase px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: 'var(--brand-light)', color: 'var(--brand)' }}
-              >
-                {tool.category}
-              </span>
+          <div className="flex items-start gap-3.5">
+            <div className="p-2 rounded-xl bg-[color:var(--surface)] border border-[color:var(--border)] shadow-xs shrink-0 mt-0.5">
+              {getIcon(tool.icon, 28)}
             </div>
-            <p className="text-sm mt-0.5" style={{ color: 'var(--muted)' }}>
-              {tool.description}
-            </p>
+            <div>
+              <div className="flex items-center gap-3 flex-wrap mb-1">
+                <h1 className="text-3xl font-extrabold tracking-tight text-[color:var(--ink)]">
+                  {tool.name}
+                </h1>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-[color:var(--brand-light)] text-[color:var(--brand)]">
+                  {tool.category}
+                </span>
+              </div>
+              <p className="text-base text-[color:var(--ink-muted)] max-w-2xl leading-relaxed">
+                {tool.description}
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          {/* Bookmark Button */}
+        <div className="flex items-center gap-3 shrink-0 self-start md:self-auto mt-2 md:mt-0">
           <button
-            id={`header-bookmark-btn-${tool.id}`}
-            onClick={handleToggleBookmark}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer shadow-sm ${
+            onClick={() => toggleBookmark(tool.id)}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl border transition-all shadow-sm cursor-pointer ${
               bookmarked
-                ? 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'
-                : 'hover:border-[var(--brand)]'
+                ? 'bg-[color:var(--warning)]/10 border-[color:var(--warning)]/30 text-[color:var(--warning)]'
+                : 'bg-[color:var(--surface)] border-[color:var(--border)] text-[color:var(--ink)] hover:border-[color:var(--brand)]'
             }`}
-            style={
-              bookmarked
-                ? {}
-                : { backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }
-            }
-            title={bookmarked ? 'Remove from Bookmarks' : 'Bookmark this tool'}
           >
-            <Star
-              className={`w-3.5 h-3.5 ${
-                bookmarked ? 'text-amber-500 fill-amber-500' : 'text-zinc-400'
-              }`}
-            />
-            <span>{bookmarked ? 'Saved' : 'Bookmark'}</span>
+            <Star className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
+            <span>{bookmarked ? 'Saved' : 'Save'}</span>
           </button>
-
-          {/* Share Button */}
           <button
-            id={`header-share-btn-${tool.id}`}
             onClick={handleShare}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer hover:border-[var(--brand)] shadow-sm"
-            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            title="Share or copy direct link"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink)] hover:border-[color:var(--brand)] transition-all shadow-sm cursor-pointer"
           >
-            {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
-            <span>{copiedLink ? 'Link Copied!' : 'Share'}</span>
+            {copiedLink ? <Check className="w-4 h-4 text-[color:var(--success)]" /> : <Share2 className="w-4 h-4" />}
+            <span>{copiedLink ? 'Copied' : 'Share'}</span>
           </button>
         </div>
       </div>
 
-      {/* Related tools shortcuts */}
       {relatedTools.length > 0 && onSelectRelated && (
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-2 pb-1 text-xs">
-          <span className="text-[11px] font-medium whitespace-nowrap" style={{ color: 'var(--muted)' }}>
+        <div className="flex items-center gap-3 overflow-x-auto custom-scrollbar pb-2 pt-2 border-t border-[color:var(--border)]">
+          <span className="text-xs font-bold uppercase tracking-wider text-[color:var(--ink-muted)] whitespace-nowrap">
             Related:
           </span>
           {relatedTools.map((rt) => (
             <button
               key={rt.id}
               onClick={() => onSelectRelated(rt)}
-              className="px-2.5 py-1 rounded-md border text-[11px] whitespace-nowrap transition-colors hover:text-[var(--brand)] hover:border-[var(--brand)]"
-              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              className="px-3 py-1.5 rounded-lg border border-[color:var(--border)] bg-[color:var(--surface)] text-xs font-semibold text-[color:var(--ink-muted)] whitespace-nowrap hover:text-[color:var(--brand)] hover:border-[color:var(--brand)] transition-colors shadow-sm cursor-pointer"
             >
               {rt.name}
             </button>

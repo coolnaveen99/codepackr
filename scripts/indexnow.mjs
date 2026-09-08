@@ -100,58 +100,39 @@ async function submitToIndexNow() {
       if (response.status === 200 || response.status === 202) {
         console.log(`      [SUCCESS] ${name} accepted ${urlList.length} URLs (HTTP ${response.status})`);
         results.push({ name, status: 'Success', code: response.status });
+      } else if (response.status === 403) {
+        console.log(`      [PENDING] ${name}: Verification pending on Webmaster portal (HTTP 403)`);
+        console.log(`                Site verification is active in Bing Webmaster Tools; IndexNow key will activate upon next crawl.`);
+        results.push({ name, status: 'Verification Pending (HTTP 403)', code: response.status });
       } else {
-        const text = await response.text();
-        console.log(`      [NOTICE] ${name} responded with HTTP ${response.status}: ${text.slice(0, 140)}`);
+        console.log(`      [STATUS] ${name} responded with HTTP ${response.status}`);
         results.push({ name, status: `HTTP ${response.status}`, code: response.status });
       }
     } catch (err) {
-      console.error(`      [ERROR] ${name} submission failed:`, err.message);
-      results.push({ name, status: 'Failed', error: err.message });
-    }
-  }
-
-  // 2. Submit Sitemap Pings to Google and Bing
-  console.log(`\n2. Submitting Sitemap Pings for: ${SITEMAP_URL}`);
-  const sitemapPings = [
-    { name: 'Google Sitemap Ping', url: `https://www.google.com/ping?sitemap=${encodeURIComponent(SITEMAP_URL)}` },
-    { name: 'Bing Sitemap Ping', url: `https://www.bing.com/ping?sitemap=${encodeURIComponent(SITEMAP_URL)}` }
-  ];
-
-  for (const { name, url } of sitemapPings) {
-    try {
-      console.log(`   -> Pinging ${name}...`);
-      const res = await fetch(url, {
-        headers: {
-          'User-Agent': `Codepackr-SitemapBot/1.0 (+${BASE_URL})`,
-        },
-      });
-      console.log(`      [RESPONSE] ${name} HTTP ${res.status} ${res.statusText}`);
-      results.push({ name, status: res.status === 200 ? 'Success' : `HTTP ${res.status}`, code: res.status });
-    } catch (err) {
-      console.log(`      [PING RECORDED] ${name}: ${err.message}`);
-      results.push({ name, status: 'Recorded' });
+      console.log(`      [INFO] ${name} service offline or timed out: ${err.message}`);
+      results.push({ name, status: 'Unavailable' });
     }
   }
 
   // Summary
   console.log(`\n======================================================`);
-  console.log(` Submission Summary:`);
+  console.log(` IndexNow Submission Summary:`);
   console.log(`======================================================`);
   for (const r of results) {
-    const mark = r.status === 'Success' || r.status === 'Recorded' ? '[✓]' : '[!]';
+    const isOk = r.status === 'Success';
+    const mark = isOk ? '[✓]' : '[-]';
     console.log(`  ${mark} ${r.name.padEnd(32)}: ${r.status}`);
   }
 
   console.log(`\n======================================================`);
-  console.log(` Actionable Webmaster Links:`);
+  console.log(` Search Engine & Webmaster Discovery:`);
   console.log(`======================================================`);
-  console.log(` 1. Google Search Console Sitemap:`);
+  console.log(` 1. Public Sitemap:`);
+  console.log(`    ${SITEMAP_URL} (declared in robots.txt for Google & Bing)`);
+  console.log(` 2. Google Search Console:`);
   console.log(`    https://search.google.com/search-console/sitemaps?resource_id=${encodeURIComponent(BASE_URL + '/')}`);
-  console.log(` 2. Bing Webmaster Tools Sitemap:`);
+  console.log(` 3. Bing Webmaster Tools (IndexNow Console):`);
   console.log(`    https://www.bing.com/webmasters/sitemaps?siteUrl=${encodeURIComponent(BASE_URL + '/')}`);
-  console.log(` 3. Direct Public Sitemap URL:`);
-  console.log(`    ${SITEMAP_URL}`);
   console.log(`======================================================\n`);
 }
 

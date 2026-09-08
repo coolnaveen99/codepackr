@@ -3,17 +3,20 @@ import { Copy, Check, RefreshCw, Download, QrCode as QrIcon, Lock, Globe, Clock,
 import QRCode from 'qrcode';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
+import { CronVisualizer } from './CronVisualizer';
 
 interface UtilitiesViewProps {
   tool: ToolDef;
   onBackToHome?: () => void;
   onSelectRelated?: (t: ToolDef) => void;
+  initialInput?: string;
 }
 
 export const UtilitiesView: React.FC<UtilitiesViewProps> = ({
   tool,
   onBackToHome,
   onSelectRelated,
+  initialInput = '',
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -684,44 +687,10 @@ console.log(\`Running \${suite} securely in your browser.\`);
         </div>
       )}
 
-      {/* Cron Expression Builder */}
+      {/* Cron Expression Visualizer & Simulator */}
       {tool.id === 'cron-expression' && (
-        <div className="max-w-2xl mx-auto p-6 rounded-2xl border shadow-md space-y-5"
-          style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-        >
-          <div className="grid grid-cols-5 gap-2 text-center">
-            {[
-              { label: 'Minute', val: cronMin, set: setCronMin, hint: '0-59' },
-              { label: 'Hour', val: cronHour, set: setCronHour, hint: '0-23' },
-              { label: 'Day (Month)', val: cronDom, set: setCronDom, hint: '1-31' },
-              { label: 'Month', val: cronMonth, set: setCronMonth, hint: '1-12' },
-              { label: 'Day (Week)', val: cronDow, set: setCronDow, hint: '0-6' },
-            ].map(({ label, val, set, hint }) => (
-              <div key={label}>
-                <span className="block text-[11px] font-bold text-gray-400 mb-1">{label}</span>
-                <input
-                  type="text"
-                  value={val}
-                  onChange={(e) => set(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border text-center font-mono font-bold text-sm outline-none"
-                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-                />
-                <span className="text-[10px] text-gray-400 mt-1 block">{hint}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="p-4 rounded-xl border text-center space-y-1"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-          >
-            <span className="text-xs text-gray-400 uppercase font-semibold">COMBINED CRON SCHEDULE</span>
-            <div className="text-2xl font-mono font-extrabold text-[var(--brand)] tracking-widest">
-              {cronMin} {cronHour} {cronDom} {cronMonth} {cronDow}
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-              Runs at minute {cronMin} of hour {cronHour} on day {cronDom} of month {cronMonth}
-            </p>
-          </div>
+        <div className="max-w-4xl mx-auto">
+          <CronVisualizer initialExpression={`${cronMin} ${cronHour} ${cronDom} ${cronMonth} ${cronDow}`} />
         </div>
       )}
 

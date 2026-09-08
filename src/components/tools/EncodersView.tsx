@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Copy, Check, RotateCcw, ArrowDownUp, Shield, KeyRound, Image as ImageIcon, CheckCircle2 } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
+import { JwtDebugger } from './JwtDebugger';
+import { popSmartPastePayload } from '../../lib/workspace';
 
 interface EncodersViewProps {
   tool: ToolDef;
@@ -171,29 +173,50 @@ export const EncodersView: React.FC<EncodersViewProps> = ({
 
   useEffect(() => {
     let sample = '';
-    switch (tool.id) {
-      case 'base64':
-        sample = 'Hello, Codepackr! Secure local browser utilities.';
-        break;
-      case 'url-encode':
-        sample = 'https://codepackr.com/search?query=json formatter&category=developer tools&filter=local#top';
-        break;
-      case 'html-entity':
-        sample = '<div class="alert font-bold">Codepackr & "Online Tools"\'s rating > 99%</div>';
-        break;
-      case 'hash-generator':
-        sample = 'The quick brown fox jumps over the lazy dog';
-        break;
-      case 'jwt-decoder':
-        sample = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkphbmUgRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJyb2xlIjoiYWRtaW4ifQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
-        break;
-      case 'jwt-encoder':
-        sample = '{"sub":"user_123","name":"Developer","role":"engineer","exp":1893456000}';
-        break;
+    const pendingTransfer = popSmartPastePayload(tool.id) || popSmartPastePayload('encoders') || initialInput;
+    if (pendingTransfer) {
+      sample = pendingTransfer;
+      if (tool.id === 'base64') {
+        // If it looks like base64 string, set mode to decode
+        if (/^[A-Za-z0-9+/=]+$/.test(pendingTransfer.trim())) {
+          setMode('decode');
+          setInput(sample);
+          processInput(sample, 'decode');
+          return;
+        }
+      } else if (tool.id === 'url-encode') {
+        if (pendingTransfer.includes('%') || pendingTransfer.startsWith('http')) {
+          setMode('decode');
+          setInput(sample);
+          processInput(sample, 'decode');
+          return;
+        }
+      }
+    } else {
+      switch (tool.id) {
+        case 'base64':
+          sample = 'Hello, Codepackr! Secure local browser utilities.';
+          break;
+        case 'url-encode':
+          sample = 'https://codepackr.com/search?query=json formatter&category=developer tools&filter=local#top';
+          break;
+        case 'html-entity':
+          sample = '<div class="alert font-bold">Codepackr & "Online Tools"\'s rating > 99%</div>';
+          break;
+        case 'hash-generator':
+          sample = 'The quick brown fox jumps over the lazy dog';
+          break;
+        case 'jwt-decoder':
+          sample = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkphbmUgRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJyb2xlIjoiYWRtaW4ifQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+          break;
+        case 'jwt-encoder':
+          sample = '{"sub":"user_123","name":"Developer","role":"engineer","exp":1893456000}';
+          break;
+      }
     }
     setInput(sample);
     processInput(sample, mode);
-  }, [tool.id]);
+  }, [tool.id, initialInput]);
 
   const processInput = async (val: string, currentMode: 'encode' | 'decode') => {
     setError(null);
@@ -424,76 +447,11 @@ export const EncodersView: React.FC<EncodersViewProps> = ({
             ))}
           </div>
         </div>
-      ) : tool.id === 'jwt-decoder' ? (
-        <div className="space-y-4">
-          <div className="p-4 rounded-2xl border shadow-sm"
-            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-          >
-            <label className="block text-xs font-semibold mb-2" style={{ color: 'var(--muted)' }}>
-              ENCODED JWT TOKEN
-            </label>
-            <textarea
-              value={input}
-              onChange={(e) => {
-                setInput(e.target.value);
-                processInput(e.target.value, 'decode');
-              }}
-              rows={3}
-              placeholder="Paste JWT (eyJhbGciOi...)..."
-              className="w-full p-3 font-mono text-xs sm:text-sm rounded-xl border outline-none break-all"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="p-4 rounded-2xl border shadow-sm"
-              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-rose-500 uppercase">HEADER: ALGORITHM & TOKEN TYPE</span>
-                <button
-                  onClick={() => copyToClipboard(jwtHeader)}
-                  className="text-xs flex items-center gap-1 hover:underline text-gray-500"
-                >
-                  <Copy className="w-3 h-3" /> Copy
-                </button>
-              </div>
-              <pre className="p-3 rounded-xl font-mono text-xs overflow-x-auto"
-                style={{ backgroundColor: 'var(--surface-2)', color: 'var(--ink)' }}
-              >
-                {jwtHeader || '// Header will appear here'}
-              </pre>
-            </div>
-
-            <div className="p-4 rounded-2xl border shadow-sm"
-              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase">PAYLOAD: DATA & CLAIMS</span>
-                  {jwtExpired !== null && (
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
-                      jwtExpired ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300' : 'bg-emerald-100 text-emerald-700'
-                    }`}>
-                      {jwtExpired ? 'EXPIRED' : 'ACTIVE'}
-                    </span>
-                  )}
-                </div>
-                <button
-                  onClick={() => copyToClipboard(jwtPayload)}
-                  className="text-xs flex items-center gap-1 hover:underline text-gray-500"
-                >
-                  <Copy className="w-3 h-3" /> Copy
-                </button>
-              </div>
-              <pre className="p-3 rounded-xl font-mono text-xs overflow-x-auto"
-                style={{ backgroundColor: 'var(--surface-2)', color: 'var(--ink)' }}
-              >
-                {jwtPayload || '// Payload will appear here'}
-              </pre>
-            </div>
-          </div>
-        </div>
+      ) : tool.id === 'jwt-decoder' || tool.id === 'jwt-encoder' ? (
+        <JwtDebugger
+          initialMode={tool.id === 'jwt-encoder' ? 'encode' : 'decode'}
+          initialToken={input}
+        />
       ) : tool.id === 'base64-image' ? (
         <div className="space-y-4">
           <div className="p-6 rounded-2xl border border-dashed text-center"

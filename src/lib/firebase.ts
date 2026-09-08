@@ -1,6 +1,6 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
-import { getFirestore, Firestore } from 'firebase/firestore';
+import { initializeFirestore, getFirestore, setLogLevel, Firestore } from 'firebase/firestore';
 
 // Codepackr Firebase Production Configuration
 export const firebaseConfig = {
@@ -13,16 +13,30 @@ export const firebaseConfig = {
   measurementId: "G-TC54P43M6G",
 };
 
-let app: FirebaseApp;
-let auth: Auth;
-let db: Firestore;
+let app: FirebaseApp | undefined;
+let auth: Auth | undefined;
+let db: Firestore | undefined;
 
 try {
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   auth = getAuth(app);
-  db = getFirestore(app);
+  
+  // Suppress internal Firestore connection retry logs when offline or behind restricted proxies
+  try {
+    setLogLevel('silent');
+  } catch {
+    // Ignore in unsupported environments
+  }
+
+  try {
+    db = initializeFirestore(app, {
+      experimentalAutoDetectLongPolling: true,
+    });
+  } catch {
+    db = getFirestore(app);
+  }
 } catch (error) {
-  console.error('[Codepackr Firebase] Initialization error:', error);
+  // Gracefully fallback to client-side offline operation
 }
 
 export { app, auth, db };

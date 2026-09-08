@@ -1,62 +1,161 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@theme {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-light: var(--brand-light);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-line: var(--border);
+  --color-muted: var(--ink-muted);
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
 
 :root {
-  --ink: #09090b;
-  --muted: #71717a;
-  --line: #e4e4e7;
+  /* Light Theme Tokens */
+  --bg: #f8fafc;
   --surface: #ffffff;
-  --surface-2: #fafafa;
-  --surface-3: #f4f4f5;
-  --brand: #4f46e5;
-  --brand-hover: #4338ca;
-  --brand-light: #eef2ff;
-  --brand-2: #0d9488;
-  --ok: #16a34a;
-  --warn: #dc2626;
+  --surface-elevated: #f1f5f9;
+  --surface-muted: #e2e8f0;
+  --border: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --ink: #0f172a;
+  --ink-muted: #64748b;
+  --brand: #2563eb;
+  --brand-hover: #1d4ed8;
+  --brand-light: rgba(37, 99, 235, 0.1);
+  --accent: #0ea5e9;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+
+  /* Backward Compatibility Aliases for Existing Components */
+  --line: var(--border);
+  --muted: var(--ink-muted);
+  --surface-2: var(--bg);
+  --surface-3: var(--surface-muted);
+  --brand-2: var(--accent);
+  --ok: var(--success);
+  --warn: var(--danger);
+
+  /* Category Accents (Subtle) */
+  --cat-formatters: #3b82f6;
+  --cat-converters: #0ea5e9;
+  --cat-encoders: #8b5cf6;
+  --cat-validators: #10b981;
+  --cat-security: #f43f5e;
+  --cat-data: #14b8a6;
+  --cat-finance: #10b981;
 }
 
 .dark {
-  --ink: #f4f4f5;
-  --muted: #a1a1aa;
-  --line: #27272a;
-  --surface: #121215;
-  --surface-2: #09090b;
-  --surface-3: #18181b;
-  --brand: #6366f1;
-  --brand-hover: #818cf8;
-  --brand-light: rgba(99, 102, 241, 0.15);
-  --brand-2: #14b8a6;
-  --ok: #22c55e;
-  --warn: #ef4444;
+  /* Dark Theme Tokens (Navy/Graphite) */
+  --bg: #09090b;
+  --surface: #18181b;
+  --surface-elevated: #27272a;
+  --surface-muted: #3f3f46;
+  --border: #27272a;
+  --border-hover: #3f3f46;
+  --ink: #f8fafc;
+  --ink-muted: #a1a1aa;
+  --brand: #3b82f6;
+  --brand-hover: #60a5fa;
+  --brand-light: rgba(59, 130, 246, 0.15);
+  --accent: #38bdf8;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --info: #60a5fa;
+
+  /* Backward Compatibility Aliases */
+  --line: var(--border);
+  --muted: var(--ink-muted);
+  --surface-2: var(--bg);
+  --surface-3: var(--surface-muted);
+  --brand-2: var(--accent);
+  --ok: var(--success);
+  --warn: var(--danger);
 }
 
 body {
   margin: 0;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: var(--ink);
-  background-color: var(--surface-2);
+  background-color: var(--bg);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 code, pre, kbd, samp, .font-mono {
-  font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-/* ==========================================================================
-   GS1 Logistics Shipping Label (4" x 6") Print Engine
-   ========================================================================== */
-
-#gs1-print-portal {
-  display: none;
+/* Scrollbar Modernization */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
+.no-scrollbar,
+.scrollbar-none {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ink-muted);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+/* GS1 Logistics Shipping Label (4" x 6") Print Engine */
+#gs1-print-portal { display: none; }
 @media print {
-  @page {
-    size: 4in 6in;
-    margin: 0;
-  }
-
+  @page { size: 4in 6in; margin: 0; }
   html, body {
     margin: 0 !important;
     padding: 0 !important;
@@ -64,14 +163,10 @@ code, pre, kbd, samp, .font-mono {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-
-  /* When printing from GS1 label generator, completely hide web application layout */
   body.printing-gs1-label > *:not(#gs1-print-portal),
   body.gs1-tool-active > *:not(#gs1-print-portal) {
     display: none !important;
   }
-
-  /* Display ONLY the isolated 4x6 print portal */
   body.printing-gs1-label #gs1-print-portal,
   body.gs1-tool-active #gs1-print-portal {
     display: flex !important;
@@ -97,42 +192,4 @@ code, pre, kbd, samp, .font-mono {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
-}
-
-/* ==========================================================================
-   Scrollbar Modernization & Suppression Utilities
-   ========================================================================== */
-
-/* Completely hide harsh native browser scrollbars */
-.no-scrollbar::-webkit-scrollbar,
-.scrollbar-none::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-.no-scrollbar,
-.scrollbar-none {
-  -ms-overflow-style: none !important; /* IE and Edge */
-  scrollbar-width: none !important; /* Firefox */
-}
-
-/* Subtle, sleek custom scrollbar for code blocks and data tables */
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: var(--line) transparent;
-}
-.custom-scrollbar::-webkit-scrollbar {
-  height: 6px;
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: var(--line);
-  border-radius: 9999px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: var(--muted);
 }

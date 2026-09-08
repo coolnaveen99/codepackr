@@ -3,6 +3,9 @@ import { Copy, Check, CheckCircle2, AlertTriangle, Search, Split, Table, Columns
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
 import { safeLocalStorage } from '../../lib/storage';
+import { diffLines, diffWordsWithSpace } from 'diff';
+import { CodeEditor } from '../CodeEditor';
+import { useWorkspace, popSmartPastePayload } from '../../lib/workspace';
 
 interface ValidatorsViewProps {
   tool: ToolDef;
@@ -35,6 +38,7 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
     leftLineNum?: number;
     rightLineNum?: number;
     lineNum?: number;
+    wordTokens?: { value: string; added?: boolean; removed?: boolean }[];
   }[]>([]);
   const [structuralDiff, setStructuralDiff] = useState<string>('');
 
@@ -162,6 +166,7 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
   };
 
   useEffect(() => {
+    const pending = popSmartPastePayload(tool.id) || popSmartPastePayload('validators') || initialInput;
     if (tool.id === 'diff-checker') {
       const left = 'function greet(name) {\n  console.log("Hello " + name);\n  return true;\n}';
       const right = 'function greet(name, title = "") {\n  console.log(`Hello ${title} ${name}`.trim());\n  return true;\n  // updated for 2026\n}';
@@ -177,150 +182,99 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
     } else if (tool.id === 'regex-tester') {
       evaluateRegex(regexPattern, regexFlags, regexTestText);
     } else if (tool.id === 'json-validator') {
-      validateJSON(jsonInput);
+      const payload = pending || jsonInput;
+      if (pending) setJsonInput(payload);
+      validateJSON(payload);
     } else if (tool.id === 'json-path-tester') {
       evaluateJSONPath(jsonPathData, jsonPathQuery);
     } else if (tool.id === 'csv-viewer') {
-      parseCSV(csvText);
+      const payload = pending || csvText;
+      if (pending) setCsvText(payload);
+      parseCSV(payload);
     } else if (tool.id === 'dotenv-formatter') {
-      formatDotenv(dotenvInput);
+      const payload = pending || dotenvInput;
+      if (pending) setDotenvInput(payload);
+      formatDotenv(payload);
     } else if (tool.id === 'xsd-validator') {
       validateXSD(xmlInput, xsdInput);
     }
-  }, [tool.id]);
+  }, [tool.id, initialInput]);
 
-  // Diff computation with LCS (Longest Common Subsequence)
+  // Diff computation with diff library and intra-line word diffing
   const computeDiff = (l: string, r: string) => {
-    const a = l.split('\n');
-    const b = r.split('\n');
-    const n = a.length;
-    const m = b.length;
-
-    // 1. Common prefix
-    let start = 0;
-    while (start < n && start < m && a[start] === b[start]) {
-      start++;
+    if (!l && !r) {
+      setDiffResults([]);
+      return;
     }
 
-    // 2. Common suffix
-    let endA = n - 1;
-    let endB = m - 1;
-    while (endA >= start && endB >= start && a[endA] === b[endB]) {
-      endA--;
-      endB--;
-    }
-
+    const lineDiff = diffLines(l, r);
     const res: {
       type: 'same' | 'add' | 'del';
       text: string;
       leftLineNum?: number;
       rightLineNum?: number;
       lineNum?: number;
+      wordTokens?: { value: string; added?: boolean; removed?: boolean }[];
     }[] = [];
 
-    // Prefix lines
-    for (let i = 0; i < start; i++) {
-      res.push({
-        type: 'same',
-        text: a[i],
-        leftLineNum: i + 1,
-        rightLineNum: i + 1,
-        lineNum: i + 1,
-      });
-    }
+    let curL = 1;
+    let curR = 1;
 
-    // Middle lines
-    const middleA = a.slice(start, endA + 1);
-    const middleB = b.slice(start, endB + 1);
-    const midN = middleA.length;
-    const midM = middleB.length;
+    for (let i = 0; i < lineDiff.length; i++) {
+      const part = lineDiff[i];
+      const rawLines = part.value.split('\n');
+      // If ends with newline, omit trailing empty string produced by split
+      const lines = part.value.endsWith('\n') ? rawLines.slice(0, -1) : rawLines;
 
-    if (midN > 0 && midM > 0 && midN * midM <= 400000) {
-      const dp: number[][] = Array.from({ length: midN + 1 }, () => new Array(midM + 1).fill(0));
-      for (let i = 1; i <= midN; i++) {
-        const lineA = middleA[i - 1];
-        for (let j = 1; j <= midM; j++) {
-          if (lineA === middleB[j - 1]) {
-            dp[i][j] = dp[i - 1][j - 1] + 1;
-          } else {
-            dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      if (part.added) {
+        // Check if previous part was a deletion to pair intra-line word diffing
+        const prevPart = i > 0 && lineDiff[i - 1].removed ? lineDiff[i - 1] : null;
+        const prevRaw = prevPart ? prevPart.value.split('\n') : [];
+        const prevLines = prevPart && prevPart.value.endsWith('\n') ? prevRaw.slice(0, -1) : prevRaw;
+
+        lines.forEach((line, idx) => {
+          let wordTokens = undefined;
+          if (prevLines[idx] !== undefined) {
+            wordTokens = diffWordsWithSpace(prevLines[idx], line);
           }
-        }
-      }
-
-      let i = midN;
-      let j = midM;
-      const temp: {
-        type: 'same' | 'add' | 'del';
-        text: string;
-        leftLineNum?: number;
-        rightLineNum?: number;
-        lineNum?: number;
-      }[] = [];
-
-      while (i > 0 || j > 0) {
-        if (i > 0 && j > 0 && middleA[i - 1] === middleB[j - 1]) {
-          temp.push({
-            type: 'same',
-            text: middleA[i - 1],
-            leftLineNum: start + i,
-            rightLineNum: start + j,
-            lineNum: start + j,
-          });
-          i--;
-          j--;
-        } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-          temp.push({
+          res.push({
             type: 'add',
-            text: middleB[j - 1],
-            rightLineNum: start + j,
-            lineNum: start + j,
+            text: line,
+            rightLineNum: curR++,
+            lineNum: curR - 1,
+            wordTokens,
           });
-          j--;
-        } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
-          temp.push({
-            type: 'del',
-            text: middleA[i - 1],
-            leftLineNum: start + i,
-            lineNum: start + i,
-          });
-          i--;
-        }
-      }
-      temp.reverse();
-      res.push(...temp);
-    } else {
-      let curL = start + 1;
-      let curR = start + 1;
-      for (const line of middleA) {
-        res.push({
-          type: 'del',
-          text: line,
-          leftLineNum: curL++,
-          lineNum: curL,
         });
-      }
-      for (const line of middleB) {
-        res.push({
-          type: 'add',
-          text: line,
-          rightLineNum: curR++,
-          lineNum: curR,
-        });
-      }
-    }
+      } else if (part.removed) {
+        // Check if next part is an addition to pair intra-line word diffing
+        const nextPart = i + 1 < lineDiff.length && lineDiff[i + 1].added ? lineDiff[i + 1] : null;
+        const nextRaw = nextPart ? nextPart.value.split('\n') : [];
+        const nextLines = nextPart && nextPart.value.endsWith('\n') ? nextRaw.slice(0, -1) : nextRaw;
 
-    // Suffix lines
-    for (let k = 0; k < (n - 1 - endA); k++) {
-      const leftIdx = endA + 1 + k;
-      const rightIdx = endB + 1 + k;
-      res.push({
-        type: 'same',
-        text: a[leftIdx],
-        leftLineNum: leftIdx + 1,
-        rightLineNum: rightIdx + 1,
-        lineNum: rightIdx + 1,
-      });
+        lines.forEach((line, idx) => {
+          let wordTokens = undefined;
+          if (nextLines[idx] !== undefined) {
+            wordTokens = diffWordsWithSpace(line, nextLines[idx]);
+          }
+          res.push({
+            type: 'del',
+            text: line,
+            leftLineNum: curL++,
+            lineNum: curL - 1,
+            wordTokens,
+          });
+        });
+      } else {
+        lines.forEach((line) => {
+          res.push({
+            type: 'same',
+            text: line,
+            leftLineNum: curL++,
+            rightLineNum: curR++,
+            lineNum: curR - 1,
+          });
+        });
+      }
     }
 
     setDiffResults(res);
@@ -508,8 +462,18 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
   const diffDeletionsCount = diffResults.filter((r) => r.type === 'del').length;
 
   interface SplitDiffRow {
-    left: { lineNum?: number; text: string; type: 'same' | 'del' | 'empty' };
-    right: { lineNum?: number; text: string; type: 'add' | 'empty' | 'same' };
+    left: {
+      lineNum?: number;
+      text: string;
+      type: 'same' | 'del' | 'empty';
+      wordTokens?: { value: string; added?: boolean; removed?: boolean }[];
+    };
+    right: {
+      lineNum?: number;
+      text: string;
+      type: 'add' | 'empty' | 'same';
+      wordTokens?: { value: string; added?: boolean; removed?: boolean }[];
+    };
   }
 
   const splitRows: SplitDiffRow[] = useMemo(() => {
@@ -532,14 +496,32 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
         }
         const maxRows = Math.max(delChunk.length, addChunk.length);
         for (let r = 0; r < maxRows; r++) {
+          const hasBoth = r < delChunk.length && r < addChunk.length;
+          const leftTokens = hasBoth
+            ? diffWordsWithSpace(delChunk[r].text, addChunk[r].text)
+            : delChunk[r]?.wordTokens;
+          const rightTokens = hasBoth
+            ? diffWordsWithSpace(delChunk[r].text, addChunk[r].text)
+            : addChunk[r]?.wordTokens;
+
           rows.push({
             left:
               r < delChunk.length
-                ? { lineNum: delChunk[r].leftLineNum, text: delChunk[r].text, type: 'del' }
+                ? {
+                    lineNum: delChunk[r].leftLineNum,
+                    text: delChunk[r].text,
+                    type: 'del',
+                    wordTokens: leftTokens,
+                  }
                 : { type: 'empty', text: '' },
             right:
               r < addChunk.length
-                ? { lineNum: addChunk[r].rightLineNum, text: addChunk[r].text, type: 'add' }
+                ? {
+                    lineNum: addChunk[r].rightLineNum,
+                    text: addChunk[r].text,
+                    type: 'add',
+                    wordTokens: rightTokens,
+                  }
                 : { type: 'empty', text: '' },
           });
         }
@@ -569,16 +551,15 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                     {leftText ? leftText.split('\n').length : 0} lines
                   </span>
                 </div>
-                <textarea
+                <CodeEditor
                   id="diff-checker-original-input"
                   value={leftText}
-                  onChange={(e) => {
-                    setLeftText(e.target.value);
-                    computeDiff(e.target.value, rightText);
+                  onChange={(val) => {
+                    setLeftText(val);
+                    computeDiff(val, rightText);
                   }}
-                  rows={7}
-                  className="w-full p-3 font-mono text-xs rounded-xl border outline-none"
-                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  height="220px"
+                  language="text"
                   placeholder="Paste or type original content here..."
                 />
               </div>
@@ -593,16 +574,15 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                     {rightText ? rightText.split('\n').length : 0} lines
                   </span>
                 </div>
-                <textarea
+                <CodeEditor
                   id="diff-checker-modified-input"
                   value={rightText}
-                  onChange={(e) => {
-                    setRightText(e.target.value);
-                    computeDiff(leftText, e.target.value);
+                  onChange={(val) => {
+                    setRightText(val);
+                    computeDiff(leftText, val);
                   }}
-                  rows={7}
-                  className="w-full p-3 font-mono text-xs rounded-xl border outline-none"
-                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  height="220px"
+                  language="text"
                   placeholder="Paste or type modified content here..."
                 />
               </div>
@@ -622,16 +602,15 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                       {leftText ? leftText.split('\n').length : 0} lines
                     </span>
                   </div>
-                  <textarea
+                  <CodeEditor
                     id="diff-checker-unified-original-input"
                     value={leftText}
-                    onChange={(e) => {
-                      setLeftText(e.target.value);
-                      computeDiff(e.target.value, rightText);
+                    onChange={(val) => {
+                      setLeftText(val);
+                      computeDiff(val, rightText);
                     }}
-                    rows={5}
-                    className="w-full p-3 font-mono text-xs rounded-xl border outline-none"
-                    style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                    height="180px"
+                    language="text"
                     placeholder="Paste or type original content here..."
                   />
                 </div>
@@ -646,16 +625,15 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                       {rightText ? rightText.split('\n').length : 0} lines
                     </span>
                   </div>
-                  <textarea
+                  <CodeEditor
                     id="diff-checker-unified-modified-input"
                     value={rightText}
-                    onChange={(e) => {
-                      setRightText(e.target.value);
-                      computeDiff(leftText, e.target.value);
+                    onChange={(val) => {
+                      setRightText(val);
+                      computeDiff(leftText, val);
                     }}
-                    rows={5}
-                    className="w-full p-3 font-mono text-xs rounded-xl border outline-none"
-                    style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                    height="180px"
+                    language="text"
                     placeholder="Paste or type modified content here..."
                   />
                 </div>
@@ -821,12 +799,23 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                             <span className="w-3 select-none font-bold text-center shrink-0">
                               {row.left.type === 'del' ? '-' : ' '}
                             </span>
-                            <span
-                              className={`flex-1 whitespace-pre ${
-                                row.left.type === 'del' ? 'line-through decoration-rose-500/70' : ''
-                              }`}
-                            >
-                              {row.left.text}
+                            <span className="flex-1 whitespace-pre">
+                              {row.left.wordTokens && row.left.type === 'del' ? (
+                                row.left.wordTokens.map((token, idx) =>
+                                  token.added ? null : (
+                                    <span
+                                      key={idx}
+                                      className={token.removed ? 'bg-rose-500/35 text-rose-950 dark:text-rose-100 font-semibold px-0.5 rounded line-through' : ''}
+                                    >
+                                      {token.value}
+                                    </span>
+                                  )
+                                )
+                              ) : (
+                                <span className={row.left.type === 'del' ? 'line-through decoration-rose-500/70' : ''}>
+                                  {row.left.text}
+                                </span>
+                              )}
                             </span>
                           </div>
 
@@ -847,7 +836,20 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                               {row.right.type === 'add' ? '+' : ' '}
                             </span>
                             <span className="flex-1 whitespace-pre">
-                              {row.right.text}
+                              {row.right.wordTokens && row.right.type === 'add' ? (
+                                row.right.wordTokens.map((token, idx) =>
+                                  token.removed ? null : (
+                                    <span
+                                      key={idx}
+                                      className={token.added ? 'bg-emerald-500/35 text-emerald-950 dark:text-emerald-100 font-semibold px-0.5 rounded shadow-xs' : ''}
+                                    >
+                                      {token.value}
+                                    </span>
+                                  )
+                                )
+                              ) : (
+                                row.right.text
+                              )}
                             </span>
                           </div>
                         </div>
@@ -882,12 +884,31 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                       <span className="w-3 select-none font-bold text-center shrink-0">
                         {r.type === 'add' ? '+' : r.type === 'del' ? '-' : ' '}
                       </span>
-                      <span
-                        className={`flex-1 whitespace-pre ${
-                          r.type === 'del' ? 'line-through decoration-rose-500/70' : ''
-                        }`}
-                      >
-                        {r.text}
+                      <span className="flex-1 whitespace-pre">
+                        {r.wordTokens ? (
+                          r.wordTokens.map((token, idx) => {
+                            if (r.type === 'add' && token.removed) return null;
+                            if (r.type === 'del' && token.added) return null;
+                            return (
+                              <span
+                                key={idx}
+                                className={
+                                  r.type === 'add' && token.added
+                                    ? 'bg-emerald-500/35 text-emerald-950 dark:text-emerald-100 font-semibold px-0.5 rounded shadow-xs'
+                                    : r.type === 'del' && token.removed
+                                    ? 'bg-rose-500/35 text-rose-950 dark:text-rose-100 font-semibold px-0.5 rounded line-through'
+                                    : ''
+                                }
+                              >
+                                {token.value}
+                              </span>
+                            );
+                          })
+                        ) : (
+                          <span className={r.type === 'del' ? 'line-through decoration-rose-500/70' : ''}>
+                            {r.text}
+                          </span>
+                        )}
                       </span>
                     </div>
                   ))
@@ -950,15 +971,16 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
               <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>
                 TEST STRING
               </label>
-              <textarea
+              <CodeEditor
+                id="regex-test-string"
                 value={regexTestText}
-                onChange={(e) => {
-                  setRegexTestText(e.target.value);
-                  evaluateRegex(regexPattern, regexFlags, e.target.value);
+                onChange={(val) => {
+                  setRegexTestText(val);
+                  evaluateRegex(regexPattern, regexFlags, val);
                 }}
-                rows={4}
-                className="w-full p-3 font-mono text-xs sm:text-sm rounded-xl border outline-none"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                height="150px"
+                language="text"
+                placeholder="Enter string to test regex matching..."
               />
             </div>
           </div>
@@ -1042,15 +1064,16 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
               </div>
             </div>
 
-            <textarea
+            <CodeEditor
+              id="json-validator-input"
               value={jsonInput}
-              onChange={(e) => {
-                setJsonInput(e.target.value);
-                validateJSON(e.target.value);
+              onChange={(val) => {
+                setJsonInput(val);
+                validateJSON(val);
               }}
-              rows={12}
-              className="w-full p-4 font-mono text-xs sm:text-sm rounded-xl border outline-none leading-relaxed"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              height="380px"
+              language="json"
+              errorMessage={jsonValidationResult.error}
             />
 
             {jsonValidationResult.error && (
@@ -1093,27 +1116,27 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                 <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>
                   JSON DATA
                 </label>
-                <textarea
+                <CodeEditor
+                  id="json-path-data-input"
                   value={jsonPathData}
-                  onChange={(e) => {
-                    setJsonPathData(e.target.value);
-                    evaluateJSONPath(e.target.value, jsonPathQuery);
+                  onChange={(val) => {
+                    setJsonPathData(val);
+                    evaluateJSONPath(val, jsonPathQuery);
                   }}
-                  rows={10}
-                  className="w-full p-3 font-mono text-xs rounded-xl border outline-none"
-                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  height="300px"
+                  language="json"
                 />
               </div>
               <div>
                 <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>
                   EVALUATION RESULT
                 </label>
-                <textarea
+                <CodeEditor
+                  id="json-path-output"
                   readOnly
                   value={jsonPathOutput}
-                  rows={10}
-                  className="w-full p-3 font-mono text-xs rounded-xl border outline-none"
-                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  height="300px"
+                  language="json"
                 />
               </div>
             </div>
@@ -1130,16 +1153,19 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
             <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>
               RAW CSV INPUT
             </label>
-            <textarea
-              value={csvText}
-              onChange={(e) => {
-                setCsvText(e.target.value);
-                parseCSV(e.target.value);
-              }}
-              rows={4}
-              className="w-full p-3 font-mono text-xs rounded-xl border outline-none mb-3"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            />
+            <div className="mb-3">
+              <CodeEditor
+                id="csv-raw-input"
+                value={csvText}
+                onChange={(val) => {
+                  setCsvText(val);
+                  parseCSV(val);
+                }}
+                height="150px"
+                language="text"
+                placeholder="Paste or type CSV content..."
+              />
+            </div>
 
             {/* Table Search */}
             <div className="flex items-center justify-between gap-3 mb-3">
@@ -1208,15 +1234,15 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
               <span className="block text-xs font-semibold mb-2" style={{ color: 'var(--muted)' }}>
                 LEFT JSON OBJECT
               </span>
-              <textarea
+              <CodeEditor
+                id="json-structural-diff-left"
                 value={leftText}
-                onChange={(e) => {
-                  setLeftText(e.target.value);
-                  computeStructuralDiff(e.target.value, rightText);
+                onChange={(val) => {
+                  setLeftText(val);
+                  computeStructuralDiff(val, rightText);
                 }}
-                rows={8}
-                className="w-full p-3 font-mono text-xs rounded-xl border outline-none"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                height="240px"
+                language="json"
               />
             </div>
             <div className="p-4 rounded-2xl border shadow-sm"
@@ -1225,15 +1251,15 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
               <span className="block text-xs font-semibold mb-2" style={{ color: 'var(--muted)' }}>
                 RIGHT JSON OBJECT
               </span>
-              <textarea
+              <CodeEditor
+                id="json-structural-diff-right"
                 value={rightText}
-                onChange={(e) => {
-                  setRightText(e.target.value);
-                  computeStructuralDiff(leftText, e.target.value);
+                onChange={(val) => {
+                  setRightText(val);
+                  computeStructuralDiff(leftText, val);
                 }}
-                rows={8}
-                className="w-full p-3 font-mono text-xs rounded-xl border outline-none"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                height="240px"
+                language="json"
               />
             </div>
           </div>
@@ -1262,15 +1288,15 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
             <span className="block text-xs font-semibold mb-2" style={{ color: 'var(--muted)' }}>
               INPUT .ENV CONTENT
             </span>
-            <textarea
+            <CodeEditor
+              id="dotenv-input"
               value={dotenvInput}
-              onChange={(e) => {
-                setDotenvInput(e.target.value);
-                formatDotenv(e.target.value);
+              onChange={(val) => {
+                setDotenvInput(val);
+                formatDotenv(val);
               }}
-              rows={10}
-              className="w-full p-3 font-mono text-xs rounded-xl border outline-none"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              height="260px"
+              language="text"
             />
           </div>
           <div className="p-4 rounded-2xl border shadow-sm flex flex-col"
@@ -1288,12 +1314,12 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                 <Copy className="w-3 h-3" /> Copy
               </button>
             </div>
-            <textarea
+            <CodeEditor
+              id="dotenv-output"
               readOnly
               value={dotenvOutput}
-              rows={10}
-              className="w-full flex-1 p-3 font-mono text-xs rounded-xl border outline-none"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              height="260px"
+              language="text"
             />
           </div>
         </div>
@@ -1314,15 +1340,15 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                 </span>
                 <span className="text-[11px] text-[var(--muted)]">Instance Data</span>
               </div>
-              <textarea
+              <CodeEditor
+                id="xsd-xml-input"
                 value={xmlInput}
-                onChange={(e) => {
-                  setXmlInput(e.target.value);
-                  validateXSD(e.target.value, xsdInput);
+                onChange={(val) => {
+                  setXmlInput(val);
+                  validateXSD(val, xsdInput);
                 }}
-                rows={12}
-                className="w-full p-3 font-mono text-xs rounded-xl border outline-none leading-relaxed"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                height="320px"
+                language="xml"
               />
             </div>
 
@@ -1337,15 +1363,15 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                 </span>
                 <span className="text-[11px] text-[var(--muted)]">W3C XML Schema</span>
               </div>
-              <textarea
+              <CodeEditor
+                id="xsd-schema-input"
                 value={xsdInput}
-                onChange={(e) => {
-                  setXsdInput(e.target.value);
-                  validateXSD(xmlInput, e.target.value);
+                onChange={(val) => {
+                  setXsdInput(val);
+                  validateXSD(xmlInput, val);
                 }}
-                rows={12}
-                className="w-full p-3 font-mono text-xs rounded-xl border outline-none leading-relaxed"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                height="320px"
+                language="xml"
               />
             </div>
           </div>

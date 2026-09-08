@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Moon, Sun, Terminal, MessageSquare, Star, Menu, Shield } from 'lucide-react';
+import { Search, Moon, Sun, Terminal, Star, Menu, Shield } from 'lucide-react';
 import { CategoryFilter } from '../types';
 import { useBookmarks } from '../lib/bookmarks';
 
@@ -24,7 +24,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   selectedCategory = 'all',
   onSelectCategory,
   onGoHome,
-  onGoContact,
   onGoBookmarks,
   onToggleSidebar,
   isAdmin = false,
@@ -42,35 +41,23 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header
-      className="sticky top-0 z-40 w-full border-b backdrop-blur-md transition-colors"
-      style={{
-        borderColor: 'var(--line)',
-        backgroundColor: darkMode ? 'rgba(18, 18, 21, 0.85)' : 'rgba(255, 255, 255, 0.85)',
-      }}
-    >
+    <header id="main-header" className="sticky top-0 z-40 w-full border-b backdrop-blur-md transition-colors border-[color:var(--border)] bg-[color:var(--surface)]/85">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-3 sm:gap-6">
+          
           {/* Left: Sidebar Toggle & Brand */}
           <div className="flex items-center gap-3 shrink-0">
             {onToggleSidebar && (
               <button
                 id="sidebar-toggle-btn"
                 onClick={onToggleSidebar}
-                className="p-2 rounded-xl border transition-colors hover:border-[var(--brand)] text-[var(--muted)] hover:text-[var(--ink)] cursor-pointer"
-                style={{
-                  backgroundColor: 'var(--surface)',
-                  borderColor: 'var(--line)',
-                }}
+                className="p-2 rounded-xl border border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)] transition-colors cursor-pointer"
                 aria-label="Toggle navigation sidebar"
-                title="Toggle Sidebar"
               >
-                <Menu className="w-4 h-4" />
+                <Menu className="w-5 h-5" />
               </button>
             )}
-
             <a
-              id="brand-logo-btn"
               href="/"
               onClick={(e) => {
                 if (!e.ctrlKey && !e.metaKey && e.button === 0) {
@@ -78,150 +65,91 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onGoHome();
                 }
               }}
-              className="flex items-center gap-2.5 group text-left cursor-pointer focus:outline-none"
+              className="flex items-center gap-3 group text-left cursor-pointer focus:outline-none"
             >
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-sm transition-transform group-hover:scale-105"
-                style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #0d9488 100%)' }}
-              >
-                <Terminal className="w-4 h-4 text-white" />
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-sm bg-[color:var(--brand)] transition-transform group-hover:scale-105">
+                <Terminal className="w-5 h-5" />
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-lg tracking-tight" style={{ color: 'var(--ink)' }}>
-                  Codepackr
+              <div className="flex flex-col">
+                <span className="font-bold text-lg leading-tight tracking-tight text-[color:var(--ink)]">
+                  CodePackr
                 </span>
-                <span
-                  className="text-[9px] font-mono uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md border"
-                  style={{
-                    backgroundColor: 'var(--brand-light)',
-                    borderColor: 'var(--brand)',
-                    color: 'var(--brand)',
-                  }}
-                >
-                  Client-Side
+                <span className="text-[10px] font-mono font-medium tracking-wider text-[color:var(--ink-muted)] uppercase">
+                  Enterprise
                 </span>
               </div>
             </a>
           </div>
 
-          {/* Center: Raycast / Linear Style Search Trigger */}
-          <div className="flex-1 max-w-xl mx-2">
+          {/* Center: Command Palette Trigger */}
+          <div className="flex-1 max-w-xl mx-2 hidden sm:block">
             <button
               id="search-trigger-btn"
               onClick={onOpenSearch}
-              className="w-full flex items-center justify-between px-3.5 py-2 text-xs sm:text-sm rounded-xl border transition-all hover:border-[var(--brand)] focus:outline-none shadow-xs group cursor-pointer"
-              style={{
-                backgroundColor: 'var(--surface)',
-                borderColor: 'var(--line)',
-                color: 'var(--muted)',
-              }}
+              className="w-full flex items-center justify-between px-4 py-2 text-sm rounded-xl border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink-muted)] hover:border-[color:var(--brand)] focus:outline-none transition-all shadow-sm cursor-pointer group"
             >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <Search className="w-3.5 h-3.5 text-zinc-400 group-hover:text-[var(--brand)] transition-colors shrink-0" />
-                <span className="truncate">Search 30+ tools, EDI segments, formats...</span>
+              <div className="flex items-center gap-3 min-w-0">
+                <Search className="w-4 h-4 group-hover:text-[color:var(--brand)] transition-colors shrink-0" />
+                <span className="truncate">Search tools, converters, formatters...</span>
               </div>
-              <kbd
-                className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 text-[10px] font-mono font-medium rounded-md border shrink-0"
-                style={{ backgroundColor: 'var(--surface-3)', borderColor: 'var(--line)', color: 'var(--muted)' }}
-              >
-                ⌘K
+              <kbd className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono font-medium rounded-md border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] shrink-0">
+                <span className="text-[10px]">⌘</span>K
               </kbd>
             </button>
           </div>
 
           {/* Right: Actions */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* Bookmarks Pill */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
-              id="bookmarks-nav-btn"
-              onClick={handleSelectBookmarks}
-              className={`px-2.5 py-1.5 text-xs font-semibold rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ${
-                selectedCategory === 'bookmarks'
-                  ? 'bg-amber-500 text-white border-amber-500'
-                  : 'hover:border-amber-400 text-[var(--muted)] hover:text-[var(--ink)]'
-              }`}
-              style={
-                selectedCategory === 'bookmarks'
-                  ? {}
-                  : {
-                      backgroundColor: 'var(--surface)',
-                      borderColor: 'var(--line)',
-                    }
-              }
-              title="Saved & Bookmarked Tools"
+              onClick={onOpenSearch}
+              className="sm:hidden p-2 rounded-xl border border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)] transition-colors cursor-pointer"
+              aria-label="Search"
             >
-              <Star
-                className={`w-3.5 h-3.5 ${
-                  selectedCategory === 'bookmarks'
-                    ? 'text-white fill-white'
-                    : bookmarkCount > 0
-                    ? 'text-amber-500 fill-amber-500'
-                    : 'text-zinc-400'
-                }`}
-              />
-              <span className="hidden sm:inline">Favorites</span>
+              <Search className="w-5 h-5" />
+            </button>
+
+            {/* Bookmarks */}
+            <button
+              id="nav-bookmarks-btn"
+              onClick={handleSelectBookmarks}
+              className={`px-3 py-1.5 text-sm font-medium rounded-xl border transition-all flex items-center gap-2 cursor-pointer shadow-sm ${
+                selectedCategory === 'bookmarks'
+                  ? 'bg-[color:var(--warning)] text-white border-[color:var(--warning)]'
+                  : 'bg-[color:var(--surface)] border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:border-[color:var(--border-hover)]'
+              }`}
+              title="Saved Tools"
+            >
+              <Star className={`w-4 h-4 ${selectedCategory === 'bookmarks' ? 'fill-white' : bookmarkCount > 0 ? 'text-[color:var(--warning)] fill-[color:var(--warning)]' : ''}`} />
+              <span className="hidden md:inline">Favorites</span>
               {bookmarkCount > 0 && (
-                <span
-                  className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                    selectedCategory === 'bookmarks'
-                      ? 'bg-white/30 text-white'
-                      : 'bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-300'
-                  }`}
-                >
+                <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${selectedCategory === 'bookmarks' ? 'bg-white/20' : 'bg-[color:var(--surface-elevated)] text-[color:var(--ink)]'}`}>
                   {bookmarkCount}
                 </span>
               )}
             </button>
 
-            {/* Admin Badge/Button when Authenticated */}
             {isAdmin && onGoAdmin && (
               <button
-                id="admin-nav-btn"
+                id="nav-admin-btn"
                 onClick={onGoAdmin}
-                className="flex px-2.5 py-1.5 text-xs font-semibold rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-800 dark:text-amber-200 transition-colors items-center gap-1.5 cursor-pointer hover:bg-amber-500/20"
-                title="Admin Governance Console"
+                className="flex px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-colors items-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs"
+                title="Admin Console"
               >
-                <Shield className="w-3.5 h-3.5 text-amber-500" />
-                <span className="hidden sm:inline">Admin</span>
+                <Shield className="w-4 h-4 text-amber-500" />
+                <span>Admin Console</span>
               </button>
             )}
 
-            {/* Contact Button */}
-            <a
-              id="contact-nav-btn"
-              href="/contact.html"
-              onClick={(e) => {
-                if (!e.ctrlKey && !e.metaKey && e.button === 0) {
-                  e.preventDefault();
-                  onGoContact();
-                }
-              }}
-              className="hidden md:flex px-2.5 py-1.5 text-xs font-semibold rounded-xl border transition-colors items-center gap-1.5 cursor-pointer hover:border-[var(--brand)] text-[var(--muted)] hover:text-[var(--ink)]"
-              style={{
-                backgroundColor: 'var(--surface)',
-                borderColor: 'var(--line)',
-              }}
-              title="Feedback & Contact"
-            >
-              <MessageSquare className="w-3.5 h-3.5" />
-              <span>Contact</span>
-            </a>
-
-            {/* Dark Mode Toggle */}
             <button
               id="theme-toggle-btn"
               onClick={onToggleTheme}
-              className="p-2 rounded-xl border transition-colors hover:border-[var(--brand)] cursor-pointer text-[var(--muted)] hover:text-[var(--ink)]"
-              style={{
-                backgroundColor: 'var(--surface)',
-                borderColor: 'var(--line)',
-              }}
+              className="p-2 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)] transition-colors cursor-pointer"
               aria-label="Toggle Theme"
-              title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
-              {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-zinc-600" />}
+              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
           </div>
+
         </div>
       </div>
     </header>

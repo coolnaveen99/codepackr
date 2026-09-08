@@ -17,7 +17,12 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
 
   // Encoders & Security
   'base64': 'base64',
+  'base64-converter': 'base64',
+  'base64-decoder': 'base64',
+  'base64-encoder': 'base64',
   'url-encode': 'url-encode',
+  'url-encoder': 'url-encode',
+  'url-decoder': 'url-encode',
   'html-entity': 'html-entity',
   'hash-generator': 'hash-generator',
   'crc32-checksum-generator': 'hash-generator',

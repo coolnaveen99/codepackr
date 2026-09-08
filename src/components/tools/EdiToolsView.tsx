@@ -41,6 +41,7 @@ import {
   FSMA_204_COMPLIANT_856,
 } from '../../data/ediDictionary';
 import { TOOLS } from '../../data/tools';
+import { popSmartPastePayload } from '../../lib/workspace';
 
 const SEGMENT_NAMES: Record<string, string> = COMPREHENSIVE_SEGMENT_DICTIONARY;
 
@@ -723,6 +724,8 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
 
   // Initialize input
   const [input, setInput] = useState<string>(() => {
+    const pendingTransfer = popSmartPastePayload(tool.id) || popSmartPastePayload('edi') || popSmartPastePayload('edi-formatter') || popSmartPastePayload('edi-to-json');
+    if (pendingTransfer) return pendingTransfer;
     if (initialInput) return initialInput;
     return SAMPLE_850;
   });
@@ -738,12 +741,37 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
   // P1.6: EDI Validator Audit Mode ('standard' envelope vs 'fsma204' Food Traceability Audit)
   const [validatorMode, setValidatorMode] = useState<'standard' | 'fsma204'>('standard');
 
-  // Keep activeTab in sync with tool prop changes
+  // Keep activeTab and input in sync with tool prop changes
   useEffect(() => {
     if (tool && tool.id) {
       setActiveTab(tool.id);
+      const pendingTransfer = popSmartPastePayload(tool.id) || popSmartPastePayload('edi') || popSmartPastePayload('edi-formatter') || popSmartPastePayload('edi-to-json');
+      if (pendingTransfer) {
+        setInput(pendingTransfer);
+      } else if (initialInput) {
+        setInput(initialInput);
+      }
     }
-  }, [tool.id]);
+  }, [tool.id, initialInput]);
+
+  // Auto-detect delimiters whenever input changes
+  useEffect(() => {
+    const trimmed = input.trim();
+    if (trimmed.startsWith('ISA') && trimmed.length >= 106) {
+      const elemSep = trimmed[3];
+      const compSep = trimmed[104];
+      const segTerm = trimmed[105];
+      if (elemSep) setElementSeparator(elemSep);
+      if (compSep) setSubElementSeparator(compSep);
+      if (segTerm && !/\s/.test(segTerm)) {
+        setSegmentTerminator(segTerm);
+      }
+    } else if (trimmed.startsWith('UNA') && trimmed.length >= 9) {
+      setSubElementSeparator(trimmed[3]);
+      setElementSeparator(trimmed[4]);
+      setSegmentTerminator(trimmed[8]);
+    }
+  }, [input]);
 
   // Current active tool definition for single dynamic top header
   const currentActiveToolDef = useMemo(() => {

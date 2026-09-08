@@ -88,11 +88,11 @@ function drawIcon(x, y, w, h) {
     return [0, 0, 0, 0]; // Transparent outside rounded container
   }
 
-  // Brand gradient: #5B52E8 (91, 82, 232) to #009F88 (0, 159, 136)
+  // Brand gradient: #2563EB (37, 99, 235) to #0EA5E9 (14, 165, 233)
   const grad = Math.max(0, Math.min(1, (nx + ny) * 0.5));
-  let bgR = Math.round(91 * (1 - grad));
-  let bgG = Math.round(82 * (1 - grad) + 159 * grad);
-  let bgB = Math.round(232 * (1 - grad) + 136 * grad);
+  let bgR = Math.round(37 * (1 - grad) + 14 * grad);
+  let bgG = Math.round(99 * (1 - grad) + 165 * grad);
+  let bgB = Math.round(235 * (1 - grad) + 233 * grad);
 
   // Terminal prompt symbol:
   // Polyline: (0.24, 0.30) -> (0.44, 0.50) -> (0.24, 0.70)
@@ -197,15 +197,33 @@ function generateSvgFavicon() {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <defs>
+    <!-- CodePackr Enterprise Gradient: Blue to Cyan -->
     <linearGradient id="codepackr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#5B52E8"/>
-      <stop offset="100%" stop-color="#009f88"/>
+      <stop offset="0%" stop-color="#2563eb" /> <!-- Tailwind Blue 600 -->
+      <stop offset="100%" stop-color="#0ea5e9" /> <!-- Tailwind Sky 500 -->
     </linearGradient>
+    
+    <!-- Subtle Inner Shadow -->
+    <filter id="inner-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feComposite in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowDiff" />
+      <feFlood flood-color="white" flood-opacity="0.3" />
+      <feComposite in2="shadowDiff" operator="in" />
+      <feComposite in2="SourceGraphic" operator="over" />
+    </filter>
   </defs>
-  <rect width="64" height="64" rx="14" fill="url(#codepackr-grad)"/>
-  <!-- Terminal Prompt Icon > _ -->
-  <polyline points="18 42 32 28 18 14" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-  <line x1="36" y1="42" x2="48" y2="42" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Background Canvas -->
+  <rect width="64" height="64" rx="16" fill="url(#codepackr-grad)" filter="url(#inner-glow)"/>
+
+  <!-- Terminal Prompt Icon: > _ -->
+  <g transform="translate(14, 16)">
+    <!-- The greater-than symbol '>' -->
+    <polyline points="4 28 18 14 4 0" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- The cursor '_' -->
+    <line x1="22" y1="28" x2="36" y2="28" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+  </g>
 </svg>
 `;
 }

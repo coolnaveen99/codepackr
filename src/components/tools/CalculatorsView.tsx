@@ -25,12 +25,14 @@ interface CalculatorsViewProps {
   tool: ToolDef;
   onBackToHome?: () => void;
   onSelectRelated?: (t: ToolDef) => void;
+  initialInput?: string;
 }
 
 export const CalculatorsView: React.FC<CalculatorsViewProps> = ({
   tool,
   onBackToHome,
   onSelectRelated,
+  initialInput = '',
 }) => {
   // Scientific Calculator State
   const [calcDisplay, setCalcDisplay] = useState('0');

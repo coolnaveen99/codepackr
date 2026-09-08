@@ -3,6 +3,8 @@ import { Copy, Check, ArrowLeftRight, Download, Upload, Image as ImageIcon, Tras
 import yaml from 'js-yaml';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
+import { CodeEditor, SupportedLanguage } from '../CodeEditor';
+import { useWorkspace, popSmartPastePayload } from '../../lib/workspace';
 
 interface ConvertersViewProps {
   tool: ToolDef;
@@ -51,6 +53,26 @@ export const ConvertersView: React.FC<ConvertersViewProps> = ({
   const [isImageDragging, setIsImageDragging] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
+  const getInputLang = (): SupportedLanguage => {
+    if (tool.id === 'json-xml-converter') return direction === 'forward' ? 'json' : 'xml';
+    if (tool.id === 'json-csv-converter') return direction === 'forward' ? 'json' : 'text';
+    if (tool.id === 'yaml-json-converter') return direction === 'forward' ? 'text' : 'json';
+    if (tool.id === 'markdown-html-converter') return direction === 'forward' ? 'text' : 'html';
+    if (tool.id === 'csv-xml-converter') return direction === 'forward' ? 'text' : 'xml';
+    if (tool.id === 'html-markdown-converter') return direction === 'forward' ? 'html' : 'text';
+    return 'text';
+  };
+
+  const getOutputLang = (): SupportedLanguage => {
+    if (tool.id === 'json-xml-converter') return direction === 'forward' ? 'xml' : 'json';
+    if (tool.id === 'json-csv-converter') return direction === 'forward' ? 'text' : 'json';
+    if (tool.id === 'yaml-json-converter') return direction === 'forward' ? 'json' : 'text';
+    if (tool.id === 'markdown-html-converter') return direction === 'forward' ? 'html' : 'text';
+    if (tool.id === 'csv-xml-converter') return direction === 'forward' ? 'xml' : 'text';
+    if (tool.id === 'html-markdown-converter') return direction === 'forward' ? 'text' : 'html';
+    return 'text';
+  };
+
   const getSample = (toolId: string, dir: 'forward' | 'reverse') => {
     switch (toolId) {
       case 'json-xml-converter':
@@ -92,10 +114,11 @@ export const ConvertersView: React.FC<ConvertersViewProps> = ({
   useEffect(() => {
     setUploadedFileName(null);
     setUploadedFileSize(null);
-    const sample = getSample(tool.id, direction);
+    const pendingTransfer = popSmartPastePayload(tool.id) || popSmartPastePayload('converters') || initialInput;
+    const sample = pendingTransfer || getSample(tool.id, direction);
     setInput(sample);
     convert(sample, direction);
-  }, [tool.id]);
+  }, [tool.id, initialInput]);
 
   const convert = (val: string, dir: 'forward' | 'reverse') => {
     setError(null);
@@ -952,17 +975,19 @@ Timestamp: ${new Date().toISOString()}
                 {input.length} chars
               </span>
             </div>
-            <textarea
-              value={input}
-              onChange={(e) => {
-                setInput(e.target.value);
-                generateCurlCode(e.target.value, targetLang);
-              }}
-              rows={5}
-              placeholder="Paste curl command or drop a .sh / .curl file..."
-              className="w-full p-3 font-mono text-xs rounded-xl border outline-none"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            />
+            <div className="rounded-xl overflow-hidden border border-[var(--line)] bg-[var(--surface-2)]">
+              <CodeEditor
+                value={input}
+                onChange={(val) => {
+                  setInput(val);
+                  generateCurlCode(val, targetLang);
+                }}
+                height="160px"
+                minHeight="140px"
+                language="text"
+                placeholder="Paste curl command or drop a .sh / .curl file..."
+              />
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -1016,13 +1041,16 @@ Timestamp: ${new Date().toISOString()}
                 </button>
               </div>
             </div>
-            <textarea
-              readOnly
-              value={output}
-              rows={12}
-              className="w-full p-3 font-mono text-xs sm:text-sm rounded-xl border outline-none leading-relaxed"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            />
+            <div className="rounded-xl overflow-hidden border border-[var(--line)] bg-[var(--surface-2)]">
+              <CodeEditor
+                readOnly
+                value={output}
+                height="320px"
+                minHeight="240px"
+                language={targetLang === 'python' ? 'text' : 'javascript'}
+                placeholder="// Generated client code will appear here..."
+              />
+            </div>
           </div>
         </div>
       ) : tool.id === 'image-resizer' || tool.id === 'favicon-generator' ? (
@@ -1363,17 +1391,20 @@ Timestamp: ${new Date().toISOString()}
                 </div>
               )}
 
-              <textarea
-                value={input}
-                onChange={(e) => {
-                  setInput(e.target.value);
-                  convert(e.target.value, direction);
-                }}
-                placeholder={`Paste content or drop a ${getInputAccept()} file here...`}
-                rows={14}
-                className="w-full p-3 font-mono text-xs sm:text-sm rounded-xl border outline-none leading-relaxed resize-y"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-              />
+              <div className="rounded-xl overflow-hidden border border-[var(--line)] bg-[var(--surface-2)]">
+                <CodeEditor
+                  value={input}
+                  onChange={(val) => {
+                    setInput(val);
+                    convert(val, direction);
+                  }}
+                  language={getInputLang()}
+                  placeholder={`Paste content or drop a ${getInputAccept()} file here...`}
+                  height="440px"
+                  minHeight="380px"
+                  errorMessage={error}
+                />
+              </div>
 
               <div className="mt-2 flex items-center justify-between text-[11px]" style={{ color: 'var(--muted)' }}>
                 <span>Drag & drop files directly or click Upload</span>
@@ -1418,14 +1449,16 @@ Timestamp: ${new Date().toISOString()}
                 </div>
               </div>
 
-              <textarea
-                readOnly
-                value={output}
-                placeholder="Converted output will appear here automatically..."
-                rows={14}
-                className="w-full p-3 font-mono text-xs sm:text-sm rounded-xl border outline-none leading-relaxed resize-y"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-              />
+              <div className="rounded-xl overflow-hidden border border-[var(--line)] bg-[var(--surface-2)]">
+                <CodeEditor
+                  readOnly
+                  value={output}
+                  language={getOutputLang()}
+                  placeholder="Converted output will appear here automatically..."
+                  height="440px"
+                  minHeight="380px"
+                />
+              </div>
 
               <div className="mt-2 flex items-center justify-between text-[11px]" style={{ color: 'var(--muted)' }}>
                 <span>Ready to download or copy</span>

@@ -13,6 +13,8 @@ import {
   Eye,
   LogOut,
   SlidersHorizontal,
+  Share2,
+  FileSpreadsheet,
 } from 'lucide-react';
 import sitemapData from '../data/sitemapUrls.json';
 import { useAdminAuth } from '../lib/useAdminAuth';
@@ -292,6 +294,69 @@ export const SitemapModal: React.FC<SitemapModalProps> = ({
               >
                 Hidden / Drafts ({hiddenUrls.length})
               </button>
+            </div>
+          )}
+
+          {/* Admin Webmaster & Indexing Command Suite (Re-enabled under Admin) */}
+          {isAuthenticated && (
+            <div
+              className="p-3 border-b flex flex-wrap items-center justify-between gap-2.5 text-xs"
+              style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface-2)' }}
+            >
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider flex items-center gap-1.5 mr-1">
+                  <Globe className="w-3.5 h-3.5 text-[var(--brand)]" />
+                  <span>Webmaster Suite:</span>
+                </span>
+
+                {/* Google Search Console */}
+                <a
+                  href="https://search.google.com/search-console"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all hover:border-[var(--brand)] hover:text-[var(--brand)] cursor-pointer shadow-2xs"
+                  style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  title="Open Google Search Console to inspect indexing and site crawls"
+                >
+                  <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
+                  </svg>
+                  <span>Google Console</span>
+                  <ExternalLink className="w-3 h-3 text-[var(--muted)]" />
+                </a>
+
+                {/* Bing Webmaster */}
+                <a
+                  href="https://www.bing.com/webmasters"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all hover:border-[var(--brand)] hover:text-[var(--brand)] cursor-pointer shadow-2xs"
+                  style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  title="Open Microsoft Bing Webmaster Tools"
+                >
+                  <span className="w-3.5 h-3.5 flex items-center justify-center font-bold text-[11px] text-sky-600">b</span>
+                  <span>Bing Webmaster</span>
+                  <ExternalLink className="w-3 h-3 text-[var(--muted)]" />
+                </a>
+
+                {/* Social Media Content Button */}
+                <a
+                  href="/codepackr_social_media_promotions.csv"
+                  download="codepackr_social_media_promotions.csv"
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all hover:border-[var(--brand)] hover:text-[var(--brand)] cursor-pointer shadow-2xs"
+                  style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  title="Download production social media promotion copy for LinkedIn & X"
+                >
+                  <Share2 className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>Social Media Content (CSV)</span>
+                  <Download className="w-3 h-3 text-[var(--muted)]" />
+                </a>
+              </div>
+
+              <div className="flex items-center gap-1.5 text-[11px] text-[var(--muted)]">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span>IndexNow Auto-Sync (Active)</span>
+              </div>
             </div>
           )}
 

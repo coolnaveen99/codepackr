@@ -4,6 +4,7 @@ import { TOOLS } from '../data/tools';
 import { ToolDef } from '../types';
 import { useToolGovernance } from '../lib/useToolGovernance';
 import { useAdminAuth } from '../lib/useAdminAuth';
+import { getIcon } from '../lib/icons';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -57,51 +58,38 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 px-4 bg-black/60 backdrop-blur-sm animate-fade-in"
-      onClick={onClose}
-    >
+    <div id="search-modal-backdrop" className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose}>
       <div
-        className="w-full max-w-xl rounded-2xl border shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
-        style={{
-          backgroundColor: 'var(--surface)',
-          borderColor: 'var(--line)',
-        }}
+        id="search-modal-container"
+        className="w-full max-w-2xl rounded-2xl border border-[color:var(--border)] shadow-2xl overflow-hidden flex flex-col max-h-[70vh] bg-[color:var(--surface)]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Search Input */}
-        <div className="flex items-center px-4 py-3 border-b gap-3" style={{ borderColor: 'var(--line)' }}>
-          <Search className="w-5 h-5 text-gray-400" />
+        <div className="flex items-center px-4 py-4 border-b border-[color:var(--border)] gap-3 bg-[color:var(--surface-elevated)]">
+          <Search className="w-5 h-5 text-[color:var(--ink-muted)]" />
           <input
+            id="search-modal-input"
             ref={inputRef}
             type="text"
-            placeholder="Search all 70+ developer tools (e.g. json, edi, xml, jwt, uuid)..."
+            placeholder="Search tools, converters, or keywords..."
             value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setSelectedIndex(0);
-            }}
+            onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0); }}
             onKeyDown={handleKeyDown}
-            className="flex-1 bg-transparent border-none outline-none text-base"
-            style={{ color: 'var(--ink)' }}
+            className="flex-1 bg-transparent border-none outline-none text-lg text-[color:var(--ink)] placeholder:text-[color:var(--ink-muted)]"
           />
           {query && (
-            <button
-              onClick={() => setQuery('')}
-              className="p-1 rounded text-gray-400 hover:text-gray-600"
-            >
-              <X className="w-4 h-4" />
+            <button onClick={() => setQuery('')} className="p-1 rounded text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] cursor-pointer">
+              <X className="w-5 h-5" />
             </button>
           )}
-          <kbd className="text-xs px-2 py-0.5 rounded border text-gray-400" style={{ borderColor: 'var(--line)' }}>
+          <kbd className="hidden sm:block text-xs font-mono px-2 py-1 rounded border border-[color:var(--border)] text-[color:var(--ink-muted)] bg-[color:var(--surface)]">
             ESC
           </kbd>
         </div>
 
-        {/* Results List */}
-        <div className="flex-1 overflow-y-auto p-2">
+        <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
           {filteredTools.length === 0 ? (
-            <div className="p-8 text-center text-sm" style={{ color: 'var(--muted)' }}>
-              No tools matching &ldquo;{query}&rdquo;
+            <div className="p-8 text-center text-sm text-[color:var(--ink-muted)]">
+              No tools matching "{query}"
             </div>
           ) : (
             filteredTools.map((tool, idx) => {
@@ -109,58 +97,43 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
               return (
                 <div
                   key={tool.id}
-                  id={`search-item-${tool.id}`}
-                  onClick={() => {
-                    onSelectTool(tool);
-                    onClose();
-                  }}
+                  onClick={() => { onSelectTool(tool); onClose(); }}
                   onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl cursor-pointer transition-colors ${
-                    isSelected ? 'shadow-sm' : ''
+                  className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-colors ${
+                    isSelected ? 'bg-[color:var(--brand-light)] border border-[color:var(--brand)]' : 'border border-transparent hover:bg-[color:var(--surface-elevated)]'
                   }`}
-                  style={{
-                    backgroundColor: isSelected ? 'var(--brand-light)' : 'transparent',
-                    border: isSelected ? '1px solid var(--brand)' : '1px solid transparent',
-                  }}
                 >
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm" style={{ color: isSelected ? 'var(--brand)' : 'var(--ink)' }}>
-                        {tool.name}
-                      </span>
-                      <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded"
-                        style={{ backgroundColor: 'var(--surface-3)', color: 'var(--muted)' }}
-                      >
-                        {tool.category}
-                      </span>
-                      {getToolStatus(tool.id).status === 'hidden' && (
-                        <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 flex items-center gap-1">
-                          <EyeOff className="w-2.5 h-2.5" />
-                          <span>Hidden</span>
-                        </span>
-                      )}
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-9 h-9 rounded-lg bg-[color:var(--surface)] border border-[color:var(--border)] flex items-center justify-center shrink-0 shadow-xs">
+                      {getIcon(tool.icon, 20)}
                     </div>
-                    <span className="text-xs line-clamp-1" style={{ color: 'var(--muted)' }}>
-                      {tool.description}
-                    </span>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-3">
+                        <span className={`font-semibold text-base ${isSelected ? 'text-[color:var(--brand)]' : 'text-[color:var(--ink)]'}`}>
+                          {tool.name}
+                        </span>
+                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-[color:var(--surface-muted)] text-[color:var(--ink-muted)]">
+                          {tool.category}
+                        </span>
+                        {getToolStatus(tool.id).status === 'hidden' && (
+                          <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-[color:var(--warning)]/10 text-[color:var(--warning)] border border-[color:var(--warning)]/30 flex items-center gap-1">
+                            <EyeOff className="w-3 h-3" /> Hidden
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-sm text-[color:var(--ink-muted)] line-clamp-1">
+                        {tool.description}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs" style={{ color: isSelected ? 'var(--brand)' : 'var(--muted)' }}>
-                    {isSelected && <CornerDownLeft className="w-3.5 h-3.5" />}
-                    <ArrowRight className="w-4 h-4 opacity-50" />
+                  <div className={`flex items-center gap-2 ${isSelected ? 'text-[color:var(--brand)]' : 'text-[color:var(--ink-muted)]'}`}>
+                    {isSelected && <CornerDownLeft className="w-4 h-4" />}
+                    <ArrowRight className="w-5 h-5 opacity-50" />
                   </div>
                 </div>
               );
             })
           )}
-        </div>
-
-        {/* Footer shortcuts */}
-        <div className="px-4 py-2 border-t text-[11px] flex items-center justify-between"
-          style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface-2)', color: 'var(--muted)' }}
-        >
-          <span>Navigate with &uarr; &darr;</span>
-          <span>Press Enter to select</span>
-          <span>Press Esc to close</span>
         </div>
       </div>
     </div>
