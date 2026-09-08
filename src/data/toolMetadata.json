@@ -4012,6 +4012,44 @@
       }
     ]
   },
+  "financial-planner": {
+    "name": "Financial Planning & Retirement Calculator",
+    "title": "Financial Planning & Retirement Calculator - Codepackr",
+    "description": "Analyze retirement readiness, projected vs required corpus, corpus sustainability, savings gap, scenarios, and get actionable recommendations.",
+    "canonicalPath": "/financial-planner",
+    "canonicalUrl": "https://www.codepackr.com/financial-planner",
+    "category": "calculators",
+    "features": [
+      "Accurate mathematical calculations with instant reactive updates for Financial Planning & Retirement Calculator.",
+      "Detailed breakdown tables with visual graphs and itemized summaries.",
+      "Customizable interest rates, compounding frequencies, and terms.",
+      "Completely private: financial figures and inputs remain on your device.",
+      "Export calculation reports and shareable configurations."
+    ],
+    "howToUse": [
+      "Enter or adjust the input parameters in the tool control panel.",
+      "View real-time updates and calculation or generation results instantly.",
+      "Copy the result to your clipboard or customize settings as needed."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Financial Planning & Retirement Calculator?",
+        "answer": "No. All operations in Financial Planning & Retirement Calculator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Financial Planning & Retirement Calculator offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Financial Planning & Retirement Calculator offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Financial Planning & Retirement Calculator handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
   "home": {
     "name": "Codepackr",
     "title": "Codepackr - Free Online Developer Tools",

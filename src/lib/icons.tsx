@@ -120,6 +120,11 @@ export const getIcon = (iconName: string, size = 18, className = ''): React.Reac
     case 'loan':
     case 'emi':
       return <CurrencyIcon {...props} />;
+    case 'target':
+    case 'retirement':
+    case 'piggybank':
+    case 'financial':
+      return <CurrencyIcon {...props} />;
 
     default:
       return <CodeIcon {...props} />;

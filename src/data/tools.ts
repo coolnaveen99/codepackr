@@ -472,6 +472,16 @@ export const TOOLS: ToolDef[] = [
 
   // Calculators
   {
+    id: 'financial-planner',
+    name: 'Financial Planning & Retirement Calculator',
+    category: 'calculators',
+    description: 'Analyze retirement readiness, projected vs required corpus, corpus sustainability, savings gap, scenarios, and get actionable recommendations.',
+    keywords: ['retirement', 'financial planning', 'corpus', 'fire', 'financial independence', 'sip', 'inflation', 'readiness', 'sustainability', 'calculator'],
+    icon: 'Target',
+    popular: true,
+    isNew: true,
+  },
+  {
     id: 'loan-calculator',
     name: 'Loan & EMI Calculator',
     category: 'calculators',

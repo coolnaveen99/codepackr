@@ -14,6 +14,7 @@ import { CalculatorsView } from './components/tools/CalculatorsView';
 import { UtilitiesView } from './components/tools/UtilitiesView';
 import { TextToolsView } from './components/tools/TextToolsView';
 import { JsonDefinitionView } from './components/tools/JsonDefinitionView';
+import { FinancialPlannerView } from './components/tools/FinancialPlannerView';
 import { EdiToolsView } from './components/tools/EdiToolsView';
 import { XmlToolsView } from './components/xml/XmlToolsView';
 import { AdminPortal } from './components/admin/AdminPortal';
@@ -23,7 +24,9 @@ import { updateDocumentMetadata } from './lib/seo';
 import { CurrencyProvider } from './lib/CurrencyContext';
 import { SitemapModal } from './components/SitemapModal';
 import { Sidebar } from './components/Sidebar';
-import { Terminal, Globe, AlertTriangle, Lock } from 'lucide-react';
+import { AdminLoginModal } from './components/admin/AdminLoginModal';
+import { useAdminAuth } from './lib/useAdminAuth';
+import { Terminal, Globe, AlertTriangle, Lock, Shield } from 'lucide-react';
 import { GithubIcon, XTwitterIcon, LinkedinIcon, YoutubeIcon, InstagramIcon } from './components/BrandIcons';
 import { safeLocalStorage } from './lib/storage';
 
@@ -56,9 +59,11 @@ export const App: React.FC = () => {
   });
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSitemapModalOpen, setIsSitemapModalOpen] = useState(false);
+  const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const { getToolStatus, isToolVisible } = useToolGovernance();
+  const { isAuthenticated } = useAdminAuth();
 
   // Apply theme to DOM
   useEffect(() => {
@@ -193,8 +198,9 @@ export const App: React.FC = () => {
   // Render active tool component
   const renderTool = (tool: ToolDef) => {
     const gov = getToolStatus(tool.id);
+    const isHiddenTool = gov.status === 'hidden' || gov.visibility === 'admin_only';
 
-    if (gov.status === 'hidden' && !isToolVisible(tool.id)) {
+    if (isHiddenTool && !isToolVisible(tool.id, isAuthenticated)) {
       return (
         <div className="max-w-md mx-auto py-16 text-center space-y-4">
           <div className="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center bg-[var(--surface-2)] text-[var(--muted)]">
@@ -202,15 +208,52 @@ export const App: React.FC = () => {
           </div>
           <h2 className="text-lg font-bold" style={{ color: 'var(--ink)' }}>Tool Unavailable</h2>
           <p className="text-xs text-[var(--muted)]">This utility is currently unlisted or undergoing administrative review.</p>
-          <button
-            onClick={navigateToHome}
-            className="px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--brand)] text-white hover:opacity-90 transition-opacity cursor-pointer"
-          >
-            Browse Available Tools
-          </button>
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <button
+              onClick={navigateToHome}
+              className="px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--brand)] text-white hover:opacity-90 transition-opacity cursor-pointer"
+            >
+              Browse Available Tools
+            </button>
+            <button
+              onClick={() => setIsAdminLoginOpen(true)}
+              className="px-4 py-2 rounded-xl text-xs font-semibold border border-[var(--line)] hover:border-[var(--brand)] transition-colors cursor-pointer"
+            >
+              Admin Sign In
+            </button>
+          </div>
         </div>
       );
     }
+
+    const renderAdminPreviewBanner = () => {
+      if (!isAuthenticated || !isHiddenTool) return null;
+      return (
+        <div className="mb-6 p-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 flex items-center justify-between gap-3 text-amber-900 dark:text-amber-200">
+          <div className="flex items-center gap-2.5">
+            <Shield className="w-5 h-5 text-amber-500 shrink-0" />
+            <div>
+              <div className="font-bold text-xs uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                Admin Preview Mode
+              </div>
+              <p className="text-xs mt-0.5 leading-relaxed">
+                This utility is marked as <strong>Hidden</strong> in Firestore Governance. Public visitors see a Tool Unavailable screen.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setActivePage('admin');
+              setActiveTool(null);
+              window.history.pushState({}, '', '/admin');
+            }}
+            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/20 text-amber-950 dark:text-amber-100 hover:bg-amber-500/30 transition-colors whitespace-nowrap cursor-pointer"
+          >
+            Governance Console &rarr;
+          </button>
+        </div>
+      );
+    };
 
     const renderMaintenanceBanner = () => {
       if (gov.status !== 'maintenance' && !gov.noticeMessage) return null;
@@ -232,6 +275,8 @@ export const App: React.FC = () => {
     let toolViewContent: React.ReactNode = null;
     if (tool.id === 'json-definition-generator') {
       toolViewContent = <JsonDefinitionView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
+    } else if (tool.id === 'financial-planner') {
+      toolViewContent = <FinancialPlannerView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
     } else {
       switch (tool.category) {
         case 'formatters':
@@ -269,6 +314,7 @@ export const App: React.FC = () => {
 
     return (
       <div className="space-y-4">
+        {renderAdminPreviewBanner()}
         {renderMaintenanceBanner()}
         {toolViewContent}
       </div>
@@ -291,6 +337,12 @@ export const App: React.FC = () => {
         onGoContact={navigateToContact}
         onGoBookmarks={() => handleSelectCategory('bookmarks')}
         onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+        isAdmin={isAuthenticated}
+        onGoAdmin={() => {
+          setActivePage('admin');
+          setActiveTool(null);
+          window.history.pushState({}, '', '/admin');
+        }}
       />
 
       {/* App Shell: Developer Sidebar + Main Content Workbench */}
@@ -509,6 +561,21 @@ export const App: React.FC = () => {
       <SitemapModal
         isOpen={isSitemapModalOpen}
         onClose={() => setIsSitemapModalOpen(false)}
+        onSelectTool={navigateToTool}
+        onNavigateAdmin={() => {
+          setActivePage('admin');
+          setActiveTool(null);
+          window.history.pushState({}, '', '/admin');
+        }}
+      />
+
+      {/* Admin Login Modal */}
+      <AdminLoginModal
+        isOpen={isAdminLoginOpen}
+        onClose={() => setIsAdminLoginOpen(false)}
+        onSuccess={() => {
+          setIsAdminLoginOpen(false);
+        }}
       />
     </div>
     </CurrencyProvider>

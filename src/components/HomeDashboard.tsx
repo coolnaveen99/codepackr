@@ -8,6 +8,8 @@ import {
   Workflow,
   Sparkles,
   ShieldCheck,
+  Shield,
+  EyeOff,
   Lock,
   Layers,
   SlidersHorizontal,
@@ -18,6 +20,7 @@ import { getIcon } from '../lib/icons';
 import { useBookmarks, shareToolUrl } from '../lib/bookmarks';
 import { getToolPath } from '../lib/urls';
 import { useToolGovernance } from '../lib/useToolGovernance';
+import { useAdminAuth } from '../lib/useAdminAuth';
 
 interface HomeDashboardProps {
   onSelectTool: (tool: ToolDef) => void;
@@ -36,6 +39,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const { isBookmarked, toggleBookmark, count: bookmarkCount } = useBookmarks();
   const { isToolVisible, getToolStatus } = useToolGovernance();
+  const { isAuthenticated } = useAdminAuth();
 
   const handleCardShare = async (e: React.MouseEvent, tool: ToolDef) => {
     e.stopPropagation();
@@ -54,8 +58,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   // Filter tools by category, governance status, and instant in-page query
   const filteredTools = useMemo(() => {
     return TOOLS.filter((tool) => {
-      // Governance check: Hide hidden/admin-only tools from public view
-      if (!isToolVisible(tool.id)) return false;
+      // Governance check: Hide hidden/admin-only tools from public view unless admin
+      if (!isToolVisible(tool.id, isAuthenticated)) return false;
 
       // Category filter
       if (selectedCategory === 'bookmarks') {
@@ -76,7 +80,11 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
       return true;
     });
-  }, [selectedCategory, searchQuery, isBookmarked, isToolVisible]);
+  }, [selectedCategory, searchQuery, isBookmarked, isToolVisible, isAuthenticated]);
+
+  const hiddenToolsCount = useMemo(() => {
+    return TOOLS.filter((tool) => !isToolVisible(tool.id, false)).length;
+  }, [isToolVisible]);
 
   const activeCategoryLabel = useMemo(() => {
     if (selectedCategory === 'all') return 'All Developer Tools';
@@ -96,10 +104,10 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               <span>100% Client-Side In-Memory Sandbox</span>
             </div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight" style={{ color: 'var(--ink)' }}>
-              Developer Tools &amp; EDI Suite
+              Professional Developer Tools &amp; EDI Suite
             </h1>
             <p className="text-xs sm:text-sm leading-relaxed text-[var(--muted)]">
-              High-performance formatters, converters, EDI processors, calculators, and encoders. Zero data leaves your browser.
+              Powerful, free-to-use tools for formatting, validation, conversion, EDI processing, encoding, and more. Your data stays in your browser.
             </p>
           </div>
 
@@ -206,6 +214,25 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         </div>
       </div>
 
+      {/* Admin Mode Indicator Banner */}
+      {isAuthenticated && hiddenToolsCount > 0 && (
+        <div className="p-3.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2.5 text-amber-800 dark:text-amber-200">
+            <Shield className="w-4 h-4 text-amber-500 shrink-0" />
+            <span>
+              <strong>Admin Mode Active:</strong> Showing all {TOOLS.length} utilities, including{' '}
+              <strong>{hiddenToolsCount} hidden/unlisted</strong> tools. Public visitors only see listed utilities.
+            </span>
+          </div>
+          <a
+            href="/admin"
+            className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-amber-500/20 text-amber-950 dark:text-amber-100 hover:bg-amber-500/30 transition-colors whitespace-nowrap"
+          >
+            Governance Console &rarr;
+          </a>
+        </div>
+      )}
+
       {/* Grid Header / Counter */}
       <div className="flex items-center justify-between text-xs text-[var(--muted)] font-mono">
         <span>
@@ -224,15 +251,18 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           const bookmarked = isBookmarked(tool.id);
           const isCopied = copiedId === tool.id;
           const gov = getToolStatus(tool.id);
+          const isHiddenTool = gov.status === 'hidden' || gov.visibility === 'admin_only';
 
           return (
             <div
               key={tool.id}
               onClick={() => onSelectTool(tool)}
-              className="group relative flex flex-col justify-between p-4 rounded-xl border transition-all duration-200 cursor-pointer hover:border-[var(--brand)] shadow-2xs hover:shadow-sm"
+              className={`group relative flex flex-col justify-between p-4 rounded-xl border transition-all duration-200 cursor-pointer hover:border-[var(--brand)] shadow-2xs hover:shadow-sm ${
+                isHiddenTool ? 'border-amber-500/40 bg-amber-500/5' : ''
+              }`}
               style={{
-                backgroundColor: 'var(--surface)',
-                borderColor: 'var(--line)',
+                backgroundColor: isHiddenTool ? undefined : 'var(--surface)',
+                borderColor: isHiddenTool ? undefined : 'var(--line)',
               }}
             >
               <div className="space-y-3">
@@ -245,7 +275,12 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                   </div>
 
                   <div className="flex items-center gap-1.5">
-                    {gov.status === 'maintenance' ? (
+                    {isHiddenTool ? (
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300 flex items-center gap-1">
+                        <EyeOff className="w-3 h-3" />
+                        Hidden
+                      </span>
+                    ) : gov.status === 'maintenance' ? (
                       <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400">
                         Maintenance
                       </span>

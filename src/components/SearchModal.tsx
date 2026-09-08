@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, ArrowRight, CornerDownLeft } from 'lucide-react';
+import { Search, X, ArrowRight, CornerDownLeft, EyeOff } from 'lucide-react';
 import { TOOLS } from '../data/tools';
 import { ToolDef } from '../types';
 import { useToolGovernance } from '../lib/useToolGovernance';
+import { useAdminAuth } from '../lib/useAdminAuth';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const { isToolVisible, getToolStatus } = useToolGovernance();
+  const { isAuthenticated } = useAdminAuth();
 
   useEffect(() => {
     if (isOpen) {
@@ -25,7 +27,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
   }, [isOpen]);
 
   const filteredTools = TOOLS.filter((tool) => {
-    if (!isToolVisible(tool.id)) return false;
+    if (!isToolVisible(tool.id, isAuthenticated)) return false;
     const q = query.toLowerCase().trim();
     if (!q) return true;
     return (
@@ -131,6 +133,12 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
                       >
                         {tool.category}
                       </span>
+                      {getToolStatus(tool.id).status === 'hidden' && (
+                        <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                          <EyeOff className="w-2.5 h-2.5" />
+                          <span>Hidden</span>
+                        </span>
+                      )}
                     </div>
                     <span className="text-xs line-clamp-1" style={{ color: 'var(--muted)' }}>
                       {tool.description}

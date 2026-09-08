@@ -34,6 +34,11 @@ const aliasDefinitions = {
     category: 'encoders',
     description: 'Generate keyed-hash message authentication codes (HMAC) using SHA-256, SHA-512, and MD5 algorithms.'
   },
+  'financial-planner': {
+    name: 'Financial Planning & Retirement Calculator',
+    category: 'calculators',
+    description: 'Calculate your retirement corpus, investment growth, retirement income, financial health, corpus sustainability and savings gap with our advanced financial planning calculator.'
+  },
   'sip-calculator': {
     name: 'SIP Calculator',
     category: 'calculators',

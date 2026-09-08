@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-09-07",
+  "updatedAt": "2026-09-08",
   "host": "www.codepackr.com",
   "baseUrl": "https://www.codepackr.com",
-  "totalUrls": 105,
+  "totalUrls": 106,
   "urls": [
     {
       "loc": "https://www.codepackr.com/",
@@ -483,6 +483,14 @@
       "priority": "0.8",
       "changefreq": "monthly",
       "category": "xml"
+    },
+    {
+      "loc": "https://www.codepackr.com/financial-planner",
+      "path": "/financial-planner",
+      "name": "Financial Planning & Retirement Calculator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "calculators"
     },
     {
       "loc": "https://www.codepackr.com/loan-calculator",

@@ -1,8 +1,7 @@
 import React from 'react';
-import { Search, Moon, Sun, Terminal, MessageSquare, Star, Menu } from 'lucide-react';
+import { Search, Moon, Sun, Terminal, MessageSquare, Star, Menu, Shield } from 'lucide-react';
 import { CategoryFilter } from '../types';
 import { useBookmarks } from '../lib/bookmarks';
-import { CurrencySelector } from './CurrencySelector';
 
 interface NavbarProps {
   theme: 'light' | 'dark';
@@ -14,6 +13,8 @@ interface NavbarProps {
   onGoContact: () => void;
   onGoBookmarks?: () => void;
   onToggleSidebar?: () => void;
+  isAdmin?: boolean;
+  onGoAdmin?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -26,6 +27,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onGoContact,
   onGoBookmarks,
   onToggleSidebar,
+  isAdmin = false,
+  onGoAdmin,
 }) => {
   const darkMode = theme === 'dark';
   const { count: bookmarkCount } = useBookmarks();
@@ -170,8 +173,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </button>
 
-            {/* Currency Selector */}
-            <CurrencySelector idPrefix="nav-currency" variant="nav" />
+            {/* Admin Badge/Button when Authenticated */}
+            {isAdmin && onGoAdmin && (
+              <button
+                id="admin-nav-btn"
+                onClick={onGoAdmin}
+                className="flex px-2.5 py-1.5 text-xs font-semibold rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-800 dark:text-amber-200 transition-colors items-center gap-1.5 cursor-pointer hover:bg-amber-500/20"
+                title="Admin Governance Console"
+              >
+                <Shield className="w-3.5 h-3.5 text-amber-500" />
+                <span className="hidden sm:inline">Admin</span>
+              </button>
+            )}
 
             {/* Contact Button */}
             <a
