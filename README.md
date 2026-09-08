@@ -185,6 +185,44 @@ The repository includes GitHub Actions workflows integrated with Vercel for cont
 
 ---
 
+## AI-as-Code: Specialized GitHub Agents & Skills
+
+CodePackr employs an **AI-as-Code** architectural pattern in `.github/` to optimize context windows, eliminate token bloat, and enforce strict enterprise quality and privacy standards across AI-assisted development sessions.
+
+```text
+.github/
+├── agents/                           # Agent definitions, allowed skills & strict constraints
+│   ├── ui-architect.yml              # Frontend UI/UX & Enterprise Design System
+│   ├── core-engineer.yml             # Algorithmic engines, parsers & client-side performance
+│   └── seo-specialist.yml            # Four-layer metadata, sitemap & promotional datasets
+├── prompts/                          # Version-controlled system prompts referenced by agents
+│   ├── ui-architect.prompt.md
+│   ├── core-engineer.prompt.md
+│   └── seo-specialist.prompt.md
+└── skills/                           # Executable SOPs & guardrails for AI workflows
+    └── add-new-tool.md               # Strict 7-step sequence for adding new developer utilities
+```
+
+### Specialized Agents
+
+| Agent | Specification File | System Prompt | Scope & Strict Constraints |
+|---|---|---|---|
+| **Frontend UI/UX Architect** | `.github/agents/ui-architect.yml` | `.github/prompts/ui-architect.prompt.md` | React 18, Tailwind CSS, Enterprise design tokens (`var(--surface)`, `var(--brand)`), CodeMirror 6 (`CodeEditor.tsx`), WCAG AA contrast, and centralized currency formatting via `useCurrency()`. |
+| **Core Logic & Algorithms** | `.github/agents/core-engineer.yml` | `.github/prompts/core-engineer.prompt.md` | In-browser parsers, formatters, cryptography, and EDI processors. Strict zero data leakage mandate: 100% memory execution, non-blocking Web Workers, zero remote API calls. |
+| **SEO, Content & Metadata** | `.github/agents/seo-specialist.yml` | `.github/prompts/seo-specialist.prompt.md` | Four-layer metadata synchronization (`tools.ts`, `seo.ts`, `generate-metadata.mjs`, `sitemap.xml`), URL slug backward-compatibility, automated IndexNow pings, and social media promotion datasets. |
+
+### Tool Integration Skill (`.github/skills/add-new-tool.md`)
+Whenever introducing a new developer utility or EDI tool, refer to `.github/skills/add-new-tool.md` for the mandatory sequential lifecycle:
+1. **Define Tool**: Register in `src/data/tools.ts`.
+2. **Implement Component**: Build with Enterprise Design System in `src/components/tools/`.
+3. **Wire Views & Routing**: Connect in category views and `src/App.tsx`.
+4. **Register Slugs**: Add canonical slugs and backward-compatible aliases in `src/lib/urls.ts`.
+5. **Add SEO Schemas**: Provide rich features and FAQ structured data in `scripts/generate-metadata.mjs`.
+6. **Build & Auto-Sync**: Run `npm run build` (regenerates sitemaps, prerendered HTML, social CSVs, and pings IndexNow).
+7. **Type Check**: Validate with `npm run lint`.
+
+---
+
 ## Deployment Configuration (Vercel)
 
 The project is pre-configured for Vercel:

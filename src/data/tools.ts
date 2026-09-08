@@ -611,11 +611,12 @@ export const TOOLS: ToolDef[] = [
   },
   {
     id: 'mock-json-generator',
-    name: 'Mock JSON Generator',
+    name: 'Advanced Mock Data Generator',
     category: 'utilities',
-    description: 'Generate realistic mock JSON records for users, products, or transactions.',
-    keywords: ['mock', 'json', 'fake', 'dummy', 'records', 'api'],
+    description: 'Generate realistic mock data records with custom schema fields, exported as JSON, CSV, or SQL INSERT statements.',
+    keywords: ['mock', 'json', 'csv', 'sql', 'generator', 'fake', 'dummy', 'schema', 'records', 'api', 'dataset'],
     icon: 'Layers',
+    popular: true,
   },
   {
     id: 'markdown-preview',

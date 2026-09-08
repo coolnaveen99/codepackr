@@ -26,55 +26,55 @@ const HdIcon: React.FC<IconProps & { gradientId: string; children: React.ReactNo
   >
     <defs>
       {/* Formatters (Blue -> Sky) */}
-      <linearGradient id="grad-formatters" x1="0%" y1="0%" x2="100%" y2="100%">
+      <linearGradient id="grad-formatters" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
         <stop offset="0%" stopColor="#2563eb" />
         <stop offset="100%" stopColor="#0ea5e9" />
       </linearGradient>
       
       {/* Encoders & Crypto (Purple -> Fuchsia) */}
-      <linearGradient id="grad-encoders" x1="0%" y1="0%" x2="100%" y2="100%">
+      <linearGradient id="grad-encoders" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
         <stop offset="0%" stopColor="#8b5cf6" />
         <stop offset="100%" stopColor="#d946ef" />
       </linearGradient>
       
       {/* Validators (Emerald -> Teal) */}
-      <linearGradient id="grad-validators" x1="0%" y1="0%" x2="100%" y2="100%">
+      <linearGradient id="grad-validators" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
         <stop offset="0%" stopColor="#10b981" />
         <stop offset="100%" stopColor="#14b8a6" />
       </linearGradient>
       
       {/* Converters (Cyan -> Blue) */}
-      <linearGradient id="grad-converters" x1="0%" y1="0%" x2="100%" y2="100%">
+      <linearGradient id="grad-converters" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
         <stop offset="0%" stopColor="#06b6d4" />
         <stop offset="100%" stopColor="#3b82f6" />
       </linearGradient>
 
       {/* EDI Tools (Orange -> Amber) */}
-      <linearGradient id="grad-edi" x1="0%" y1="0%" x2="100%" y2="100%">
+      <linearGradient id="grad-edi" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
         <stop offset="0%" stopColor="#f97316" />
         <stop offset="100%" stopColor="#f59e0b" />
       </linearGradient>
 
       {/* XML/XSD/XSLT (Rose -> Orange) */}
-      <linearGradient id="grad-xml" x1="0%" y1="0%" x2="100%" y2="100%">
+      <linearGradient id="grad-xml" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
         <stop offset="0%" stopColor="#e11d48" />
         <stop offset="100%" stopColor="#f97316" />
       </linearGradient>
 
       {/* Calculators (Emerald -> Lime) */}
-      <linearGradient id="grad-calculators" x1="0%" y1="0%" x2="100%" y2="100%">
+      <linearGradient id="grad-calculators" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
         <stop offset="0%" stopColor="#059669" />
         <stop offset="100%" stopColor="#84cc16" />
       </linearGradient>
 
       {/* Utilities (Slate -> Indigo) */}
-      <linearGradient id="grad-utilities" x1="0%" y1="0%" x2="100%" y2="100%">
+      <linearGradient id="grad-utilities" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
         <stop offset="0%" stopColor="#64748b" />
         <stop offset="100%" stopColor="#6366f1" />
       </linearGradient>
 
       {/* Text Tools (Violet -> Pink) */}
-      <linearGradient id="grad-text" x1="0%" y1="0%" x2="100%" y2="100%">
+      <linearGradient id="grad-text" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
         <stop offset="0%" stopColor="#7c3aed" />
         <stop offset="100%" stopColor="#ec4899" />
       </linearGradient>
@@ -242,11 +242,13 @@ export const SendIcon: React.FC<IconProps> = (props) => (
 
 export const BarcodeIcon: React.FC<IconProps> = (props) => (
   <HdIcon gradientId="grad-edi" {...props}>
-    <path d="M3 5v14" stroke="url(#grad-edi)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M8 5v14" stroke="url(#grad-edi)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M12 5v14" stroke="url(#grad-edi)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M17 5v14" stroke="url(#grad-edi)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M21 5v14" stroke="url(#grad-edi)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path
+      d="M3 5v14 M8 5v14 M12 5v14 M17 5v14 M21 5v14"
+      stroke="url(#grad-edi)"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </HdIcon>
 );
 
@@ -456,6 +458,9 @@ export const getIcon = (iconName: string, size = 18, className = ''): React.Reac
     case 'shieldcheck':
       return <SecurityIcon {...props} />;
     case 'barcode':
+    case 'barcodeicon':
+    case 'scan':
+    case 'gs1':
       return <BarcodeIcon {...props} />;
     case 'gitcomparearrows':
       return <CompareIcon {...props} />;

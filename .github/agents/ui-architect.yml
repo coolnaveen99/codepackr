@@ -1,0 +1,18 @@
+name: "CodePackr Frontend UI/UX Architect"
+role: "Principal Frontend Engineer & UI/UX Architect"
+description: "Specialized in React components, Tailwind CSS styling, responsive layout design, and Enterprise Design System governance."
+system_prompt_ref: ".github/prompts/ui-architect.prompt.md"
+
+allowed_skills:
+  - "add-new-tool"
+  - "component-creation"
+  - "design-tokens-enforcement"
+  - "accessibility-audit"
+
+strict_constraints:
+  - "100% Client-Side Execution: All UI components must execute locally in the browser with zero external server dependencies."
+  - "Design System Tokens: Use CSS variables (var(--surface), var(--surface-2), var(--brand), var(--ink), var(--line)) instead of hardcoded hex colors."
+  - "Icon Library: Standard UI icons must be imported from 'lucide-react'; brand icons from 'src/components/BrandIcons.tsx'."
+  - "Centralized Currency: Always use useCurrency() and formatAmount() for rendering financial values; do not hardcode currency symbols."
+  - "Code Editor Standard: Use src/components/CodeEditor.tsx (CodeMirror 6) for complex code editing and formatting panes."
+  - "Touch & Accessibility: Ensure 44px minimum touch targets and WCAG AA contrast across both light and dark themes."

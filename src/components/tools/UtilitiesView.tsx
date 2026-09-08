@@ -68,11 +68,6 @@ export const UtilitiesView: React.FC<UtilitiesViewProps> = ({
   // HTTP Codes
   const [httpSearch, setHttpSearch] = useState('');
 
-  // Mock JSON
-  const [mockSchema, setMockSchema] = useState<'users' | 'products' | 'orders'>('users');
-  const [mockCount, setMockCount] = useState(3);
-  const [mockOutput, setMockOutput] = useState('');
-
   // Markdown Preview
   const [mdContent, setMdContent] = useState(
     `# Codepackr Markdown Preview
@@ -121,8 +116,6 @@ console.log(\`Running \${suite} securely in your browser.\`);
       updateTimestamp(timestampSec);
     } else if (tool.id === 'slugify') {
       updateSlug(slugInput, slugSep);
-    } else if (tool.id === 'mock-json-generator') {
-      generateMockJson(mockSchema, mockCount);
     }
   }, [tool.id]);
 
@@ -277,44 +270,6 @@ console.log(\`Running \${suite} securely in your browser.\`);
       .replace(/[\s_-]+/g, sep)
       .replace(/^-+|-+$/g, '');
     setSlugOutput(slug);
-  };
-
-  // Mock JSON logic
-  const generateMockJson = (type: 'users' | 'products' | 'orders', count: number) => {
-    const items: any[] = [];
-    const names = ['Emma Watson', 'Liam Smith', 'Olivia Brown', 'Noah Davis', 'Sophia Wilson'];
-    const roles = ['Software Engineer', 'Product Designer', 'Data Scientist', 'DevOps Specialist'];
-    const products = ['Mechanical Keyboard', '4K Monitor', 'Noise Cancelling Headphones', 'Ergonomic Desk'];
-
-    for (let i = 1; i <= count; i++) {
-      if (type === 'users') {
-        items.push({
-          id: `usr_${1000 + i}`,
-          name: names[i % names.length],
-          email: `${names[i % names.length].toLowerCase().replace(' ', '.')}@example.com`,
-          role: roles[i % roles.length],
-          isActive: i % 2 === 0,
-          createdAt: new Date(Date.now() - i * 86400000).toISOString(),
-        });
-      } else if (type === 'products') {
-        items.push({
-          sku: `SKU-${2000 + i}`,
-          name: products[i % products.length],
-          price: 49.99 + i * 15,
-          inStock: true,
-          rating: 4.5 + (i % 5) * 0.1,
-        });
-      } else {
-        items.push({
-          orderId: `ORD-${3000 + i}`,
-          customer: names[i % names.length],
-          total: (120.50 + i * 35).toFixed(2),
-          status: i % 3 === 0 ? 'SHIPPED' : 'PROCESSING',
-          timestamp: new Date().toISOString(),
-        });
-      }
-    }
-    setMockOutput(JSON.stringify(items, null, 2));
   };
 
   const copyToClipboard = (txt: string) => {
@@ -795,68 +750,6 @@ console.log(\`Running \${suite} securely in your browser.\`);
               </div>
             ))}
           </div>
-        </div>
-      )}
-
-      {/* Mock JSON Generator */}
-      {tool.id === 'mock-json-generator' && (
-        <div className="space-y-4 max-w-3xl mx-auto">
-          <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl border shadow-sm"
-            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex rounded-lg border overflow-hidden p-0.5" style={{ borderColor: 'var(--line)' }}>
-                {(['users', 'products', 'orders'] as const).map((schema) => (
-                  <button
-                    key={schema}
-                    onClick={() => {
-                      setMockSchema(schema);
-                      generateMockJson(schema, mockCount);
-                    }}
-                    className={`px-3 py-1 text-xs capitalize font-medium ${
-                      mockSchema === schema ? 'bg-[var(--brand)] text-white' : 'hover:opacity-80'
-                    }`}
-                  >
-                    {schema}
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-1.5 text-xs">
-                <span>Count:</span>
-                <input
-                  type="number"
-                  min={1}
-                  max={25}
-                  value={mockCount}
-                  onChange={(e) => {
-                    const c = Number(e.target.value);
-                    setMockCount(c);
-                    generateMockJson(mockSchema, c);
-                  }}
-                  className="w-16 p-1.5 rounded-lg border text-center font-mono outline-none"
-                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-                />
-              </div>
-            </div>
-
-            <button
-              onClick={() => copyToClipboard(mockOutput)}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 shadow-sm"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-            >
-              <Copy className="w-3.5 h-3.5" />
-              <span>Copy Mock JSON</span>
-            </button>
-          </div>
-
-          <textarea
-            readOnly
-            value={mockOutput}
-            rows={14}
-            className="w-full p-4 font-mono text-xs sm:text-sm rounded-2xl border outline-none leading-relaxed"
-            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-          />
         </div>
       )}
 

@@ -115,6 +115,8 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'slugify': 'slugify',
   'http-status-codes': 'http-status-codes',
   'mock-json-generator': 'mock-json-generator',
+  'mock-data-generator': 'mock-json-generator',
+  'advanced-mock-data-generator': 'mock-json-generator',
 
   // Text tools & Text operations
   'text-tools': 'text-tools',

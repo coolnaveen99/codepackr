@@ -10,11 +10,9 @@ import {
   Shield,
   Lock,
   EyeOff,
-  Eye,
   LogOut,
   SlidersHorizontal,
   Share2,
-  FileSpreadsheet,
 } from 'lucide-react';
 import sitemapData from '../data/sitemapUrls.json';
 import { useAdminAuth } from '../lib/useAdminAuth';
@@ -46,12 +44,17 @@ export const SitemapModal: React.FC<SitemapModalProps> = ({
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
+  const safeData = (sitemapData as any)?.default || sitemapData || {};
+  const rawUrls: any[] = Array.isArray(safeData.urls) ? safeData.urls : [];
+  const sitemapXmlUrl = `${safeData.baseUrl || 'https://www.codepackr.com'}/sitemap.xml`;
+  const updatedAt = safeData.updatedAt || '2026-09-08';
+
   // Deduplicated URL inventory annotated with governance status
   const urls = useMemo(() => {
     const seen = new Set<string>();
     const unique: any[] = [];
 
-    (sitemapData.urls || []).forEach((u: any) => {
+    rawUrls.forEach((u: any) => {
       const locKey = u.loc || u.path;
       if (!seen.has(locKey)) {
         seen.add(locKey);
@@ -71,9 +74,7 @@ export const SitemapModal: React.FC<SitemapModalProps> = ({
     });
 
     return unique;
-  }, [getToolStatus]);
-
-  const sitemapXmlUrl = `${sitemapData.baseUrl}/sitemap.xml`;
+  }, [rawUrls, getToolStatus]);
 
   // Filtered by public vs admin
   const publicUrls = useMemo(() => urls.filter((u) => !u.isHidden), [urls]);
@@ -314,13 +315,11 @@ export const SitemapModal: React.FC<SitemapModalProps> = ({
                   href="https://search.google.com/search-console"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all hover:border-[var(--brand)] hover:text-[var(--brand)] cursor-pointer shadow-2xs"
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all hover:border-[var(--brand)] hover:text-[var(--brand)] cursor-pointer shadow-xs"
                   style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
                   title="Open Google Search Console to inspect indexing and site crawls"
                 >
-                  <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-                  </svg>
+                  <Search className="w-3.5 h-3.5 text-[var(--brand)] shrink-0" />
                   <span>Google Console</span>
                   <ExternalLink className="w-3 h-3 text-[var(--muted)]" />
                 </a>
@@ -330,7 +329,7 @@ export const SitemapModal: React.FC<SitemapModalProps> = ({
                   href="https://www.bing.com/webmasters"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all hover:border-[var(--brand)] hover:text-[var(--brand)] cursor-pointer shadow-2xs"
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all hover:border-[var(--brand)] hover:text-[var(--brand)] cursor-pointer shadow-xs"
                   style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
                   title="Open Microsoft Bing Webmaster Tools"
                 >
@@ -343,7 +342,7 @@ export const SitemapModal: React.FC<SitemapModalProps> = ({
                 <a
                   href="/codepackr_social_media_promotions.csv"
                   download="codepackr_social_media_promotions.csv"
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all hover:border-[var(--brand)] hover:text-[var(--brand)] cursor-pointer shadow-2xs"
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all hover:border-[var(--brand)] hover:text-[var(--brand)] cursor-pointer shadow-xs"
                   style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
                   title="Download production social media promotion copy for LinkedIn & X"
                 >
@@ -398,7 +397,7 @@ export const SitemapModal: React.FC<SitemapModalProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search live indexed URLs, slugs, or tool names..."
-                className="w-full pl-9 pr-4 py-2 rounded-xl text-xs border focus:outline-hidden focus:ring-1 focus:ring-[var(--brand)] transition-all font-mono"
+                className="w-full pl-9 pr-4 py-2 rounded-xl text-xs border focus:outline-none focus:ring-1 focus:ring-[var(--brand)] transition-all font-mono"
                 style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
               />
             </div>
@@ -530,7 +529,7 @@ export const SitemapModal: React.FC<SitemapModalProps> = ({
             style={{ borderColor: 'var(--line)', backgroundColor: 'var(--bg)' }}
           >
             <span className="text-[var(--muted)]">
-              Last modified timestamp: <strong className="text-[var(--ink)]">{sitemapData.updatedAt}</strong> &bull;{' '}
+              Last modified timestamp: <strong className="text-[var(--ink)]">{updatedAt}</strong> &bull;{' '}
               {isAuthenticated ? `${urls.length} Total URLs` : `${publicUrls.length} Public URLs`}
             </span>
 

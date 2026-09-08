@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Copy, Check, RotateCcw, Play, AlertTriangle, CheckCircle2, Trash2, Save, Clock, Loader2 } from 'lucide-react';
+import { Copy, Check, RotateCcw, Play, AlertTriangle, CheckCircle2, Trash2, Save, Clock, Loader2, Cpu } from 'lucide-react';
 import { format as formatSQL } from 'sql-formatter';
 import yaml from 'js-yaml';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
 import { CodeEditor, SupportedLanguage } from '../CodeEditor';
 import { useWorkspace } from '../../lib/workspace';
-import { executeAsyncTransform } from '../../lib/workerBridge';
+import { executeAsyncTransform, formatJsonInWorker, WorkerTaskResult } from '../../lib/workerBridge';
 
 interface FormattersViewProps {
   tool: ToolDef;
@@ -94,98 +94,105 @@ export const FormattersView: React.FC<FormattersViewProps> = ({
 
       setIsProcessing(true);
 
-      const res = await executeAsyncTransform(
-        () => {
-          if (tool.id === 'json-formatter') {
-            const parsed = JSON.parse(valToFormat);
-            return forceMinify
-              ? JSON.stringify(parsed)
-              : JSON.stringify(parsed, null, indent === 'tab' ? '\t' : indent);
-          } else if (tool.id === 'html-formatter') {
-            let formatted = '';
-            const reg = /(>)(<)(\/*)/g;
-            let xmlStr = valToFormat.replace(reg, '$1\r\n$2$3');
-            let pad = 0;
-            const indentStr = indent === 'tab' ? '\t' : ' '.repeat(indent);
-            xmlStr.split('\r\n').forEach((node) => {
-              let indentLevel = 0;
-              if (node.match(/.+<\/\w[^>]*>$/)) {
-                indentLevel = 0;
-              } else if (node.match(/^<\/\w/)) {
-                if (pad !== 0) pad -= 1;
-              } else if (node.match(/^<\w[^>]*[^\/]>.*$/)) {
-                indentLevel = 1;
-              } else {
-                indentLevel = 0;
-              }
-              let padding = '';
-              for (let i = 0; i < pad; i++) padding += indentStr;
-              formatted += padding + node.trim() + '\r\n';
-              pad += indentLevel;
-            });
-            return formatted.trim();
-          } else if (tool.id === 'css-formatter') {
-            if (forceMinify) {
-              return valToFormat
-                .replace(/\/\*[\s\S]*?\*\//g, '')
-                .replace(/\s+/g, ' ')
-                .replace(/\s*([\{\};:,])\s*/g, '$1')
-                .replace(/;}/g, '}')
-                .trim();
-            } else {
-              return valToFormat
-                .replace(/\s+/g, ' ')
-                .replace(/\{\s*/g, ' {\n  ')
-                .replace(/;\s*/g, ';\n  ')
-                .replace(/\s*\}\s*/g, '\n}\n\n')
-                .replace(/\n\s*\n\s*\}/g, '\n}')
-                .trim();
-            }
-          } else if (tool.id === 'sql-formatter') {
-            return formatSQL(valToFormat, {
+      let res: WorkerTaskResult<string>;
+
+      if (tool.id === 'json-formatter') {
+        // Strict Web Worker execution for native JSON parse & stringify
+        res = await formatJsonInWorker(valToFormat, indent, forceMinify);
+      } else if (tool.id === 'sql-formatter') {
+        // SQL formatting with async yielding pattern to prevent UI freeze
+        res = await executeAsyncTransform(
+          () =>
+            formatSQL(valToFormat, {
               language: 'sql',
               tabWidth: indent === 'tab' ? 2 : (indent as number),
               keywordCase: 'upper',
-            });
-          } else if (tool.id === 'xml-formatter') {
-            const PADDING = indent === 'tab' ? '\t' : ' '.repeat(indent);
-            const reg = /(>)(<)(\/*)/g;
-            let formatted = '';
-            let pad = 0;
-            const xmlStr = valToFormat.replace(reg, '$1\r\n$2$3');
-            xmlStr.split('\r\n').forEach((node) => {
-              let indentLevel = 0;
-              if (node.match(/.+<\/\w[^>]*>$/)) {
-                indentLevel = 0;
-              } else if (node.match(/^<\/\w/)) {
-                if (pad !== 0) pad -= 1;
-              } else if (node.match(/^<\w[^>]*[^\/]>.*$/)) {
-                indentLevel = 1;
+            }),
+          { payloadLength: valToFormat.length }
+        );
+      } else {
+        res = await executeAsyncTransform(
+          () => {
+            if (tool.id === 'html-formatter') {
+              let formatted = '';
+              const reg = /(>)(<)(\/*)/g;
+              let xmlStr = valToFormat.replace(reg, '$1\r\n$2$3');
+              let pad = 0;
+              const indentStr = indent === 'tab' ? '\t' : ' '.repeat(indent);
+              xmlStr.split('\r\n').forEach((node) => {
+                let indentLevel = 0;
+                if (node.match(/.+<\/\w[^>]*>$/)) {
+                  indentLevel = 0;
+                } else if (node.match(/^<\/\w/)) {
+                  if (pad !== 0) pad -= 1;
+                } else if (node.match(/^<\w[^>]*[^\/]>.*$/)) {
+                  indentLevel = 1;
+                } else {
+                  indentLevel = 0;
+                }
+                let padding = '';
+                for (let i = 0; i < pad; i++) padding += indentStr;
+                formatted += padding + node.trim() + '\r\n';
+                pad += indentLevel;
+              });
+              return formatted.trim();
+            } else if (tool.id === 'css-formatter') {
+              if (forceMinify) {
+                return valToFormat
+                  .replace(/\/\*[\s\S]*?\*\//g, '')
+                  .replace(/\s+/g, ' ')
+                  .replace(/\s*([\{\};:,])\s*/g, '$1')
+                  .replace(/;}/g, '}')
+                  .trim();
               } else {
-                indentLevel = 0;
+                return valToFormat
+                  .replace(/\s+/g, ' ')
+                  .replace(/\{\s*/g, ' {\n  ')
+                  .replace(/;\s*/g, ';\n  ')
+                  .replace(/\s*\}\s*/g, '\n}\n\n')
+                  .replace(/\n\s*\n\s*\}/g, '\n}')
+                  .trim();
               }
-              let padding = '';
-              for (let i = 0; i < pad; i++) padding += PADDING;
-              formatted += padding + node.trim() + '\r\n';
-              pad += indentLevel;
-            });
-            return formatted.trim();
-          } else if (tool.id === 'yaml-formatter') {
-            const parsed = yaml.load(valToFormat);
-            return yaml.dump(parsed, {
-              indent: indent === 'tab' ? 2 : (indent as number),
-            });
-          } else if (tool.id === 'js-minifier') {
-            return valToFormat
-              .replace(/\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm, '')
-              .replace(/\s+/g, ' ')
-              .replace(/\s*([=\{\}\(\);,:<>\+\-\*\/])\s*/g, '$1')
-              .trim();
-          }
-          return valToFormat;
-        },
-        { payloadLength: valToFormat.length }
-      );
+            } else if (tool.id === 'xml-formatter') {
+              const PADDING = indent === 'tab' ? '\t' : ' '.repeat(indent);
+              const reg = /(>)(<)(\/*)/g;
+              let formatted = '';
+              let pad = 0;
+              const xmlStr = valToFormat.replace(reg, '$1\r\n$2$3');
+              xmlStr.split('\r\n').forEach((node) => {
+                let indentLevel = 0;
+                if (node.match(/.+<\/\w[^>]*>$/)) {
+                  indentLevel = 0;
+                } else if (node.match(/^<\/\w/)) {
+                  if (pad !== 0) pad -= 1;
+                } else if (node.match(/^<\w[^>]*[^\/]>.*$/)) {
+                  indentLevel = 1;
+                } else {
+                  indentLevel = 0;
+                }
+                let padding = '';
+                for (let i = 0; i < pad; i++) padding += PADDING;
+                formatted += padding + node.trim() + '\r\n';
+                pad += indentLevel;
+              });
+              return formatted.trim();
+            } else if (tool.id === 'yaml-formatter') {
+              const parsed = yaml.load(valToFormat);
+              return yaml.dump(parsed, {
+                indent: indent === 'tab' ? 2 : (indent as number),
+              });
+            } else if (tool.id === 'js-minifier') {
+              return valToFormat
+                .replace(/\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm, '')
+                .replace(/\s+/g, ' ')
+                .replace(/\s*([=\{\}\(\);,:<>\+\-\*\/])\s*/g, '$1')
+                .trim();
+            }
+            return valToFormat;
+          },
+          { payloadLength: valToFormat.length }
+        );
+      }
 
       setIsProcessing(false);
       setExecTimeMs(res.durationMs);
@@ -299,6 +306,13 @@ export const FormattersView: React.FC<FormattersViewProps> = ({
             <Save className="w-3 h-3 text-[color:var(--brand)]" />
             <span>{isSavedLocally ? 'Workspace Saved' : 'Auto-Saving'}</span>
           </div>
+
+          {tool.id === 'json-formatter' && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[color:var(--surface-elevated)] text-[11px] font-medium text-[color:var(--brand)] border border-[color:var(--border)]">
+              <Cpu className="w-3 h-3" />
+              <span>Web Worker</span>
+            </div>
+          )}
 
           {execTimeMs !== null && (
             <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[color:var(--surface-elevated)] text-[11px] font-mono text-[color:var(--ink-muted)] border border-[color:var(--border)]">

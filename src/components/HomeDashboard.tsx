@@ -68,10 +68,10 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             100% Client-Side Execution
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-[color:var(--ink)] mb-4 leading-tight">
-            Developer Tools,<br />Built for <span className="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--brand)] to-[color:var(--accent)]">Speed &amp; Privacy.</span>
+            Enterprise Developer Utilities,<br />Engineered for <span className="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--brand)] to-[color:var(--accent)]">Speed &amp; Privacy.</span>
           </h1>
           <p className="text-lg text-[color:var(--ink-muted)] mb-8 max-w-2xl leading-relaxed">
-            A premium suite of formatters, converters, and engineering utilities. Process JSON, XML, EDI, and cryptographic operations instantly in your browser.
+            Elevate your workflow with a premium suite of offline-first engineering utilities. Securely process JSON, XML, EDI, and cryptographic operations—instantly and entirely within your browser.
           </p>
           <div className="flex flex-wrap items-center gap-4">
             <button
@@ -99,21 +99,26 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       <SmartPasteHero onSelectTool={onSelectTool} />
 
       {/* Toolbar & Filters */}
-      <div id="tool-grid" className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[color:var(--border)] pb-4 sticky top-16 bg-[color:var(--bg)] z-30 py-2">
-        <div className="flex-1 w-full md:max-w-md">
-          <div className="relative">
-            <Search className="w-4 h-4 text-[color:var(--ink-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Filter current view..."
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm font-medium border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink)] focus:outline-none focus:border-[color:var(--brand)] transition-colors shadow-sm"
-            />
+      <div id="tool-grid" className="space-y-3 border-b border-[color:var(--border)] pb-4 sticky top-16 bg-[color:var(--bg)] z-30 py-2">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold text-[color:var(--ink)]">Featured Utilities</h2>
+            <div className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-[color:var(--surface-elevated)] border border-[color:var(--border)] text-[color:var(--ink-muted)]">
+              <Zap className="w-3.5 h-3.5 text-[color:var(--warning)]"/> {filteredTools.length} Available
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-3 text-sm font-semibold text-[color:var(--ink-muted)]">
-           <div className="flex items-center gap-1.5"><Zap className="w-4 h-4 text-[color:var(--warning)]"/> {filteredTools.length} Utilities</div>
+          <div className="w-full md:max-w-md">
+            <div className="relative">
+              <Search className="w-4 h-4 text-[color:var(--ink-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Filter current view..."
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm font-medium border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink)] focus:outline-none focus:border-[color:var(--brand)] transition-colors shadow-sm"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -136,7 +141,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                   {getIcon(tool.icon, 24)}
                 </div>
                 <div className="flex items-center gap-2">
-                   {tool.popular && <span className="text-[10px] uppercase font-bold px-2 py-1 rounded bg-[color:var(--warning)]/10 text-[color:var(--warning)]">Popular</span>}
+                   {tool.popular && <span className="text-[10px] uppercase font-bold px-2 py-1 rounded bg-[color:var(--warning)]/10 text-[color:var(--warning)]">Featured</span>}
                    {isHidden && <span className="text-[10px] uppercase font-bold px-2 py-1 rounded bg-[color:var(--danger)]/10 text-[color:var(--danger)] flex items-center gap-1"><EyeOff className="w-3 h-3"/> Hidden</span>}
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleBookmark(tool.id); }}

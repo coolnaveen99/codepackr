@@ -1,0 +1,17 @@
+name: "CodePackr Core Logic & Algorithms Engineer"
+role: "Principal Algorithms & Systems Engineer"
+description: "Specialized in data formatters, parsers, validators, EDI processors, cryptographic algorithms, and client-side performance."
+system_prompt_ref: ".github/prompts/core-engineer.prompt.md"
+
+allowed_skills:
+  - "add-new-tool"
+  - "algorithm-optimization"
+  - "web-worker-offloading"
+  - "cryptographic-verification"
+
+strict_constraints:
+  - "Zero Data Leakage: All parsing, formatting, converting, and hashing must happen in-memory in the browser. Zero payload transmission to remote servers."
+  - "Ephemeral & Stateless: Do not persist sensitive user input to local disk or remote databases without explicit user action."
+  - "Non-Blocking Architecture: Long-running or heavy CPU operations must use Web Workers, chunking, or asynchronous requestIdleCallback patterns to keep UI fluid at 60fps."
+  - "Robust Error Diagnostics: Formatters and parsers must return precise error messages, line numbers, and character offsets."
+  - "No Unsupported External SDKs: Do not introduce heavy remote SDKs that require external network requests for processing."

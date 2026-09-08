@@ -18,6 +18,7 @@ import { UtilitiesView } from './components/tools/UtilitiesView';
 import { TextToolsView } from './components/tools/TextToolsView';
 import { JsonDefinitionView } from './components/tools/JsonDefinitionView';
 import { FinancialPlannerView } from './components/tools/FinancialPlannerView';
+import { MockDataGeneratorView } from './components/tools/MockDataGeneratorView';
 import { EdiToolsView } from './components/tools/EdiToolsView';
 import { XmlToolsView } from './components/xml/XmlToolsView';
 import { AdminPortal } from './components/admin/AdminPortal';
@@ -293,6 +294,8 @@ export const App: React.FC = () => {
       toolViewContent = <JsonDefinitionView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
     } else if (tool.id === 'financial-planner') {
       toolViewContent = <FinancialPlannerView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
+    } else if (tool.id === 'mock-json-generator') {
+      toolViewContent = <MockDataGeneratorView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
     } else {
       switch (tool.category) {
         case 'formatters':
