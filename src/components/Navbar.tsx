@@ -31,6 +31,13 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const darkMode = theme === 'dark';
   const { count: bookmarkCount } = useBookmarks();
+  const [isMac, setIsMac] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsMac(navigator.userAgent.includes('Mac'));
+    }
+  }, []);
 
   const handleSelectBookmarks = () => {
     if (onGoBookmarks) {
@@ -93,7 +100,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span className="truncate">Search tools, converters, formatters...</span>
               </div>
               <kbd className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono font-medium rounded-md border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] shrink-0">
-                <span className="text-[10px]">⌘</span>K
+                <span className="text-[10px]">{isMac ? '⌘' : 'Ctrl'}</span>K
               </kbd>
             </button>
           </div>

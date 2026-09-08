@@ -13,11 +13,9 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const { login, loginWithPasscode, resetPassword, isAuthenticated, user } = useAdminAuth();
-  const [authMode, setAuthMode] = useState<'password' | 'passkey'>('password');
+  const { login, resetPassword, isAuthenticated, user } = useAdminAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [passkey, setPasskey] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -49,46 +47,24 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
     setSubmitting(true);
 
     try {
-      if (authMode === 'passkey') {
-        await loginWithPasscode(passkey, email.trim() || 'admin@codepackr.com');
-      } else {
-        await login(email.trim(), password);
-      }
+      await login(email.trim(), password);
       setSuccessMsg('Authentication successful. Admin mode unlocked.');
       setTimeout(() => {
         if (onSuccess) onSuccess();
         onClose();
       }, 600);
     } catch (err: any) {
-      // Use console.warn to avoid triggering false alarms in error tracking systems
       console.warn('Admin login attempt feedback:', err?.code || err?.message || err);
       const code = err?.code || '';
       if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
-        setError('Invalid admin credentials. Please verify your password or use your Admin Passkey.');
+        setError('Invalid admin credentials. Please check your email and password.');
       } else if (code === 'auth/user-not-found') {
-        setError('No administrator account found with this email. Check credentials or use Passkey.');
+        setError('No administrator account found with this email.');
       } else if (code === 'auth/too-many-requests') {
-        setError('Access temporarily throttled due to multiple attempts. Try again in a few moments or use Passkey.');
+        setError('Access temporarily throttled due to multiple attempts. Try again in a few moments.');
       } else {
         setError(err?.message || 'Failed to authenticate administrator session.');
       }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleQuickPasskey = async () => {
-    setError(null);
-    setSubmitting(true);
-    try {
-      await loginWithPasscode('codepackr-admin', email.trim() || 'admin@codepackr.com');
-      setSuccessMsg('Admin passkey verified. Console unlocked.');
-      setTimeout(() => {
-        if (onSuccess) onSuccess();
-        onClose();
-      }, 500);
-    } catch (err: any) {
-      setError(err?.message || 'Unable to authenticate with passkey.');
     } finally {
       setSubmitting(false);
     }
@@ -162,51 +138,12 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
           </div>
         )}
 
-        {/* Auth Mode Tabs */}
-        <div className="flex rounded-xl p-1 border text-xs font-medium" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}>
-          <button
-            type="button"
-            onClick={() => {
-              setAuthMode('password');
-              setError(null);
-            }}
-            className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
-              authMode === 'password'
-                ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs font-semibold'
-                : 'text-[var(--muted)] hover:text-[var(--ink)]'
-            }`}
-          >
-            Email & Password
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setAuthMode('passkey');
-              setError(null);
-            }}
-            className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
-              authMode === 'passkey'
-                ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs font-semibold'
-                : 'text-[var(--muted)] hover:text-[var(--ink)]'
-            }`}
-          >
-            Admin Passkey
-          </button>
-        </div>
-
         {/* Feedback Alerts */}
         {error && (
           <div className="p-3 rounded-xl text-xs bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 flex items-start gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
             <div className="flex-1">
               <span>{error}</span>
-              <button
-                type="button"
-                onClick={handleQuickPasskey}
-                className="mt-1.5 block text-[11px] font-semibold text-[var(--brand)] hover:underline cursor-pointer"
-              >
-                &rarr; Click to unlock with default Admin Passkey
-              </button>
             </div>
           </div>
         )}
@@ -220,76 +157,51 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {authMode === 'password' ? (
-            <>
-              <div>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink)' }}>
-                  Admin Email
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@codepackr.com"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl text-xs border focus:outline-none focus:border-[var(--brand)] transition-colors"
-                    style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>
-                    Password
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleForgotPassword}
-                    disabled={submitting}
-                    className="text-[11px] text-[var(--brand)] hover:underline cursor-pointer disabled:opacity-50"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-                <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••••••"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl text-xs border focus:outline-none focus:border-[var(--brand)] transition-colors"
-                    style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                  />
-                </div>
-              </div>
-            </>
-          ) : (
-            <div>
-              <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink)' }}>
-                Security Passkey / Master Key
-              </label>
-              <div className="relative">
-                <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
-                <input
-                  type="password"
-                  required
-                  value={passkey}
-                  onChange={(e) => setPasskey(e.target.value)}
-                  placeholder="Enter administrator passkey (e.g. codepackr-admin)"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl text-xs border focus:outline-none focus:border-[var(--brand)] transition-colors"
-                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                />
-              </div>
-              <p className="mt-1.5 text-[11px] text-[var(--muted)]">
-                Default emergency passkey: <code className="px-1 py-0.5 rounded bg-[var(--surface-3)] font-mono text-[10px]">codepackr-admin</code>
-              </p>
+          <div>
+            <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink)' }}>
+              Admin Email
+            </label>
+            <div className="relative">
+              <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@codepackr.com"
+                className="w-full pl-9 pr-3 py-2.5 rounded-xl text-xs border focus:outline-none focus:border-[var(--brand)] transition-colors"
+                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              />
             </div>
-          )}
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>
+                Password
+              </label>
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={submitting}
+                className="text-[11px] text-[var(--brand)] hover:underline cursor-pointer disabled:opacity-50"
+              >
+                Forgot password?
+              </button>
+            </div>
+            <div className="relative">
+              <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••••"
+                className="w-full pl-9 pr-3 py-2.5 rounded-xl text-xs border focus:outline-none focus:border-[var(--brand)] transition-colors"
+                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              />
+            </div>
+          </div>
 
           <button
             type="submit"
@@ -303,7 +215,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
               </>
             ) : (
               <>
-                <span>{authMode === 'passkey' ? 'Unlock with Passkey' : 'Sign In as Administrator'}</span>
+                <span>Sign In as Administrator</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </>
             )}

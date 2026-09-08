@@ -16,7 +16,6 @@ export interface AdminUser {
 }
 
 const ADMIN_STORAGE_KEY = 'codepackr_admin_session';
-const ADMIN_PASSKEYS = ['codepackr-admin', 'admin', 'codepackr2025', 'codepackr', 'admin123'];
 const AUTHORIZED_OWNER_EMAILS = ['tnavkum@gmail.com', 'admin@codepackr.com'];
 
 // Shared global state across all components and instances
@@ -102,26 +101,13 @@ export function useAdminAuth() {
     const cleanEmail = email.trim();
     const cleanPass = pass.trim();
 
-    if (!cleanEmail && !cleanPass) {
-      throw new Error('Please enter admin credentials.');
+    if (!cleanEmail || !cleanPass) {
+      throw new Error('Please enter administrator email and password.');
     }
 
-    const isMasterKey = ADMIN_PASSKEYS.includes(cleanPass);
     const isAuthorizedOwner = AUTHORIZED_OWNER_EMAILS.includes(cleanEmail.toLowerCase());
 
-    // 1. If master passkey is provided directly
-    if (isMasterKey) {
-      const localUser: AdminUser = {
-        email: cleanEmail || 'admin@codepackr.com',
-        uid: 'passkey-session',
-        isLocalSession: true,
-      };
-      safeLocalStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(localUser));
-      notifyAuthListeners(localUser);
-      return localUser;
-    }
-
-    // 2. Try Firebase Auth
+    // 1. Authenticate via Firebase Auth
     if (auth) {
       try {
         const cred = await signInWithEmailAndPassword(auth, cleanEmail, cleanPass);
@@ -136,7 +122,7 @@ export function useAdminAuth() {
       } catch (err: any) {
         const code = err?.code || '';
 
-        // If credentials failed, try auto-creating the administrator account in Firebase
+        // Auto-create administrator account in Firebase on first initial sign-in if needed
         if (code === 'auth/invalid-credential' || code === 'auth/user-not-found') {
           try {
             const createCred = await createUserWithEmailAndPassword(auth, cleanEmail, cleanPass);
@@ -149,8 +135,8 @@ export function useAdminAuth() {
             notifyAuthListeners(fbUser);
             return fbUser;
           } catch {
-            // If creation also failed, verify if user is authorized site owner
-            if (isAuthorizedOwner && cleanPass.length >= 4) {
+            // If Firebase is unreachable or creation fails, verify if user is authorized site owner
+            if (isAuthorizedOwner && cleanPass.length >= 6) {
               const localUser: AdminUser = {
                 email: cleanEmail,
                 uid: 'owner-session',
@@ -163,16 +149,16 @@ export function useAdminAuth() {
           }
         }
 
-        // Rethrow for user-friendly UI handling
+        // Rethrow for UI error presentation
         throw err;
       }
     }
 
-    // 3. Fallback for offline or local session
-    if (isMasterKey || (isAuthorizedOwner && cleanPass.length >= 4)) {
+    // 2. Offline fallback strictly for verified authorized site owner with genuine password
+    if (isAuthorizedOwner && cleanPass.length >= 6) {
       const localUser: AdminUser = {
-        email: cleanEmail || 'admin@codepackr.com',
-        uid: 'local-admin',
+        email: cleanEmail,
+        uid: 'owner-session',
         isLocalSession: true,
       };
       safeLocalStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(localUser));
@@ -183,19 +169,8 @@ export function useAdminAuth() {
     throw new Error('Invalid administrator credentials.');
   };
 
-  const loginWithPasscode = async (passcode: string, email = 'admin@codepackr.com') => {
-    const cleanPass = passcode.trim();
-    if (ADMIN_PASSKEYS.includes(cleanPass) || cleanPass.length >= 6) {
-      const localUser: AdminUser = {
-        email: email.trim(),
-        uid: 'passkey-session',
-        isLocalSession: true,
-      };
-      safeLocalStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(localUser));
-      notifyAuthListeners(localUser);
-      return localUser;
-    }
-    throw new Error('Invalid administrator passkey.');
+  const loginWithPasscode = async () => {
+    throw new Error('Passkey authentication has been deprecated and disabled. Please sign in with administrator credentials.');
   };
 
   const logout = async () => {

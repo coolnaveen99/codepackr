@@ -26,6 +26,13 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const { isToolVisible, getToolStatus } = useToolGovernance();
   const { isAuthenticated } = useAdminAuth();
+  const [isMac, setIsMac] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsMac(navigator.userAgent.includes('Mac'));
+    }
+  }, []);
 
   const handleCardShare = async (e: React.MouseEvent, tool: ToolDef) => {
     e.stopPropagation();
@@ -78,7 +85,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               className="px-6 py-3 rounded-xl font-bold border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink)] hover:border-[color:var(--brand)] transition-colors flex items-center gap-2 shadow-sm cursor-pointer"
             >
               <Search className="w-5 h-5" />
-              Search Tools (⌘K)
+              Search Tools ({isMac ? '⌘' : 'Ctrl'} K)
             </button>
           </div>
         </div>

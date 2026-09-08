@@ -53,7 +53,7 @@ export const Footer: React.FC<FooterProps> = ({
                   id="footer-admin-btn"
                   type="button"
                   onClick={onOpenAdminLogin}
-                  className="inline-flex items-center gap-1 opacity-50 hover:opacity-100 text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1 opacity-50 hover:opacity-100 text-[var(--ink-muted)] hover:text-[var(--ink)] transition-all cursor-pointer"
                   title="Admin Console (Ctrl+Shift+A)"
                   aria-label="Admin Console"
                 >

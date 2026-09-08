@@ -5,9 +5,20 @@ import { xml } from '@codemirror/lang-xml';
 import { sql } from '@codemirror/lang-sql';
 import { javascript } from '@codemirror/lang-javascript';
 import { css } from '@codemirror/lang-css';
+import { html } from '@codemirror/lang-html';
+import { markdown } from '@codemirror/lang-markdown';
 import { EditorView } from '@codemirror/view';
 
-export type SupportedLanguage = 'json' | 'xml' | 'sql' | 'javascript' | 'typescript' | 'css' | 'html' | 'text';
+export type SupportedLanguage =
+  | 'json'
+  | 'xml'
+  | 'sql'
+  | 'javascript'
+  | 'typescript'
+  | 'css'
+  | 'html'
+  | 'markdown'
+  | 'text';
 
 interface CodeEditorProps {
   id?: string;
@@ -16,6 +27,7 @@ interface CodeEditorProps {
   language?: SupportedLanguage;
   placeholder?: string;
   readOnly?: boolean;
+  theme?: 'light' | 'dark';
   minHeight?: string;
   maxHeight?: string;
   height?: string;
@@ -32,6 +44,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   language = 'text',
   placeholder = 'Type or paste code here...',
   readOnly = false,
+  theme,
   minHeight = '360px',
   maxHeight = '700px',
   height = '500px',
@@ -40,8 +53,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   errorMessage,
   errorLine,
 }) => {
-  // Check if current HTML document is in dark mode
-  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+  // Check if current theme is dark (prop or DOM fallback)
+  const isDark =
+    theme !== undefined
+      ? theme === 'dark'
+      : typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
 
   // Dynamic language extension
   const langExtension = useMemo<Extension | null>(() => {
@@ -49,8 +65,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       case 'json':
         return json();
       case 'xml':
-      case 'html':
         return xml();
+      case 'html':
+        return html();
+      case 'markdown':
+        return markdown();
       case 'sql':
         return sql();
       case 'javascript':

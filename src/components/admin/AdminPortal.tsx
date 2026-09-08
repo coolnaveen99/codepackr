@@ -55,7 +55,7 @@ function formatRelativeTime(isoString?: string): string {
 }
 
 export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
-  const { user, isAuthenticated, loading: authLoading, login, loginWithPasscode, logout, resetPassword } = useAdminAuth();
+  const { user, isAuthenticated, loading: authLoading, login, logout, resetPassword } = useAdminAuth();
   const {
     governance,
     globalConfig,
@@ -72,10 +72,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
   const [activeTab, setActiveTab] = useState<AdminTab>('matrix');
 
   // Login form state
-  const [authMode, setAuthMode] = useState<'password' | 'passkey'>('password');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [passkey, setPasskey] = useState('');
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loginSuccess, setLoginSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -116,30 +114,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
     setLoginSuccess(null);
     setSubmitting(true);
     try {
-      if (authMode === 'passkey') {
-        await loginWithPasscode(passkey, email.trim() || 'admin@codepackr.com');
-      } else {
-        await login(email.trim(), password);
-      }
+      await login(email.trim(), password);
     } catch (err: any) {
       const code = err?.code || '';
       if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
-        setLoginError('Invalid credentials. Check your password or use your Admin Passkey.');
+        setLoginError('Invalid credentials. Please verify your email and password.');
       } else {
         setLoginError(err?.message || 'Invalid admin credentials');
       }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleQuickPasskey = async () => {
-    setLoginError(null);
-    setSubmitting(true);
-    try {
-      await loginWithPasscode('codepackr-admin', email.trim() || 'admin@codepackr.com');
-    } catch (err: any) {
-      setLoginError(err?.message || 'Unable to authenticate with passkey');
     } finally {
       setSubmitting(false);
     }
@@ -353,40 +335,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
               Codepackr Enterprise Console
             </h1>
             <p className="text-xs" style={{ color: 'var(--muted)' }}>
-              Authenticate with your administrative account or passkey to manage real-time tool lifecycle, audit logs, and global site broadcast.
+              Authenticate with your administrative account to manage real-time tool lifecycle, audit logs, and global site broadcast.
             </p>
-          </div>
-
-          {/* Auth Mode Tabs */}
-          <div className="flex rounded-xl p-1 border text-xs font-medium" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}>
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('password');
-                setLoginError(null);
-              }}
-              className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
-                authMode === 'password'
-                  ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs font-semibold'
-                  : 'text-[var(--muted)] hover:text-[var(--ink)]'
-              }`}
-            >
-              Email &amp; Password
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('passkey');
-                setLoginError(null);
-              }}
-              className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
-                authMode === 'passkey'
-                  ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs font-semibold'
-                  : 'text-[var(--muted)] hover:text-[var(--ink)]'
-              }`}
-            >
-              Admin Passkey
-            </button>
           </div>
 
           {loginError && (
@@ -394,13 +344,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
               <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
               <div className="flex-1">
                 <span>{loginError}</span>
-                <button
-                  type="button"
-                  onClick={handleQuickPasskey}
-                  className="mt-1.5 block text-[11px] font-semibold text-[var(--brand)] hover:underline cursor-pointer"
-                >
-                  &rarr; Click here to unlock with default Admin Passkey
-                </button>
               </div>
             </div>
           )}
@@ -413,73 +356,48 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBack }) => {
           )}
 
           <form onSubmit={handleLogin} className="space-y-4">
-            {authMode === 'password' ? (
-              <>
-                <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink)' }}>
-                    Admin Email
-                  </label>
-                  <div className="relative">
-                    <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      placeholder="admin@codepackr.com"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl text-xs border focus:outline-none focus:border-[var(--brand)]"
-                      style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink)' }}>
-                    Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      placeholder="••••••••••••"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl text-xs border focus:outline-none focus:border-[var(--brand)]"
-                      style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                    />
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink)' }}>
-                  Security Passkey / Master Key
-                </label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
-                  <input
-                    type="password"
-                    required
-                    value={passkey}
-                    onChange={(e) => setPasskey(e.target.value)}
-                    placeholder="Enter passkey (e.g. codepackr-admin)"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl text-xs border focus:outline-none focus:border-[var(--brand)]"
-                    style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                  />
-                </div>
-                <p className="mt-1.5 text-[11px] text-[var(--muted)]">
-                  Default passkey: <code className="px-1 py-0.5 rounded bg-[var(--surface-3)] font-mono text-[10px]">codepackr-admin</code>
-                </p>
+            <div>
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink)' }}>
+                Admin Email
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="admin@codepackr.com"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl text-xs border focus:outline-none focus:border-[var(--brand)]"
+                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                />
               </div>
-            )}
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--ink)' }}>
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="••••••••••••"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl text-xs border focus:outline-none focus:border-[var(--brand)]"
+                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                />
+              </div>
+            </div>
 
             <button
               type="submit"
               disabled={submitting}
               className="w-full py-2.5 rounded-xl text-xs font-semibold text-white bg-[var(--brand)] hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
             >
-              {submitting ? 'Authenticating...' : authMode === 'passkey' ? 'Unlock with Passkey' : 'Sign In to Console'}
+              {submitting ? 'Authenticating...' : 'Sign In to Console'}
             </button>
           </form>
 
