@@ -19,6 +19,7 @@ import {
   Check,
   Loader2,
   X,
+  RotateCcw,
 } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
@@ -261,6 +262,12 @@ export const FinancialPlannerView: React.FC<FinancialPlannerViewProps> = ({
     ...plan.retirement.map((r) => ({ age: r.age, value: r.closingCorpus })),
   ];
 
+  const handleResetToDefaults = () => {
+    setInputs({ ...DEFAULT_FINANCIAL_INPUTS });
+    setRealValues(false);
+    setMode('basic');
+  };
+
   return (
     <div className="space-y-6 pb-10">
       {/* Dedicated Executive PDF Report (Print-only) */}
@@ -273,7 +280,13 @@ export const FinancialPlannerView: React.FC<FinancialPlannerViewProps> = ({
 
       {/* Interactive Web Workspace (Hidden during print) */}
       <div className="space-y-6 print:hidden">
-        <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+        <ToolHeader
+          tool={tool}
+          onBackToHome={onBackToHome}
+          onSelectRelated={onSelectRelated}
+          onResetOrClear={handleResetToDefaults}
+          resetLabel="Reset to Defaults"
+        />
 
         {/* Controls bar */}
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -346,8 +359,14 @@ export const FinancialPlannerView: React.FC<FinancialPlannerViewProps> = ({
               )}
             </button>
             <CurrencySelector />
-            <button onClick={() => setInputs({ ...DEFAULT_FINANCIAL_INPUTS })} className="px-3 py-2 text-xs font-semibold rounded-xl border cursor-pointer" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface)', color: 'var(--muted)' }}>
-              Reset
+            <button
+              onClick={handleResetToDefaults}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all hover:border-rose-500 hover:text-rose-500 cursor-pointer"
+              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              title="Reset all inputs to default assumptions"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>Reset to Defaults</span>
             </button>
           </div>
         </div>

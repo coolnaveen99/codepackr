@@ -326,9 +326,22 @@ export const XsltTransformerView: React.FC<XsltTransformerViewProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  const handleClearWorkspace = () => {
+    setXmlSource('');
+    setXsltSource('');
+    setTransformOutput('');
+    setTransformError(null);
+  };
+
   return (
     <div className="space-y-6">
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleClearWorkspace}
+        resetLabel="Clear Workspace"
+      />
 
       {/* Preset Buttons Bar */}
       <div

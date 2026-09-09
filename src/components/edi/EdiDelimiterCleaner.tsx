@@ -149,9 +149,19 @@ export const EdiDelimiterCleaner: React.FC<EdiDelimiterCleanerProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  const handleClearWorkspace = () => {
+    setInput('');
+  };
+
   return (
     <div className="space-y-6">
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleClearWorkspace}
+        resetLabel="Clear Workspace"
+      />
 
       {/* Control Panel */}
       <div

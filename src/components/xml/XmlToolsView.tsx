@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, FileCode2, ArrowLeftRight, Search, ShieldCheck, Code, ArrowRight } from 'lucide-react';
+import { Sparkles, FileCode2, ArrowLeftRight, Search, Code, FileCheck2 } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { XsltTransformerView } from './XsltTransformerView';
 import { XmlToXsdGeneratorView } from './XmlToXsdGeneratorView';
 import { XsdToXmlGeneratorView } from './XsdToXmlGeneratorView';
 import { XPathEvaluatorView } from './XPathEvaluatorView';
 import { XmlEscapeView } from './XmlEscapeView';
+import { XsdValidatorView } from './XsdValidatorView';
 
 interface XmlToolsViewProps {
   tool: ToolDef;
@@ -18,9 +19,9 @@ export const XmlToolsView: React.FC<XmlToolsViewProps> = ({
   tool,
   onBackToHome,
   onSelectRelated,
-  initialInput = '',
+  initialInput,
 }) => {
-  const [activeTab, setActiveTab] = useState<string>(tool.id || 'xslt-transformer');
+  const [activeTab, setActiveTab] = useState(tool.id || 'xslt-transformer');
 
   useEffect(() => {
     if (tool.id) {
@@ -30,6 +31,7 @@ export const XmlToolsView: React.FC<XmlToolsViewProps> = ({
 
   const tabs = [
     { id: 'xslt-transformer', label: 'XSLT Transformer', icon: Sparkles },
+    { id: 'xsd-validator', label: 'XSD Schema Validator', icon: FileCheck2 },
     { id: 'xml-to-xsd', label: 'XML to XSD Generator', icon: FileCode2 },
     { id: 'xsd-to-xml', label: 'XSD to XML Generator', icon: ArrowLeftRight },
     { id: 'xpath-evaluator', label: 'XPath Evaluator', icon: Search },
@@ -38,7 +40,6 @@ export const XmlToolsView: React.FC<XmlToolsViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Sub-tool navigation switcher */}
       <div className="flex items-center gap-2 border-b overflow-x-auto no-scrollbar pb-2" style={{ borderColor: 'var(--line)' }}>
         {tabs.map((tab) => {
           const TabIcon = tab.icon;
@@ -63,9 +64,11 @@ export const XmlToolsView: React.FC<XmlToolsViewProps> = ({
         })}
       </div>
 
-      {/* Render Active XML/XSD/XSLT Sub-tool */}
       {activeTab === 'xslt-transformer' && (
         <XsltTransformerView tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      )}
+      {activeTab === 'xsd-validator' && (
+        <XsdValidatorView tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} initialInput={initialInput} />
       )}
       {activeTab === 'xml-to-xsd' && (
         <XmlToXsdGeneratorView tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
@@ -82,3 +85,4 @@ export const XmlToolsView: React.FC<XmlToolsViewProps> = ({
     </div>
   );
 };
+

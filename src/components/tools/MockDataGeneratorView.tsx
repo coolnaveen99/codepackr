@@ -436,9 +436,22 @@ export const MockDataGeneratorView: React.FC<MockDataGeneratorViewProps> = ({
   const editorLanguage: SupportedLanguage =
     exportFormat === 'json' ? 'json' : exportFormat === 'sql' ? 'sql' : 'text';
 
+  const handleResetToDefaults = () => {
+    handleApplyPreset(PRESET_SCHEMAS[0]);
+    setRowCount(25);
+    setExportFormat('json');
+    setTableName('users');
+  };
+
   return (
     <div className="space-y-6">
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleResetToDefaults}
+        resetLabel="Reset to Defaults"
+      />
 
       {/* Preset Quick Selectors */}
       <div

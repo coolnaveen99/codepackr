@@ -92,9 +92,21 @@ export const TextToolsView: React.FC<TextToolsViewProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleClearWorkspace = () => {
+    setText('');
+    setFindStr('');
+    setReplaceStr('');
+  };
+
   return (
     <div>
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleClearWorkspace}
+        resetLabel="Clear Workspace"
+      />
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">

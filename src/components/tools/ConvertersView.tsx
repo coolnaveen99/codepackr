@@ -622,9 +622,32 @@ makeRequest();`);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleClearWorkspace = () => {
+    setInput('');
+    setOutput('');
+    setError(null);
+    setUploadedFileName(null);
+    setUploadedFileSize(null);
+    setImageSrc(null);
+    setImageFileName(null);
+    setCaseSamples({});
+    if (tool.id === 'number-base-converter') {
+      setBinVal('');
+      setOctVal('');
+      setDecVal('');
+      setHexVal('');
+    }
+  };
+
   return (
     <div>
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleClearWorkspace}
+        resetLabel="Clear Workspace"
+      />
 
       {/* Case Converter layout */}
       {tool.id === 'case-converter' ? (

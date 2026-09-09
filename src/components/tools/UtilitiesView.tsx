@@ -297,9 +297,56 @@ console.log(\`Running \${suite} securely in your browser.\`);
     { code: 504, name: 'Gateway Timeout', desc: 'The server, while acting as a gateway or proxy, did not receive a timely response.' },
   ];
 
+  const handleResetOrClear = () => {
+    if (tool.id === 'uuid-generator') {
+      setUuidCount(5);
+      setUuidHyphens(true);
+      setUuidUppercase(false);
+      generateUuids();
+    } else if (tool.id === 'qr-generator') {
+      setQrText('https://codepackr.com');
+    } else if (tool.id === 'password-generator') {
+      setPwLength(16);
+      setPwUpper(true);
+      setPwLower(true);
+      setPwNumbers(true);
+      setPwSymbols(true);
+      generatePasswords();
+    } else if (tool.id === 'lorem-ipsum') {
+      setLoremCount(3);
+      setLoremType('paragraphs');
+      generateLorem(3, 'paragraphs');
+    } else if (tool.id === 'color-converter') {
+      updateFromHex('#5B52E8');
+    } else if (tool.id === 'timestamp') {
+      const now = Math.floor(Date.now() / 1000);
+      updateTimestamp(now);
+    } else if (tool.id === 'cron-expression') {
+      setCronMin('0');
+      setCronHour('12');
+      setCronDom('*');
+      setCronMonth('*');
+      setCronDow('?');
+    } else if (tool.id === 'slugify') {
+      setSlugInput('');
+      setSlugSep('-');
+      setSlugOutput('');
+    } else if (tool.id === 'http-status-codes') {
+      setHttpSearch('');
+    } else if (tool.id === 'markdown-preview') {
+      setMdContent('# Codepackr Markdown Preview\n\nStart typing markdown here...');
+    }
+  };
+
   return (
     <div>
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleResetOrClear}
+        resetLabel={tool.id === 'slugify' ? 'Clear Workspace' : 'Reset to Defaults'}
+      />
 
       {/* UUID Generator */}
       {tool.id === 'uuid-generator' && (

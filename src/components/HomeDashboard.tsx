@@ -47,7 +47,14 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     return TOOLS.filter((tool) => {
       if (!isToolVisible(tool.id, isAuthenticated)) return false;
       if (selectedCategory === 'bookmarks' && !isBookmarked(tool.id)) return false;
-      if (selectedCategory !== 'all' && selectedCategory !== 'bookmarks' && tool.category !== selectedCategory) return false;
+      if (
+        selectedCategory !== 'all' &&
+        selectedCategory !== 'bookmarks' &&
+        tool.category !== selectedCategory &&
+        !tool.secondaryCategories?.includes(selectedCategory as any)
+      ) {
+        return false;
+      }
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         return tool.name.toLowerCase().includes(q) || tool.description.toLowerCase().includes(q) || tool.keywords?.some((k) => k.toLowerCase().includes(q));

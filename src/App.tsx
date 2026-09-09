@@ -19,6 +19,7 @@ import { TextToolsView } from './components/tools/TextToolsView';
 import { JsonDefinitionView } from './components/tools/JsonDefinitionView';
 import { FinancialPlannerView } from './components/tools/FinancialPlannerView';
 import { MockDataGeneratorView } from './components/tools/MockDataGeneratorView';
+import { ImageToolsView } from './components/tools/ImageToolsView';
 import { EdiToolsView } from './components/tools/EdiToolsView';
 import { XmlToolsView } from './components/xml/XmlToolsView';
 import { AdminPortal } from './components/admin/AdminPortal';
@@ -298,6 +299,9 @@ export const App: React.FC = () => {
       toolViewContent = <MockDataGeneratorView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
     } else {
       switch (tool.category) {
+        case 'image':
+          toolViewContent = <ImageToolsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
+          break;
         case 'formatters':
           toolViewContent = <FormattersView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
           break;
@@ -316,7 +320,7 @@ export const App: React.FC = () => {
         case 'xml':
           toolViewContent = <XmlToolsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
           break;
-        case 'calculators':
+        case 'financial-calculators':
           toolViewContent = <CalculatorsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
           break;
         case 'utilities':

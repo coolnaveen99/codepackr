@@ -72,99 +72,6 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
   const [dotenvInput, setDotenvInput] = useState('NODE_ENV=production\nPORT=3000\nDATABASE_URL=postgres://localhost:5432/db\nCACHE_ENABLED=true\nAPI_KEY=');
   const [dotenvOutput, setDotenvOutput] = useState('');
 
-  // XSD Validator
-  const [xmlInput, setXmlInput] = useState(`<?xml version="1.0" encoding="UTF-8"?>
-<note>
-  <to>Tove</to>
-  <from>Jani</from>
-  <heading>Reminder</heading>
-  <body>Don't forget me this weekend!</body>
-</note>`);
-
-  const [xsdInput, setXsdInput] = useState(`<?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <xs:element name="note">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="to" type="xs:string"/>
-        <xs:element name="from" type="xs:string"/>
-        <xs:element name="heading" type="xs:string"/>
-        <xs:element name="body" type="xs:string"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-</xs:schema>`);
-
-  const [xsdResults, setXsdResults] = useState<{ valid: boolean; issues: string[]; stats?: string }>({
-    valid: true,
-    issues: ['XML conforms to XSD schema structure.'],
-    stats: 'Well-formed XML Document (4 elements verified)',
-  });
-
-  const validateXSD = (xml: string, xsd: string) => {
-    try {
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xml, 'text/xml');
-      const parserError = xmlDoc.querySelector('parsererror');
-      if (parserError) {
-        setXsdResults({
-          valid: false,
-          issues: [`XML Syntax Error: ${parserError.textContent?.split('\n')[0] || 'Invalid XML'}`],
-        });
-        return;
-      }
-
-      const xsdDoc = parser.parseFromString(xsd, 'text/xml');
-      const xsdError = xsdDoc.querySelector('parsererror');
-      if (xsdError) {
-        setXsdResults({
-          valid: false,
-          issues: [`XSD Syntax Error: ${xsdError.textContent?.split('\n')[0] || 'Invalid XSD schema'}`],
-        });
-        return;
-      }
-
-      const issues: string[] = [];
-      const expectedElements = Array.from(xsdDoc.querySelectorAll('element, [name]'))
-        .map((el) => el.getAttribute('name'))
-        .filter(Boolean);
-
-      const xmlElements = Array.from(xmlDoc.querySelectorAll('*')).map((el) => el.tagName);
-
-      if (expectedElements.length > 0) {
-        const rootElement = expectedElements[0];
-        if (xmlDoc.documentElement.tagName !== rootElement) {
-          issues.push(`Root element mismatch: expected <${rootElement}>, found <${xmlDoc.documentElement.tagName}>`);
-        }
-      }
-
-      expectedElements.forEach((req) => {
-        if (req && !xmlElements.includes(req)) {
-          issues.push(`Missing element: <${req}> declared in schema`);
-        }
-      });
-
-      if (issues.length > 0) {
-        setXsdResults({
-          valid: false,
-          issues,
-          stats: `${xmlElements.length} elements scanned, ${issues.length} issue(s) detected`,
-        });
-      } else {
-        setXsdResults({
-          valid: true,
-          issues: ['XML document conforms to XSD schema definition.'],
-          stats: `Well-formed XML document (${xmlElements.length} elements verified against schema)`,
-        });
-      }
-    } catch (err: any) {
-      setXsdResults({
-        valid: false,
-        issues: [`Validation error: ${err.message}`],
-      });
-    }
-  };
-
   useEffect(() => {
     const pending = popSmartPastePayload(tool.id) || popSmartPastePayload('validators') || initialInput;
     if (tool.id === 'diff-checker') {
@@ -195,8 +102,6 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
       const payload = pending || dotenvInput;
       if (pending) setDotenvInput(payload);
       formatDotenv(payload);
-    } else if (tool.id === 'xsd-validator') {
-      validateXSD(xmlInput, xsdInput);
     }
   }, [tool.id, initialInput]);
 
@@ -530,9 +435,56 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
     return rows;
   }, [diffResults]);
 
+  const handleResetToDefaults = () => {
+    if (tool.id === 'diff-checker') {
+      const left = 'function greet(name) {\n  console.log("Hello " + name);\n  return true;\n}';
+      const right = 'function greet(name, title = "") {\n  console.log(`Hello ${title} ${name}`.trim());\n  return true;\n  // updated for 2026\n}';
+      setLeftText(left);
+      setRightText(right);
+      computeDiff(left, right);
+    } else if (tool.id === 'json-structural-diff') {
+      const left = '{\n  "version": "1.0",\n  "enabled": true,\n  "count": 5,\n  "tags": ["alpha", "beta"]\n}';
+      const right = '{\n  "version": "1.1",\n  "enabled": true,\n  "count": 10,\n  "tags": ["alpha", "beta", "gamma"],\n  "newProp": "codepackr"\n}';
+      setLeftText(left);
+      setRightText(right);
+      computeStructuralDiff(left, right);
+    } else if (tool.id === 'regex-tester') {
+      const p = '\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b';
+      const f = 'g';
+      const t = 'Contact support@codepackr.com or developer.team@company.org for assistance with EDI 850 transactions.';
+      setRegexPattern(p);
+      setRegexFlags(f);
+      setRegexTestText(t);
+      evaluateRegex(p, f, t);
+    } else if (tool.id === 'json-validator') {
+      const defaultJson = '{\n  "status": "success",\n  "code": 200,\n  "message": "Valid JSON payload",\n  "data": {\n    "user": "developer",\n    "tools": ["formatter", "validator"]\n  }\n}';
+      setJsonInput(defaultJson);
+      validateJSON(defaultJson);
+    } else if (tool.id === 'json-path-tester') {
+      const sample = '{\n  "store": {\n    "book": [\n      { "category": "reference", "author": "Nigel Rees", "title": "Sayings of the Century", "price": 8.95 },\n      { "category": "fiction", "author": "Evelyn Waugh", "title": "Sword of Honour", "price": 12.99 }\n    ]\n  }\n}';
+      setJsonPathData(sample);
+      setJsonPathQuery('$.store.book[*].author');
+      evaluateJSONPath(sample, '$.store.book[*].author');
+    } else if (tool.id === 'csv-viewer') {
+      const sample = 'id,name,role,department\n1,Alice,Engineer,Platform\n2,Bob,Architect,EDI Integration\n3,Charlie,Analyst,Data Systems';
+      setCsvText(sample);
+      parseCSV(sample);
+    } else if (tool.id === 'dotenv-formatter') {
+      const sample = 'NODE_ENV=production\nPORT=3000\nDATABASE_URL=postgres://localhost:5432/db\nCACHE_ENABLED=true\nAPI_KEY=';
+      setDotenvInput(sample);
+      formatDotenv(sample);
+    }
+  };
+
   return (
     <div>
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleResetToDefaults}
+        resetLabel="Reset to Defaults"
+      />
 
       {/* Diff Checker View */}
       {tool.id === 'diff-checker' && (
@@ -1321,99 +1273,6 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
               height="260px"
               language="text"
             />
-          </div>
-        </div>
-      )}
-
-      {/* XSD / XML Schema Validator */}
-      {tool.id === 'xsd-validator' && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* XML Document */}
-            <div
-              className="p-4 rounded-2xl border shadow-sm flex flex-col"
-              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-                  XML INSTANCE DOCUMENT
-                </span>
-                <span className="text-[11px] text-[var(--muted)]">Instance Data</span>
-              </div>
-              <CodeEditor
-                id="xsd-xml-input"
-                value={xmlInput}
-                onChange={(val) => {
-                  setXmlInput(val);
-                  validateXSD(val, xsdInput);
-                }}
-                height="320px"
-                language="xml"
-              />
-            </div>
-
-            {/* XSD Schema */}
-            <div
-              className="p-4 rounded-2xl border shadow-sm flex flex-col"
-              style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-                  XSD SCHEMA DEFINITION
-                </span>
-                <span className="text-[11px] text-[var(--muted)]">W3C XML Schema</span>
-              </div>
-              <CodeEditor
-                id="xsd-schema-input"
-                value={xsdInput}
-                onChange={(val) => {
-                  setXsdInput(val);
-                  validateXSD(xmlInput, val);
-                }}
-                height="320px"
-                language="xml"
-              />
-            </div>
-          </div>
-
-          {/* Validation Result Status */}
-          <div
-            className="p-4 rounded-2xl border shadow-sm"
-            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              {xsdResults.valid ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-              ) : (
-                <AlertTriangle className="w-5 h-5 text-rose-500" />
-              )}
-              <span
-                className={`font-semibold text-sm ${
-                  xsdResults.valid ? 'text-emerald-600' : 'text-rose-600'
-                }`}
-              >
-                {xsdResults.valid ? 'Valid Against XSD Schema' : 'Validation Discrepancies Found'}
-              </span>
-            </div>
-
-            <div className="space-y-1.5 text-xs font-mono">
-              {xsdResults.issues.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`p-2.5 rounded-lg border ${
-                    xsdResults.valid
-                      ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900'
-                      : 'bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300 border-rose-200 dark:border-rose-900'
-                  }`}
-                >
-                  {msg}
-                </div>
-              ))}
-            </div>
-
-            {xsdResults.stats && (
-              <p className="mt-2 text-xs text-[var(--muted)]">{xsdResults.stats}</p>
-            )}
           </div>
         </div>
       )}

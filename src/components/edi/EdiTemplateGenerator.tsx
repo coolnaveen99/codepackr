@@ -162,9 +162,29 @@ export const EdiTemplateGenerator: React.FC<EdiTemplateGeneratorProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  const handleResetToDefaults = () => {
+    setSelectedTemplate('850');
+    setSenderId('SENDERQUAL');
+    setReceiverId('RECEIVERQUAL');
+    setSenderQual('ZZ');
+    setReceiverQual('ZZ');
+    setDocNumber('PO-2026-9901');
+    setItemCount(2);
+    setElemSep('*');
+    setSegTerm('~');
+    setSelectedCategory('All');
+    setSearchFilter('');
+  };
+
   return (
     <div className="space-y-6">
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleResetToDefaults}
+        resetLabel="Reset to Defaults"
+      />
 
       {/* Category Tabs & Search Bar */}
       <div

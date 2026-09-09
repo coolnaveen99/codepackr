@@ -103,7 +103,7 @@ export const PrivacyPolicyView: React.FC<PrivacyPolicyViewProps> = ({
               </h2>
               <p style={{ color: 'var(--muted)' }}>
                 Codepackr operates as a purely browser-executed, offline-capable suite of developer tools. When you format JSON,
-                validate XML/XSD schemas, compute cryptographic hashes, generate JWT tokens, or process EDI payloads, the entire
+                validate XML/XSD schemas, compute cryptographic hashes, generate JWT tokens, process images, plan retirement goals, or process EDI payloads, the entire
                 computation is carried out locally on your machine via JavaScript (ECMAScript) and WebAssembly sandboxing.
               </p>
               <ul className="list-disc pl-5 space-y-1" style={{ color: 'var(--muted)' }}>
@@ -115,8 +115,26 @@ export const PrivacyPolicyView: React.FC<PrivacyPolicyViewProps> = ({
 
             <section className="space-y-3">
               <h2 className="text-base font-bold flex items-center gap-2" style={{ color: 'var(--ink)' }}>
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                2. Client-Side Image Processing &amp; Financial Privacy Guarantee
+              </h2>
+              <div className="p-4 rounded-xl border space-y-2" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}>
+                <p style={{ color: 'var(--muted)' }}>
+                  All image utilities (including Visual Image Comparator &amp; Pixel Diff Inspector, Image Combiner &amp; Layout Merger, Image Resizer &amp; Favicon Generator, Base64 Image Converter, and EXIF Metadata Stripper &amp; Photo Inspector) and financial calculators (Retirement &amp; Financial Planning Calculator, Loan &amp; EMI Calculator, SIP Calculator, and Compound Interest Calculator) operate 100% within your browser's memory using client-side Web APIs, HTML5 Canvas, and WebAssembly.
+                </p>
+                <p className="font-semibold" style={{ color: 'var(--ink)' }}>
+                  Your images, photos, and personal financial profiles are never uploaded, stored, or transmitted to any external server.
+                </p>
+                <p style={{ color: 'var(--muted)' }}>
+                  Image data is rendered directly into transient HTML5 Canvas contexts and local object URLs that exist strictly within your browser's volatile memory. EXIF metadata is parsed and stripped client-side, guaranteeing that camera serials, device fingerprints, and GPS coordinates never leave your device. Similarly, all retirement figures, income levels, asset allocations, and net worth calculations remain 100% confidential in your local session.
+                </p>
+              </div>
+            </section>
+
+            <section className="space-y-3">
+              <h2 className="text-base font-bold flex items-center gap-2" style={{ color: 'var(--ink)' }}>
                 <Building className="w-4 h-4 text-[var(--brand)]" />
-                2. Enterprise EDI Tools &amp; Corporate Data Disclaimer
+                3. Enterprise EDI Tools &amp; Corporate Data Disclaimer
               </h2>
               <p style={{ color: 'var(--muted)' }}>
                 Codepackr provides advanced Electronic Data Interchange (EDI) processing utilities—including ANSI ASC X12, UN/EDIFACT,
@@ -142,7 +160,7 @@ export const PrivacyPolicyView: React.FC<PrivacyPolicyViewProps> = ({
 
             <section className="space-y-3">
               <h2 className="text-base font-bold" style={{ color: 'var(--ink)' }}>
-                3. Information We Collect (Minimalist Analytics &amp; Contact Webhooks)
+                4. Information We Collect (Minimalist Analytics &amp; Contact Webhooks)
               </h2>
               <p style={{ color: 'var(--muted)' }}>
                 Codepackr does not track you with invasive identifiers. The only information processed includes:
@@ -165,7 +183,7 @@ export const PrivacyPolicyView: React.FC<PrivacyPolicyViewProps> = ({
 
             <section className="space-y-3">
               <h2 className="text-base font-bold" style={{ color: 'var(--ink)' }}>
-                4. Statutory Safe Harbor Under Information Technology Act, 2000
+                5. Statutory Safe Harbor Under Information Technology Act, 2000
               </h2>
               <p style={{ color: 'var(--muted)' }}>
                 Codepackr operates in compliance with Section 79 of the Information Technology Act, 2000 (India) and the Information

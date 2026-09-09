@@ -2,7 +2,7 @@ import React from 'react';
 import {
   LayoutGrid, Star, Workflow, Code2, ArrowLeftRight, Calculator,
   CheckCircle2, Binary, Wrench, Type, FileCode, ShieldCheck,
-  ChevronLeft, ChevronRight, X
+  ChevronLeft, ChevronRight, X, Image as ImageIcon
 } from 'lucide-react';
 import { ToolCategory, CategoryFilter } from '../types';
 import { TOOLS, CATEGORIES } from '../data/tools';
@@ -23,10 +23,11 @@ interface SidebarProps {
 }
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  image: <ImageIcon className="w-4 h-4" />,
   edi: <Workflow className="w-4 h-4" />,
   formatters: <Code2 className="w-4 h-4" />,
   converters: <ArrowLeftRight className="w-4 h-4" />,
-  calculators: <Calculator className="w-4 h-4" />,
+  'financial-calculators': <Calculator className="w-4 h-4" />,
   validators: <CheckCircle2 className="w-4 h-4" />,
   encoders: <Binary className="w-4 h-4" />,
   utilities: <Wrench className="w-4 h-4" />,
@@ -112,7 +113,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
             <div className="space-y-1">
               {CATEGORIES.filter((c) => c.id !== 'all').map((cat) => {
-                const count = TOOLS.filter((t) => t.category === cat.id).length;
+                const count = TOOLS.filter((t) => t.category === cat.id || t.secondaryCategories?.includes(cat.id as any)).length;
                 const isSelected = selectedCategory === cat.id;
                 const icon = CATEGORY_ICONS[cat.id] || <Wrench className="w-4 h-4" />;
                 

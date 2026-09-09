@@ -213,9 +213,21 @@ export const XmlToXsdGeneratorView: React.FC<XmlToXsdGeneratorViewProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  const handleClearWorkspace = () => {
+    setXmlInput('');
+    setXsdOutput('');
+    setParseError(null);
+  };
+
   return (
     <div className="space-y-6">
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleClearWorkspace}
+        resetLabel="Clear Workspace"
+      />
 
       {/* Control Bar */}
       <div

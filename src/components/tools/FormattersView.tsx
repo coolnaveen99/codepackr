@@ -246,7 +246,13 @@ export const FormattersView: React.FC<FormattersViewProps> = ({
 
   return (
     <div className="animate-fade-in space-y-6">
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleClearWorkspace}
+        resetLabel="Clear Workspace"
+      />
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] shadow-sm">

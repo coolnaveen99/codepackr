@@ -597,9 +597,25 @@ export const EdiLifecycleReconciliation: React.FC<EdiLifecycleReconciliationProp
     URL.revokeObjectURL(url);
   };
 
+  const handleResetToDefaults = () => {
+    setSelectedScenario('clean');
+    setDoc850(CLEAN_850);
+    setDoc855(CLEAN_855);
+    setDoc856(CLEAN_856);
+    setDoc810(CLEAN_810);
+    setDoc820(CLEAN_820);
+    setActiveDocTab('850');
+  };
+
   return (
     <div className="space-y-6">
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleResetToDefaults}
+        resetLabel="Reset to Defaults"
+      />
 
       {/* Preset Scenario Selector Banner */}
       <div

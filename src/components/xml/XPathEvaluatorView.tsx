@@ -155,9 +155,23 @@ export const XPathEvaluatorView: React.FC<XPathEvaluatorViewProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleClearWorkspace = () => {
+    setXmlInput('');
+    setXpathQuery('');
+    setMatches([]);
+    setScalarResult(null);
+    setEvalError(null);
+  };
+
   return (
     <div className="space-y-6">
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleClearWorkspace}
+        resetLabel="Clear Workspace"
+      />
 
       {/* XPath Query Input Bar */}
       <div

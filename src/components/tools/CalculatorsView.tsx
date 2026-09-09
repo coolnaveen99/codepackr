@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Calculator as CalcIcon,
-  Percent,
-  Receipt,
   DollarSign,
   Calendar,
   ChevronDown,
@@ -14,7 +11,8 @@ import {
   ArrowUpRight,
   BarChart3,
   Layers,
-  Sparkles
+  Sparkles,
+  RotateCcw
 } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
@@ -34,21 +32,6 @@ export const CalculatorsView: React.FC<CalculatorsViewProps> = ({
   onSelectRelated,
   initialInput = '',
 }) => {
-  // Scientific Calculator State
-  const [calcDisplay, setCalcDisplay] = useState('0');
-  const [calcFormula, setCalcFormula] = useState('');
-
-  // Percentage Calculator State (stored as strings to prevent sticky zero)
-  const [percXStr, setPercXStr] = useState('15');
-  const [percYStr, setPercYStr] = useState('200');
-  const [incFromStr, setIncFromStr] = useState('50');
-  const [incToStr, setIncToStr] = useState('75');
-
-  // Tip Calculator State (stored as strings to prevent sticky zero)
-  const [billAmountStr, setBillAmountStr] = useState('85.50');
-  const [tipPercentStr, setTipPercentStr] = useState('18');
-  const [splitCountStr, setSplitCountStr] = useState('2');
-
   // Loan EMI Calculator State (stored as strings to prevent sticky zero, e.g. 09665775)
   const [loanPrincipalStr, setLoanPrincipalStr] = useState('50000');
   const [loanRateStr, setLoanRateStr] = useState('6.5');
@@ -103,46 +86,6 @@ export const CalculatorsView: React.FC<CalculatorsViewProps> = ({
     }
     setter(cleaned);
   };
-
-  // Calc buttons helper
-  const handleCalcButton = (val: string) => {
-    if (val === 'C') {
-      setCalcDisplay('0');
-      setCalcFormula('');
-    } else if (val === '=') {
-      try {
-        const sanitized = (calcFormula + calcDisplay)
-          .replace(/×/g, '*')
-          .replace(/÷/g, '/')
-          .replace(/[^0-9+\-*/().]/g, '');
-        // eslint-disable-next-line no-eval
-        const res = Function(`'use strict'; return (${sanitized})`)();
-        setCalcDisplay(String(Number(res.toFixed(6))));
-        setCalcFormula('');
-      } catch {
-        setCalcDisplay('Error');
-      }
-    } else if (['+', '-', '×', '÷'].includes(val)) {
-      setCalcFormula((prev) => prev + calcDisplay + ' ' + val + ' ');
-      setCalcDisplay('0');
-    } else {
-      setCalcDisplay((prev) => (prev === '0' ? val : prev + val));
-    }
-  };
-
-  // Percentage Math
-  const percX = parseFloat(percXStr) || 0;
-  const percY = parseFloat(percYStr) || 0;
-  const incFrom = parseFloat(incFromStr) || 0;
-  const incTo = parseFloat(incToStr) || 0;
-
-  // Tip Math
-  const billAmount = parseFloat(billAmountStr) || 0;
-  const tipPercent = parseFloat(tipPercentStr) || 0;
-  const splitCount = Math.max(1, parseInt(splitCountStr, 10) || 1);
-  const tipAmount = (billAmount * tipPercent) / 100;
-  const totalBill = billAmount + tipAmount;
-  const perPerson = splitCount > 0 ? totalBill / splitCount : totalBill;
 
   // Loan Math
   const loanPrincipal = parseFloat(loanPrincipalStr) || 0;
@@ -440,224 +383,46 @@ export const CalculatorsView: React.FC<CalculatorsViewProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  const handleResetToDefaults = () => {
+    if (tool.id === 'loan-calculator') {
+      setLoanPrincipalStr('50000');
+      setLoanRateStr('6.5');
+      setLoanTenureStr('5');
+      setTenureUnit('years');
+      setShowAmortization(false);
+      setAmortizationMode('annual');
+    } else if (tool.id === 'sip-calculator') {
+      setSipMonthlyStr('5000');
+      setSipRateStr('12');
+      setSipTenureStr('10');
+      setSipTenureUnit('years');
+      setSipStepUpStr('0');
+      setSipInflationStr('0');
+      setShowSipSchedule(false);
+      setSipScheduleMode('annual');
+    } else if (tool.id === 'investment-calculator') {
+      setCompPrincipalStr('10000');
+      setCompDepositStr('500');
+      setCompDepositFreq('monthly');
+      setCompRateStr('8');
+      setCompTenureStr('10');
+      setCompTenureUnit('years');
+      setCompFreq('12');
+      setCompStepUpStr('0');
+      setShowCompSchedule(false);
+      setCompScheduleMode('annual');
+    }
+  };
+
   return (
     <div>
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
-
-      {tool.id === 'calculator' && (
-        <div className="max-w-md mx-auto p-6 rounded-2xl border shadow-lg"
-          style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-        >
-          {/* Display */}
-          <div className="p-4 rounded-xl mb-4 text-right overflow-hidden border"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-          >
-            <div className="text-xs font-mono h-5 opacity-60 truncate">
-              {calcFormula}
-            </div>
-            <div className="text-3xl font-mono font-bold tracking-tight" style={{ color: 'var(--ink)' }}>
-              {calcDisplay}
-            </div>
-          </div>
-
-          {/* Grid */}
-          <div className="grid grid-cols-4 gap-2.5">
-            {['C', '(', ')', '÷', '7', '8', '9', '×', '4', '5', '6', '-', '1', '2', '3', '+', '0', '.', '%', '='].map(
-              (btn) => (
-                <button
-                  key={btn}
-                  onClick={() => handleCalcButton(btn)}
-                  className={`py-3.5 rounded-xl font-mono text-base font-semibold transition-transform active:scale-95 border ${
-                    btn === '='
-                      ? 'bg-[var(--brand)] text-white col-span-1 shadow-md'
-                      : ['+', '-', '×', '÷'].includes(btn)
-                      ? 'bg-[var(--brand-light)] text-[var(--brand)]'
-                      : btn === 'C'
-                      ? 'bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:text-rose-300'
-                      : 'hover:opacity-80'
-                  }`}
-                  style={{
-                    backgroundColor: btn === '=' ? 'var(--brand)' : undefined,
-                    borderColor: 'var(--line)',
-                  }}
-                >
-                  {btn}
-                </button>
-              )
-            )}
-          </div>
-        </div>
-      )}
-
-      {tool.id === 'percentage-calculator' && (
-        <div className="space-y-4 max-w-2xl mx-auto">
-          {/* Form 1: What is X% of Y */}
-          <div className="p-5 rounded-2xl border shadow-sm space-y-3"
-            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-          >
-            <h3 className="text-sm font-bold flex items-center gap-2">
-              <Percent className="w-4 h-4 text-[var(--brand)]" />
-              <span>Calculate Percentage (What is X% of Y?)</span>
-            </h3>
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm">What is</span>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={percXStr}
-                onChange={(e) => handleCleanInput(e.target.value, setPercXStr)}
-                placeholder="15"
-                className="w-24 p-2 rounded-xl border text-center font-mono text-sm outline-none"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-              />
-              <span className="text-sm">% of</span>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={percYStr}
-                onChange={(e) => handleCleanInput(e.target.value, setPercYStr)}
-                placeholder="200"
-                className="w-28 p-2 rounded-xl border text-center font-mono text-sm outline-none"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-              />
-              <span className="text-sm font-bold">=</span>
-              <span className="text-xl font-bold font-mono px-3 py-1 rounded-xl"
-                style={{ backgroundColor: 'var(--brand-light)', color: 'var(--brand)' }}
-              >
-                {((percX * percY) / 100).toFixed(2)}
-              </span>
-            </div>
-          </div>
-
-          {/* Form 2: Increase / Decrease */}
-          <div className="p-5 rounded-2xl border shadow-sm space-y-3"
-            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-          >
-            <h3 className="text-sm font-bold flex items-center gap-2">
-              <Percent className="w-4 h-4 text-emerald-500" />
-              <span>Percentage Increase or Decrease</span>
-            </h3>
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm">From</span>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={incFromStr}
-                onChange={(e) => handleCleanInput(e.target.value, setIncFromStr)}
-                placeholder="50"
-                className="w-28 p-2 rounded-xl border text-center font-mono text-sm outline-none"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-              />
-              <span className="text-sm">to</span>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={incToStr}
-                onChange={(e) => handleCleanInput(e.target.value, setIncToStr)}
-                placeholder="75"
-                className="w-28 p-2 rounded-xl border text-center font-mono text-sm outline-none"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-              />
-              <span className="text-sm font-bold">=</span>
-              {incFrom !== 0 && (
-                <span className={`text-xl font-bold font-mono px-3 py-1 rounded-xl ${
-                  incTo >= incFrom ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
-                }`}>
-                  {(((incTo - incFrom) / Math.abs(incFrom)) * 100).toFixed(2)}%
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {tool.id === 'tip-calculator' && (
-        <div className="max-w-xl mx-auto p-6 rounded-2xl border shadow-md space-y-5"
-          style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-        >
-          {/* Quick Currency Selector Bar */}
-          <div className="flex items-center justify-between pb-3 border-b flex-wrap gap-2" style={{ borderColor: 'var(--line)' }}>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-                Currency:
-              </span>
-              <span className="text-xs font-mono font-bold text-[var(--brand)] flex items-center gap-1">
-                <span>{currency.flag}</span>
-                <span>{currency.code} ({currency.symbol.trim()})</span>
-              </span>
-            </div>
-            <CurrencySelector idPrefix="tip-currency" variant="pill" />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>
-                BILL AMOUNT ({currency.symbol.trim()})
-              </label>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={billAmountStr}
-                onChange={(e) => handleCleanInput(e.target.value, setBillAmountStr)}
-                placeholder="e.g. 85.50"
-                className="w-full p-2.5 rounded-xl border font-mono text-sm outline-none"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>
-                TIP PERCENTAGE ({tipPercent}%)
-              </label>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={tipPercentStr}
-                onChange={(e) => handleCleanInput(e.target.value, setTipPercentStr)}
-                placeholder="e.g. 18"
-                className="w-full p-2.5 rounded-xl border font-mono text-sm outline-none"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>
-                SPLIT (PEOPLE)
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={splitCountStr}
-                onChange={(e) => handleCleanInput(e.target.value, setSplitCountStr)}
-                placeholder="1"
-                className="w-full p-2.5 rounded-xl border font-mono text-sm outline-none"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3 p-4 rounded-xl border"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-          >
-            <div>
-              <span className="text-xs text-gray-500 block">Total Tip</span>
-              <span className="text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400">
-                {formatAmount(tipAmount)}
-              </span>
-            </div>
-            <div>
-              <span className="text-xs text-gray-500 block">Total Bill</span>
-              <span className="text-lg font-bold font-mono" style={{ color: 'var(--ink)' }}>
-                {formatAmount(totalBill)}
-              </span>
-            </div>
-            <div>
-              <span className="text-xs text-gray-500 block">Per Person</span>
-              <span className="text-lg font-bold font-mono text-[var(--brand)]">
-                {formatAmount(perPerson)}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleResetToDefaults}
+        resetLabel="Reset to Defaults"
+      />
 
       {tool.id === 'loan-calculator' && (
         <div className="max-w-3xl mx-auto p-6 rounded-2xl border shadow-md space-y-6"
@@ -675,7 +440,18 @@ export const CalculatorsView: React.FC<CalculatorsViewProps> = ({
                 <span className="text-[10px] text-[var(--muted)] font-normal hidden sm:inline">— {currency.name}</span>
               </span>
             </div>
-            <CurrencySelector idPrefix="loan-currency" variant="pill" />
+            <div className="flex items-center gap-2">
+              <CurrencySelector idPrefix="loan-currency" variant="pill" />
+              <button
+                onClick={handleResetToDefaults}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all hover:border-rose-500 hover:text-rose-500 cursor-pointer shadow-xs"
+                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                title="Reset inputs to default values"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset to Defaults</span>
+              </button>
+            </div>
           </div>
 
           {/* Inputs Row with Clean Sanitized Numbers & Tenure Unit Switch */}
@@ -1118,7 +894,18 @@ export const CalculatorsView: React.FC<CalculatorsViewProps> = ({
                 <span className="text-[10px] text-[var(--muted)] font-normal hidden sm:inline">— {currency.name}</span>
               </span>
             </div>
-            <CurrencySelector idPrefix="sip-currency" variant="pill" />
+            <div className="flex items-center gap-2">
+              <CurrencySelector idPrefix="sip-currency" variant="pill" />
+              <button
+                onClick={handleResetToDefaults}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all hover:border-rose-500 hover:text-rose-500 cursor-pointer shadow-xs"
+                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                title="Reset inputs to default values"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset to Defaults</span>
+              </button>
+            </div>
           </div>
 
           {/* Inputs Grid */}
@@ -1637,7 +1424,18 @@ export const CalculatorsView: React.FC<CalculatorsViewProps> = ({
                 <span className="text-[10px] text-[var(--muted)] font-normal hidden sm:inline">— {currency.name}</span>
               </span>
             </div>
-            <CurrencySelector idPrefix="comp-currency" variant="pill" />
+            <div className="flex items-center gap-2">
+              <CurrencySelector idPrefix="comp-currency" variant="pill" />
+              <button
+                onClick={handleResetToDefaults}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all hover:border-rose-500 hover:text-rose-500 cursor-pointer shadow-xs"
+                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                title="Reset inputs to default values"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset to Defaults</span>
+              </button>
+            </div>
           </div>
 
           {/* Inputs Row 1: Initial Deposit, Regular Addition & Frequency */}

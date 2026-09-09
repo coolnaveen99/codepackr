@@ -214,9 +214,26 @@ export const EncodersView: React.FC<EncodersViewProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleClearWorkspace = () => {
+    setInput('');
+    setOutput('');
+    setError(null);
+    setHashes({});
+    setJwtHeader('');
+    setJwtPayload('');
+    setJwtExpired(null);
+    setImagePreview(null);
+  };
+
   return (
     <div>
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleClearWorkspace}
+        resetLabel="Clear Workspace"
+      />
 
       {/* Mode Bar */}
       {(tool.id === 'base64' || tool.id === 'url-encode' || tool.id === 'html-entity') && (

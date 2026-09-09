@@ -31,10 +31,7 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'jwt-encoder': 'jwt-encoder',
   'base64-image': 'base64-image',
 
-  // Calculators
-  'calculator': 'calculator',
-  'percentage-calculator': 'percentage-calculator',
-  'tip-calculator': 'tip-calculator',
+  // Financial Calculators
   'financial-planner': 'financial-planner',
   'retirement-calculator': 'financial-planner',
   'financial-planning-calculator': 'financial-planner',
@@ -47,10 +44,13 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
 
   // Validators
   'diff-checker': 'diff-checker',
+  'image-diff-checker': 'image-diff-checker',
+  'image-diff': 'image-diff-checker',
+  'image-comparator': 'image-diff-checker',
+  'image-compare': 'image-diff-checker',
   'regex-tester': 'regex-tester',
   'json-validator': 'json-validator',
   'json-path-tester': 'json-path-tester',
-  'xsd-validator': 'xsd-validator',
   'csv-viewer': 'csv-viewer',
   'json-structural-diff': 'json-structural-diff',
   'dotenv-formatter': 'dotenv-formatter',
@@ -66,6 +66,15 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'html-markdown-converter': 'html-markdown-converter',
   'curl-code-converter': 'curl-code-converter',
   'image-resizer': 'image-resizer',
+  'image-merger': 'image-merger',
+  'image-combiner': 'image-merger',
+  'combine-images': 'image-merger',
+  'image-joiner': 'image-merger',
+  'image-exif-inspector': 'image-exif-inspector',
+  'exif-inspector': 'image-exif-inspector',
+  'strip-exif': 'image-exif-inspector',
+  'exif-stripper': 'image-exif-inspector',
+  'remove-exif': 'image-exif-inspector',
   'favicon-generator': 'favicon-generator',
   'json-definition-generator': 'json-definition-generator',
   'json-to-definition': 'json-definition-generator',
@@ -99,6 +108,9 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'xsd-to-xml': 'xsd-to-xml',
   'xpath-evaluator': 'xpath-evaluator',
   'xml-escape-tool': 'xml-escape-tool',
+  'xsd-validator': 'xsd-validator',
+  'xml-validator': 'xsd-validator',
+  'xml-schema-validator': 'xsd-validator',
 
   // Utilities
   'uuid-generator': 'uuid-generator',
@@ -138,11 +150,14 @@ export const TOOL_ID_TO_CANONICAL_SLUG: Record<string, string> = {
   'edi-formatter': 'edi-formatter',
   'edi-to-json': 'edi-to-json',
   'markdown-preview': 'markdown-preview',
-  'financial-planner': 'financial-planner',
+  'financial-planner': 'retirement-calculator',
   'sip-calculator': 'sip-calculator',
   'investment-calculator': 'investment-calculator',
   'compound-investment-calculator': 'investment-calculator',
   'json-definition-generator': 'json-definition-generator',
+  'image-merger': 'image-merger',
+  'image-exif-inspector': 'image-exif-inspector',
+  'image-diff-checker': 'image-diff-checker',
 };
 
 /**
@@ -165,6 +180,9 @@ export function getToolDirectUrl(tool: ToolDef | string): string {
  * Mapping of direct category URL slugs to category filter keys
  */
 export const CATEGORY_SLUG_MAP: Record<string, string> = {
+  'image': 'image',
+  'image-tools': 'image',
+  'images': 'image',
   'formatters': 'formatters',
   'encoders': 'encoders',
   'validators': 'validators',
@@ -173,7 +191,9 @@ export const CATEGORY_SLUG_MAP: Record<string, string> = {
   'edi-tools': 'edi',
   'xml': 'xml',
   'xml-tools': 'xml',
-  'calculators': 'calculators',
+  'financial-calculators': 'financial-calculators',
+  'financial-calculator': 'financial-calculators',
+  'calculators': 'financial-calculators',
   'utilities': 'utilities',
   'text': 'text',
   'text-tools': 'text',

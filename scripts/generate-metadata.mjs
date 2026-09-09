@@ -34,14 +34,19 @@ const aliasDefinitions = {
     category: 'encoders',
     description: 'Generate keyed-hash message authentication codes (HMAC) using SHA-256, SHA-512, and MD5 algorithms.'
   },
+  'retirement-calculator': {
+    name: 'Retirement & Financial Planning Calculator',
+    category: 'financial-calculators',
+    description: 'Calculate your retirement corpus, projected vs required savings, inflation impact, and get actionable financial independence strategies.'
+  },
   'financial-planner': {
-    name: 'Financial Planning & Retirement Calculator',
-    category: 'calculators',
-    description: 'Calculate your retirement corpus, investment growth, retirement income, financial health, corpus sustainability and savings gap with our advanced financial planning calculator.'
+    name: 'Retirement & Financial Planning Calculator',
+    category: 'financial-calculators',
+    description: 'Calculate your retirement corpus, projected vs required savings, inflation impact, and get actionable financial independence strategies.'
   },
   'sip-calculator': {
     name: 'SIP Calculator',
-    category: 'calculators',
+    category: 'financial-calculators',
     description: 'Calculate future wealth and expected maturity values for Systematic Investment Plans (SIP) and mutual fund investments with compounding graphs.'
   },
   'investment-calculator': {
@@ -189,6 +194,16 @@ const aliasDefinitions = {
     category: 'formatters',
     description: 'All-in-one developer suite of code beautifiers and minifiers for JSON, SQL, HTML, CSS, XML, and YAML data.'
   },
+  'image-tools': {
+    name: 'Image Processing & Optimization Tools Suite',
+    category: 'image',
+    description: '100% private, client-side image utilities to merge, resize, compress, strip EXIF metadata, compare diffs, convert Base64, and generate favicons.'
+  },
+  'image': {
+    name: 'Image Processing & Optimization Tools Suite',
+    category: 'image',
+    description: '100% private, client-side image utilities to merge, resize, compress, strip EXIF metadata, compare diffs, convert Base64, and generate favicons.'
+  },
   'encoders': {
     name: 'Encoders, Decoders & Cryptography Tools',
     category: 'encoders',
@@ -206,8 +221,18 @@ const aliasDefinitions = {
   },
   'calculators': {
     name: 'Financial & Math Calculators Suite',
-    category: 'calculators',
+    category: 'financial-calculators',
     description: 'Calculate loans, monthly EMIs, amortization schedules, SIP returns, percentages, and gratuity tips with multi-currency support.'
+  },
+  'financial-calculators': {
+    name: 'Financial & Retirement Calculators Suite',
+    category: 'financial-calculators',
+    description: 'Calculate retirement corpus, loan EMIs, SIP compounding, investments, and inflation-adjusted financial independence strategies.'
+  },
+  'xsd-validator': {
+    name: 'XSD & XML Schema Validator',
+    category: 'xml',
+    description: 'Validate XML structures against W3C XSD schema definitions, element constraints, and data types locally in your browser.'
   },
   'utilities': {
     name: 'Developer Utilities & Generators',
@@ -255,6 +280,14 @@ const sitemapSlugs = [...sitemap.matchAll(/<loc>https:\/\/www\.codepackr\.com\/(
 // Specific custom content helpers by category and tool
 function getCategoryFeatures(category, toolName) {
   switch (category) {
+    case 'image':
+      return [
+        `High-performance, 100% browser-based HTML5 canvas image processing for ${toolName}.`,
+        'Zero file uploads: your photos, screenshots, and graphics never leave your local device.',
+        'Precision layout, dimensions, compression quality, and format controls (PNG, JPEG, WebP).',
+        'Built-in privacy safeguards: strip sensitive GPS and camera EXIF metadata in seconds.',
+        'Instant live preview with fast one-click download in full resolution.'
+      ];
     case 'formatters':
       return [
         `Customizable indentation options (2 spaces, 4 spaces, or tabs) for ${toolName}.`,
@@ -304,6 +337,7 @@ function getCategoryFeatures(category, toolName) {
         'Formatted syntax highlighting with expandable code nodes.'
       ];
     case 'calculators':
+    case 'financial-calculators':
       return [
         `Accurate mathematical calculations with instant reactive updates for ${toolName}.`,
         'Detailed breakdown tables with visual graphs and itemized summaries.',
@@ -333,6 +367,13 @@ function getCategoryFeatures(category, toolName) {
 
 function getCategoryHowToUse(category, toolName) {
   switch (category) {
+    case 'image':
+      return [
+        `Upload or drag-and-drop your image files directly into the browser tool workspace.`,
+        `Adjust desired dimensions, layout orientation, alignment, padding, or quality settings.`,
+        `Inspect the real-time canvas preview or review diagnostic metadata details.`,
+        `Download the processed image or copy generated assets with a single click.`
+      ];
     case 'formatters':
       return [
         `Paste your raw code or unformatted text into the editor.`,

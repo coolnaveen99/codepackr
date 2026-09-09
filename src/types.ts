@@ -1,11 +1,12 @@
 export type ToolCategory = 
+  | 'image'
   | 'formatters'
   | 'encoders'
   | 'validators'
   | 'converters'
   | 'edi'
   | 'xml'
-  | 'calculators'
+  | 'financial-calculators'
   | 'utilities'
   | 'text';
 
@@ -15,6 +16,7 @@ export interface ToolDef {
   id: string;
   name: string;
   category: ToolCategory;
+  secondaryCategories?: ToolCategory[];
   description: string;
   keywords: string[];
   icon: string;

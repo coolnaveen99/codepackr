@@ -1145,9 +1145,34 @@ export const As2ToolsView: React.FC<As2ToolsViewProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  const handleResetToDefaults = () => {
+    setAs2From('MYCOMPANY_AS2');
+    setAs2To('WALMART_AS2');
+    setSubject('EDI X12 Transaction AS2 Transmission');
+    setContentType('application/edi-x12');
+    setFilename('PO_20260904_850.x12');
+    setSecurityMode('signed_encrypted');
+    setRequestMdn(true);
+    setMdnType('sync');
+    setAsyncUrl('https://as2.mycompany.com/as2/async-mdn');
+    setRequestSignedMdn(true);
+    setMicAlgorithm('sha-256');
+    setEncoderPayload(SAMPLE_EDI_850);
+    setDecoderInput('');
+    setDecoderResult(null);
+    setMdnParserInput('');
+    setMdnParsedResult(null);
+  };
+
   return (
     <div className="space-y-6">
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleResetToDefaults}
+        resetLabel="Reset to Defaults"
+      />
 
       {/* Main Suite Navigation Tabs */}
       <div

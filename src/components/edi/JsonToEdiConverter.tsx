@@ -567,9 +567,21 @@ export const JsonToEdiConverter: React.FC<JsonToEdiConverterProps> = ({
     }
   };
 
+  const handleClearWorkspace = () => {
+    setJsonInput('');
+    setEdiOutput('');
+    setJsonError(null);
+  };
+
   return (
     <div className="space-y-6">
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleClearWorkspace}
+        resetLabel="Clear Workspace"
+      />
 
       {/* Control Bar */}
       <div

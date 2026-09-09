@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Share2, Check, ArrowLeft, Star } from 'lucide-react';
+import { Share2, Check, ArrowLeft, Star, RotateCcw } from 'lucide-react';
 import { ToolDef } from '../types';
 import { TOOLS } from '../data/tools';
 import { useBookmarks, shareToolUrl } from '../lib/bookmarks';
@@ -9,12 +9,28 @@ interface ToolHeaderProps {
   tool: ToolDef;
   onBackToHome?: () => void;
   onSelectRelated?: (t: ToolDef) => void;
+  onResetOrClear?: () => void;
+  resetLabel?: string;
 }
 
-export const ToolHeader: React.FC<ToolHeaderProps> = ({ tool, onBackToHome, onSelectRelated }) => {
+export const ToolHeader: React.FC<ToolHeaderProps> = ({
+  tool,
+  onBackToHome,
+  onSelectRelated,
+  onResetOrClear,
+  resetLabel,
+}) => {
   const [copiedLink, setCopiedLink] = useState(false);
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const bookmarked = isBookmarked(tool.id);
+
+  const isCalcOrPlanner =
+    tool.category === 'financial-calculators' ||
+    tool.category === 'validators' ||
+    tool.id === 'financial-planner';
+
+  const defaultActionLabel = isCalcOrPlanner ? 'Reset to Defaults' : 'Clear Workspace';
+  const effectiveResetLabel = resetLabel || defaultActionLabel;
 
   const handleShare = async () => {
     const success = await shareToolUrl(tool.id, tool.name, tool.description);
@@ -59,7 +75,18 @@ export const ToolHeader: React.FC<ToolHeaderProps> = ({ tool, onBackToHome, onSe
           </div>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0 self-start md:self-auto mt-2 md:mt-0">
+        <div className="flex items-center gap-2.5 shrink-0 self-start md:self-auto mt-2 md:mt-0 flex-wrap">
+          {onResetOrClear && (
+            <button
+              onClick={onResetOrClear}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all hover:border-rose-500 hover:text-rose-500 cursor-pointer shadow-xs"
+              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              title={effectiveResetLabel}
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>{effectiveResetLabel}</span>
+            </button>
+          )}
           <button
             onClick={() => toggleBookmark(tool.id)}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl border transition-all shadow-sm cursor-pointer ${

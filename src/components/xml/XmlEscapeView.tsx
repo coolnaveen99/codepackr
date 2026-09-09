@@ -79,9 +79,20 @@ export const XmlEscapeView: React.FC<XmlEscapeViewProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  const handleClearWorkspace = () => {
+    setInput('');
+    setOutput('');
+  };
+
   return (
     <div className="space-y-6">
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleClearWorkspace}
+        resetLabel="Clear Workspace"
+      />
 
       {/* Actions Toolbar */}
       <div

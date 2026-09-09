@@ -211,6 +211,18 @@ const toolsData = [
     tags: ['#XML', '#XSD', '#SchemaValidation', '#DataIntegrity', '#Developer']
   },
   {
+    slug: 'xslt-transformer',
+    name: 'XSLT Transformer & Tester',
+    desc: 'Transform XML documents with XSLT stylesheets, test templates, parameters, and preview HTML/XML/Text client-side',
+    tags: ['#XSLT', '#XML', '#Transform', '#DataIntegration', '#EDI']
+  },
+  {
+    slug: 'xsd-validator',
+    name: 'XSD & XML Schema Validator',
+    desc: 'Validate XML structures against W3C XSD schema definitions, element constraints, and data types locally in browser',
+    tags: ['#XML', '#XSD', '#SchemaValidator', '#W3C', '#DataIntegrity']
+  },
+  {
     slug: 'xml-xsd-generator',
     name: 'XML to XSD Schema Generator',
     desc: 'Automatically infer and generate W3C XSD schemas from sample XML data',
@@ -361,6 +373,44 @@ const toolsData = [
     tags: ['#Images', '#WebP', '#ImageFormatConverter', '#Format', '#Converter']
   },
 
+  // Image Tools Suite
+  {
+    slug: 'image-tools',
+    name: 'Image Processing & Optimization Tools Suite',
+    desc: 'Merge, resize, compress, strip EXIF metadata, compare image diffs, and generate favicons 100% locally in your browser',
+    tags: ['#ImageTools', '#Design', '#WebPerf', '#Privacy', '#HTML5Canvas', '#FrontEnd']
+  },
+  {
+    slug: 'image-merger',
+    name: 'Image Merger & Combiner',
+    desc: 'Stitch two images side-by-side or stacked vertically with custom padding, gap spacing, and alignment',
+    tags: ['#ImageMerger', '#ImageStitching', '#Design', '#GraphicDesign', '#Canvas']
+  },
+  {
+    slug: 'image-exif-inspector',
+    name: 'EXIF Metadata Inspector & Stripper',
+    desc: 'Inspect camera metadata and GPS coordinates, then sanitize images by stripping all EXIF data client-side',
+    tags: ['#EXIF', '#Privacy', '#CyberSecurity', '#Metadata', '#Photography']
+  },
+  {
+    slug: 'image-diff-checker',
+    name: 'Side-by-Side Image Comparator',
+    desc: 'Compare two images with interactive curtain slider, pixel diff heatmap, and onion-skin blending',
+    tags: ['#ImageDiff', '#VisualTesting', '#QA', '#UIUX', '#DesignReview']
+  },
+  {
+    slug: 'image-resizer',
+    name: 'Image Resizer & Compressor',
+    desc: 'Resize, crop, and compress images with custom dimensions and quality settings directly in the browser',
+    tags: ['#ImageResizer', '#ImageCompression', '#WebPerf', '#Optimization']
+  },
+  {
+    slug: 'favicon-generator',
+    name: 'Favicon Generator',
+    desc: 'Generate crisp multi-resolution PNG and ICO web favicons (16x16, 32x32, 48x48, 180x180) from any image',
+    tags: ['#Favicon', '#WebDesign', '#IconGenerator', '#WebDevelopment']
+  },
+
   // 7. Calculators
   {
     slug: 'calculators',
@@ -397,6 +447,24 @@ const toolsData = [
     name: 'Percentage & Ratio Calculator',
     desc: 'Calculate percentage increases, discounts, fractional ratios, and differences instantly',
     tags: ['#Math', '#Percentages', '#Calculator', '#Discounts', '#Ratios']
+  },
+  {
+    slug: 'financial-calculators',
+    name: 'Financial & Retirement Calculators Suite',
+    desc: 'Calculate retirement corpus, loan EMIs, SIP compounding, investments, and inflation-adjusted financial independence strategies',
+    tags: ['#Finance', '#Retirement', '#FinancialPlanning', '#FIRE', '#WealthBuilding']
+  },
+  {
+    slug: 'retirement-calculator',
+    name: 'Retirement & Financial Planning Calculator',
+    desc: 'Calculate your retirement corpus, projected vs required savings, inflation impact, and financial independence roadmap',
+    tags: ['#RetirementCalculator', '#CorpusCalculator', '#FinancialIndependence', '#FIRE', '#PersonalFinance']
+  },
+  {
+    slug: 'financial-planner',
+    name: 'Retirement & Financial Planning Calculator',
+    desc: 'Calculate your retirement corpus, projected vs required savings, inflation impact, and financial independence roadmap',
+    tags: ['#FinancialPlanning', '#RetirementPlanning', '#CorpusCalculator', '#Wealth', '#Investing']
   },
   {
     slug: 'gratuity-calculator',

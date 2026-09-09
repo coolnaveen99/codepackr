@@ -236,9 +236,24 @@ export const EdiAckGenerator: React.FC<EdiAckGeneratorProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  const handleResetToDefaults = () => {
+    setInputEdi(SAMPLE_850_INPUT);
+    setAckType('x12_997');
+    setAckStatus('A');
+    setTa1NoteCode('000');
+    setDelimiter('~');
+    setElementSep('*');
+  };
+
   return (
     <div className="space-y-6">
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleResetToDefaults}
+        resetLabel="Reset to Defaults"
+      />
 
       {/* Control Banner */}
       <div

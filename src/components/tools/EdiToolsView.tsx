@@ -34,6 +34,7 @@ import { EdiDelimiterCleaner } from '../edi/EdiDelimiterCleaner';
 import { As2ToolsView } from '../edi/As2ToolsView';
 import { Gs1LabelGenerator } from '../edi/Gs1LabelGenerator';
 import { EdiLifecycleReconciliation } from '../edi/EdiLifecycleReconciliation';
+import { XsltTransformerView } from '../xml/XsltTransformerView';
 import {
   COMPREHENSIVE_SEGMENT_DICTIONARY,
   EDI_TRANSACTIONS,
@@ -1130,21 +1131,33 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
   const errorCount = validationIssues.filter((i) => i.type === 'error').length;
   const warningCount = validationIssues.filter((i) => i.type === 'warning').length;
 
+  const handleClearWorkspace = () => {
+    setInput('');
+    setFilterQuery('');
+  };
+
   return (
     <div className="space-y-6">
       {/* 1. SINGLE TOP HEADER: Bookmark, Share, Category badges */}
-      <ToolHeader tool={currentActiveToolDef} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={currentActiveToolDef}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleClearWorkspace}
+        resetLabel="Clear Workspace"
+      />
 
       {/* 2. Sub-tools Navigation Tabs */}
       <div
-        className="flex items-center gap-2 border-b overflow-x-auto pb-2"
-        style={{ borderColor: 'var(--line)', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        className="flex items-center gap-2 border-b overflow-x-auto pb-2.5 custom-scrollbar scroll-smooth"
+        style={{ borderColor: 'var(--line)' }}
       >
         {[
           { id: 'edi-formatter', label: 'EDI Formatter & Indenter', icon: Sparkles },
           { id: 'edi-segment-viewer', label: 'EDI Segment & Element Viewer', icon: Table },
           { id: 'edi-to-json', label: 'EDI to JSON Converter', icon: ArrowLeftRight },
           { id: 'json-to-edi', label: 'JSON to EDI Converter', icon: FileCode2 },
+          { id: 'xslt-transformer', label: 'XSLT Transformer & Tester', icon: Sparkles, isNew: true },
           { id: 'edi-validator', label: 'EDI Compliance Validator', icon: ShieldCheck },
           { id: 'edi-lifecycle-reconciliation', label: 'Order Lifecycle Reconciliation', icon: GitCompareArrows },
           { id: 'edi-997-generator', label: '997 / TA1 / CONTRL Ack Generator', icon: CheckCircle2 },
@@ -1165,7 +1178,7 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
                   window.history.pushState({}, '', `/${targetTool.id}`);
                 }
               }}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer relative ${
                 isActive ? 'shadow-sm' : 'hover:opacity-80'
               }`}
               style={{
@@ -1176,6 +1189,17 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
             >
               <TabIcon className="w-4 h-4" />
               <span>{tab.label}</span>
+              {tab.isNew && (
+                <span
+                  className="px-1.5 py-0.2 text-[9px] font-bold rounded uppercase tracking-wider ml-1"
+                  style={{
+                    backgroundColor: isActive ? 'rgba(255,255,255,0.25)' : 'var(--brand)',
+                    color: '#ffffff',
+                  }}
+                >
+                  NEW
+                </span>
+              )}
             </button>
           );
         })}
@@ -2046,6 +2070,9 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
         )}
         {activeTab === 'as2-tools' && (
           <As2ToolsView tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} initialInput={input} />
+        )}
+        {activeTab === 'xslt-transformer' && (
+          <XsltTransformerView tool={currentActiveToolDef} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
         )}
       </div>
     </div>

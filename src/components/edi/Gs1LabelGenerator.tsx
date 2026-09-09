@@ -421,9 +421,37 @@ IEA*1*000000856~`;
     </div>
   );
 
+  const handleResetToDefaults = () => {
+    setExtensionDigit('0');
+    setCompanyPrefix('0614141');
+    setSerialReference('123456789');
+    setGtin('00012345678905');
+    setQuantity('24');
+    setItemDescription('PREMIUM COTTON APPAREL 12PK');
+    setBatchLot('BATCH-2026-X');
+    setExpirationDate('271231');
+    setShipFromCompany('ACME LOGISTICS INC.');
+    setShipFromStreet('1200 COMMERCE WAY');
+    setShipFromCityStateZip('CHICAGO, IL 60601');
+    setShipToCompany('TARGET DISTRIBUTION #0584');
+    setShipToStreet('900 LOGISTICS BLVD');
+    setShipToCityStateZip('ONTARIO, CA 91761');
+    setShipToPostal('91761');
+    setCarrierName('FEDEX FREIGHT (FDEG)');
+    setBolNumber('BOL-994821');
+    setPoNumber('PO-2026-9901');
+    setViewMode('label');
+  };
+
   return (
     <div className="space-y-6">
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleResetToDefaults}
+        resetLabel="Reset to Defaults"
+      />
 
       {/* Mode Navigation Bar */}
       <div
