@@ -2,637 +2,649 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
   <loc>https://www.codepackr.com/</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>weekly</changefreq>
   <priority>1.0</priority>
 </url>
 <url>
+  <loc>https://www.codepackr.com/image-tools</loc>
+  <lastmod>2026-09-09</lastmod>
+  <changefreq>weekly</changefreq>
+  <priority>0.9</priority>
+</url>
+<url>
   <loc>https://www.codepackr.com/edi-tools</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>weekly</changefreq>
   <priority>0.9</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/formatters</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>weekly</changefreq>
   <priority>0.9</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/encoders</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>weekly</changefreq>
   <priority>0.9</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/validators</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>weekly</changefreq>
   <priority>0.9</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/converters</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
+  <changefreq>weekly</changefreq>
+  <priority>0.9</priority>
+</url>
+<url>
+  <loc>https://www.codepackr.com/financial-calculators</loc>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>weekly</changefreq>
   <priority>0.9</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/calculators</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>weekly</changefreq>
   <priority>0.9</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/utilities</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>weekly</changefreq>
   <priority>0.9</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/text-tools</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>weekly</changefreq>
   <priority>0.9</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/xml-tools</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>weekly</changefreq>
   <priority>0.9</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/json-formatter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/html-formatter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/css-formatter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/sql-formatter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/xml-formatter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/yaml-formatter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/js-minifier</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/base64</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/url-encode</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/html-entity</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/hash-generator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/jwt-decoder</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/jwt-encoder</loc>
-  <lastmod>2026-09-08</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.8</priority>
-</url>
-<url>
-  <loc>https://www.codepackr.com/base64-image</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/diff-checker</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/regex-tester</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/json-validator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/json-path-tester</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/csv-viewer</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/json-structural-diff</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/dotenv-formatter</loc>
-  <lastmod>2026-09-08</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.8</priority>
-</url>
-<url>
-  <loc>https://www.codepackr.com/xsd-validator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/json-xml-converter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/json-csv-converter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/case-converter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/yaml-json-converter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/number-base-converter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/markdown-html-converter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/curl-code-converter</loc>
-  <lastmod>2026-09-08</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.8</priority>
-</url>
-<url>
-  <loc>https://www.codepackr.com/image-resizer</loc>
-  <lastmod>2026-09-08</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.8</priority>
-</url>
-<url>
-  <loc>https://www.codepackr.com/favicon-generator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/csv-xml-converter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/html-markdown-converter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/json-definition-generator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.8</priority>
+</url>
+<url>
+  <loc>https://www.codepackr.com/image-resizer</loc>
+  <lastmod>2026-09-09</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.8</priority>
+</url>
+<url>
+  <loc>https://www.codepackr.com/image-merger</loc>
+  <lastmod>2026-09-09</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.8</priority>
+</url>
+<url>
+  <loc>https://www.codepackr.com/image-exif-inspector</loc>
+  <lastmod>2026-09-09</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.8</priority>
+</url>
+<url>
+  <loc>https://www.codepackr.com/image-diff-checker</loc>
+  <lastmod>2026-09-09</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.8</priority>
+</url>
+<url>
+  <loc>https://www.codepackr.com/favicon-generator</loc>
+  <lastmod>2026-09-09</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.8</priority>
+</url>
+<url>
+  <loc>https://www.codepackr.com/base64-image</loc>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/edi-formatter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/edi-segment-viewer</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/edi-to-json</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/edi-validator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/edi-997-generator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/json-to-edi</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/edi-sample-generator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/edi-delimiter-converter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/as2-tools</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/gs1-sscc-label-generator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/edi-lifecycle-reconciliation</loc>
-  <lastmod>2026-09-08</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.8</priority>
-</url>
-<url>
-  <loc>https://www.codepackr.com/xslt-transformer</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/xml-to-xsd</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/xsd-to-xml</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/xpath-evaluator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/xml-escape-tool</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.8</priority>
+</url>
+<url>
+  <loc>https://www.codepackr.com/xsd-validator</loc>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/financial-planner</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/loan-calculator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/sip-calculator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/investment-calculator</loc>
-  <lastmod>2026-09-08</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.8</priority>
-</url>
-<url>
-  <loc>https://www.codepackr.com/calculator</loc>
-  <lastmod>2026-09-08</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.8</priority>
-</url>
-<url>
-  <loc>https://www.codepackr.com/percentage-calculator</loc>
-  <lastmod>2026-09-08</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.8</priority>
-</url>
-<url>
-  <loc>https://www.codepackr.com/tip-calculator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/uuid-generator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/qr-generator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/password-generator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/lorem-ipsum</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/color-converter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/timestamp</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/cron-expression</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/slugify</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/http-status-codes</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/mock-json-generator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/markdown-preview</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/edi-x12-formatter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/edi-json-converter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/edi-order-reconciliation</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/as2-encoder-decoder</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/as2-mdn-generator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/gs1-128-generator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/sscc-18-generator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/json-minifier</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/crc32-checksum-generator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/hmac-generator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
+  <loc>https://www.codepackr.com/retirement-calculator</loc>
+  <lastmod>2026-09-09</lastmod>
+  <changefreq>weekly</changefreq>
+  <priority>0.9</priority>
+</url>
+<url>
   <loc>https://www.codepackr.com/compound-investment-calculator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/compound-interest-calculator</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/json-to-definition</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/markdown</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/what-is-my-screen-resolution</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/what-is-my-user-agent</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/word-counter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/character-counter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/line-counter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/sentence-counter</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/remove-duplicate-lines</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/remove-empty-lines</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/remove-extra-spaces</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/sort-lines-alphabetically</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/reverse-line-order</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/contact</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.7</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/privacy</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.6</priority>
 </url>
 <url>
   <loc>https://www.codepackr.com/terms</loc>
-  <lastmod>2026-09-08</lastmod>
+  <lastmod>2026-09-09</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.6</priority>
 </url>

@@ -19,6 +19,11 @@ import { TextToolsView } from './components/tools/TextToolsView';
 import { JsonDefinitionView } from './components/tools/JsonDefinitionView';
 import { FinancialPlannerView } from './components/tools/FinancialPlannerView';
 import { MockDataGeneratorView } from './components/tools/MockDataGeneratorView';
+import { JwtInspectorView } from './components/dev-lab/JwtInspectorView';
+import { PkceGeneratorView } from './components/dev-lab/PkceGeneratorView';
+import { OpenApiValidatorView } from './components/dev-lab/OpenApiValidatorView';
+import { DockerK8sValidatorView } from './components/dev-lab/DockerK8sValidatorView';
+import { ConnectionStringParserView } from './components/dev-lab/ConnectionStringParserView';
 import { ImageToolsView } from './components/tools/ImageToolsView';
 import { EdiToolsView } from './components/tools/EdiToolsView';
 import { XmlToolsView } from './components/xml/XmlToolsView';
@@ -297,6 +302,16 @@ export const App: React.FC = () => {
       toolViewContent = <FinancialPlannerView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
     } else if (tool.id === 'mock-json-generator') {
       toolViewContent = <MockDataGeneratorView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
+    } else if (tool.id === 'jwt-inspector') {
+      toolViewContent = <JwtInspectorView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
+    } else if (tool.id === 'pkce-generator') {
+      toolViewContent = <PkceGeneratorView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
+    } else if (tool.id === 'openapi-validator') {
+      toolViewContent = <OpenApiValidatorView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
+    } else if (tool.id === 'docker-k8s-validator') {
+      toolViewContent = <DockerK8sValidatorView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
+    } else if (tool.id === 'connection-string-parser') {
+      toolViewContent = <ConnectionStringParserView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
     } else {
       switch (tool.category) {
         case 'image':

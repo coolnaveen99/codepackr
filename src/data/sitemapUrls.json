@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-09-08",
+  "updatedAt": "2026-09-09",
   "host": "www.codepackr.com",
   "baseUrl": "https://www.codepackr.com",
-  "totalUrls": 106,
+  "totalUrls": 108,
   "urls": [
     {
       "loc": "https://www.codepackr.com/",
@@ -11,6 +11,14 @@
       "priority": "1.0",
       "changefreq": "weekly",
       "category": "home"
+    },
+    {
+      "loc": "https://www.codepackr.com/image-tools",
+      "path": "/image-tools",
+      "name": "Image Processing & Optimization Tools Suite",
+      "priority": "0.9",
+      "changefreq": "weekly",
+      "category": "image"
     },
     {
       "loc": "https://www.codepackr.com/edi-tools",
@@ -51,6 +59,14 @@
       "priority": "0.9",
       "changefreq": "weekly",
       "category": "converters"
+    },
+    {
+      "loc": "https://www.codepackr.com/financial-calculators",
+      "path": "/financial-calculators",
+      "name": "Financial & Retirement Calculators Suite",
+      "priority": "0.9",
+      "changefreq": "weekly",
+      "category": "financial-calculators"
     },
     {
       "loc": "https://www.codepackr.com/calculators",
@@ -189,14 +205,6 @@
       "category": "encoders"
     },
     {
-      "loc": "https://www.codepackr.com/base64-image",
-      "path": "/base64-image",
-      "name": "Base64 Image Converter",
-      "priority": "0.8",
-      "changefreq": "monthly",
-      "category": "encoders"
-    },
-    {
       "loc": "https://www.codepackr.com/diff-checker",
       "path": "/diff-checker",
       "name": "Diff Checker",
@@ -248,14 +256,6 @@
       "loc": "https://www.codepackr.com/dotenv-formatter",
       "path": "/dotenv-formatter",
       "name": "dotenv Formatter & Validator",
-      "priority": "0.8",
-      "changefreq": "monthly",
-      "category": "validators"
-    },
-    {
-      "loc": "https://www.codepackr.com/xsd-validator",
-      "path": "/xsd-validator",
-      "name": "XSD & XML Schema Validator",
       "priority": "0.8",
       "changefreq": "monthly",
       "category": "validators"
@@ -317,22 +317,6 @@
       "category": "converters"
     },
     {
-      "loc": "https://www.codepackr.com/image-resizer",
-      "path": "/image-resizer",
-      "name": "Image Resizer & Compressor",
-      "priority": "0.8",
-      "changefreq": "monthly",
-      "category": "converters"
-    },
-    {
-      "loc": "https://www.codepackr.com/favicon-generator",
-      "path": "/favicon-generator",
-      "name": "Favicon Generator",
-      "priority": "0.8",
-      "changefreq": "monthly",
-      "category": "converters"
-    },
-    {
       "loc": "https://www.codepackr.com/csv-xml-converter",
       "path": "/csv-xml-converter",
       "name": "CSV to XML Converter",
@@ -355,6 +339,54 @@
       "priority": "0.8",
       "changefreq": "monthly",
       "category": "converters"
+    },
+    {
+      "loc": "https://www.codepackr.com/image-resizer",
+      "path": "/image-resizer",
+      "name": "Image Resizer & Compressor",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "image"
+    },
+    {
+      "loc": "https://www.codepackr.com/image-merger",
+      "path": "/image-merger",
+      "name": "Image Merger & Combiner",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "image"
+    },
+    {
+      "loc": "https://www.codepackr.com/image-exif-inspector",
+      "path": "/image-exif-inspector",
+      "name": "EXIF Metadata Inspector & Stripper",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "image"
+    },
+    {
+      "loc": "https://www.codepackr.com/image-diff-checker",
+      "path": "/image-diff-checker",
+      "name": "Side-by-Side Image Comparator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "image"
+    },
+    {
+      "loc": "https://www.codepackr.com/favicon-generator",
+      "path": "/favicon-generator",
+      "name": "Favicon Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "image"
+    },
+    {
+      "loc": "https://www.codepackr.com/base64-image",
+      "path": "/base64-image",
+      "name": "Base64 Image Converter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "image"
     },
     {
       "loc": "https://www.codepackr.com/edi-formatter",
@@ -445,14 +477,6 @@
       "category": "edi"
     },
     {
-      "loc": "https://www.codepackr.com/xslt-transformer",
-      "path": "/xslt-transformer",
-      "name": "XSLT Transformer & Tester",
-      "priority": "0.8",
-      "changefreq": "monthly",
-      "category": "xml"
-    },
-    {
       "loc": "https://www.codepackr.com/xml-to-xsd",
       "path": "/xml-to-xsd",
       "name": "XML to XSD Schema Generator",
@@ -485,12 +509,20 @@
       "category": "xml"
     },
     {
-      "loc": "https://www.codepackr.com/financial-planner",
-      "path": "/financial-planner",
-      "name": "Financial Planning & Retirement Calculator",
+      "loc": "https://www.codepackr.com/xsd-validator",
+      "path": "/xsd-validator",
+      "name": "XSD & XML Schema Validator",
       "priority": "0.8",
       "changefreq": "monthly",
-      "category": "calculators"
+      "category": "xml"
+    },
+    {
+      "loc": "https://www.codepackr.com/financial-planner",
+      "path": "/financial-planner",
+      "name": "Retirement & Financial Planning Calculator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "financial-calculators"
     },
     {
       "loc": "https://www.codepackr.com/loan-calculator",
@@ -498,7 +530,7 @@
       "name": "Loan & EMI Calculator",
       "priority": "0.8",
       "changefreq": "monthly",
-      "category": "calculators"
+      "category": "financial-calculators"
     },
     {
       "loc": "https://www.codepackr.com/sip-calculator",
@@ -506,7 +538,7 @@
       "name": "SIP Calculator",
       "priority": "0.8",
       "changefreq": "monthly",
-      "category": "calculators"
+      "category": "financial-calculators"
     },
     {
       "loc": "https://www.codepackr.com/investment-calculator",
@@ -514,31 +546,7 @@
       "name": "Investment Calculator",
       "priority": "0.8",
       "changefreq": "monthly",
-      "category": "calculators"
-    },
-    {
-      "loc": "https://www.codepackr.com/calculator",
-      "path": "/calculator",
-      "name": "Scientific Calculator",
-      "priority": "0.8",
-      "changefreq": "monthly",
-      "category": "calculators"
-    },
-    {
-      "loc": "https://www.codepackr.com/percentage-calculator",
-      "path": "/percentage-calculator",
-      "name": "Percentage Calculator",
-      "priority": "0.8",
-      "changefreq": "monthly",
-      "category": "calculators"
-    },
-    {
-      "loc": "https://www.codepackr.com/tip-calculator",
-      "path": "/tip-calculator",
-      "name": "Tip Calculator",
-      "priority": "0.8",
-      "changefreq": "monthly",
-      "category": "calculators"
+      "category": "financial-calculators"
     },
     {
       "loc": "https://www.codepackr.com/uuid-generator",
@@ -615,7 +623,7 @@
     {
       "loc": "https://www.codepackr.com/mock-json-generator",
       "path": "/mock-json-generator",
-      "name": "Mock JSON Generator",
+      "name": "Advanced Mock Data Generator",
       "priority": "0.8",
       "changefreq": "monthly",
       "category": "utilities"
@@ -709,12 +717,20 @@
       "category": "encoders"
     },
     {
+      "loc": "https://www.codepackr.com/retirement-calculator",
+      "path": "/retirement-calculator",
+      "name": "Retirement & Financial Planning Calculator",
+      "priority": "0.9",
+      "changefreq": "weekly",
+      "category": "financial-calculators"
+    },
+    {
       "loc": "https://www.codepackr.com/compound-investment-calculator",
       "path": "/compound-investment-calculator",
       "name": "Compound Investment Calculator",
       "priority": "0.8",
       "changefreq": "monthly",
-      "category": "calculators"
+      "category": "financial-calculators"
     },
     {
       "loc": "https://www.codepackr.com/compound-interest-calculator",
@@ -722,7 +738,7 @@
       "name": "Compound Interest Calculator",
       "priority": "0.8",
       "changefreq": "monthly",
-      "category": "calculators"
+      "category": "financial-calculators"
     },
     {
       "loc": "https://www.codepackr.com/json-to-definition",

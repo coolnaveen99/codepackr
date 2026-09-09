@@ -74,6 +74,15 @@ export const TOOLS: ToolDef[] = [
     keywords: ['js', 'javascript', 'minify', 'compress', 'shrink'],
     icon: 'Terminal',
   },
+  {
+    id: 'connection-string-parser',
+    name: 'Database Connection String Builder',
+    category: 'formatters',
+    description: 'Construct, format, and parse database connection URIs for PostgreSQL, MySQL, MongoDB Atlas, and Redis.',
+    keywords: ['database', 'connection string', 'uri', 'postgres', 'mysql', 'mongodb', 'redis', 'builder', 'parse', 'dsn'],
+    icon: 'Link',
+    popular: true,
+  },
 
   // Encoders
   {
@@ -128,6 +137,24 @@ export const TOOLS: ToolDef[] = [
     keywords: ['jwt', 'token', 'sign', 'hs256', 'auth', 'encode'],
     icon: 'Key',
   },
+  {
+    id: 'jwt-inspector',
+    name: 'JWT Inspector & Validator',
+    category: 'encoders',
+    description: 'Inspect, decode, and validate JSON Web Tokens (JWT) headers, payloads, signatures, and expiration status.',
+    keywords: ['jwt', 'token', 'decode', 'json web token', 'inspector', 'claims', 'exp', 'signature', 'base64url', 'validator'],
+    icon: 'Shield',
+    popular: true,
+  },
+  {
+    id: 'pkce-generator',
+    name: 'OAuth 2.0 PKCE Generator',
+    category: 'encoders',
+    description: 'Generate high-entropy cryptographically secure OAuth 2.0 PKCE code verifiers and SHA-256 code challenges.',
+    keywords: ['pkce', 'oauth', 'oauth2', 'code verifier', 'code challenge', 'sha256', 'auth', 'security', 's256'],
+    icon: 'Key',
+    popular: true,
+  },
 
   // Validators
   {
@@ -137,6 +164,24 @@ export const TOOLS: ToolDef[] = [
     description: 'Compare two blocks of text or code side-by-side with line difference highlights.',
     keywords: ['diff', 'compare', 'difference', 'code diff', 'changes'],
     icon: 'GitCompare',
+    popular: true,
+  },
+  {
+    id: 'openapi-validator',
+    name: 'OpenAPI / Swagger Spec Viewer',
+    category: 'validators',
+    description: 'Validate, parse, and inspect structural syntax and endpoint paths for OpenAPI 3.0 and Swagger API specifications.',
+    keywords: ['openapi', 'swagger', 'api', 'spec', 'yaml', 'validator', 'lint', 'schema', 'endpoints', 'json'],
+    icon: 'FileCode',
+    popular: true,
+  },
+  {
+    id: 'docker-k8s-validator',
+    name: 'Docker & Kubernetes YAML Linter',
+    category: 'validators',
+    description: 'Lint, validate, and verify structural syntax for Docker Compose and Kubernetes YAML resource manifests.',
+    keywords: ['docker', 'kubernetes', 'k8s', 'yaml', 'linter', 'validator', 'manifest', 'deployment', 'compose', 'service'],
+    icon: 'Server',
     popular: true,
   },
   {

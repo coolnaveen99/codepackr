@@ -228,6 +228,12 @@ const toolsData = [
     desc: 'Automatically infer and generate W3C XSD schemas from sample XML data',
     tags: ['#XML', '#XSD', '#SchemaGenerator', '#Architecture', '#DevTools']
   },
+  {
+    slug: 'connection-string-parser',
+    name: 'Database Connection String Builder',
+    desc: 'Construct, format, and parse database connection URIs for PostgreSQL, MySQL, MongoDB Atlas, and Redis',
+    tags: ['#Database', '#PostgreSQL', '#MySQL', '#MongoDB', '#Redis', '#DevOps']
+  },
 
   // 4. Encoders & Cryptography
   {
@@ -278,6 +284,18 @@ const toolsData = [
     desc: 'Compute 32-bit cyclic redundancy check (CRC32) checksums for text and data files',
     tags: ['#CRC32', '#Checksum', '#Integrity', '#Programming', '#DevTools']
   },
+  {
+    slug: 'jwt-inspector',
+    name: 'JWT Inspector & Validator',
+    desc: 'Inspect, decode, and validate JSON Web Token (JWT) headers, payloads, signatures, and expiration in browser memory',
+    tags: ['#JWT', '#OAuth2', '#WebSecurity', '#Authentication', '#DevTools']
+  },
+  {
+    slug: 'pkce-generator',
+    name: 'OAuth 2.0 PKCE Generator',
+    desc: 'Generate cryptographically secure OAuth 2.0 PKCE code verifiers and SHA-256 code challenges locally in browser',
+    tags: ['#OAuth2', '#PKCE', '#Security', '#Auth', '#WebSecurity']
+  },
 
   // 5. Validators
   {
@@ -285,6 +303,18 @@ const toolsData = [
     name: 'Syntax, Schema & Diff Validators Suite',
     desc: 'Validate JSON syntax, XSD schemas, regex patterns, text diffs, and structured documents',
     tags: ['#Validation', '#DataIntegrity', '#DiffChecker', '#Regex', '#CodeQuality']
+  },
+  {
+    slug: 'openapi-validator',
+    name: 'OpenAPI / Swagger Spec Viewer',
+    desc: 'Validate, parse, and inspect structural syntax and endpoint paths for OpenAPI 3.0 and Swagger API specifications',
+    tags: ['#OpenAPI', '#Swagger', '#API', '#RestAPI', '#APIDesign']
+  },
+  {
+    slug: 'docker-k8s-validator',
+    name: 'Docker & Kubernetes YAML Linter',
+    desc: 'Lint, validate, and verify structural syntax for Docker Compose and Kubernetes YAML resource manifests',
+    tags: ['#Docker', '#Kubernetes', '#K8s', '#DevOps', '#YAML', '#CloudNative']
   },
   {
     slug: 'json-validator',

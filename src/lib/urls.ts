@@ -14,6 +14,9 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'xml-formatter': 'xml-formatter',
   'yaml-formatter': 'yaml-formatter',
   'js-minifier': 'js-minifier',
+  'connection-string-parser': 'connection-string-parser',
+  'connection-string-builder': 'connection-string-parser',
+  'db-connection-builder': 'connection-string-parser',
 
   // Encoders & Security
   'base64': 'base64',
@@ -29,6 +32,12 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'hmac-generator': 'hash-generator',
   'jwt-decoder': 'jwt-decoder',
   'jwt-encoder': 'jwt-encoder',
+  'jwt-inspector': 'jwt-inspector',
+  'jwt-validator': 'jwt-inspector',
+  'jwt-debugger': 'jwt-inspector',
+  'pkce-generator': 'pkce-generator',
+  'pkce': 'pkce-generator',
+  'oauth-pkce': 'pkce-generator',
   'base64-image': 'base64-image',
 
   // Financial Calculators
@@ -48,6 +57,13 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'image-diff': 'image-diff-checker',
   'image-comparator': 'image-diff-checker',
   'image-compare': 'image-diff-checker',
+  'openapi-validator': 'openapi-validator',
+  'swagger-validator': 'openapi-validator',
+  'swagger-viewer': 'openapi-validator',
+  'docker-k8s-validator': 'docker-k8s-validator',
+  'k8s-validator': 'docker-k8s-validator',
+  'docker-linter': 'docker-k8s-validator',
+  'k8s-linter': 'docker-k8s-validator',
   'regex-tester': 'regex-tester',
   'json-validator': 'json-validator',
   'json-path-tester': 'json-path-tester',
@@ -158,6 +174,11 @@ export const TOOL_ID_TO_CANONICAL_SLUG: Record<string, string> = {
   'image-merger': 'image-merger',
   'image-exif-inspector': 'image-exif-inspector',
   'image-diff-checker': 'image-diff-checker',
+  'jwt-inspector': 'jwt-inspector',
+  'pkce-generator': 'pkce-generator',
+  'openapi-validator': 'openapi-validator',
+  'docker-k8s-validator': 'docker-k8s-validator',
+  'connection-string-parser': 'connection-string-parser',
 };
 
 /**

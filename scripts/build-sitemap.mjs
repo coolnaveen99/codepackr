@@ -69,6 +69,12 @@ const specializedAliases = [
   { slug: 'what-is-my-screen-resolution', name: 'Screen Resolution & Viewport Checker', priority: '0.8', changefreq: 'monthly', category: 'utilities' },
   { slug: 'what-is-my-user-agent', name: 'User Agent Inspector', priority: '0.8', changefreq: 'monthly', category: 'utilities' },
 
+  // Developer Utilities & Cloud Aliases
+  { slug: 'connection-string-builder', name: 'Database Connection String Builder', priority: '0.8', changefreq: 'monthly', category: 'formatters' },
+  { slug: 'jwt-validator', name: 'JWT Inspector & Token Validator', priority: '0.8', changefreq: 'monthly', category: 'encoders' },
+  { slug: 'swagger-validator', name: 'OpenAPI & Swagger Spec Validator', priority: '0.8', changefreq: 'monthly', category: 'validators' },
+  { slug: 'k8s-validator', name: 'Kubernetes & Docker YAML Linter', priority: '0.8', changefreq: 'monthly', category: 'validators' },
+
   // Text tools
   { slug: 'word-counter', name: 'Word Counter & Statistics', priority: '0.8', changefreq: 'monthly', category: 'text' },
   { slug: 'character-counter', name: 'Character & Byte Counter', priority: '0.8', changefreq: 'monthly', category: 'text' },

@@ -268,6 +268,46 @@ const aliasDefinitions = {
     name: 'Serial Shipping Container Code (SSCC-18) Generator',
     category: 'edi',
     description: 'Calculate Mod-10 check digits and generate standard 18-digit Serial Shipping Container Code (SSCC-18) labels.'
+  },
+  'jwt-inspector': {
+    name: 'JWT Inspector & Validator',
+    category: 'encoders',
+    description: 'Inspect, decode, and validate JSON Web Token (JWT) headers, payloads, signatures, and expiration status in browser memory.'
+  },
+  'jwt-validator': {
+    name: 'JWT Inspector & Validator',
+    category: 'encoders',
+    description: 'Inspect, decode, and validate JSON Web Token (JWT) headers, payloads, signatures, and expiration status in browser memory.'
+  },
+  'pkce-generator': {
+    name: 'OAuth 2.0 PKCE Generator',
+    category: 'encoders',
+    description: 'Generate high-entropy cryptographically secure OAuth 2.0 PKCE code verifiers and SHA-256 code challenges directly in browser memory.'
+  },
+  'openapi-validator': {
+    name: 'OpenAPI / Swagger Spec Viewer',
+    category: 'validators',
+    description: 'Validate, parse, and inspect structural syntax and endpoint routes for OpenAPI 3.0 and Swagger API specifications.'
+  },
+  'swagger-validator': {
+    name: 'OpenAPI / Swagger Spec Viewer',
+    category: 'validators',
+    description: 'Validate, parse, and inspect structural syntax and endpoint routes for OpenAPI 3.0 and Swagger API specifications.'
+  },
+  'docker-k8s-validator': {
+    name: 'Docker & Kubernetes YAML Linter',
+    category: 'validators',
+    description: 'Lint, validate, and verify structural syntax for Docker Compose and Kubernetes YAML resource manifests.'
+  },
+  'connection-string-parser': {
+    name: 'Database Connection String Builder',
+    category: 'formatters',
+    description: 'Construct, format, and parse database connection URIs for PostgreSQL, MySQL, MongoDB Atlas, and Redis with client-side privacy.'
+  },
+  'connection-string-builder': {
+    name: 'Database Connection String Builder',
+    category: 'formatters',
+    description: 'Construct, format, and parse database connection URIs for PostgreSQL, MySQL, MongoDB Atlas, and Redis with client-side privacy.'
   }
 };
 

@@ -399,6 +399,7 @@ export const getIcon = (iconName: string, size = 18, className = ''): React.Reac
     case 'palette':
       return <TerminalIcon {...props} />; // Using terminal as palette for CSS
     case 'database':
+    case 'server':
       return <DatabaseIcon {...props} />;
     case 'filecode':
     case 'filetext':
