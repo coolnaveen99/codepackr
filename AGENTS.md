@@ -52,6 +52,13 @@ Welcome to **Codepackr** (`www.codepackr.com`) — a comprehensive, 100% privacy
   3. `scripts/generate-metadata.mjs`: Provide rich feature bullet points, step-by-step how-to, and FAQ schema for prerendering.
   4. `scripts/build-sitemap.mjs`: Ensure the tool path is indexed in `sitemap.xml`.
 
+### External Scripts & Tracking Tags Documentation Directive
+- **DO document every script in plain English before inserting**:
+  - Whenever adding, updating, or inserting external scripts, tracking tags, analytics snippets, or third-party embeds (e.g. Google Tag Manager, Google Analytics, AdSense, Clarity, Pixel tags) into `index.html` or any page template:
+  - **MANDATORY**: First add a clear comment line explaining **why the script is used** and **details in simple layman-friendly terms** (e.g. what it does, why it exists, container/publisher IDs, and fallback behavior if JavaScript is disabled).
+  - Only after this explanatory comment line, paste the script code.
+  - Never insert bare or unexplained `<script>` or `<noscript>` tags.
+
 ### Verification
 - **DO test builds thoroughly**:
   - Run `lint_applet` (`npm run lint`) to guarantee 0 TypeScript errors.

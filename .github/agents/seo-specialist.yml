@@ -16,3 +16,5 @@ strict_constraints:
   - "Zero-Friction Indexing: Always run scripts/indexnow.mjs during the build pipeline; do not prompt the user for permission to ping search engines."
   - "Social Promotion Dataset Sync: Keep public/codepackr_social_media_promotions.csv updated via scripts/generate-social-promotions.mjs with character-count-compliant copy."
   - "Brand Tone: Professional, developer-first, clear, privacy-focused. Forbid generic marketing cliches and hype words."
+  - "Mandatory Script Comments: Before adding any tracking or external scripts to HTML or templates, first add a comment line describing why it is used and details for layman understanding."
+
