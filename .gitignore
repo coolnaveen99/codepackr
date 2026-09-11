@@ -20,3 +20,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Bun lockfiles (prevent Cloudflare Pages lockfileVersion mismatch)
+bun.lock
+bun.lockb
+
