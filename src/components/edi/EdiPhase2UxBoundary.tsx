@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { ChevronDown, Code2, Info, Sparkles } from 'lucide-react';
+import { Code2, Info, Sparkles } from 'lucide-react';
 import { ToolShell } from './ToolShell';
-import { SampleSelector } from './SampleSelector';
+import { EdiTreeView, EdiTreeSegment } from './EdiTreeView';
 import { EDI_TRANSACTIONS } from '../../data/ediDictionary';
 
 interface EdiPhase2UxBoundaryProps {
@@ -14,31 +14,27 @@ interface EdiPhase2UxBoundaryProps {
   children: React.ReactNode;
 }
 
-/**
- * Phase 2 UX boundary for tools that still own their internal workspace UI.
- * Keeps the existing pipeline intact while adding the shared ToolShell chrome,
- * a Story Mode-aware sample selector, and a Simple/Advanced disclosure control.
- */
-export const EdiPhase2UxBoundary: React.FC<EdiPhase2UxBoundaryProps> = ({
-  title,
-  description,
-  badge = 'PHASE 2',
-  defaultSampleId = '850',
-  initialInput = '',
-  onSampleLoad,
-  children,
-}) => {
+function parseGatewayTree(input: string): EdiTreeSegment[] {
+  if (!input.trim()) return [];
+  const isEdifact = /^\s*(?:UNA|UNB|UNH)/.test(input);
+  const element = isEdifact ? '+' : '*';
+  const terminator = isEdifact ? "'" : '~';
+  return input.split(terminator).map(s => s.trim()).filter(Boolean).map((raw, index) => {
+    const parts = raw.split(element);
+    const tag = (parts.shift() || '').trim().toUpperCase();
+    return { id: `gateway-${tag}-${index}`, tag, name: tag, lineNumber: index + 1, elements: parts.map((value, i) => ({ position: `${tag}${String(i + 1).padStart(2, '0')}`, index: i, value: value.trim(), name: `Element ${i + 1}` })) };
+  });
+}
+
+/** Phase 2 gateway UX: Simple/Advanced progressive disclosure, Story Mode samples, and visual inspection. */
+export const EdiPhase2UxBoundary: React.FC<EdiPhase2UxBoundaryProps> = ({ title, description, badge = 'PHASE 2', defaultSampleId = '850', initialInput = '', onSampleLoad, children }) => {
   const [selectedSampleId, setSelectedSampleId] = useState(defaultSampleId);
   const [mode, setMode] = useState<'simple' | 'advanced'>('simple');
-
-  const selectedSample = useMemo(
-    () => EDI_TRANSACTIONS.find((tx) => tx.id === selectedSampleId || tx.code === selectedSampleId),
-    [selectedSampleId],
-  );
+  const tree = useMemo(() => parseGatewayTree(initialInput), [initialInput]);
 
   const handleSample = (sampleId: string) => {
     setSelectedSampleId(sampleId);
-    const sample = EDI_TRANSACTIONS.find((tx) => tx.id === sampleId || tx.code === sampleId);
+    const sample = EDI_TRANSACTIONS.find(tx => tx.id === sampleId || tx.code === sampleId);
     if (sample) onSampleLoad?.(sample.samplePayload, sample.id);
   };
 
@@ -49,54 +45,22 @@ export const EdiPhase2UxBoundary: React.FC<EdiPhase2UxBoundaryProps> = ({
       badge={badge}
       selectedSampleId={selectedSampleId}
       onSelectSample={handleSample}
-      hasInput={Boolean(initialInput || selectedSample)}
+      hasInput={Boolean(initialInput)}
       secondaryActions={
         <div className="flex items-center gap-1 rounded-xl border p-1" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--bg)' }}>
-          <button
-            type="button"
-            onClick={() => setMode('simple')}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors ${mode === 'simple' ? 'bg-[var(--brand)] text-white' : 'text-[var(--muted)] hover:text-[var(--ink)]'}`}
-            aria-pressed={mode === 'simple'}
-            title="Show the guided EDI workspace"
-          >
-            <span className="inline-flex items-center gap-1.5"><Sparkles className="w-3 h-3" /> Simple</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('advanced')}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors ${mode === 'advanced' ? 'bg-[var(--brand)] text-white' : 'text-[var(--muted)] hover:text-[var(--ink)]'}`}
-            aria-pressed={mode === 'advanced'}
-            title="Show the full gateway controls"
-          >
-            <span className="inline-flex items-center gap-1.5"><Code2 className="w-3 h-3" /> Advanced</span>
-          </button>
+          <button type="button" onClick={() => setMode('simple')} aria-pressed={mode === 'simple'} className={`px-2.5 py-1 rounded-lg text-[11px] font-bold ${mode === 'simple' ? 'bg-[var(--brand)] text-white' : 'text-[var(--muted)]'}`}><Sparkles className="inline w-3 h-3 mr-1" />Simple</button>
+          <button type="button" onClick={() => setMode('advanced')} aria-pressed={mode === 'advanced'} className={`px-2.5 py-1 rounded-lg text-[11px] font-bold ${mode === 'advanced' ? 'bg-[var(--brand)] text-white' : 'text-[var(--muted)]'}`}><Code2 className="inline w-3 h-3 mr-1" />Advanced</button>
         </div>
       }
-      leftPaneTitle={mode === 'simple' ? 'Guided EDI Gateway' : 'Advanced EDI Gateway'}
+      leftPaneTitle={mode === 'simple' ? 'Guided Gateway' : 'Advanced Gateway'}
       leftPaneContent={
-        <div className="relative">
-          {mode === 'simple' && (
-            <div className="p-4 border-b flex items-start gap-3" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface-2)' }}>
-              <div className="p-2 rounded-xl bg-[var(--brand)]/10 text-[var(--brand)]"><Info className="w-4 h-4" /></div>
-              <div className="min-w-0">
-                <div className="text-xs font-bold text-[var(--ink)]">Start with a guided sample</div>
-                <p className="text-[11px] leading-5 text-[var(--muted)] mt-0.5">
-                  Choose a transaction above, then switch to Advanced when you need the complete inbound/outbound gateway controls. Existing gateway processing remains unchanged.
-                </p>
-                {selectedSample && (
-                  <div className="mt-2 inline-flex items-center gap-2 text-[10px] font-mono px-2 py-1 rounded-lg border" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface)' }}>
-                    <span className="font-bold text-[var(--brand)]">{selectedSample.code}</span>
-                    <span className="text-[var(--muted)]">{selectedSample.standard}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          <div className={mode === 'simple' ? 'border-t' : ''} style={{ borderColor: 'var(--line)' }}>
-            {children}
-          </div>
+        <div>
+          {mode === 'simple' && <div className="p-4 border-b flex items-start gap-3" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface-2)' }}><div className="p-2 rounded-xl bg-[var(--brand)]/10 text-[var(--brand)]"><Info className="w-4 h-4" /></div><div><div className="text-xs font-bold text-[var(--ink)]">Start with a guided transaction</div><p className="text-[11px] leading-5 text-[var(--muted)] mt-0.5">Choose a Story Mode step or individual sample above. Switch to Advanced when you need the complete gateway controls.</p></div></div>}
+          {children}
         </div>
       }
+      rightPaneTitle="Segment Inspector"
+      rightPaneContent={<div className="p-3">{tree.length ? <EdiTreeView segments={tree} /> : <div className="min-h-[280px] flex items-center justify-center text-center"><div><Info className="w-5 h-5 mx-auto text-[var(--muted)]" /><p className="text-xs font-semibold text-[var(--ink)] mt-2">No EDI payload yet</p><p className="text-[11px] text-[var(--muted)] mt-1">Load a sample or paste an inbound/outbound message.</p></div></div>}</div>}
     />
   );
 };
