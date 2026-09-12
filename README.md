@@ -83,6 +83,16 @@ All tools run locally in the browser. Input is not uploaded to any server by the
 
 ---
 
+## EDI UX Modernization
+
+See the full enterprise roadmap and implementation guide:
+
+**[docs/EDI_UX_Modernization_Guide.md](docs/EDI_UX_Modernization_Guide.md)**
+
+This document covers progressive disclosure, Story Mode supply-chain presets, lazy-loaded dictionaries, PHI redaction, visual trees, and the phased implementation matrix for making every EDI tool simple and powerful.
+
+---
+
 ## Getting Started & Local Development
 
 This project is built using **React 18**, **TypeScript**, and **Vite** with Tailwind CSS.
