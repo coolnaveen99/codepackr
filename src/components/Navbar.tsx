@@ -94,7 +94,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               target="_blank"
               rel="noopener noreferrer"
               title="Codepackr Finance — Calculators, Planning & Wealth Projections"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all shadow-xs cursor-pointer group ml-1"
+              aria-label="Codepackr Finance — Calculators, Planning & Wealth Projections"
+              className="inline-flex items-center gap-1.5 px-2 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all shadow-xs cursor-pointer group ml-1"
             >
               <span className="text-emerald-600 dark:text-emerald-400 transition-transform group-hover:scale-110">
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -103,8 +104,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <line x1="6" y1="20" x2="6" y2="14" />
                 </svg>
               </span>
-              <span className="font-semibold">Codepackr Finance</span>
-              <span className="text-[10px] opacity-70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
+              <span className="hidden sm:inline font-semibold">Codepackr Finance</span>
+              <span className="hidden sm:inline text-[10px] opacity-70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
             </a>
           </div>
 

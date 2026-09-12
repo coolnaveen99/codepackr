@@ -65,6 +65,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
           </div>
 
+          <a
+            id="mobile-nav-codepackr-finance-link"
+            href="https://finance.codepackr.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+            title="Codepackr Finance — Calculators, Planning & Wealth Projections"
+            className="lg:hidden flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all cursor-pointer group"
+          >
+            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
+            <span>Codepackr Finance</span>
+            <ExternalLink className="w-3.5 h-3.5 ml-auto opacity-70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </a>
+
           <div className="space-y-1">
             <button
               onClick={() => { onSelectCategory('all'); onGoHome(); onClose(); }}
