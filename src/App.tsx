@@ -13,11 +13,9 @@ import { FormattersView } from './components/tools/FormattersView';
 import { EncodersView } from './components/tools/EncodersView';
 import { ValidatorsView } from './components/tools/ValidatorsView';
 import { ConvertersView } from './components/tools/ConvertersView';
-import { CalculatorsView } from './components/tools/CalculatorsView';
 import { UtilitiesView } from './components/tools/UtilitiesView';
 import { TextToolsView } from './components/tools/TextToolsView';
 import { JsonDefinitionView } from './components/tools/JsonDefinitionView';
-import { FinancialPlannerView } from './components/tools/FinancialPlannerView';
 import { MockDataGeneratorView } from './components/tools/MockDataGeneratorView';
 import { JwtInspectorView } from './components/dev-lab/JwtInspectorView';
 import { PkceGeneratorView } from './components/dev-lab/PkceGeneratorView';
@@ -109,6 +107,11 @@ export const App: React.FC = () => {
   useEffect(() => {
     const handleLocationChange = () => {
       const route = resolveCurrentRoute();
+
+      if (route.externalRedirect) {
+        window.location.replace(route.externalRedirect);
+        return;
+      }
 
       if (route.category) {
         setSelectedCategory(route.category as CategoryFilter);
@@ -298,8 +301,6 @@ export const App: React.FC = () => {
     let toolViewContent: React.ReactNode = null;
     if (tool.id === 'json-definition-generator') {
       toolViewContent = <JsonDefinitionView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
-    } else if (tool.id === 'financial-planner') {
-      toolViewContent = <FinancialPlannerView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
     } else if (tool.id === 'mock-json-generator') {
       toolViewContent = <MockDataGeneratorView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
     } else if (tool.id === 'jwt-inspector') {
@@ -334,9 +335,6 @@ export const App: React.FC = () => {
           break;
         case 'xml':
           toolViewContent = <XmlToolsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
-          break;
-        case 'financial-calculators':
-          toolViewContent = <CalculatorsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
           break;
         case 'utilities':
           toolViewContent = <UtilitiesView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;

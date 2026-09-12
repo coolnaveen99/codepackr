@@ -1,15 +1,15 @@
 import { ToolDef, ToolCategory } from '../types';
 
-export const CATEGORIES: { id: ToolCategory | 'all'; label: string; count?: number }[] = [
+export const CATEGORIES: { id: ToolCategory | 'all'; label: string; count?: number; externalUrl?: string }[] = [
   { id: 'all', label: 'All Tools' },
   { id: 'formatters', label: 'Formatters' },
   { id: 'encoders', label: 'Encoders' },
   { id: 'validators', label: 'Validators' },
   { id: 'converters', label: 'Converters' },
   { id: 'image', label: 'Image Tools' },
-  { id: 'edi', label: 'EDI Tools' },
+  { id: 'edi', label: 'EDI Integration Hub' },
   { id: 'xml', label: 'XML & XSD Tools' },
-  { id: 'financial-calculators', label: 'Financial Calculators' },
+  { id: 'financial-calculators', label: 'Financial Tools', externalUrl: 'https://finance.codepackr.com/' },
   { id: 'utilities', label: 'Utilities' },
   { id: 'text', label: 'Text Tools' },
 ];
@@ -324,6 +324,16 @@ export const TOOLS: ToolDef[] = [
 
   // Image Tools
   {
+    id: 'image-target-compressor',
+    name: 'Image Resizer & Target Size Compressor',
+    category: 'image',
+    description: 'Resize images to exact dimensions in pixels (px), centimeters (cm), millimeters (mm), or inches with DPI control and compress to a maximum target file size (KB/MB).',
+    keywords: ['image resizer', 'target size compressor', 'resize image to kb', 'passport photo 150kb', 'exact dimensions', 'compress under kb', 'visa photo resizer', 'image resizer cm mm inch', '300 dpi photo resizer', 'passport photo size converter'],
+    icon: 'Maximize2',
+    popular: true,
+    isNew: true,
+  },
+  {
     id: 'image-resizer',
     name: 'Image Resizer & Compressor',
     category: 'image',
@@ -378,12 +388,72 @@ export const TOOLS: ToolDef[] = [
 
   // EDI Tools
   {
+    id: 'edi-csv-converter',
+    name: 'EDI to CSV & CSV to EDI Converter',
+    category: 'edi',
+    description: 'Convert ANSI X12 and EDIFACT messages into flattened CSV or Excel spreadsheets, or generate compliant EDI 850/810 documents directly from spreadsheet tables.',
+    keywords: ['edi to csv', 'csv to edi', 'edi excel', 'edi spreadsheet', 'convert edi to excel', 'export edi csv', 'x12 to csv', '850 to csv', 'po to csv', 'edi table'],
+    icon: 'FileSpreadsheet',
+    popular: true,
+    isNew: true,
+  },
+  {
+    id: 'edi-hipaa-sanitizer',
+    name: 'EDI HIPAA De-Identifier & PHI Sanitizer',
+    category: 'edi',
+    description: '100% client-side HIPAA Safe Harbor (45 CFR § 164.514(b)) de-identifier to mask patient names, SSNs, member IDs, DOBs, and addresses in 837/835/270 transactions with audit logging.',
+    keywords: ['hipaa edi', 'edi de-identifier', 'phi sanitizer', 'anonymize 837', '835 de-identification', 'hipaa safe harbor', 'mask edi', 'healthcare edi privacy', 'edi compliance audit'],
+    icon: 'ShieldCheck',
+    popular: true,
+    isNew: true,
+  },
+  {
+    id: 'edi-batch-splitter',
+    name: 'EDI Batch Splitter & Joiner',
+    category: 'edi',
+    description: 'Split multi-transaction EDI files by Functional Group (GS/GE), Transaction Set (ST/SE), or PO/Claim filters, or merge multiple files with auto-recalculated envelopes.',
+    keywords: ['edi splitter', 'edi batch', 'edi joiner', 'split x12', 'merge edi', 'split 850', 'claim extractor', 'edi multi transaction', 'reenveloping', 'gs ge split', 'st se split'],
+    icon: 'Scissors',
+    popular: true,
+    isNew: true,
+  },
+  {
+    id: 'edi-diff-compare',
+    name: 'EDI Semantic Diff & Compare',
+    category: 'edi',
+    description: 'Compare two ANSI X12 or EDIFACT documents side-by-side or unified with loop alignment, element-level mutation highlights, and volatile envelope ignoring.',
+    keywords: ['edi diff', 'edi compare', 'x12 diff', 'compare edi', 'semantic diff', 'edi version compare', '850 revision compare', 'element diff', 'edi revision'],
+    icon: 'GitCompare',
+    popular: true,
+    isNew: true,
+  },
+  {
+    id: 'edi-message-gateway',
+    name: 'EDI Inbound & Outbound Integration Gateway',
+    category: 'edi',
+    description: 'Bi-directional enterprise B2B integration: Inbound ingestion, validation, and canonical mapping to JSON/XML, and outbound ERP-to-EDI synthesis with AS2 packaging.',
+    keywords: ['edi gateway', 'edi integration', 'inbound edi', 'outbound edi', 'edi pipeline', 'as2 gateway', 'canonical model', 'x12 850', 'edifact orders', 'biztalk schema', 'edi validation', 'message envelope'],
+    icon: 'Network',
+    popular: true,
+    isNew: true,
+  },
+  {
     id: 'edi-formatter',
     name: 'EDI X12 Formatter',
     category: 'edi',
     description: 'Format, wrap, and indent ANSI X12 and EDIFACT documents with custom delimiters.',
     keywords: ['edi', 'x12', 'edifact', 'format', 'indent', 'delimiters', '850', '810', '997'],
     icon: 'Workflow',
+    popular: true,
+    isNew: true,
+  },
+  {
+    id: 'edi-schema-viewer',
+    name: 'EDI Hierarchical Schema Viewer & Element Lookup',
+    category: 'edi',
+    description: 'Explore ANSI X12 loop hierarchies (Header, PO1, HL, Summary), element positions (BEG01, PO102), and code-list definitions with synchronized raw text highlighting.',
+    keywords: ['edi schema', 'schema viewer', 'element lookup', 'edi tree', 'loop hierarchy', 'hl loop', 'code list', 'ansi x12 dictionary'],
+    icon: 'Layers',
     popular: true,
     isNew: true,
   },
@@ -555,52 +625,6 @@ export const TOOLS: ToolDef[] = [
     icon: 'FileCheck2',
     popular: true,
     isNew: true,
-  },
-
-  // Financial Calculators
-  {
-    id: 'financial-planner',
-    name: 'Retirement & Financial Planning Calculator',
-    category: 'financial-calculators',
-    description: 'Calculate your retirement corpus, projected vs required savings, inflation impact, and get actionable financial independence strategies.',
-    keywords: [
-      'retirement calculator',
-      'corpus calculator',
-      'financial independence',
-      'sip calculator',
-      'retirement planning tool',
-      'pension calculator',
-      'wealth accumulation'
-    ],
-    icon: 'TrendingUp',
-    popular: true,
-    isNew: true,
-  },
-  {
-    id: 'loan-calculator',
-    name: 'Loan & EMI Calculator',
-    category: 'financial-calculators',
-    description: 'Calculate monthly loan EMI, total interest, and comprehensive repayment timeline.',
-    keywords: ['loan', 'emi', 'mortgage', 'interest', 'finance'],
-    icon: 'DollarSign',
-  },
-  {
-    id: 'sip-calculator',
-    name: 'SIP Calculator',
-    category: 'financial-calculators',
-    description: 'Calculate Systematic Investment Plan (SIP) returns, wealth gain, and interactive growth charts.',
-    keywords: ['sip', 'mutual-funds', 'investment', 'wealth', 'finance', 'returns', 'calculator', 'graph'],
-    icon: 'TrendingUp',
-    popular: true,
-  },
-  {
-    id: 'investment-calculator',
-    name: 'Investment Calculator',
-    category: 'financial-calculators',
-    description: 'Calculate investment growth with periodic deposits, tenure switcher, and interactive circular graphs.',
-    keywords: ['investment', 'compound-interest', 'savings', 'growth', 'apy', 'finance', 'calculator', 'graph'],
-    icon: 'PiggyBank',
-    popular: true,
   },
 
   // Utilities

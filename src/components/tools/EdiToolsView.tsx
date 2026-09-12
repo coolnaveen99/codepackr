@@ -24,9 +24,20 @@ import {
   FileSpreadsheet,
   Barcode,
   GitCompareArrows,
+  Layers,
+  Network,
+  Scissors,
+  GitCompare,
+  BookOpen,
 } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
+import { EdiTutorialPanel } from '../edi/EdiTutorialPanel';
+import { EdiBatchSplitterView } from '../edi/EdiBatchSplitterView';
+import { EdiDiffCompareView } from '../edi/EdiDiffCompareView';
+import { EdiCsvConverterView } from '../edi/EdiCsvConverterView';
+import { EdiHipaaSanitizerView } from '../edi/EdiHipaaSanitizerView';
+import { EdiMessageGatewayView } from '../edi/EdiMessageGatewayView';
 import { EdiAckGenerator } from '../edi/EdiAckGenerator';
 import { JsonToEdiConverter } from '../edi/JsonToEdiConverter';
 import { EdiTemplateGenerator } from '../edi/EdiTemplateGenerator';
@@ -35,6 +46,9 @@ import { As2ToolsView } from '../edi/As2ToolsView';
 import { Gs1LabelGenerator } from '../edi/Gs1LabelGenerator';
 import { EdiLifecycleReconciliation } from '../edi/EdiLifecycleReconciliation';
 import { XsltTransformerView } from '../xml/XsltTransformerView';
+import { EdiSchemaViewer } from '../edi/EdiSchemaViewer';
+import { SmartDownload } from '../common/SmartDownload';
+import { downloadFile } from '../../lib/smartDownload';
 import {
   COMPREHENSIVE_SEGMENT_DICTIONARY,
   EDI_TRANSACTIONS,
@@ -1180,6 +1194,7 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
 
   // P1.6: EDI Validator Audit Mode ('standard' envelope vs 'fsma204' Food Traceability Audit)
   const [validatorMode, setValidatorMode] = useState<'standard' | 'fsma204'>('standard');
+  const [showTutorial, setShowTutorial] = useState<boolean>(false);
 
   // Keep activeTab and input in sync with tool prop changes
   useEffect(() => {
@@ -1633,13 +1648,11 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
   };
 
   const handleDownload = (content: string, filename: string) => {
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadFile({
+      file: content,
+      filename,
+      mimeType: filename.endsWith('.json') ? 'application/json' : 'text/plain;charset=utf-8',
+    });
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1762,7 +1775,13 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
         style={{ borderColor: 'var(--line)' }}
       >
         {[
+          { id: 'edi-csv-converter', label: 'EDI to CSV & CSV to EDI', icon: FileSpreadsheet, isNew: true },
+          { id: 'edi-hipaa-sanitizer', label: 'HIPAA PHI De-Identifier', icon: ShieldCheck, isNew: true },
+          { id: 'edi-batch-splitter', label: 'Batch Splitter & Joiner', icon: Scissors, isNew: true },
+          { id: 'edi-diff-compare', label: 'Semantic Diff & Compare', icon: GitCompare, isNew: true },
+          { id: 'edi-message-gateway', label: 'Inbound & Outbound Gateway', icon: Network, isNew: true },
           { id: 'edi-formatter', label: 'EDI Formatter & Indenter', icon: Sparkles },
+          { id: 'edi-schema-viewer', label: 'Hierarchical Schema & Element Lookup', icon: Layers, isNew: true },
           { id: 'edi-segment-viewer', label: 'EDI Segment & Element Viewer', icon: Table },
           { id: 'edi-to-json', label: 'EDI to JSON Converter', icon: ArrowLeftRight },
           { id: 'json-to-edi', label: 'JSON to EDI Converter', icon: FileCode2 },
@@ -1813,6 +1832,59 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
           );
         })}
       </div>
+
+      {/* 2.5 EDI Integration Hub Status Bar & Step-by-Step Tutorial Trigger */}
+      <div
+        className="p-3.5 rounded-2xl border flex items-center justify-between flex-wrap gap-3 shadow-xs"
+        style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+      >
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            EDI Integration Hub
+          </span>
+          <span className="text-xs" style={{ color: 'var(--line)' }}>•</span>
+          <span className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>
+            {currentActiveToolDef?.name || 'EDI Tool'}
+          </span>
+          <span className="text-[10px] px-2 py-0.5 rounded font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            100% Client-Side Privacy
+          </span>
+        </div>
+
+        {/* Step-by-Step Tutorial & Field Guide Toggle Button */}
+        <button
+          type="button"
+          onClick={() => setShowTutorial(!showTutorial)}
+          className="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-xs border"
+          style={{
+            backgroundColor: showTutorial ? 'var(--brand)' : 'var(--surface-2)',
+            color: showTutorial ? '#ffffff' : 'var(--brand)',
+            borderColor: showTutorial ? 'var(--brand)' : 'var(--line)',
+          }}
+          title="Toggle Step-by-Step Tutorial & Field Guide"
+        >
+          <BookOpen className="w-3.5 h-3.5" />
+          <span>{showTutorial ? 'Hide Step-by-Step Guide' : 'Step-by-Step Tutorial & Field Guide'}</span>
+          <span
+            className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+              showTutorial ? 'bg-white/25 text-white' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+            }`}
+          >
+            How-To
+          </span>
+        </button>
+      </div>
+
+      {/* Embedded Step-by-Step Tutorial Panel when opened */}
+      {showTutorial && (
+        <EdiTutorialPanel
+          toolId={activeTab}
+          isOpen={true}
+          onToggle={() => setShowTutorial(false)}
+          onLoadSample={(s) => setInput(s)}
+        />
+      )}
 
       {/* 3. Delimiter & Sample Controls Bar (for formatter, viewer, to-json, validator) */}
       {['edi-formatter', 'edi-segment-viewer', 'edi-to-json', 'edi-validator'].includes(activeTab) && (
@@ -2652,6 +2724,24 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
 
       {/* 8. Other Sub-Tools without duplicate ToolHeaders */}
       <div className="[&>div>div:first-child]:hidden">
+        {activeTab === 'edi-csv-converter' && (
+          <EdiCsvConverterView tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} initialInput={input} />
+        )}
+        {activeTab === 'edi-hipaa-sanitizer' && (
+          <EdiHipaaSanitizerView tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} initialInput={input} />
+        )}
+        {activeTab === 'edi-batch-splitter' && (
+          <EdiBatchSplitterView tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} initialInput={input} />
+        )}
+        {activeTab === 'edi-diff-compare' && (
+          <EdiDiffCompareView tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} initialInput={input} />
+        )}
+        {activeTab === 'edi-message-gateway' && (
+          <EdiMessageGatewayView tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} initialInput={input} />
+        )}
+        {activeTab === 'edi-schema-viewer' && (
+          <EdiSchemaViewer initialInput={input} onNavigateToTab={setActiveTab} />
+        )}
         {activeTab === 'edi-lifecycle-reconciliation' && (
           <EdiLifecycleReconciliation tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
         )}

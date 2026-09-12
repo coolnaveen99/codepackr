@@ -189,14 +189,6 @@ code, pre, kbd, samp, .font-mono {
     display: none !important;
   }
 
-  /* Ensure the Financial Planner PDF report displays cleanly */
-  #financial-planner-pdf-report {
-    display: block !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
   /* Prevent awkward page cuts across cards and rows */
   tr,
   section,

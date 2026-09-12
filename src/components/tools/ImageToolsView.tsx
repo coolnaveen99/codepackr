@@ -5,6 +5,7 @@ import { ImageExifInspectorView } from './ImageExifInspectorView';
 import { ImageDiffView } from './ImageDiffView';
 import { ConvertersView } from './ConvertersView';
 import { EncodersView } from './EncodersView';
+import { ImageTargetCompressorView } from './ImageTargetCompressorView';
 
 interface ImageToolsViewProps {
   tool: ToolDef;
@@ -17,6 +18,9 @@ export const ImageToolsView: React.FC<ImageToolsViewProps> = (props) => {
   const { tool } = props;
 
   switch (tool.id) {
+    case 'image-target-compressor':
+    case 'image-resizer-target-size':
+      return <ImageTargetCompressorView {...props} />;
     case 'image-merger':
       return <ImageMergeView {...props} />;
     case 'image-exif-inspector':

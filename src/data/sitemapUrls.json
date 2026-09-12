@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-09-09",
+  "updatedAt": "2026-09-12",
   "host": "www.codepackr.com",
   "baseUrl": "https://www.codepackr.com",
-  "totalUrls": 108,
+  "totalUrls": 123,
   "urls": [
     {
       "loc": "https://www.codepackr.com/",
@@ -157,6 +157,14 @@
       "category": "formatters"
     },
     {
+      "loc": "https://www.codepackr.com/connection-string-parser",
+      "path": "/connection-string-parser",
+      "name": "Database Connection String Builder",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "formatters"
+    },
+    {
       "loc": "https://www.codepackr.com/base64",
       "path": "/base64",
       "name": "Base64 Encoder & Decoder",
@@ -205,9 +213,41 @@
       "category": "encoders"
     },
     {
+      "loc": "https://www.codepackr.com/jwt-inspector",
+      "path": "/jwt-inspector",
+      "name": "JWT Inspector & Validator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "encoders"
+    },
+    {
+      "loc": "https://www.codepackr.com/pkce-generator",
+      "path": "/pkce-generator",
+      "name": "OAuth 2.0 PKCE Generator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "encoders"
+    },
+    {
       "loc": "https://www.codepackr.com/diff-checker",
       "path": "/diff-checker",
       "name": "Diff Checker",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "validators"
+    },
+    {
+      "loc": "https://www.codepackr.com/openapi-validator",
+      "path": "/openapi-validator",
+      "name": "OpenAPI / Swagger Spec Viewer",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "validators"
+    },
+    {
+      "loc": "https://www.codepackr.com/docker-k8s-validator",
+      "path": "/docker-k8s-validator",
+      "name": "Docker & Kubernetes YAML Linter",
       "priority": "0.8",
       "changefreq": "monthly",
       "category": "validators"
@@ -341,6 +381,14 @@
       "category": "converters"
     },
     {
+      "loc": "https://www.codepackr.com/image-target-compressor",
+      "path": "/image-target-compressor",
+      "name": "Image Resizer & Target Size Compressor",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "image"
+    },
+    {
       "loc": "https://www.codepackr.com/image-resizer",
       "path": "/image-resizer",
       "name": "Image Resizer & Compressor",
@@ -389,9 +437,25 @@
       "category": "image"
     },
     {
+      "loc": "https://www.codepackr.com/edi-message-gateway",
+      "path": "/edi-message-gateway",
+      "name": "EDI Message Gateway & Analyzer",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
       "loc": "https://www.codepackr.com/edi-formatter",
       "path": "/edi-formatter",
       "name": "EDI X12 Formatter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-schema-viewer",
+      "path": "/edi-schema-viewer",
+      "name": "EDI Hierarchical Schema Viewer & Element Lookup",
       "priority": "0.8",
       "changefreq": "monthly",
       "category": "edi"
@@ -637,6 +701,14 @@
       "category": "utilities"
     },
     {
+      "loc": "https://www.codepackr.com/edi-gateway-analyzer",
+      "path": "/edi-gateway-analyzer",
+      "name": "EDI Message Gateway & Analyzer",
+      "priority": "0.85",
+      "changefreq": "weekly",
+      "category": "edi"
+    },
+    {
       "loc": "https://www.codepackr.com/edi-x12-formatter",
       "path": "/edi-x12-formatter",
       "name": "EDI ANSI ASC X12 Formatter",
@@ -773,6 +845,38 @@
       "category": "utilities"
     },
     {
+      "loc": "https://www.codepackr.com/connection-string-builder",
+      "path": "/connection-string-builder",
+      "name": "Database Connection String Builder",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "formatters"
+    },
+    {
+      "loc": "https://www.codepackr.com/jwt-validator",
+      "path": "/jwt-validator",
+      "name": "JWT Inspector & Token Validator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "encoders"
+    },
+    {
+      "loc": "https://www.codepackr.com/swagger-validator",
+      "path": "/swagger-validator",
+      "name": "OpenAPI & Swagger Spec Validator",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "validators"
+    },
+    {
+      "loc": "https://www.codepackr.com/k8s-validator",
+      "path": "/k8s-validator",
+      "name": "Kubernetes & Docker YAML Linter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "validators"
+    },
+    {
       "loc": "https://www.codepackr.com/word-counter",
       "path": "/word-counter",
       "name": "Word Counter & Statistics",
@@ -843,6 +947,22 @@
       "priority": "0.8",
       "changefreq": "monthly",
       "category": "text"
+    },
+    {
+      "loc": "https://www.codepackr.com/image-resizer-target-size",
+      "path": "/image-resizer-target-size",
+      "name": "Image Resizer & Target Size Compressor",
+      "priority": "0.85",
+      "changefreq": "weekly",
+      "category": "image"
+    },
+    {
+      "loc": "https://www.codepackr.com/photo-size-reducer",
+      "path": "/photo-size-reducer",
+      "name": "Passport & Visa Photo Size Reducer",
+      "priority": "0.85",
+      "changefreq": "weekly",
+      "category": "image"
     },
     {
       "loc": "https://www.codepackr.com/contact",

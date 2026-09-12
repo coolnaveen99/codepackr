@@ -478,30 +478,6 @@ const toolsData = [
     desc: 'Calculate percentage increases, discounts, fractional ratios, and differences instantly',
     tags: ['#Math', '#Percentages', '#Calculator', '#Discounts', '#Ratios']
   },
-  {
-    slug: 'financial-calculators',
-    name: 'Financial & Retirement Calculators Suite',
-    desc: 'Calculate retirement corpus, loan EMIs, SIP compounding, investments, and inflation-adjusted financial independence strategies',
-    tags: ['#Finance', '#Retirement', '#FinancialPlanning', '#FIRE', '#WealthBuilding']
-  },
-  {
-    slug: 'retirement-calculator',
-    name: 'Retirement & Financial Planning Calculator',
-    desc: 'Calculate your retirement corpus, projected vs required savings, inflation impact, and financial independence roadmap',
-    tags: ['#RetirementCalculator', '#CorpusCalculator', '#FinancialIndependence', '#FIRE', '#PersonalFinance']
-  },
-  {
-    slug: 'financial-planner',
-    name: 'Retirement & Financial Planning Calculator',
-    desc: 'Calculate your retirement corpus, projected vs required savings, inflation impact, and financial independence roadmap',
-    tags: ['#FinancialPlanning', '#RetirementPlanning', '#CorpusCalculator', '#Wealth', '#Investing']
-  },
-  {
-    slug: 'gratuity-calculator',
-    name: 'Gratuity & Retirement Calculator',
-    desc: 'Calculate statutory end-of-service gratuity and retirement severance benefits in multiple currencies',
-    tags: ['#Retirement', '#HR', '#Gratuity', '#Benefits', '#Salary']
-  },
 
   // 8. Utilities
   {

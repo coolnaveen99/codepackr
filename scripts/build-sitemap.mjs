@@ -30,12 +30,11 @@ while ((m = regex.exec(toolsSection)) !== null) {
 const categoryHubs = [
   { slug: 'image-tools', name: 'Image Processing & Optimization Tools Suite', priority: '0.9', changefreq: 'weekly', category: 'image' },
   { slug: 'edi-tools', name: 'EDI Tools & Business Transaction Suite', priority: '0.9', changefreq: 'weekly', category: 'edi' },
+  { slug: 'edi-integration-hub', name: 'EDI Integration Hub & Enterprise Gateway Suite', priority: '0.9', changefreq: 'weekly', category: 'edi' },
   { slug: 'formatters', name: 'Code & Data Formatters', priority: '0.9', changefreq: 'weekly', category: 'formatters' },
   { slug: 'encoders', name: 'Encoders, Decoders & Cryptography', priority: '0.9', changefreq: 'weekly', category: 'encoders' },
   { slug: 'validators', name: 'Syntax, Schema & Diff Validators', priority: '0.9', changefreq: 'weekly', category: 'validators' },
   { slug: 'converters', name: 'File & Data Format Converters', priority: '0.9', changefreq: 'weekly', category: 'converters' },
-  { slug: 'financial-calculators', name: 'Financial & Retirement Calculators Suite', priority: '0.9', changefreq: 'weekly', category: 'financial-calculators' },
-  { slug: 'calculators', name: 'Financial, Loan & Math Calculators', priority: '0.9', changefreq: 'weekly', category: 'calculators' },
   { slug: 'utilities', name: 'Developer Utilities & Generators', priority: '0.9', changefreq: 'weekly', category: 'utilities' },
   { slug: 'text-tools', name: 'Text Processing & Analysis Tools', priority: '0.9', changefreq: 'weekly', category: 'text' },
   { slug: 'xml-tools', name: 'XML, XSD, XSLT & XPath Suite', priority: '0.9', changefreq: 'weekly', category: 'xml' },
@@ -44,6 +43,17 @@ const categoryHubs = [
 // 3. Direct Sub-features and Specialized Aliases
 const specializedAliases = [
   // EDI Sub-tools
+  { slug: 'edi-csv-converter', name: 'EDI to CSV & CSV to EDI Converter', priority: '0.9', changefreq: 'weekly', category: 'edi' },
+  { slug: 'edi-to-csv', name: 'EDI to CSV Spreadsheet Converter', priority: '0.85', changefreq: 'weekly', category: 'edi' },
+  { slug: 'csv-to-edi', name: 'CSV to EDI X12 Generator', priority: '0.85', changefreq: 'weekly', category: 'edi' },
+  { slug: 'edi-hipaa-sanitizer', name: 'EDI HIPAA De-Identifier & PHI Sanitizer', priority: '0.9', changefreq: 'weekly', category: 'edi' },
+  { slug: 'edi-batch-splitter', name: 'EDI Batch Splitter & Joiner', priority: '0.9', changefreq: 'weekly', category: 'edi' },
+  { slug: 'edi-splitter', name: 'EDI Multi-Transaction Splitter', priority: '0.85', changefreq: 'weekly', category: 'edi' },
+  { slug: 'edi-diff-compare', name: 'EDI Semantic Diff & Compare', priority: '0.9', changefreq: 'weekly', category: 'edi' },
+  { slug: 'edi-diff', name: 'EDI X12 & EDIFACT Diff Tool', priority: '0.85', changefreq: 'weekly', category: 'edi' },
+  { slug: 'edi-message-gateway', name: 'EDI Inbound & Outbound Integration Gateway', priority: '0.9', changefreq: 'weekly', category: 'edi' },
+  { slug: 'edi-inbound-outbound-gateway', name: 'EDI Inbound & Outbound Integration Gateway', priority: '0.85', changefreq: 'weekly', category: 'edi' },
+  { slug: 'edi-gateway-analyzer', name: 'EDI Message Gateway & Analyzer', priority: '0.85', changefreq: 'weekly', category: 'edi' },
   { slug: 'edi-x12-formatter', name: 'EDI ANSI ASC X12 Formatter', priority: '0.8', changefreq: 'monthly', category: 'edi' },
   { slug: 'edi-json-converter', name: 'EDI to JSON Document Converter', priority: '0.8', changefreq: 'monthly', category: 'edi' },
   { slug: 'edi-order-reconciliation', name: 'EDI Order Lifecycle Reconciliation', priority: '0.8', changefreq: 'monthly', category: 'edi' },
@@ -56,12 +66,6 @@ const specializedAliases = [
   { slug: 'json-minifier', name: 'JSON Minifier & Compressor', priority: '0.8', changefreq: 'monthly', category: 'formatters' },
   { slug: 'crc32-checksum-generator', name: 'CRC32 Checksum Generator', priority: '0.8', changefreq: 'monthly', category: 'encoders' },
   { slug: 'hmac-generator', name: 'HMAC Keyed-Hash Generator', priority: '0.8', changefreq: 'monthly', category: 'encoders' },
-  { slug: 'retirement-calculator', name: 'Retirement & Financial Planning Calculator', priority: '0.9', changefreq: 'weekly', category: 'financial-calculators' },
-  { slug: 'financial-planner', name: 'Retirement & Financial Planning Calculator', priority: '0.85', changefreq: 'weekly', category: 'financial-calculators' },
-  { slug: 'sip-calculator', name: 'SIP Calculator', priority: '0.85', changefreq: 'monthly', category: 'financial-calculators' },
-  { slug: 'investment-calculator', name: 'Investment Calculator', priority: '0.85', changefreq: 'monthly', category: 'financial-calculators' },
-  { slug: 'compound-investment-calculator', name: 'Compound Investment Calculator', priority: '0.8', changefreq: 'monthly', category: 'financial-calculators' },
-  { slug: 'compound-interest-calculator', name: 'Compound Interest Calculator', priority: '0.8', changefreq: 'monthly', category: 'financial-calculators' },
   { slug: 'xsd-validator', name: 'XSD & XML Schema Validator', priority: '0.85', changefreq: 'weekly', category: 'xml' },
   { slug: 'json-definition-generator', name: 'JSON Definition & Type Generator', priority: '0.85', changefreq: 'monthly', category: 'converters' },
   { slug: 'json-to-definition', name: 'JSON to Type Definition Converter', priority: '0.8', changefreq: 'monthly', category: 'converters' },
@@ -85,6 +89,10 @@ const specializedAliases = [
   { slug: 'remove-extra-spaces', name: 'Remove Extra Whitespace', priority: '0.8', changefreq: 'monthly', category: 'text' },
   { slug: 'sort-lines-alphabetically', name: 'Sort Lines Alphabetically', priority: '0.8', changefreq: 'monthly', category: 'text' },
   { slug: 'reverse-line-order', name: 'Reverse Line Order', priority: '0.8', changefreq: 'monthly', category: 'text' },
+
+  // Image Tools Sub-features & Aliases
+  { slug: 'image-resizer-target-size', name: 'Image Resizer & Target Size Compressor', priority: '0.85', changefreq: 'weekly', category: 'image' },
+  { slug: 'photo-size-reducer', name: 'Passport & Visa Photo Size Reducer', priority: '0.85', changefreq: 'weekly', category: 'image' },
 ];
 
 // 4. Legal & Company Pages

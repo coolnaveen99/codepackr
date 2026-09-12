@@ -1,4 +1,43 @@
 {
+  "image-tools": {
+    "name": "Image Processing & Optimization Tools Suite",
+    "title": "Image Processing & Optimization Tools Suite - Codepackr",
+    "description": "100% private, client-side image utilities to merge, resize, compress, strip EXIF metadata, compare diffs, convert Base64, and generate favicons.",
+    "canonicalPath": "/image-tools",
+    "canonicalUrl": "https://www.codepackr.com/image-tools",
+    "category": "image",
+    "features": [
+      "High-performance, 100% browser-based HTML5 canvas image processing for Image Processing & Optimization Tools Suite.",
+      "Zero file uploads: your photos, screenshots, and graphics never leave your local device.",
+      "Precision layout, dimensions, compression quality, and format controls (PNG, JPEG, WebP).",
+      "Built-in privacy safeguards: strip sensitive GPS and camera EXIF metadata in seconds.",
+      "Instant live preview with fast one-click download in full resolution."
+    ],
+    "howToUse": [
+      "Upload or drag-and-drop your image files directly into the browser tool workspace.",
+      "Adjust desired dimensions, layout orientation, alignment, padding, or quality settings.",
+      "Inspect the real-time canvas preview or review diagnostic metadata details.",
+      "Download the processed image or copy generated assets with a single click."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Image Processing & Optimization Tools Suite?",
+        "answer": "No. All operations in Image Processing & Optimization Tools Suite execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Image Processing & Optimization Tools Suite offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Image Processing & Optimization Tools Suite offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Image Processing & Optimization Tools Suite handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
   "edi-tools": {
     "name": "EDI Tools & Business Transaction Suite",
     "title": "EDI Tools & Business Transaction Suite - Codepackr",
@@ -194,13 +233,51 @@
       }
     ]
   },
+  "financial-calculators": {
+    "name": "Financial & Retirement Calculators Suite",
+    "title": "Financial & Retirement Calculators Suite - Codepackr",
+    "description": "Calculate retirement corpus, loan EMIs, SIP compounding, investments, and inflation-adjusted financial independence strategies.",
+    "canonicalPath": "/financial-calculators",
+    "canonicalUrl": "https://www.codepackr.com/financial-calculators",
+    "category": "financial-calculators",
+    "features": [
+      "Accurate mathematical calculations with instant reactive updates for Financial & Retirement Calculators Suite.",
+      "Detailed breakdown tables with visual graphs and itemized summaries.",
+      "Customizable interest rates, compounding frequencies, and terms.",
+      "Completely private: financial figures and inputs remain on your device.",
+      "Export calculation reports and shareable configurations."
+    ],
+    "howToUse": [
+      "Enter or adjust the input parameters in the tool control panel.",
+      "View real-time updates and calculation or generation results instantly.",
+      "Copy the result to your clipboard or customize settings as needed."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Financial & Retirement Calculators Suite?",
+        "answer": "No. All operations in Financial & Retirement Calculators Suite execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Financial & Retirement Calculators Suite offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Financial & Retirement Calculators Suite offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Financial & Retirement Calculators Suite handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
   "calculators": {
     "name": "Financial & Math Calculators Suite",
     "title": "Financial & Math Calculators Suite - Codepackr",
     "description": "Calculate loans, monthly EMIs, amortization schedules, SIP returns, percentages, and gratuity tips with multi-currency support.",
     "canonicalPath": "/calculators",
     "canonicalUrl": "https://www.codepackr.com/calculators",
-    "category": "calculators",
+    "category": "financial-calculators",
     "features": [
       "Accurate mathematical calculations with instant reactive updates for Financial & Math Calculators Suite.",
       "Detailed breakdown tables with visual graphs and itemized summaries.",
@@ -619,6 +696,45 @@
       }
     ]
   },
+  "connection-string-parser": {
+    "name": "Database Connection String Builder",
+    "title": "Database Connection String Builder - Codepackr",
+    "description": "Construct, format, and parse database connection URIs for PostgreSQL, MySQL, MongoDB Atlas, and Redis with client-side privacy.",
+    "canonicalPath": "/connection-string-parser",
+    "canonicalUrl": "https://www.codepackr.com/connection-string-parser",
+    "category": "formatters",
+    "features": [
+      "Customizable indentation options (2 spaces, 4 spaces, or tabs) for Database Connection String Builder.",
+      "Instant error detection with precise line and column indicators for syntax issues.",
+      "Minification mode to compress code and remove unnecessary whitespace.",
+      "100% in-browser processing ensuring source code never leaves your computer.",
+      "One-click copy to clipboard and downloadable formatted output."
+    ],
+    "howToUse": [
+      "Paste your raw code or unformatted text into the editor.",
+      "Select your preferred formatting preferences (such as 2 spaces, 4 spaces, or minify).",
+      "Click Format to beautify and validate your syntax.",
+      "Review the formatted output, copy it to your clipboard, or download it as a file."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Database Connection String Builder?",
+        "answer": "No. All operations in Database Connection String Builder execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Database Connection String Builder offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Database Connection String Builder offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Database Connection String Builder handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
   "base64": {
     "name": "Base64 Encoder & Decoder",
     "title": "Base64 Encoder & Decoder - Codepackr",
@@ -853,15 +969,15 @@
       }
     ]
   },
-  "base64-image": {
-    "name": "Base64 Image Converter",
-    "title": "Base64 Image Converter - Codepackr",
-    "description": "Convert images to base64 Data URLs or preview images from base64 strings.",
-    "canonicalPath": "/base64-image",
-    "canonicalUrl": "https://www.codepackr.com/base64-image",
+  "jwt-inspector": {
+    "name": "JWT Inspector & Validator",
+    "title": "JWT Inspector & Validator - Codepackr",
+    "description": "Inspect, decode, and validate JSON Web Token (JWT) headers, payloads, signatures, and expiration status in browser memory.",
+    "canonicalPath": "/jwt-inspector",
+    "canonicalUrl": "https://www.codepackr.com/jwt-inspector",
     "category": "encoders",
     "features": [
-      "High-speed encoding and decoding for Base64 Image Converter with zero latency.",
+      "High-speed encoding and decoding for JWT Inspector & Validator with zero latency.",
       "Support for UTF-8 character sets, binary buffers, and multi-line strings.",
       "Cryptographically secure local processing using modern Web Crypto APIs.",
       "Instant validation and format error diagnostics.",
@@ -875,19 +991,58 @@
     ],
     "faqs": [
       {
-        "question": "Is my data or code sent to an external server when using Base64 Image Converter?",
-        "answer": "No. All operations in Base64 Image Converter execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+        "question": "Is my data or code sent to an external server when using JWT Inspector & Validator?",
+        "answer": "No. All operations in JWT Inspector & Validator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
       },
       {
-        "question": "Can I use Base64 Image Converter offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Base64 Image Converter offline."
+        "question": "Can I use JWT Inspector & Validator offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using JWT Inspector & Validator offline."
       },
       {
         "question": "Are there any usage limits, fees, or account registrations required?",
         "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
       },
       {
-        "question": "How does Base64 Image Converter handle large files or sensitive data?",
+        "question": "How does JWT Inspector & Validator handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "pkce-generator": {
+    "name": "OAuth 2.0 PKCE Generator",
+    "title": "OAuth 2.0 PKCE Generator - Codepackr",
+    "description": "Generate high-entropy cryptographically secure OAuth 2.0 PKCE code verifiers and SHA-256 code challenges directly in browser memory.",
+    "canonicalPath": "/pkce-generator",
+    "canonicalUrl": "https://www.codepackr.com/pkce-generator",
+    "category": "encoders",
+    "features": [
+      "High-speed encoding and decoding for OAuth 2.0 PKCE Generator with zero latency.",
+      "Support for UTF-8 character sets, binary buffers, and multi-line strings.",
+      "Cryptographically secure local processing using modern Web Crypto APIs.",
+      "Instant validation and format error diagnostics.",
+      "One-click copy to clipboard and local file export."
+    ],
+    "howToUse": [
+      "Input your plain text, string, or secret key into the input field.",
+      "Choose your desired encoding/decoding mode or hashing algorithm.",
+      "View the generated output immediately as you type.",
+      "Copy the resulting hash, token, or encoded string with a single click."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using OAuth 2.0 PKCE Generator?",
+        "answer": "No. All operations in OAuth 2.0 PKCE Generator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use OAuth 2.0 PKCE Generator offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using OAuth 2.0 PKCE Generator offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does OAuth 2.0 PKCE Generator handle large files or sensitive data?",
         "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
       }
     ]
@@ -927,6 +1082,84 @@
       },
       {
         "question": "How does Diff Checker handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "openapi-validator": {
+    "name": "OpenAPI / Swagger Spec Viewer",
+    "title": "OpenAPI / Swagger Spec Viewer - Codepackr",
+    "description": "Validate, parse, and inspect structural syntax and endpoint routes for OpenAPI 3.0 and Swagger API specifications.",
+    "canonicalPath": "/openapi-validator",
+    "canonicalUrl": "https://www.codepackr.com/openapi-validator",
+    "category": "validators",
+    "features": [
+      "Comprehensive syntax and schema validation for OpenAPI / Swagger Spec Viewer.",
+      "Detailed line-by-line error reporting with actionable diagnostic messages.",
+      "Support for complex schemas, recursive structures, and edge cases.",
+      "Zero network transfer: all validation occurs inside your browser runtime.",
+      "Export clean data or copy validation results with one click."
+    ],
+    "howToUse": [
+      "Paste your code, schema, or document into the validation window.",
+      "Click Validate to inspect syntax, schema compliance, and format rules.",
+      "Review any highlighted errors, line numbers, and warnings in the results pane.",
+      "Fix issues directly in the editor or copy the validated content."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using OpenAPI / Swagger Spec Viewer?",
+        "answer": "No. All operations in OpenAPI / Swagger Spec Viewer execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use OpenAPI / Swagger Spec Viewer offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using OpenAPI / Swagger Spec Viewer offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does OpenAPI / Swagger Spec Viewer handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "docker-k8s-validator": {
+    "name": "Docker & Kubernetes YAML Linter",
+    "title": "Docker & Kubernetes YAML Linter - Codepackr",
+    "description": "Lint, validate, and verify structural syntax for Docker Compose and Kubernetes YAML resource manifests.",
+    "canonicalPath": "/docker-k8s-validator",
+    "canonicalUrl": "https://www.codepackr.com/docker-k8s-validator",
+    "category": "validators",
+    "features": [
+      "Comprehensive syntax and schema validation for Docker & Kubernetes YAML Linter.",
+      "Detailed line-by-line error reporting with actionable diagnostic messages.",
+      "Support for complex schemas, recursive structures, and edge cases.",
+      "Zero network transfer: all validation occurs inside your browser runtime.",
+      "Export clean data or copy validation results with one click."
+    ],
+    "howToUse": [
+      "Paste your code, schema, or document into the validation window.",
+      "Click Validate to inspect syntax, schema compliance, and format rules.",
+      "Review any highlighted errors, line numbers, and warnings in the results pane.",
+      "Fix issues directly in the editor or copy the validated content."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Docker & Kubernetes YAML Linter?",
+        "answer": "No. All operations in Docker & Kubernetes YAML Linter execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Docker & Kubernetes YAML Linter offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Docker & Kubernetes YAML Linter offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Docker & Kubernetes YAML Linter handle large files or sensitive data?",
         "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
       }
     ]
@@ -1161,45 +1394,6 @@
       },
       {
         "question": "How does dotenv Formatter & Validator handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
-  "xsd-validator": {
-    "name": "XSD & XML Schema Validator",
-    "title": "XSD & XML Schema Validator - Codepackr",
-    "description": "Validate XML structures against XSD schema definitions and element constraints.",
-    "canonicalPath": "/xsd-validator",
-    "canonicalUrl": "https://www.codepackr.com/xsd-validator",
-    "category": "validators",
-    "features": [
-      "Comprehensive syntax and schema validation for XSD & XML Schema Validator.",
-      "Detailed line-by-line error reporting with actionable diagnostic messages.",
-      "Support for complex schemas, recursive structures, and edge cases.",
-      "Zero network transfer: all validation occurs inside your browser runtime.",
-      "Export clean data or copy validation results with one click."
-    ],
-    "howToUse": [
-      "Paste your code, schema, or document into the validation window.",
-      "Click Validate to inspect syntax, schema compliance, and format rules.",
-      "Review any highlighted errors, line numbers, and warnings in the results pane.",
-      "Fix issues directly in the editor or copy the validated content."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using XSD & XML Schema Validator?",
-        "answer": "No. All operations in XSD & XML Schema Validator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use XSD & XML Schema Validator offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using XSD & XML Schema Validator offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does XSD & XML Schema Validator handle large files or sensitive data?",
         "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
       }
     ]
@@ -1477,84 +1671,6 @@
       }
     ]
   },
-  "image-resizer": {
-    "name": "Image Resizer & Compressor",
-    "title": "Image Resizer & Compressor - Codepackr",
-    "description": "Resize, compress, and re-encode PNG, JPEG, and WebP images locally.",
-    "canonicalPath": "/image-resizer",
-    "canonicalUrl": "https://www.codepackr.com/image-resizer",
-    "category": "converters",
-    "features": [
-      "Bidirectional conversion and schema mapping for Image Resizer & Compressor.",
-      "Preserves data integrity, data types, and structural hierarchies.",
-      "Live side-by-side input and converted output preview.",
-      "Fully client-side execution protecting sensitive files and payloads.",
-      "Quick copy, file download, and clearing tools."
-    ],
-    "howToUse": [
-      "Paste or upload the source data into the left input pane.",
-      "Configure conversion settings such as formatting style, delimiters, or indentations.",
-      "The converted output appears automatically in the right output pane.",
-      "Copy the converted code or download the resulting document."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using Image Resizer & Compressor?",
-        "answer": "No. All operations in Image Resizer & Compressor execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use Image Resizer & Compressor offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Image Resizer & Compressor offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does Image Resizer & Compressor handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
-  "favicon-generator": {
-    "name": "Favicon Generator",
-    "title": "Favicon Generator - Codepackr",
-    "description": "Generate standard favicon sizes (16x16, 32x32, 48x48, 180x180) from an image.",
-    "canonicalPath": "/favicon-generator",
-    "canonicalUrl": "https://www.codepackr.com/favicon-generator",
-    "category": "converters",
-    "features": [
-      "Bidirectional conversion and schema mapping for Favicon Generator.",
-      "Preserves data integrity, data types, and structural hierarchies.",
-      "Live side-by-side input and converted output preview.",
-      "Fully client-side execution protecting sensitive files and payloads.",
-      "Quick copy, file download, and clearing tools."
-    ],
-    "howToUse": [
-      "Paste or upload the source data into the left input pane.",
-      "Configure conversion settings such as formatting style, delimiters, or indentations.",
-      "The converted output appears automatically in the right output pane.",
-      "Copy the converted code or download the resulting document."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using Favicon Generator?",
-        "answer": "No. All operations in Favicon Generator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use Favicon Generator offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Favicon Generator offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does Favicon Generator handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
   "csv-xml-converter": {
     "name": "CSV to XML Converter",
     "title": "CSV to XML Converter - Codepackr",
@@ -1672,6 +1788,279 @@
       }
     ]
   },
+  "image-target-compressor": {
+    "name": "Image Resizer & Target Size Compressor",
+    "title": "Image Resizer & Target Size Compressor - Codepackr",
+    "description": "Resize images to exact dimensions in pixels (px), centimeters (cm), millimeters (mm), or inches with DPI control, and compress to a strict maximum target file size (KB/MB) client-side.",
+    "canonicalPath": "/image-target-compressor",
+    "canonicalUrl": "https://www.codepackr.com/image-target-compressor",
+    "category": "image",
+    "features": [
+      "High-performance, 100% browser-based HTML5 canvas image processing for Image Resizer & Target Size Compressor.",
+      "Zero file uploads: your photos, screenshots, and graphics never leave your local device.",
+      "Precision layout, dimensions, compression quality, and format controls (PNG, JPEG, WebP).",
+      "Built-in privacy safeguards: strip sensitive GPS and camera EXIF metadata in seconds.",
+      "Instant live preview with fast one-click download in full resolution."
+    ],
+    "howToUse": [
+      "Upload or drag-and-drop your image files directly into the browser tool workspace.",
+      "Adjust desired dimensions, layout orientation, alignment, padding, or quality settings.",
+      "Inspect the real-time canvas preview or review diagnostic metadata details.",
+      "Download the processed image or copy generated assets with a single click."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Image Resizer & Target Size Compressor?",
+        "answer": "No. All operations in Image Resizer & Target Size Compressor execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Image Resizer & Target Size Compressor offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Image Resizer & Target Size Compressor offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Image Resizer & Target Size Compressor handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "image-resizer": {
+    "name": "Image Resizer & Compressor",
+    "title": "Image Resizer & Compressor - Codepackr",
+    "description": "Resize, compress, and re-encode PNG, JPEG, and WebP images locally.",
+    "canonicalPath": "/image-resizer",
+    "canonicalUrl": "https://www.codepackr.com/image-resizer",
+    "category": "image",
+    "features": [
+      "High-performance, 100% browser-based HTML5 canvas image processing for Image Resizer & Compressor.",
+      "Zero file uploads: your photos, screenshots, and graphics never leave your local device.",
+      "Precision layout, dimensions, compression quality, and format controls (PNG, JPEG, WebP).",
+      "Built-in privacy safeguards: strip sensitive GPS and camera EXIF metadata in seconds.",
+      "Instant live preview with fast one-click download in full resolution."
+    ],
+    "howToUse": [
+      "Upload or drag-and-drop your image files directly into the browser tool workspace.",
+      "Adjust desired dimensions, layout orientation, alignment, padding, or quality settings.",
+      "Inspect the real-time canvas preview or review diagnostic metadata details.",
+      "Download the processed image or copy generated assets with a single click."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Image Resizer & Compressor?",
+        "answer": "No. All operations in Image Resizer & Compressor execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Image Resizer & Compressor offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Image Resizer & Compressor offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Image Resizer & Compressor handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "image-merger": {
+    "name": "Image Merger & Combiner",
+    "title": "Image Merger & Combiner - Codepackr",
+    "description": "Combine two images side-by-side or top-to-bottom with custom spacing, padding, and background colors.",
+    "canonicalPath": "/image-merger",
+    "canonicalUrl": "https://www.codepackr.com/image-merger",
+    "category": "image",
+    "features": [
+      "High-performance, 100% browser-based HTML5 canvas image processing for Image Merger & Combiner.",
+      "Zero file uploads: your photos, screenshots, and graphics never leave your local device.",
+      "Precision layout, dimensions, compression quality, and format controls (PNG, JPEG, WebP).",
+      "Built-in privacy safeguards: strip sensitive GPS and camera EXIF metadata in seconds.",
+      "Instant live preview with fast one-click download in full resolution."
+    ],
+    "howToUse": [
+      "Upload or drag-and-drop your image files directly into the browser tool workspace.",
+      "Adjust desired dimensions, layout orientation, alignment, padding, or quality settings.",
+      "Inspect the real-time canvas preview or review diagnostic metadata details.",
+      "Download the processed image or copy generated assets with a single click."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Image Merger & Combiner?",
+        "answer": "No. All operations in Image Merger & Combiner execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Image Merger & Combiner offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Image Merger & Combiner offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Image Merger & Combiner handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "image-exif-inspector": {
+    "name": "EXIF Metadata Inspector & Stripper",
+    "title": "EXIF Metadata Inspector & Stripper - Codepackr",
+    "description": "Inspect image properties and strip EXIF metadata for complete online privacy.",
+    "canonicalPath": "/image-exif-inspector",
+    "canonicalUrl": "https://www.codepackr.com/image-exif-inspector",
+    "category": "image",
+    "features": [
+      "High-performance, 100% browser-based HTML5 canvas image processing for EXIF Metadata Inspector & Stripper.",
+      "Zero file uploads: your photos, screenshots, and graphics never leave your local device.",
+      "Precision layout, dimensions, compression quality, and format controls (PNG, JPEG, WebP).",
+      "Built-in privacy safeguards: strip sensitive GPS and camera EXIF metadata in seconds.",
+      "Instant live preview with fast one-click download in full resolution."
+    ],
+    "howToUse": [
+      "Upload or drag-and-drop your image files directly into the browser tool workspace.",
+      "Adjust desired dimensions, layout orientation, alignment, padding, or quality settings.",
+      "Inspect the real-time canvas preview or review diagnostic metadata details.",
+      "Download the processed image or copy generated assets with a single click."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using EXIF Metadata Inspector & Stripper?",
+        "answer": "No. All operations in EXIF Metadata Inspector & Stripper execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use EXIF Metadata Inspector & Stripper offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using EXIF Metadata Inspector & Stripper offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does EXIF Metadata Inspector & Stripper handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "image-diff-checker": {
+    "name": "Side-by-Side Image Comparator",
+    "title": "Side-by-Side Image Comparator - Codepackr",
+    "description": "Compare two images side-by-side or via diff overlay to detect visual discrepancies.",
+    "canonicalPath": "/image-diff-checker",
+    "canonicalUrl": "https://www.codepackr.com/image-diff-checker",
+    "category": "image",
+    "features": [
+      "High-performance, 100% browser-based HTML5 canvas image processing for Side-by-Side Image Comparator.",
+      "Zero file uploads: your photos, screenshots, and graphics never leave your local device.",
+      "Precision layout, dimensions, compression quality, and format controls (PNG, JPEG, WebP).",
+      "Built-in privacy safeguards: strip sensitive GPS and camera EXIF metadata in seconds.",
+      "Instant live preview with fast one-click download in full resolution."
+    ],
+    "howToUse": [
+      "Upload or drag-and-drop your image files directly into the browser tool workspace.",
+      "Adjust desired dimensions, layout orientation, alignment, padding, or quality settings.",
+      "Inspect the real-time canvas preview or review diagnostic metadata details.",
+      "Download the processed image or copy generated assets with a single click."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Side-by-Side Image Comparator?",
+        "answer": "No. All operations in Side-by-Side Image Comparator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Side-by-Side Image Comparator offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Side-by-Side Image Comparator offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Side-by-Side Image Comparator handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "favicon-generator": {
+    "name": "Favicon Generator",
+    "title": "Favicon Generator - Codepackr",
+    "description": "Generate standard favicon sizes (16x16, 32x32, 48x48, 180x180) from an image.",
+    "canonicalPath": "/favicon-generator",
+    "canonicalUrl": "https://www.codepackr.com/favicon-generator",
+    "category": "image",
+    "features": [
+      "High-performance, 100% browser-based HTML5 canvas image processing for Favicon Generator.",
+      "Zero file uploads: your photos, screenshots, and graphics never leave your local device.",
+      "Precision layout, dimensions, compression quality, and format controls (PNG, JPEG, WebP).",
+      "Built-in privacy safeguards: strip sensitive GPS and camera EXIF metadata in seconds.",
+      "Instant live preview with fast one-click download in full resolution."
+    ],
+    "howToUse": [
+      "Upload or drag-and-drop your image files directly into the browser tool workspace.",
+      "Adjust desired dimensions, layout orientation, alignment, padding, or quality settings.",
+      "Inspect the real-time canvas preview or review diagnostic metadata details.",
+      "Download the processed image or copy generated assets with a single click."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Favicon Generator?",
+        "answer": "No. All operations in Favicon Generator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Favicon Generator offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Favicon Generator offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Favicon Generator handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "base64-image": {
+    "name": "Base64 Image Converter",
+    "title": "Base64 Image Converter - Codepackr",
+    "description": "Convert images to base64 Data URLs or preview images from base64 strings.",
+    "canonicalPath": "/base64-image",
+    "canonicalUrl": "https://www.codepackr.com/base64-image",
+    "category": "image",
+    "features": [
+      "High-performance, 100% browser-based HTML5 canvas image processing for Base64 Image Converter.",
+      "Zero file uploads: your photos, screenshots, and graphics never leave your local device.",
+      "Precision layout, dimensions, compression quality, and format controls (PNG, JPEG, WebP).",
+      "Built-in privacy safeguards: strip sensitive GPS and camera EXIF metadata in seconds.",
+      "Instant live preview with fast one-click download in full resolution."
+    ],
+    "howToUse": [
+      "Upload or drag-and-drop your image files directly into the browser tool workspace.",
+      "Adjust desired dimensions, layout orientation, alignment, padding, or quality settings.",
+      "Inspect the real-time canvas preview or review diagnostic metadata details.",
+      "Download the processed image or copy generated assets with a single click."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Base64 Image Converter?",
+        "answer": "No. All operations in Base64 Image Converter execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Base64 Image Converter offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Base64 Image Converter offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Base64 Image Converter handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
   "edi-formatter": {
     "name": "EDI X12 Formatter & Beautifier",
     "title": "EDI X12 Formatter & Beautifier - Codepackr",
@@ -1707,6 +2096,45 @@
       },
       {
         "question": "How does EDI X12 Formatter & Beautifier handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "edi-schema-viewer": {
+    "name": "EDI Hierarchical Schema Viewer & Element Lookup",
+    "title": "EDI Hierarchical Schema Viewer & Element Lookup - Codepackr",
+    "description": "Explore ANSI X12 loops, segment structures, element positions (BEG01, PO102), and standard code dictionaries with synchronized raw text highlighting.",
+    "canonicalPath": "/edi-schema-viewer",
+    "canonicalUrl": "https://www.codepackr.com/edi-schema-viewer",
+    "category": "edi",
+    "features": [
+      "Specialized parsing for ANSI ASC X12 and EDIFACT standard transactions.",
+      "Automatic detection of segment terminators (~, newline) and element separators (*).",
+      "Structured segment tree viewer for loops, headers, and trailers (ISA, GS, ST, SE, GE, IEA).",
+      "Zero server transmission — EDI payloads with sensitive PII/PHI remain strictly local.",
+      "Standard compliance checks and export options for integration workflows."
+    ],
+    "howToUse": [
+      "Paste your raw EDI transaction (e.g. 834, 837, 850, 855) into the EDI workspace.",
+      "The tool auto-detects segment delimiters (like ~ or newline) and element separators (*).",
+      "Inspect formatted segments, loop hierarchies, or generated JSON/997 outputs.",
+      "Copy or save your clean EDI output for testing and trading partner integration."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using EDI Hierarchical Schema Viewer & Element Lookup?",
+        "answer": "No. All operations in EDI Hierarchical Schema Viewer & Element Lookup execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use EDI Hierarchical Schema Viewer & Element Lookup offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using EDI Hierarchical Schema Viewer & Element Lookup offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does EDI Hierarchical Schema Viewer & Element Lookup handle large files or sensitive data?",
         "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
       }
     ]
@@ -2101,44 +2529,6 @@
       }
     ]
   },
-  "xslt-transformer": {
-    "name": "XSLT Transformer & Tester",
-    "title": "XSLT Transformer & Tester - Codepackr",
-    "description": "Execute XSLT 1.0/2.0 transformations with source XML, stylesheets, live preview, and EDI XML presets.",
-    "canonicalPath": "/xslt-transformer",
-    "canonicalUrl": "https://www.codepackr.com/xslt-transformer",
-    "category": "xml",
-    "features": [
-      "Standards-compliant XML parsing and schema processing for XSLT Transformer & Tester.",
-      "Support for namespaces, attributes, self-closing tags, and CDATA blocks.",
-      "Real-time XPath evaluation and XSD schema validation.",
-      "Safe local execution with protection against external entity attacks (XXE).",
-      "Formatted syntax highlighting with expandable code nodes."
-    ],
-    "howToUse": [
-      "Enter or adjust the input parameters in the tool control panel.",
-      "View real-time updates and calculation or generation results instantly.",
-      "Copy the result to your clipboard or customize settings as needed."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using XSLT Transformer & Tester?",
-        "answer": "No. All operations in XSLT Transformer & Tester execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use XSLT Transformer & Tester offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using XSLT Transformer & Tester offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does XSLT Transformer & Tester handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
   "xml-to-xsd": {
     "name": "XML to XSD Schema Generator",
     "title": "XML to XSD Schema Generator - Codepackr",
@@ -2291,13 +2681,89 @@
       }
     ]
   },
+  "xsd-validator": {
+    "name": "XSD & XML Schema Validator",
+    "title": "XSD & XML Schema Validator - Codepackr",
+    "description": "Validate XML structures against W3C XSD schema definitions, element constraints, and data types locally in your browser.",
+    "canonicalPath": "/xsd-validator",
+    "canonicalUrl": "https://www.codepackr.com/xsd-validator",
+    "category": "xml",
+    "features": [
+      "Standards-compliant XML parsing and schema processing for XSD & XML Schema Validator.",
+      "Support for namespaces, attributes, self-closing tags, and CDATA blocks.",
+      "Real-time XPath evaluation and XSD schema validation.",
+      "Safe local execution with protection against external entity attacks (XXE).",
+      "Formatted syntax highlighting with expandable code nodes."
+    ],
+    "howToUse": [
+      "Enter or adjust the input parameters in the tool control panel.",
+      "View real-time updates and calculation or generation results instantly.",
+      "Copy the result to your clipboard or customize settings as needed."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using XSD & XML Schema Validator?",
+        "answer": "No. All operations in XSD & XML Schema Validator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use XSD & XML Schema Validator offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using XSD & XML Schema Validator offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does XSD & XML Schema Validator handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "financial-planner": {
+    "name": "Retirement & Financial Planning Calculator",
+    "title": "Retirement & Financial Planning Calculator - Codepackr",
+    "description": "Calculate your retirement corpus, projected vs required savings, inflation impact, and get actionable financial independence strategies.",
+    "canonicalPath": "/financial-planner",
+    "canonicalUrl": "https://www.codepackr.com/financial-planner",
+    "category": "financial-calculators",
+    "features": [
+      "Accurate mathematical calculations with instant reactive updates for Retirement & Financial Planning Calculator.",
+      "Detailed breakdown tables with visual graphs and itemized summaries.",
+      "Customizable interest rates, compounding frequencies, and terms.",
+      "Completely private: financial figures and inputs remain on your device.",
+      "Export calculation reports and shareable configurations."
+    ],
+    "howToUse": [
+      "Enter or adjust the input parameters in the tool control panel.",
+      "View real-time updates and calculation or generation results instantly.",
+      "Copy the result to your clipboard or customize settings as needed."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Retirement & Financial Planning Calculator?",
+        "answer": "No. All operations in Retirement & Financial Planning Calculator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Retirement & Financial Planning Calculator offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Retirement & Financial Planning Calculator offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Retirement & Financial Planning Calculator handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
   "loan-calculator": {
     "name": "Loan & EMI Calculator",
     "title": "Loan & EMI Calculator - Codepackr",
     "description": "Calculate monthly loan EMI, total interest, and comprehensive repayment timeline.",
     "canonicalPath": "/loan-calculator",
     "canonicalUrl": "https://www.codepackr.com/loan-calculator",
-    "category": "calculators",
+    "category": "financial-calculators",
     "features": [
       "Accurate mathematical calculations with instant reactive updates for Loan & EMI Calculator.",
       "Detailed breakdown tables with visual graphs and itemized summaries.",
@@ -2335,7 +2801,7 @@
     "description": "Calculate future wealth and expected maturity values for Systematic Investment Plans (SIP) and mutual fund investments with compounding graphs.",
     "canonicalPath": "/sip-calculator",
     "canonicalUrl": "https://www.codepackr.com/sip-calculator",
-    "category": "calculators",
+    "category": "financial-calculators",
     "features": [
       "Accurate mathematical calculations with instant reactive updates for SIP Calculator.",
       "Detailed breakdown tables with visual graphs and itemized summaries.",
@@ -2401,120 +2867,6 @@
       },
       {
         "question": "How does Investment Calculator handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
-  "calculator": {
-    "name": "Scientific Calculator",
-    "title": "Scientific Calculator - Codepackr",
-    "description": "Fast arithmetic, trigonometric, exponential, and algebraic calculations.",
-    "canonicalPath": "/calculator",
-    "canonicalUrl": "https://www.codepackr.com/calculator",
-    "category": "calculators",
-    "features": [
-      "Accurate mathematical calculations with instant reactive updates for Scientific Calculator.",
-      "Detailed breakdown tables with visual graphs and itemized summaries.",
-      "Customizable interest rates, compounding frequencies, and terms.",
-      "Completely private: financial figures and inputs remain on your device.",
-      "Export calculation reports and shareable configurations."
-    ],
-    "howToUse": [
-      "Enter or adjust the input parameters in the tool control panel.",
-      "View real-time updates and calculation or generation results instantly.",
-      "Copy the result to your clipboard or customize settings as needed."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using Scientific Calculator?",
-        "answer": "No. All operations in Scientific Calculator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use Scientific Calculator offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Scientific Calculator offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does Scientific Calculator handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
-  "percentage-calculator": {
-    "name": "Percentage Calculator",
-    "title": "Percentage Calculator - Codepackr",
-    "description": "Calculate percentages, percent increases/decreases, and fractional ratios.",
-    "canonicalPath": "/percentage-calculator",
-    "canonicalUrl": "https://www.codepackr.com/percentage-calculator",
-    "category": "calculators",
-    "features": [
-      "Accurate mathematical calculations with instant reactive updates for Percentage Calculator.",
-      "Detailed breakdown tables with visual graphs and itemized summaries.",
-      "Customizable interest rates, compounding frequencies, and terms.",
-      "Completely private: financial figures and inputs remain on your device.",
-      "Export calculation reports and shareable configurations."
-    ],
-    "howToUse": [
-      "Enter or adjust the input parameters in the tool control panel.",
-      "View real-time updates and calculation or generation results instantly.",
-      "Copy the result to your clipboard or customize settings as needed."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using Percentage Calculator?",
-        "answer": "No. All operations in Percentage Calculator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use Percentage Calculator offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Percentage Calculator offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does Percentage Calculator handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
-  "tip-calculator": {
-    "name": "Tip Calculator",
-    "title": "Tip Calculator - Codepackr",
-    "description": "Quickly calculate bill tips, total payable amount, and split by person count.",
-    "canonicalPath": "/tip-calculator",
-    "canonicalUrl": "https://www.codepackr.com/tip-calculator",
-    "category": "calculators",
-    "features": [
-      "Accurate mathematical calculations with instant reactive updates for Tip Calculator.",
-      "Detailed breakdown tables with visual graphs and itemized summaries.",
-      "Customizable interest rates, compounding frequencies, and terms.",
-      "Completely private: financial figures and inputs remain on your device.",
-      "Export calculation reports and shareable configurations."
-    ],
-    "howToUse": [
-      "Enter or adjust the input parameters in the tool control panel.",
-      "View real-time updates and calculation or generation results instantly.",
-      "Copy the result to your clipboard or customize settings as needed."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using Tip Calculator?",
-        "answer": "No. All operations in Tip Calculator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use Tip Calculator offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Tip Calculator offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does Tip Calculator handle large files or sensitive data?",
         "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
       }
     ]
@@ -2862,14 +3214,14 @@
     ]
   },
   "mock-json-generator": {
-    "name": "Mock JSON Generator",
-    "title": "Mock JSON Generator - Codepackr",
-    "description": "Generate realistic mock JSON records for users, products, or transactions.",
+    "name": "Advanced Mock Data Generator",
+    "title": "Advanced Mock Data Generator - Codepackr",
+    "description": "Generate realistic mock data records with custom schema fields, exported as JSON, CSV, or SQL INSERT statements.",
     "canonicalPath": "/mock-json-generator",
     "canonicalUrl": "https://www.codepackr.com/mock-json-generator",
     "category": "utilities",
     "features": [
-      "Fast, responsive browser utility for Mock JSON Generator with intuitive controls.",
+      "Fast, responsive browser utility for Advanced Mock Data Generator with intuitive controls.",
       "Modern developer-first UI optimized for dark and light themes.",
       "Runs offline and locally without sending telemetry on your inputs.",
       "Instant output generation with convenient one-click copying.",
@@ -2882,19 +3234,19 @@
     ],
     "faqs": [
       {
-        "question": "Is my data or code sent to an external server when using Mock JSON Generator?",
-        "answer": "No. All operations in Mock JSON Generator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+        "question": "Is my data or code sent to an external server when using Advanced Mock Data Generator?",
+        "answer": "No. All operations in Advanced Mock Data Generator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
       },
       {
-        "question": "Can I use Mock JSON Generator offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Mock JSON Generator offline."
+        "question": "Can I use Advanced Mock Data Generator offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Advanced Mock Data Generator offline."
       },
       {
         "question": "Are there any usage limits, fees, or account registrations required?",
         "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
       },
       {
-        "question": "How does Mock JSON Generator handle large files or sensitive data?",
+        "question": "How does Advanced Mock Data Generator handle large files or sensitive data?",
         "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
       }
     ]
@@ -3327,6 +3679,44 @@
       }
     ]
   },
+  "retirement-calculator": {
+    "name": "Retirement & Financial Planning Calculator",
+    "title": "Retirement & Financial Planning Calculator - Codepackr",
+    "description": "Calculate your retirement corpus, projected vs required savings, inflation impact, and get actionable financial independence strategies.",
+    "canonicalPath": "/retirement-calculator",
+    "canonicalUrl": "https://www.codepackr.com/retirement-calculator",
+    "category": "financial-calculators",
+    "features": [
+      "Accurate mathematical calculations with instant reactive updates for Retirement & Financial Planning Calculator.",
+      "Detailed breakdown tables with visual graphs and itemized summaries.",
+      "Customizable interest rates, compounding frequencies, and terms.",
+      "Completely private: financial figures and inputs remain on your device.",
+      "Export calculation reports and shareable configurations."
+    ],
+    "howToUse": [
+      "Enter or adjust the input parameters in the tool control panel.",
+      "View real-time updates and calculation or generation results instantly.",
+      "Copy the result to your clipboard or customize settings as needed."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Retirement & Financial Planning Calculator?",
+        "answer": "No. All operations in Retirement & Financial Planning Calculator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Retirement & Financial Planning Calculator offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Retirement & Financial Planning Calculator offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Retirement & Financial Planning Calculator handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
   "compound-investment-calculator": {
     "name": "Compound Investment Calculator",
     "title": "Compound Investment Calculator - Codepackr",
@@ -3552,6 +3942,161 @@
       },
       {
         "question": "How does User Agent String & Client Inspector handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "connection-string-builder": {
+    "name": "Database Connection String Builder",
+    "title": "Database Connection String Builder - Codepackr",
+    "description": "Construct, format, and parse database connection URIs for PostgreSQL, MySQL, MongoDB Atlas, and Redis with client-side privacy.",
+    "canonicalPath": "/connection-string-builder",
+    "canonicalUrl": "https://www.codepackr.com/connection-string-builder",
+    "category": "formatters",
+    "features": [
+      "Customizable indentation options (2 spaces, 4 spaces, or tabs) for Database Connection String Builder.",
+      "Instant error detection with precise line and column indicators for syntax issues.",
+      "Minification mode to compress code and remove unnecessary whitespace.",
+      "100% in-browser processing ensuring source code never leaves your computer.",
+      "One-click copy to clipboard and downloadable formatted output."
+    ],
+    "howToUse": [
+      "Paste your raw code or unformatted text into the editor.",
+      "Select your preferred formatting preferences (such as 2 spaces, 4 spaces, or minify).",
+      "Click Format to beautify and validate your syntax.",
+      "Review the formatted output, copy it to your clipboard, or download it as a file."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Database Connection String Builder?",
+        "answer": "No. All operations in Database Connection String Builder execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Database Connection String Builder offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Database Connection String Builder offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Database Connection String Builder handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "jwt-validator": {
+    "name": "JWT Inspector & Validator",
+    "title": "JWT Inspector & Validator - Codepackr",
+    "description": "Inspect, decode, and validate JSON Web Token (JWT) headers, payloads, signatures, and expiration status in browser memory.",
+    "canonicalPath": "/jwt-validator",
+    "canonicalUrl": "https://www.codepackr.com/jwt-validator",
+    "category": "encoders",
+    "features": [
+      "High-speed encoding and decoding for JWT Inspector & Validator with zero latency.",
+      "Support for UTF-8 character sets, binary buffers, and multi-line strings.",
+      "Cryptographically secure local processing using modern Web Crypto APIs.",
+      "Instant validation and format error diagnostics.",
+      "One-click copy to clipboard and local file export."
+    ],
+    "howToUse": [
+      "Input your plain text, string, or secret key into the input field.",
+      "Choose your desired encoding/decoding mode or hashing algorithm.",
+      "View the generated output immediately as you type.",
+      "Copy the resulting hash, token, or encoded string with a single click."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using JWT Inspector & Validator?",
+        "answer": "No. All operations in JWT Inspector & Validator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use JWT Inspector & Validator offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using JWT Inspector & Validator offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does JWT Inspector & Validator handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "swagger-validator": {
+    "name": "OpenAPI / Swagger Spec Viewer",
+    "title": "OpenAPI / Swagger Spec Viewer - Codepackr",
+    "description": "Validate, parse, and inspect structural syntax and endpoint routes for OpenAPI 3.0 and Swagger API specifications.",
+    "canonicalPath": "/swagger-validator",
+    "canonicalUrl": "https://www.codepackr.com/swagger-validator",
+    "category": "validators",
+    "features": [
+      "Comprehensive syntax and schema validation for OpenAPI / Swagger Spec Viewer.",
+      "Detailed line-by-line error reporting with actionable diagnostic messages.",
+      "Support for complex schemas, recursive structures, and edge cases.",
+      "Zero network transfer: all validation occurs inside your browser runtime.",
+      "Export clean data or copy validation results with one click."
+    ],
+    "howToUse": [
+      "Paste your code, schema, or document into the validation window.",
+      "Click Validate to inspect syntax, schema compliance, and format rules.",
+      "Review any highlighted errors, line numbers, and warnings in the results pane.",
+      "Fix issues directly in the editor or copy the validated content."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using OpenAPI / Swagger Spec Viewer?",
+        "answer": "No. All operations in OpenAPI / Swagger Spec Viewer execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use OpenAPI / Swagger Spec Viewer offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using OpenAPI / Swagger Spec Viewer offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does OpenAPI / Swagger Spec Viewer handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "k8s-validator": {
+    "name": "K8s Validator",
+    "title": "K8s Validator - Codepackr",
+    "description": "Free online k8s validator tool for developers. Fast, client-side, and private.",
+    "canonicalPath": "/k8s-validator",
+    "canonicalUrl": "https://www.codepackr.com/k8s-validator",
+    "category": "utilities",
+    "features": [
+      "Fast, responsive browser utility for K8s Validator with intuitive controls.",
+      "Modern developer-first UI optimized for dark and light themes.",
+      "Runs offline and locally without sending telemetry on your inputs.",
+      "Instant output generation with convenient one-click copying.",
+      "Keyboard shortcuts and clean ergonomics for high-productivity development."
+    ],
+    "howToUse": [
+      "Enter or adjust the input parameters in the tool control panel.",
+      "View real-time updates and calculation or generation results instantly.",
+      "Copy the result to your clipboard or customize settings as needed."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using K8s Validator?",
+        "answer": "No. All operations in K8s Validator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use K8s Validator offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using K8s Validator offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does K8s Validator handle large files or sensitive data?",
         "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
       }
     ]
@@ -3898,6 +4443,82 @@
       }
     ]
   },
+  "image-resizer-target-size": {
+    "name": "Image Resizer Target Size",
+    "title": "Image Resizer Target Size - Codepackr",
+    "description": "Free online image resizer target size tool for developers. Fast, client-side, and private.",
+    "canonicalPath": "/image-resizer-target-size",
+    "canonicalUrl": "https://www.codepackr.com/image-resizer-target-size",
+    "category": "utilities",
+    "features": [
+      "Fast, responsive browser utility for Image Resizer Target Size with intuitive controls.",
+      "Modern developer-first UI optimized for dark and light themes.",
+      "Runs offline and locally without sending telemetry on your inputs.",
+      "Instant output generation with convenient one-click copying.",
+      "Keyboard shortcuts and clean ergonomics for high-productivity development."
+    ],
+    "howToUse": [
+      "Enter or adjust the input parameters in the tool control panel.",
+      "View real-time updates and calculation or generation results instantly.",
+      "Copy the result to your clipboard or customize settings as needed."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Image Resizer Target Size?",
+        "answer": "No. All operations in Image Resizer Target Size execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Image Resizer Target Size offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Image Resizer Target Size offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Image Resizer Target Size handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "photo-size-reducer": {
+    "name": "Photo Size Reducer",
+    "title": "Photo Size Reducer - Codepackr",
+    "description": "Free online photo size reducer tool for developers. Fast, client-side, and private.",
+    "canonicalPath": "/photo-size-reducer",
+    "canonicalUrl": "https://www.codepackr.com/photo-size-reducer",
+    "category": "utilities",
+    "features": [
+      "Fast, responsive browser utility for Photo Size Reducer with intuitive controls.",
+      "Modern developer-first UI optimized for dark and light themes.",
+      "Runs offline and locally without sending telemetry on your inputs.",
+      "Instant output generation with convenient one-click copying.",
+      "Keyboard shortcuts and clean ergonomics for high-productivity development."
+    ],
+    "howToUse": [
+      "Enter or adjust the input parameters in the tool control panel.",
+      "View real-time updates and calculation or generation results instantly.",
+      "Copy the result to your clipboard or customize settings as needed."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Photo Size Reducer?",
+        "answer": "No. All operations in Photo Size Reducer execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Photo Size Reducer offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Photo Size Reducer offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Photo Size Reducer handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
   "contact": {
     "name": "Contact & Feedback",
     "title": "Contact & Feedback - Codepackr",
@@ -4012,40 +4633,41 @@
       }
     ]
   },
-  "financial-planner": {
-    "name": "Financial Planning & Retirement Calculator",
-    "title": "Financial Planning & Retirement Calculator - Codepackr",
-    "description": "Analyze retirement readiness, projected vs required corpus, corpus sustainability, savings gap, scenarios, and get actionable recommendations.",
-    "canonicalPath": "/financial-planner",
-    "canonicalUrl": "https://www.codepackr.com/financial-planner",
-    "category": "calculators",
+  "edi-message-gateway": {
+    "name": "EDI Message Gateway & Analyzer",
+    "title": "EDI Message Gateway & Analyzer - Codepackr",
+    "description": "Receive, analyze, decode, validate, transform, and generate EDI messages across inbound and outbound pipelines with user-provided schemas and canonical models.",
+    "canonicalPath": "/edi-message-gateway",
+    "canonicalUrl": "https://www.codepackr.com/edi-message-gateway",
+    "category": "edi",
     "features": [
-      "Accurate mathematical calculations with instant reactive updates for Financial Planning & Retirement Calculator.",
-      "Detailed breakdown tables with visual graphs and itemized summaries.",
-      "Customizable interest rates, compounding frequencies, and terms.",
-      "Completely private: financial figures and inputs remain on your device.",
-      "Export calculation reports and shareable configurations."
+      "Specialized parsing for ANSI ASC X12 and EDIFACT standard transactions.",
+      "Automatic detection of segment terminators (~, newline) and element separators (*).",
+      "Structured segment tree viewer for loops, headers, and trailers (ISA, GS, ST, SE, GE, IEA).",
+      "Zero server transmission — EDI payloads with sensitive PII/PHI remain strictly local.",
+      "Standard compliance checks and export options for integration workflows."
     ],
     "howToUse": [
-      "Enter or adjust the input parameters in the tool control panel.",
-      "View real-time updates and calculation or generation results instantly.",
-      "Copy the result to your clipboard or customize settings as needed."
+      "Paste your raw EDI transaction (e.g. 834, 837, 850, 855) into the EDI workspace.",
+      "The tool auto-detects segment delimiters (like ~ or newline) and element separators (*).",
+      "Inspect formatted segments, loop hierarchies, or generated JSON/997 outputs.",
+      "Copy or save your clean EDI output for testing and trading partner integration."
     ],
     "faqs": [
       {
-        "question": "Is my data or code sent to an external server when using Financial Planning & Retirement Calculator?",
-        "answer": "No. All operations in Financial Planning & Retirement Calculator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+        "question": "Is my data or code sent to an external server when using EDI Message Gateway & Analyzer?",
+        "answer": "No. All operations in EDI Message Gateway & Analyzer execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
       },
       {
-        "question": "Can I use Financial Planning & Retirement Calculator offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Financial Planning & Retirement Calculator offline."
+        "question": "Can I use EDI Message Gateway & Analyzer offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using EDI Message Gateway & Analyzer offline."
       },
       {
         "question": "Are there any usage limits, fees, or account registrations required?",
         "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
       },
       {
-        "question": "How does Financial Planning & Retirement Calculator handle large files or sensitive data?",
+        "question": "How does EDI Message Gateway & Analyzer handle large files or sensitive data?",
         "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
       }
     ]

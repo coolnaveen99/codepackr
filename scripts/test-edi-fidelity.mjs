@@ -61,9 +61,11 @@ function parseEdiSegments(text, segTerm, elemSep) {
   if (effectiveTerm === '\r\n') {
     rawSegments = text.split(/\r\n/);
   } else if (effectiveTerm === '\n' || effectiveTerm === '\r') {
-    rawSegments = text.split(/\r?\n/);
+    rawSegments = text.split(/\r?\n+/);
   } else {
-    rawSegments = text.split(effectiveTerm);
+    const escapedTerm = effectiveTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const splitRegex = new RegExp(`${escapedTerm}[\\r\\n]*`, 'g');
+    rawSegments = text.split(splitRegex);
   }
 
   const segments = [];
@@ -174,7 +176,7 @@ console.log('  Passed: UN/EDIFACT standard parsed and validated.\n');
 // TEST 4: ANSI X12 856 ASN with Hierarchical Levels & SSCC Barcodes
 // ==========================================
 console.log('TEST 4: ANSI X12 856 Advance Ship Notice (HL Loops + Barcode Carrier)');
-const test856 = `ISA*00*          *00*          *ZZ*LOGISTICS_EXP  *ZZ*RETAIL_DIST    *260311*1015*U*00401*100000001*0*P*~
+const test856 = `ISA*00*          *00*          *ZZ*LOGISTICS_EXP  *ZZ*RETAIL_DIST    *260311*1015*U*00401*100000001*0*P*>~
 GS*SH*LOGISTICS_EXP*RETAIL_DIST*20260311*1015*1001*X*004010~
 ST*856*0001~
 BSN*00*SH-2026-001*20260311*1015*0001~
@@ -192,7 +194,6 @@ GE*1*1001~
 IEA*1*100000001~`;
 
 const delims4 = detectDelimiters(test856);
-console.log('delims4 detected:', delims4);
 const segs4 = parseEdiSegments(test856, delims4.segTerm, delims4.elemSep);
 assert.strictEqual(segs4.length, 16);
 const hlList = segs4.filter(s => s.tag === 'HL');

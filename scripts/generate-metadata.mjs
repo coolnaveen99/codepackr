@@ -34,36 +34,6 @@ const aliasDefinitions = {
     category: 'encoders',
     description: 'Generate keyed-hash message authentication codes (HMAC) using SHA-256, SHA-512, and MD5 algorithms.'
   },
-  'retirement-calculator': {
-    name: 'Retirement & Financial Planning Calculator',
-    category: 'financial-calculators',
-    description: 'Calculate your retirement corpus, projected vs required savings, inflation impact, and get actionable financial independence strategies.'
-  },
-  'financial-planner': {
-    name: 'Retirement & Financial Planning Calculator',
-    category: 'financial-calculators',
-    description: 'Calculate your retirement corpus, projected vs required savings, inflation impact, and get actionable financial independence strategies.'
-  },
-  'sip-calculator': {
-    name: 'SIP Calculator',
-    category: 'financial-calculators',
-    description: 'Calculate future wealth and expected maturity values for Systematic Investment Plans (SIP) and mutual fund investments with compounding graphs.'
-  },
-  'investment-calculator': {
-    name: 'Investment Calculator',
-    category: 'calculators',
-    description: 'Calculate long-term investment growth, future portfolio values, and compound interest earnings with customizable deposit schedules and interactive graphs.'
-  },
-  'compound-investment-calculator': {
-    name: 'Compound Investment Calculator',
-    category: 'calculators',
-    description: 'Calculate long-term compound growth, future investment values, and interest earnings with customizable deposit schedules and interactive graphs.'
-  },
-  'compound-interest-calculator': {
-    name: 'Compound Interest Calculator',
-    category: 'calculators',
-    description: 'Calculate future compound interest, effective annual rate, and portfolio appreciation over time with visual growth breakdown.'
-  },
   'json-definition-generator': {
     name: 'JSON Definition & Type Generator',
     category: 'converters',
@@ -79,10 +49,75 @@ const aliasDefinitions = {
     category: 'edi',
     description: 'All-in-one developer toolkit for ANSI ASC X12, UN/EDIFACT, 997 & CONTRL acknowledgments, AS2 messaging, JSON converters, and syntax validation.'
   },
+  'edi-batch-splitter': {
+    name: 'EDI Batch Splitter & Joiner',
+    category: 'edi',
+    description: 'Split multi-transaction ANSI X12 and EDIFACT EDI files by Functional Group (GS/GE), Transaction Set (ST/SE), or PO/Claim numbers, and merge files with auto-recalculated envelopes.'
+  },
+  'edi-splitter': {
+    name: 'EDI Batch Splitter & Joiner',
+    category: 'edi',
+    description: 'Split multi-transaction ANSI X12 and EDIFACT EDI files by Functional Group (GS/GE), Transaction Set (ST/SE), or PO/Claim numbers, and merge files with auto-recalculated envelopes.'
+  },
+  'edi-diff-compare': {
+    name: 'EDI Semantic Diff & Compare',
+    category: 'edi',
+    description: 'Compare two ANSI X12 or EDIFACT documents side-by-side or unified with loop alignment, element-level mutation highlights, and volatile envelope ignoring.'
+  },
+  'edi-diff': {
+    name: 'EDI Semantic Diff & Compare',
+    category: 'edi',
+    description: 'Compare two ANSI X12 or EDIFACT documents side-by-side or unified with loop alignment, element-level mutation highlights, and volatile envelope ignoring.'
+  },
+  'edi-compare': {
+    name: 'EDI Semantic Diff & Compare',
+    category: 'edi',
+    description: 'Compare two ANSI X12 or EDIFACT documents side-by-side or unified with loop alignment, element-level mutation highlights, and volatile envelope ignoring.'
+  },
+  'edi-message-gateway': {
+    name: 'EDI Message Gateway & Analyzer',
+    category: 'edi',
+    description: 'Receive, analyze, decode, validate, transform, and generate EDI messages across inbound and outbound pipelines with user-provided schemas and canonical models.'
+  },
+  'edi-gateway-analyzer': {
+    name: 'EDI Message Gateway & Analyzer',
+    category: 'edi',
+    description: 'Receive, analyze, decode, validate, transform, and generate EDI messages across inbound and outbound pipelines with user-provided schemas and canonical models.'
+  },
+  'edi-schema-viewer': {
+    name: 'EDI Hierarchical Schema Viewer & Element Lookup',
+    category: 'edi',
+    description: 'Explore ANSI X12 loops, segment structures, element positions (BEG01, PO102), and standard code dictionaries with synchronized raw text highlighting.'
+  },
+  'image-target-compressor': {
+    name: 'Image Resizer & Target Size Compressor',
+    category: 'image',
+    description: 'Resize images to exact dimensions in pixels (px), centimeters (cm), millimeters (mm), or inches with DPI control, and compress to a strict maximum target file size (KB/MB) client-side.'
+  },
   'edi-formatter': {
     name: 'EDI X12 Formatter & Beautifier',
     category: 'edi',
     description: 'Format, beautify, and indent raw ANSI ASC X12 and EDIFACT EDI transactions with automatic segment terminator and element delimiter detection.'
+  },
+  'edi-to-csv': {
+    name: 'EDI to CSV & CSV to EDI Converter',
+    category: 'edi',
+    description: 'Convert ANSI X12 and EDIFACT messages into flattened CSV or Excel spreadsheets, or generate compliant EDI 850/810 documents directly from spreadsheet tables.'
+  },
+  'csv-to-edi': {
+    name: 'CSV to EDI X12 Generator',
+    category: 'edi',
+    description: 'Generate valid ANSI ASC X12 850 Purchase Order and 810 Invoice EDI files from CSV spreadsheets with automatic enveloping and control counts.'
+  },
+  'edi-csv': {
+    name: 'EDI to CSV Converter',
+    category: 'edi',
+    description: 'Flatten EDI 850, 810, 856, and 846 files into line-item tables, order summaries, and raw segment matrices for Microsoft Excel.'
+  },
+  'hipaa-sanitizer': {
+    name: 'EDI HIPAA De-Identifier & PHI Sanitizer',
+    category: 'edi',
+    description: 'Client-side HIPAA Safe Harbor (45 CFR § 164.514(b)) de-identifier to redact patient names, SSNs, member IDs, DOBs, and addresses in 837/835 files.'
   },
   'edi-to-json': {
     name: 'EDI to JSON Converter',
@@ -218,16 +253,6 @@ const aliasDefinitions = {
     name: 'Data & File Format Converters',
     category: 'converters',
     description: 'Convert between JSON, XML, CSV, YAML, Markdown, cURL code commands, and image formats effortlessly.'
-  },
-  'calculators': {
-    name: 'Financial & Math Calculators Suite',
-    category: 'financial-calculators',
-    description: 'Calculate loans, monthly EMIs, amortization schedules, SIP returns, percentages, and gratuity tips with multi-currency support.'
-  },
-  'financial-calculators': {
-    name: 'Financial & Retirement Calculators Suite',
-    category: 'financial-calculators',
-    description: 'Calculate retirement corpus, loan EMIs, SIP compounding, investments, and inflation-adjusted financial independence strategies.'
   },
   'xsd-validator': {
     name: 'XSD & XML Schema Validator',

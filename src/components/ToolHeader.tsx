@@ -24,10 +24,7 @@ export const ToolHeader: React.FC<ToolHeaderProps> = ({
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const bookmarked = isBookmarked(tool.id);
 
-  const isCalcOrPlanner =
-    tool.category === 'financial-calculators' ||
-    tool.category === 'validators' ||
-    tool.id === 'financial-planner';
+  const isCalcOrPlanner = tool.category === 'validators';
 
   const defaultActionLabel = isCalcOrPlanner ? 'Reset to Defaults' : 'Clear Workspace';
   const effectiveResetLabel = resetLabel || defaultActionLabel;

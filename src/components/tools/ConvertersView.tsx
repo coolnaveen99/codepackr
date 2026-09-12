@@ -5,6 +5,8 @@ import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
 import { CodeEditor, SupportedLanguage } from '../CodeEditor';
 import { useWorkspace, popSmartPastePayload } from '../../lib/workspace';
+import { downloadFile } from '../../lib/smartDownload';
+import { TOOLS } from '../../data/tools';
 
 interface ConvertersViewProps {
   tool: ToolDef;
@@ -451,10 +453,21 @@ makeRequest();`);
     const img = new Image();
     img.onload = () => {
       ctx?.drawImage(img, 0, 0, w, h);
-      const link = document.createElement('a');
-      link.download = filename;
-      link.href = canvas.toDataURL(`image/${imgFormat}`, imgQuality / 100);
-      link.click();
+      const mime = `image/${imgFormat}`;
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            downloadFile({
+              file: blob,
+              filename,
+              mimeType: mime,
+              expectedExtension: imgFormat,
+            });
+          }
+        },
+        mime,
+        imgQuality / 100
+      );
     };
     img.src = imageSrc;
   };
@@ -1209,13 +1222,44 @@ Timestamp: ${new Date().toISOString()}
                   <div className="flex items-end">
                     <button
                       onClick={() => downloadProcessedImage(imgWidth, imgHeight, `resized-${imgWidth}x${imgHeight}.${imgFormat}`)}
-                      className="w-full py-2.5 rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                      className="w-full py-2.5 rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-1.5 shadow-sm cursor-pointer hover:opacity-90"
                       style={{ backgroundColor: 'var(--brand)' }}
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>Download Resized</span>
                     </button>
                   </div>
+                </div>
+              )}
+
+              {tool.id === 'image-resizer' && (
+                <div
+                  className="p-3 rounded-xl border flex items-center justify-between gap-3 text-xs"
+                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
+                >
+                  <div>
+                    <span className="font-semibold block" style={{ color: 'var(--ink)' }}>
+                      Need strict file-size limits (e.g. ≤ 150 KB for passport / visa uploads)?
+                    </span>
+                    <span className="text-[11px]" style={{ color: 'var(--muted)' }}>
+                      CodePackr's dedicated Target Size Compressor finds the optimal quality factor under your exact KB limit.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const targetTool = TOOLS.find((t) => t.id === 'image-target-compressor');
+                      if (targetTool && onSelectRelated) {
+                        onSelectRelated(targetTool);
+                      } else {
+                        window.location.href = '/image-target-compressor';
+                      }
+                    }}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white cursor-pointer hover:opacity-90 whitespace-nowrap shadow-xs"
+                    style={{ backgroundColor: 'var(--brand)' }}
+                  >
+                    Open Target Compressor
+                  </button>
                 </div>
               )}
             </div>

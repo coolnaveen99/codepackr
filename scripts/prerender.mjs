@@ -24,7 +24,10 @@ if (fs.existsSync(metadataPath)) {
 const SLUG_MAPPINGS = {
   'edi-x12-formatter': 'edi-formatter',
   'edi-json-converter': 'edi-to-json',
-  'markdown': 'markdown-preview'
+  'edi-gateway-analyzer': 'edi-message-gateway',
+  'markdown': 'markdown-preview',
+  'image-resizer-target-size': 'image-target-compressor',
+  'photo-size-reducer': 'image-target-compressor'
 };
 
 // Parse all loc URLs from public/sitemap.xml

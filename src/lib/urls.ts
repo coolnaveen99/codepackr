@@ -40,17 +40,6 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'oauth-pkce': 'pkce-generator',
   'base64-image': 'base64-image',
 
-  // Financial Calculators
-  'financial-planner': 'financial-planner',
-  'retirement-calculator': 'financial-planner',
-  'financial-planning-calculator': 'financial-planner',
-  'financial-independence-calculator': 'financial-planner',
-  'sip-calculator': 'sip-calculator',
-  'investment-calculator': 'investment-calculator',
-  'compound-investment-calculator': 'investment-calculator',
-  'compound-interest-calculator': 'investment-calculator',
-  'loan-calculator': 'loan-calculator',
-
   // Validators
   'diff-checker': 'diff-checker',
   'image-diff-checker': 'image-diff-checker',
@@ -81,6 +70,11 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'markdown-html-converter': 'markdown-html-converter',
   'html-markdown-converter': 'html-markdown-converter',
   'curl-code-converter': 'curl-code-converter',
+  'image-target-compressor': 'image-target-compressor',
+  'image-resizer-target-size': 'image-target-compressor',
+  'resize-image-target-size': 'image-target-compressor',
+  'image-resizer-kb': 'image-target-compressor',
+  'photo-size-reducer': 'image-target-compressor',
   'image-resizer': 'image-resizer',
   'image-merger': 'image-merger',
   'image-combiner': 'image-merger',
@@ -98,9 +92,38 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'json-to-typescript': 'json-definition-generator',
 
   // EDI Tools
+  'edi-csv-converter': 'edi-csv-converter',
+  'edi-to-csv': 'edi-csv-converter',
+  'csv-to-edi': 'edi-csv-converter',
+  'edi-csv': 'edi-csv-converter',
+  'edi-excel': 'edi-csv-converter',
+  'edi-hipaa-sanitizer': 'edi-hipaa-sanitizer',
+  'hipaa-sanitizer': 'edi-hipaa-sanitizer',
+  'edi-de-identifier': 'edi-hipaa-sanitizer',
+  'edi-phi-sanitizer': 'edi-hipaa-sanitizer',
+  'edi-batch-splitter': 'edi-batch-splitter',
+  'edi-splitter': 'edi-batch-splitter',
+  'edi-joiner': 'edi-batch-splitter',
+  'edi-batch': 'edi-batch-splitter',
+  'edi-diff-compare': 'edi-diff-compare',
+  'edi-diff': 'edi-diff-compare',
+  'edi-compare': 'edi-diff-compare',
+  'edi-semantic-diff': 'edi-diff-compare',
+  'edi-message-gateway': 'edi-message-gateway',
+  'edi-inbound-outbound-gateway': 'edi-message-gateway',
+  'edi-integration-gateway': 'edi-message-gateway',
+  'inbound-outbound-gateway': 'edi-message-gateway',
+  'edi-gateway-analyzer': 'edi-message-gateway',
+  'edi-gateway': 'edi-message-gateway',
+  'edi-pipeline': 'edi-message-gateway',
+  'as2-edi-gateway': 'edi-message-gateway',
   'edi-tools': 'edi-formatter',
   'edi-x12-formatter': 'edi-formatter',
   'edi-formatter': 'edi-formatter',
+  'edi-schema-viewer': 'edi-schema-viewer',
+  'edi-hierarchy-viewer': 'edi-schema-viewer',
+  'edi-element-lookup': 'edi-schema-viewer',
+  'edi-tree-viewer': 'edi-schema-viewer',
   'edi-segment-viewer': 'edi-segment-viewer',
   'edi-json-converter': 'edi-to-json',
   'edi-to-json': 'edi-to-json',
@@ -163,13 +186,16 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
  * Preferred direct canonical URL slug for each tool ID
  */
 export const TOOL_ID_TO_CANONICAL_SLUG: Record<string, string> = {
+  'edi-csv-converter': 'edi-csv-converter',
+  'edi-hipaa-sanitizer': 'edi-hipaa-sanitizer',
+  'edi-batch-splitter': 'edi-batch-splitter',
+  'edi-diff-compare': 'edi-diff-compare',
+  'edi-message-gateway': 'edi-message-gateway',
+  'image-target-compressor': 'image-target-compressor',
+  'edi-schema-viewer': 'edi-schema-viewer',
   'edi-formatter': 'edi-formatter',
   'edi-to-json': 'edi-to-json',
   'markdown-preview': 'markdown-preview',
-  'financial-planner': 'retirement-calculator',
-  'sip-calculator': 'sip-calculator',
-  'investment-calculator': 'investment-calculator',
-  'compound-investment-calculator': 'investment-calculator',
   'json-definition-generator': 'json-definition-generator',
   'image-merger': 'image-merger',
   'image-exif-inspector': 'image-exif-inspector',
@@ -210,6 +236,8 @@ export const CATEGORY_SLUG_MAP: Record<string, string> = {
   'converters': 'converters',
   'edi': 'edi',
   'edi-tools': 'edi',
+  'edi-integration-hub': 'edi',
+  'edi-integration': 'edi',
   'xml': 'xml',
   'xml-tools': 'xml',
   'financial-calculators': 'financial-calculators',
@@ -220,6 +248,21 @@ export const CATEGORY_SLUG_MAP: Record<string, string> = {
   'text-tools': 'text',
 };
 
+export const FINANCIAL_REDIRECT_SLUGS = new Set([
+  'financial-calculators',
+  'financial-calculator',
+  'calculators',
+  'retirement-calculator',
+  'financial-planner',
+  'financial-planning-calculator',
+  'financial-independence-calculator',
+  'sip-calculator',
+  'investment-calculator',
+  'compound-investment-calculator',
+  'compound-interest-calculator',
+  'loan-calculator',
+]);
+
 /**
  * Resolves the active route based on the current window location (pathname + search)
  */
@@ -227,6 +270,7 @@ export function resolveCurrentRoute(): {
   page: 'home' | 'contact' | 'privacy' | 'admin';
   tool: ToolDef | null;
   category?: string;
+  externalRedirect?: string;
 } {
   if (typeof window === 'undefined') {
     return { page: 'home', tool: null };
@@ -234,6 +278,23 @@ export function resolveCurrentRoute(): {
 
   const pathname = window.location.pathname.replace(/^\/+|\/+$/g, '');
   const searchParams = new URLSearchParams(window.location.search);
+
+  // Check legacy financial tool & calculator routes -> Redirect to finance.codepackr.com
+  const rawSlug = pathname.replace(/\.html$/, '');
+  const toolParam = searchParams.get('tool');
+  const catParam = searchParams.get('cat') || searchParams.get('category');
+
+  if (
+    FINANCIAL_REDIRECT_SLUGS.has(rawSlug) ||
+    (toolParam && FINANCIAL_REDIRECT_SLUGS.has(toolParam)) ||
+    (catParam && FINANCIAL_REDIRECT_SLUGS.has(catParam))
+  ) {
+    return {
+      page: 'home',
+      tool: null,
+      externalRedirect: 'https://finance.codepackr.com/'
+    };
+  }
 
   // 0. Check admin console page
   if (pathname === 'admin.html' || pathname === 'admin' || searchParams.get('page') === 'admin') {
@@ -256,8 +317,6 @@ export function resolveCurrentRoute(): {
 
   // 3. Check direct path slug (e.g. "json-formatter.html", "json-formatter", or "formatters")
   if (pathname && pathname !== 'index.html') {
-    const rawSlug = pathname.replace(/\.html$/, '');
-
     // Check category hubs first
     if (CATEGORY_SLUG_MAP[rawSlug]) {
       return { page: 'home', tool: null, category: CATEGORY_SLUG_MAP[rawSlug] };
@@ -271,7 +330,6 @@ export function resolveCurrentRoute(): {
   }
 
   // 4. Check query param: ?tool=...
-  const toolParam = searchParams.get('tool');
   if (toolParam) {
     const mappedToolId = SLUG_TO_TOOL_ID[toolParam] || toolParam;
     const foundTool = TOOLS.find((t) => t.id === mappedToolId);
@@ -281,7 +339,5 @@ export function resolveCurrentRoute(): {
   }
 
   // 5. Category filter param: ?cat=... or ?category=...
-  const catParam = searchParams.get('cat') || searchParams.get('category');
-
   return { page: 'home', tool: null, category: catParam || undefined };
 }
