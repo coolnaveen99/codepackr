@@ -105,3 +105,18 @@ When adding a new tool to Codepackr, complete this sequential checklist:
 5. [ ] **Add Metadata in `scripts/generate-metadata.mjs`**: Include tool name, description, category, and features for prerendering.
 6. [ ] **Run Full Build & Sync**: Run `npm run build` (which automatically regenerates `sitemap.xml`, `toolMetadata.json`, `codepackr_social_media_promotions.csv`, prerenders HTML, and dispatches IndexNow pings).
 7. [ ] **Verify with `lint_applet` and `compile_applet`**: Ensure zero type errors and a clean build.
+
+---
+
+## EDI UX Modernization Guide
+
+When working on any EDI tool or the EDI category, **always follow** the enterprise roadmap and principles defined in:
+
+**[docs/EDI_UX_Modernization_Guide.md](docs/EDI_UX_Modernization_Guide.md)**
+
+Key requirements from the guide:
+- Use progressive disclosure and one-click samples / Story Mode presets.
+- Prefer visual trees and color-coded segments.
+- Keep all processing 100% client-side (Web Workers + lazy dictionary loading).
+- Implement PHI redaction toggle for healthcare transactions.
+- Follow the phased matrix (Phase 1 Foundation → Phase 4 Visual Studio).
