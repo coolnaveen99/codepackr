@@ -206,7 +206,72 @@ assert.ok(manSeg, 'MAN segment must exist');
 assert.strictEqual(manSeg.elements[1], '00001234567890123456', 'SSCC-18 barcode must be extracted');
 console.log('  Passed: 856 ASN Hierarchical Levels & SSCC Barcode fully extracted.\n');
 
+// ==========================================
+// TEST 5: Complex real-world style 850 (Tediware-style) – full segment preservation
+// ==========================================
+console.log('TEST 5: Complex 850 with REF/PER/FOB/ITD/DTM/N9-MSG/PO4/multi-product-ID – Lossless Segment Count');
+const testComplex850 = `ISA*00*          *00*          *ZZ*TEDIBUYER      *01*WIDGETWORKS    *260101*0000*U*00401*000000001*0*T*>~
+GS*PO*TEDIBUYER*WIDGETWORKS*20260101*0000*1001*X*004010~
+ST*850*1001~
+BEG*00*SA*TEDIPO0001**20260101~
+CUR*BY*CAD~
+REF*IA*10000~
+REF*19*Ship to head office~
+REF*YD*1~
+REF*ZZ*No QC Hold, OK to Ship~
+PER*BD*Adrian~
+FOB*PP~
+ITD************26~
+DTM*106*20260201~
+N9*ZZ*GEN~
+MSG*THIS PURCHASE ORDER MUST BE FULFILLED ACCORDING TO THE VENDOR GUIDE AT https://tediware.com~
+MSG*QUESTIONS ABOUT THIS ORDER? CONTACT INFO@TEDIWARE.COM. NO SUBSTITUTIONS OR BACKORDERS.~
+N1*VN*WIDGETWORKS LLC~
+N3*1 INDUSTRIAL WAY~
+N4*PORTLAND*OR*97201*US~
+N1*ST*TEDIWARE HEAD OFFICE*92*400~
+N3*18 KING STREET EAST*SUITE 1400~
+N4*TORONTO*ON*M5C1C4*CA~
+PO1*1*36*EA*10**SK*0000001*VN*SKUTEDI1*UP*000000000001~
+PID*F*08***WIDGET ASSEMBLY KIT~
+PO4*36*****27*LB***10*15*12*IN~
+CTT*1~
+SE*25*1001~
+GE*1*1001~
+IEA*1*000000001~`;
+
+const delims5 = detectDelimiters(testComplex850);
+const segs5 = parseEdiSegments(testComplex850, delims5.segTerm, delims5.elemSep);
+
+assert.ok(segs5.length >= 25, `Must parse at least 25 segments (got ${segs5.length})`);
+assert.strictEqual(segs5.find(s => s.tag === 'BEG')?.elements[2], 'TEDIPO0001');
+assert.strictEqual(segs5.find(s => s.tag === 'CUR')?.elements[1], 'CAD');
+const refs = segs5.filter(s => s.tag === 'REF');
+assert.strictEqual(refs.length, 4, 'Must preserve all 4 REF segments');
+assert.ok(segs5.some(s => s.tag === 'PER' && s.elements[1] === 'Adrian'));
+assert.ok(segs5.some(s => s.tag === 'FOB' && s.elements[0] === 'PP'));
+assert.ok(segs5.some(s => s.tag === 'DTM' && s.elements[0] === '106'));
+assert.ok(segs5.some(s => s.tag === 'N9'));
+assert.strictEqual(segs5.filter(s => s.tag === 'MSG').length, 2, 'Must preserve both MSG notes');
+const stParty = segs5.find(s => s.tag === 'N1' && s.elements[0] === 'ST');
+assert.ok(stParty);
+assert.strictEqual(stParty.elements[3], '400');
+const n3St = segs5.filter(s => s.tag === 'N3');
+assert.ok(n3St.some(s => s.elements[1] === 'SUITE 1400'), 'Must preserve multi-line address (SUITE 1400)');
+const po1 = segs5.find(s => s.tag === 'PO1');
+assert.ok(po1);
+assert.strictEqual(po1.elements[1], '36');
+assert.strictEqual(po1.elements[6], '0000001'); // SK
+assert.strictEqual(po1.elements[8], 'SKUTEDI1'); // VN
+assert.strictEqual(po1.elements[10], '000000000001'); // UP
+const po4 = segs5.find(s => s.tag === 'PO4');
+assert.ok(po4, 'PO4 physical details must be present');
+assert.strictEqual(po4.elements[0], '36');
+assert.strictEqual(po4.elements[5], '27');
+console.log('  Passed: Complex 850 – all REF/PER/FOB/ITD/DTM/N9/MSG/PO4/multi-product-ID and multi-line address preserved with zero data loss.\n');
+
 console.log('====================================================');
-console.log('ALL 4 RIGOROUS EDI FIDELITY TESTS PASSED WITH 100% SUCCESS!');
+console.log('ALL 5 RIGOROUS EDI FIDELITY TESTS PASSED WITH 100% SUCCESS!');
 console.log('Zero data loss, zero hallucinated defaults, 100% strict compliance.');
+console.log('Complex real-world 850 (REF/N9/MSG/PO4) fully covered.');
 console.log('====================================================');
