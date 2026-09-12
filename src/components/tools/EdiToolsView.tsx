@@ -57,6 +57,8 @@ import {
 } from '../../data/ediDictionary';
 import { TOOLS } from '../../data/tools';
 import { popSmartPastePayload } from '../../lib/workspace';
+import { EdiPhase2UxBoundary } from '../edi/EdiPhase2UxBoundary';
+import { EdiPhase2Inspector } from '../edi/EdiPhase2Inspector';
 
 const SEGMENT_NAMES: Record<string, string> = COMPREHENSIVE_SEGMENT_DICTIONARY;
 
@@ -2040,6 +2042,14 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
         </div>
       )}
 
+      {/* Phase 2: synchronized raw ↔ visual tree inspector for every EDI tool */}
+      <EdiPhase2Inspector
+        input={input}
+        elementSeparator={elementSeparator}
+        segmentTerminator={segmentTerminator}
+        onLoadSample={loadTransactionSample}
+      />
+
       {/* 4. EDI VALIDATOR VIEW: Full Dashboard, Report & Live Editor */}
       {activeTab === 'edi-validator' && (
         <div className="space-y-6">
@@ -2737,7 +2747,24 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
           <EdiDiffCompareView tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} initialInput={input} />
         )}
         {activeTab === 'edi-message-gateway' && (
-          <EdiMessageGatewayView tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} initialInput={input} />
+          <EdiPhase2UxBoundary
+            title="EDI Message Gateway"
+            description="Guided inbound/outbound EDI gateway with progressive disclosure, Story Mode samples, and synchronized segment inspection."
+            defaultSampleId={selectedSampleId}
+            initialInput={input}
+            onSampleLoad={(payload, sampleId) => {
+              setSelectedSampleId(sampleId);
+              setInput(payload);
+            }}
+          >
+            <EdiMessageGatewayView
+              key={`phase2-gateway-${selectedSampleId}`}
+              tool={tool}
+              onBackToHome={onBackToHome}
+              onSelectRelated={onSelectRelated}
+              initialInput={input}
+            />
+          </EdiPhase2UxBoundary>
         )}
         {activeTab === 'edi-schema-viewer' && (
           <EdiSchemaViewer initialInput={input} onNavigateToTab={setActiveTab} />
