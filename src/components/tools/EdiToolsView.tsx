@@ -289,8 +289,8 @@ export function evaluateFsma204Traceability(segments: ParsedSegment[]) {
   // 3. Critical Tracking Event (CTE)
   const bsnSeg = segments.find((s) => s.tag === 'BSN');
   if (bsnSeg) {
-    const purpose = bsnSeg.elements[0] || '00';
-    const struct = bsnSeg.elements[4] || '0001';
+    const purpose = bsnSeg.elements[0] || 'Unspecified';
+    const struct = bsnSeg.elements[4] || 'Unspecified';
     checks.push({
       id: 'kde-cte',
       title: 'Critical Tracking Event (CTE)',
@@ -595,106 +595,502 @@ export function convertEdiToJsonWithSchema(
     return JSON.stringify(res, null, 2);
   }
 
-  // Default: 'semantic' Business Object Model
-  const isa = segments.find((s) => s.tag === 'ISA');
-  const gs = segments.find((s) => s.tag === 'GS');
-  const st = segments.find((s) => s.tag === 'ST');
-  const beg = segments.find((s) => s.tag === 'BEG');
-  const big = segments.find((s) => s.tag === 'BIG');
-  const bsn = segments.find((s) => s.tag === 'BSN');
-  const cur = segments.find((s) => s.tag === 'CUR');
+  // Default: 'semantic' Business Object Model - 100% Faithful to Source Transaction
+  // Tracks every segment to guarantee zero data loss and zero fabricated values.
+  const processedIndices = new Set<number>();
 
+  const findAndTrack = (tag: string): ParsedSegment | undefined => {
+    const idx = segments.findIndex((s) => s.tag === tag);
+    if (idx !== -1) {
+      processedIndices.add(idx);
+      return segments[idx];
+    }
+    return undefined;
+  };
+
+  // 1. Dual-Standard Check: UN/EDIFACT vs ANSI X12
+  const isEdifact =
+    segments.some((s) => ['UNA', 'UNB', 'UNH', 'BGM', 'NAD', 'UNT', 'UNZ'].includes(s.tag)) ||
+    (segments[0] && ['UNA', 'UNB'].includes(segments[0].tag));
+
+  if (isEdifact) {
+    const una = findAndTrack('UNA');
+    const unb = findAndTrack('UNB');
+    const unh = findAndTrack('UNH');
+    const bgm = findAndTrack('BGM');
+    const dtmList = segments.filter((s) => s.tag === 'DTM');
+    const unt = findAndTrack('UNT');
+    const unz = findAndTrack('UNZ');
+
+    // Parse NAD parties (NAD+SU, NAD+BY, NAD+DP, etc.)
+    const parties: any[] = [];
+    segments.forEach((s, idx) => {
+      if (s.tag === 'NAD') {
+        processedIndices.add(idx);
+        const idParts = (s.elements[1] || '').split(':');
+        parties.push({
+          type: s.elements[0]?.trim() || undefined,
+          id: idParts[0]?.trim() || undefined,
+          idQualifier: idParts[1]?.trim() || undefined,
+          name: s.elements[3]?.trim() || s.elements[2]?.trim() || undefined,
+          street: s.elements[4]?.trim() || undefined,
+          city: s.elements[5]?.trim() || undefined,
+          postalCode: s.elements[7]?.trim() || undefined,
+          country: s.elements[8]?.trim() || undefined,
+        });
+      }
+    });
+
+    // Parse LIN line items
+    const items: any[] = [];
+    let currentLin: any = null;
+    segments.forEach((s, idx) => {
+      if (s.tag === 'LIN') {
+        processedIndices.add(idx);
+        if (currentLin) items.push(currentLin);
+        const codeParts = (s.elements[2] || '').split(':');
+        currentLin = {
+          line: s.elements[0]?.trim() || undefined,
+          itemNumber: codeParts[0]?.trim() || s.elements[1]?.trim() || undefined,
+          itemType: codeParts[1]?.trim() || undefined,
+          descriptions: [] as string[],
+        };
+      } else if (s.tag === 'IMD' && currentLin) {
+        processedIndices.add(idx);
+        const desc = s.elements[2]?.trim() || s.elements[1]?.trim();
+        if (desc) currentLin.descriptions.push(desc);
+      } else if (s.tag === 'QTY' && currentLin) {
+        processedIndices.add(idx);
+        const qtyParts = (s.elements[0] || '').split(':');
+        currentLin.quantity = qtyParts[1] ? parseFloat(qtyParts[1]) : undefined;
+        currentLin.uom = qtyParts[2]?.trim() || undefined;
+      } else if (s.tag === 'PRI' && currentLin) {
+        processedIndices.add(idx);
+        const priParts = (s.elements[0] || '').split(':');
+        currentLin.unitPrice = priParts[1] ? parseFloat(priParts[1]) : undefined;
+      }
+    });
+    if (currentLin) items.push(currentLin);
+
+    const unmapped = segments
+      .filter((_, i) => !processedIndices.has(i))
+      .map((seg) => ({
+        tag: seg.tag,
+        lineNumber: seg.lineNumber,
+        elements: seg.elements,
+        raw: seg.raw,
+      }));
+
+    const res = {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      format: 'EDIFACT_SEMANTIC_SCHEMA',
+      standard: 'UN/EDIFACT',
+      generatedAt: new Date().toISOString(),
+      serviceStringAdvice: una ? una.raw : undefined,
+      interchange: unb
+        ? {
+            syntax: unb.elements[0]?.trim() || undefined,
+            sender: unb.elements[1]?.trim() || undefined,
+            recipient: unb.elements[2]?.trim() || undefined,
+            date: unb.elements[3]?.trim() || undefined,
+            controlReference: unb.elements[4]?.trim() || undefined,
+          }
+        : undefined,
+      message: unh
+        ? {
+            reference: unh.elements[0]?.trim() || undefined,
+            type: unh.elements[1]?.trim() || undefined,
+            document: bgm
+              ? {
+                  type: bgm.elements[0]?.trim() || undefined,
+                  number: bgm.elements[1]?.trim() || undefined,
+                  function: bgm.elements[2]?.trim() || undefined,
+                }
+              : undefined,
+            dates:
+              dtmList.length > 0
+                ? dtmList.map((d) => ({
+                    qualifier: (d.elements[0] || '').split(':')[0]?.trim(),
+                    value: (d.elements[0] || '').split(':')[1]?.trim(),
+                  }))
+                : undefined,
+            parties: parties.length > 0 ? parties : undefined,
+            items: items.length > 0 ? items : undefined,
+          }
+        : undefined,
+      summary: {
+        declaredSegmentCount: unt?.elements[0] ? parseInt(unt.elements[0], 10) : undefined,
+        messageReference: unt?.elements[1]?.trim() || undefined,
+        interchangeControlCount: unz?.elements[0] ? parseInt(unz.elements[0], 10) : undefined,
+        interchangeControlReference: unz?.elements[1]?.trim() || undefined,
+      },
+      unmappedSegments: unmapped.length > 0 ? unmapped : undefined,
+      allSegments: segments.map((s) => ({
+        tag: s.tag,
+        lineNumber: s.lineNumber,
+        elements: s.elements,
+      })),
+    };
+    return JSON.stringify(res, null, 2);
+  }
+
+  // 2. ANSI X12 Semantic Business Object Model
+  const isa = findAndTrack('ISA');
+  const gs = findAndTrack('GS');
+  const st = findAndTrack('ST');
+  const beg = findAndTrack('BEG'); // 850 PO
+  const bak = findAndTrack('BAK'); // 855 PO Ack
+  const big = findAndTrack('BIG'); // 810 Invoice
+  const bsn = findAndTrack('BSN'); // 856 ASN
+  const bch = findAndTrack('BCH'); // 860 PO Change
+  const bpr = findAndTrack('BPR'); // 820 Payment Order
+  const trn = findAndTrack('TRN'); // 820 Trace
+  const ak1 = findAndTrack('AK1'); // 997 FA Group
+  const ak9 = findAndTrack('AK9'); // 997 FA Trailer
+  const b2 = findAndTrack('B2');   // 204 Carrier Tender
+  const b2a = findAndTrack('B2A'); // 204 Tender Purpose
+  const b10 = findAndTrack('B10'); // 214 Carrier Status
+  const cur = findAndTrack('CUR');
+  const ctt = findAndTrack('CTT');
+  const tds = findAndTrack('TDS');
+  const se = findAndTrack('SE');
+  const ge = findAndTrack('GE');
+  const iea = findAndTrack('IEA');
+
+  // Track Hierarchical Levels (856 ASN HL Loops)
+  const hlSegments = segments.filter((s) => s.tag === 'HL');
+  const hierarchicalLevels: any[] = [];
+  if (hlSegments.length > 0) {
+    hlSegments.forEach((hl) => {
+      hierarchicalLevels.push({
+        id: hl.elements[0]?.trim() || undefined,
+        parentId: hl.elements[1]?.trim() || undefined,
+        levelCode: hl.elements[2]?.trim() || undefined, // S=Shipment, O=Order, T=Tare, P=Pack, I=Item
+        childCode: hl.elements[3]?.trim() || undefined,
+        line: hl.lineNumber,
+      });
+    });
+  }
+
+  // Identify where line items begin
+  const firstLineIdx = segments.findIndex((s) => ['PO1', 'IT1', 'LIN', 'POC'].includes(s.tag));
+  const headerEndIdx = firstLineIdx !== -1 ? firstLineIdx : segments.length;
+
+  // Header-level references, dates, terms, carrier instructions, allowances, notes
+  const headerReferences: any[] = [];
+  const headerDates: any[] = [];
+  const headerContacts: any[] = [];
+  const headerTerms: any[] = [];
+  const carrierRouting: any[] = [];
+  const fobTerms: any[] = [];
+  const allowancesCharges: any[] = [];
+  const headerNotes: any[] = [];
+
+  // Parse Parties (N1 Loop)
   const parties: any[] = [];
   let currentParty: any = null;
-  segments.forEach((s) => {
+
+  for (let i = 0; i < headerEndIdx; i++) {
+    const s = segments[i];
+    if (['ISA', 'GS', 'ST', 'BEG', 'BIG', 'BSN', 'BCH', 'BAK', 'BPR', 'TRN', 'AK1', 'B2', 'B2A', 'B10', 'CUR'].includes(s.tag)) {
+      continue;
+    }
+
     if (s.tag === 'N1') {
+      processedIndices.add(i);
       if (currentParty) parties.push(currentParty);
       currentParty = {
-        type: s.elements[0] || '',
-        name: s.elements[1] || '',
-        idQualifier: s.elements[2] || '',
-        idCode: s.elements[3] || '',
+        type: s.elements[0]?.trim() || undefined,
+        name: s.elements[1]?.trim() || undefined,
+        idQualifier: s.elements[2]?.trim() || undefined,
+        idCode: s.elements[3]?.trim() || undefined,
       };
+    } else if (s.tag === 'N2' && currentParty) {
+      processedIndices.add(i);
+      currentParty.additionalName = [s.elements[0]?.trim(), s.elements[1]?.trim()].filter(Boolean).join(' ');
     } else if (s.tag === 'N3' && currentParty) {
-      currentParty.address = s.elements[0] || '';
+      processedIndices.add(i);
+      currentParty.address = [s.elements[0]?.trim(), s.elements[1]?.trim()].filter(Boolean).join(', ');
     } else if (s.tag === 'N4' && currentParty) {
-      currentParty.city = s.elements[0] || '';
-      currentParty.state = s.elements[1] || '';
-      currentParty.zip = s.elements[2] || '';
-      currentParty.country = s.elements[3] || 'US';
+      processedIndices.add(i);
+      currentParty.city = s.elements[0]?.trim() || undefined;
+      currentParty.state = s.elements[1]?.trim() || undefined;
+      currentParty.zip = s.elements[2]?.trim() || undefined;
+      currentParty.country = s.elements[3]?.trim() || undefined; // NO hardcoded 'US'
+    } else if (s.tag === 'REF') {
+      processedIndices.add(i);
+      const refObj = {
+        qualifier: s.elements[0]?.trim() || undefined,
+        value: s.elements[1]?.trim() || undefined,
+        description: s.elements[2]?.trim() || undefined,
+      };
+      if (currentParty) {
+        currentParty.references = currentParty.references || [];
+        currentParty.references.push(refObj);
+      } else {
+        headerReferences.push(refObj);
+      }
+    } else if (s.tag === 'PER') {
+      processedIndices.add(i);
+      const perObj = {
+        functionCode: s.elements[0]?.trim() || undefined,
+        name: s.elements[1]?.trim() || undefined,
+        commQualifier: s.elements[2]?.trim() || undefined,
+        commNumber: s.elements[3]?.trim() || undefined,
+      };
+      if (currentParty) {
+        currentParty.contacts = currentParty.contacts || [];
+        currentParty.contacts.push(perObj);
+      } else {
+        headerContacts.push(perObj);
+      }
+    } else if (s.tag === 'DTM') {
+      processedIndices.add(i);
+      headerDates.push({
+        qualifier: s.elements[0]?.trim() || undefined,
+        date: s.elements[1]?.trim() || undefined,
+        time: s.elements[2]?.trim() || undefined,
+      });
+    } else if (s.tag === 'ITD') {
+      processedIndices.add(i);
+      headerTerms.push({
+        termsTypeCode: s.elements[0]?.trim() || undefined,
+        termsBasisDateCode: s.elements[1]?.trim() || undefined,
+        termsDiscountPercent: s.elements[2] ? parseFloat(s.elements[2]) : undefined,
+        termsDiscountDays: s.elements[4] ? parseInt(s.elements[4], 10) : undefined,
+        termsNetDays: s.elements[6] ? parseInt(s.elements[6], 10) : undefined,
+        termsDescription: s.elements[11]?.trim() || undefined,
+      });
+    } else if (s.tag === 'TD5' || s.tag === 'TD1') {
+      processedIndices.add(i);
+      carrierRouting.push({
+        tag: s.tag,
+        routingSequenceCode: s.elements[0]?.trim() || undefined,
+        idQualifier: s.elements[1]?.trim() || undefined,
+        idCode: s.elements[2]?.trim() || undefined,
+        transportMethod: s.elements[3]?.trim() || undefined,
+        routing: s.elements[4]?.trim() || undefined,
+      });
+    } else if (s.tag === 'FOB') {
+      processedIndices.add(i);
+      fobTerms.push({
+        shipmentMethodCode: s.elements[0]?.trim() || undefined,
+        locationQualifier: s.elements[1]?.trim() || undefined,
+        description: s.elements[2]?.trim() || undefined,
+      });
+    } else if (s.tag === 'SAC') {
+      processedIndices.add(i);
+      allowancesCharges.push({
+        indicator: s.elements[0]?.trim() || undefined,
+        serviceCode: s.elements[1]?.trim() || undefined,
+        amount: s.elements[4] ? parseFloat(s.elements[4]) : undefined,
+        rate: s.elements[7] ? parseFloat(s.elements[7]) : undefined,
+      });
+    } else if (s.tag === 'MSG' || s.tag === 'NTE') {
+      processedIndices.add(i);
+      headerNotes.push(s.elements.map((el) => el.trim()).filter(Boolean).join(' '));
     }
-  });
+  }
   if (currentParty) parties.push(currentParty);
 
+  // Parse Line Items & Details
   const items: any[] = [];
   let currentItem: any = null;
-  segments.forEach((s) => {
-    if (s.tag === 'PO1' || s.tag === 'IT1') {
+
+  for (let i = firstLineIdx !== -1 ? firstLineIdx : segments.length; i < segments.length; i++) {
+    const s = segments[i];
+
+    // Check if we reached summary/trailer
+    if (['CTT', 'TDS', 'SE', 'GE', 'IEA'].includes(s.tag)) {
+      processedIndices.add(i);
+      continue;
+    }
+
+    if (['PO1', 'IT1', 'LIN', 'POC'].includes(s.tag)) {
+      processedIndices.add(i);
       if (currentItem) items.push(currentItem);
+
+      // Parse product identification pairs (e.g. VN, UP, IN, BP, MG)
+      const productIds: Array<{ qualifier: string; id: string }> = [];
+      const productIdMap: Record<string, string> = {};
+      for (let pIdx = 5; pIdx < s.elements.length; pIdx += 2) {
+        const q = s.elements[pIdx]?.trim();
+        const v = s.elements[pIdx + 1]?.trim();
+        if (q && v) {
+          productIds.push({ qualifier: q, id: v });
+          productIdMap[q] = v;
+        }
+      }
+
       currentItem = {
-        line: parseInt(s.elements[0] || '1', 10),
-        quantity: parseFloat(s.elements[1] || '0'),
-        uom: s.elements[2] || 'EA',
-        unitPrice: parseFloat(s.elements[3] || '0'),
-        partNumber: s.elements[6] || s.elements[5] || '',
+        line: s.elements[0]?.trim() || undefined, // NO hardcoded '1'
+        quantity: s.elements[1] !== undefined && s.elements[1] !== '' ? parseFloat(s.elements[1]) : undefined,
+        uom: s.elements[2]?.trim() || undefined, // NO hardcoded 'EA'
+        unitPrice: s.elements[3] !== undefined && s.elements[3] !== '' ? parseFloat(s.elements[3]) : undefined,
+        basisOfUnitPrice: s.elements[4]?.trim() || undefined,
+        productIds: productIds.length > 0 ? productIds : undefined,
+        productIdMap: Object.keys(productIdMap).length > 0 ? productIdMap : undefined,
+        descriptions: [] as string[],
+        references: [] as any[],
+        dates: [] as any[],
+        allowancesCharges: [] as any[],
+        notes: [] as string[],
       };
     } else if (s.tag === 'PID' && currentItem) {
-      currentItem.description = s.elements[4] || s.elements[0] || '';
-    } else if (s.tag === 'LIN' && currentItem) {
-      currentItem.gtin = s.elements[2] || '';
+      processedIndices.add(i);
+      const desc = s.elements[4]?.trim() || s.elements[0]?.trim();
+      if (desc) currentItem.descriptions.push(desc);
+    } else if (s.tag === 'REF' && currentItem) {
+      processedIndices.add(i);
+      currentItem.references.push({
+        qualifier: s.elements[0]?.trim() || undefined,
+        value: s.elements[1]?.trim() || undefined,
+      });
+    } else if (s.tag === 'DTM' && currentItem) {
+      processedIndices.add(i);
+      currentItem.dates.push({
+        qualifier: s.elements[0]?.trim() || undefined,
+        date: s.elements[1]?.trim() || undefined,
+      });
+    } else if (s.tag === 'SAC' && currentItem) {
+      processedIndices.add(i);
+      currentItem.allowancesCharges.push({
+        indicator: s.elements[0]?.trim() || undefined,
+        amount: s.elements[4] ? parseFloat(s.elements[4]) : undefined,
+      });
+    } else if (s.tag === 'ACK' && currentItem) {
+      processedIndices.add(i);
+      currentItem.acknowledgments = currentItem.acknowledgments || [];
+      currentItem.acknowledgments.push({
+        lineStatusCode: s.elements[0]?.trim() || undefined,
+        quantity: s.elements[1] !== undefined && s.elements[1] !== '' ? parseFloat(s.elements[1]) : undefined,
+        uom: s.elements[2]?.trim() || undefined,
+        dateQualifier: s.elements[3]?.trim() || undefined,
+        date: s.elements[4]?.trim() || undefined,
+      });
+    } else if (s.tag === 'SN1' && currentItem) {
+      processedIndices.add(i);
+      currentItem.shipmentDetail = {
+        numberOfUnitsShipped: s.elements[1] !== undefined && s.elements[1] !== '' ? parseFloat(s.elements[1]) : undefined,
+        uom: s.elements[2]?.trim() || undefined,
+        accumulatedQty: s.elements[3] !== undefined && s.elements[3] !== '' ? parseFloat(s.elements[3]) : undefined,
+      };
+    } else if ((s.tag === 'MSG' || s.tag === 'NTE') && currentItem) {
+      processedIndices.add(i);
+      currentItem.notes.push(s.elements.map((el) => el.trim()).filter(Boolean).join(' '));
     }
-  });
+  }
   if (currentItem) items.push(currentItem);
 
-  const ctt = segments.find((s) => s.tag === 'CTT');
-  const tds = segments.find((s) => s.tag === 'TDS');
+  // Clean up empty arrays in items
+  items.forEach((item) => {
+    if (item.descriptions && item.descriptions.length === 0) delete item.descriptions;
+    if (item.references && item.references.length === 0) delete item.references;
+    if (item.dates && item.dates.length === 0) delete item.dates;
+    if (item.allowancesCharges && item.allowancesCharges.length === 0) delete item.allowancesCharges;
+    if (item.notes && item.notes.length === 0) delete item.notes;
+  });
+
+  // Collect any unmapped segments to guarantee 100% lossless fidelity
+  const unmappedSegments = segments
+    .map((seg, idx) => ({ seg, idx }))
+    .filter(({ idx }) => !processedIndices.has(idx))
+    .map(({ seg }) => ({
+      tag: seg.tag,
+      lineNumber: seg.lineNumber,
+      name: seg.name,
+      elements: seg.elements,
+      raw: seg.raw,
+    }));
 
   const res = {
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     format: 'ASC_X12_SEMANTIC_SCHEMA',
     standard: isa ? 'ANSI_X12' : 'EDI',
-    version: gs?.elements[7] || '004010',
+    version: gs?.elements[7]?.trim() || undefined, // NO hardcoded '004010'
     generatedAt: new Date().toISOString(),
     interchange: isa
       ? {
-          sender: isa.elements[5]?.trim(),
-          senderQualifier: isa.elements[4]?.trim(),
-          receiver: isa.elements[7]?.trim(),
-          receiverQualifier: isa.elements[6]?.trim(),
-          controlNumber: isa.elements[12]?.trim(),
-          date: isa.elements[8]?.trim(),
-          time: isa.elements[9]?.trim(),
+          sender: isa.elements[5]?.trim() || undefined,
+          senderQualifier: isa.elements[4]?.trim() || undefined,
+          receiver: isa.elements[7]?.trim() || undefined,
+          receiverQualifier: isa.elements[6]?.trim() || undefined,
+          controlNumber: isa.elements[12]?.trim() || undefined,
+          date: isa.elements[8]?.trim() || undefined,
+          time: isa.elements[9]?.trim() || undefined,
           ackRequested: isa.elements[13]?.trim() === '1',
+          usageIndicator: isa.elements[14]?.trim() || undefined,
         }
-      : null,
+      : undefined,
     functionalGroup: gs
       ? {
-          functionalCode: gs.elements[0]?.trim(),
-          sender: gs.elements[1]?.trim(),
-          receiver: gs.elements[2]?.trim(),
-          date: gs.elements[3]?.trim(),
-          time: gs.elements[4]?.trim(),
-          controlNumber: gs.elements[5]?.trim(),
-          version: gs.elements[7]?.trim(),
+          functionalCode: gs.elements[0]?.trim() || undefined,
+          sender: gs.elements[1]?.trim() || undefined,
+          receiver: gs.elements[2]?.trim() || undefined,
+          date: gs.elements[3]?.trim() || undefined,
+          time: gs.elements[4]?.trim() || undefined,
+          controlNumber: gs.elements[5]?.trim() || undefined,
+          agencyCode: gs.elements[6]?.trim() || undefined,
+          version: gs.elements[7]?.trim() || undefined,
         }
-      : null,
+      : undefined,
     transaction: {
-      set: st?.elements[0] || '850',
-      controlNumber: st?.elements[1] || '0001',
+      set: st?.elements[0]?.trim() || undefined, // NO hardcoded '850'
+      controlNumber: st?.elements[1]?.trim() || undefined, // NO hardcoded '0001'
+      implementationConvention: st?.elements[2]?.trim() || undefined,
       header: {
-        poNumber: beg?.elements[2] || '',
-        invoiceNumber: big?.elements[1] || '',
-        shipmentId: bsn?.elements[1] || '',
-        date: beg?.elements[4] || big?.elements[0] || bsn?.elements[2] || '',
-        currency: cur?.elements[1] || 'USD',
+        poNumber: beg?.elements[2]?.trim() || bch?.elements[2]?.trim() || bak?.elements[2]?.trim() || undefined,
+        invoiceNumber: big?.elements[1]?.trim() || undefined,
+        shipmentId: bsn?.elements[1]?.trim() || b10?.elements[1]?.trim() || undefined,
+        shipmentDate: bsn?.elements[2]?.trim() || undefined,
+        shipmentTime: bsn?.elements[3]?.trim() || undefined,
+        hierarchicalStructureCode: bsn?.elements[4]?.trim() || undefined,
+        date: beg?.elements[4]?.trim() || big?.elements[0]?.trim() || bsn?.elements[2]?.trim() || bch?.elements[4]?.trim() || bak?.elements[3]?.trim() || undefined,
+        acknowledgmentType: bak?.elements[1]?.trim() || undefined,
+        acknowledgmentDate: bak?.elements[8]?.trim() || undefined,
+        paymentAmount: bpr?.elements[1] ? parseFloat(bpr.elements[1]) : undefined,
+        paymentMethod: bpr?.elements[3]?.trim() || undefined,
+        paymentEffectiveDate: bpr?.elements[15]?.trim() || undefined,
+        traceNumber: trn?.elements[1]?.trim() || undefined,
+        loadTenderNumber: b2?.elements[3]?.trim() || undefined,
+        carrierScac: b2?.elements[1]?.trim() || undefined,
+        purposeCode: beg?.elements[0]?.trim() || bsn?.elements[0]?.trim() || bch?.elements[0]?.trim() || bak?.elements[0]?.trim() || b2a?.elements[0]?.trim() || undefined,
+        typeCode: beg?.elements[1]?.trim() || bch?.elements[1]?.trim() || undefined,
+        currency: cur?.elements[1]?.trim() ? { code: cur.elements[1].trim(), entityIdentifier: cur.elements[0]?.trim() } : undefined, // NO hardcoded 'USD'
+        references: headerReferences.length > 0 ? headerReferences : undefined,
+        dates: headerDates.length > 0 ? headerDates : undefined,
+        contacts: headerContacts.length > 0 ? headerContacts : undefined,
+        paymentTerms: headerTerms.length > 0 ? headerTerms : undefined,
+        carrierRouting: carrierRouting.length > 0 ? carrierRouting : undefined,
+        fobTerms: fobTerms.length > 0 ? fobTerms : undefined,
+        allowancesCharges: allowancesCharges.length > 0 ? allowancesCharges : undefined,
+        notes: headerNotes.length > 0 ? headerNotes : undefined,
       },
-      parties,
-      items,
+      hierarchicalLevels: hierarchicalLevels.length > 0 ? hierarchicalLevels : undefined,
+      parties: parties.length > 0 ? parties : undefined,
+      items: items.length > 0 ? items : undefined,
       summary: {
-        totalLineItems: ctt ? parseInt(ctt.elements[0], 10) : items.length,
-        totalInvoiceAmount: tds ? parseFloat(tds.elements[0]) / 100 : undefined,
+        totalLineItems: ctt?.elements[0] ? parseInt(ctt.elements[0], 10) : items.length > 0 ? items.length : undefined,
+        hashTotal: ctt?.elements[1] ? parseFloat(ctt.elements[1]) : undefined,
+        totalInvoiceAmount: tds?.elements[0] ? parseFloat(tds.elements[0]) / 100 : undefined,
+        declaredSegmentCount: se?.elements[0] ? parseInt(se.elements[0], 10) : undefined,
+        trailerControlNumber: se?.elements[1]?.trim() || undefined,
+        functionalAckTotals: ak9
+          ? {
+              status: ak9.elements[0]?.trim() || undefined,
+              includedSets: ak9.elements[1] ? parseInt(ak9.elements[1], 10) : undefined,
+              receivedSets: ak9.elements[2] ? parseInt(ak9.elements[2], 10) : undefined,
+              acceptedSets: ak9.elements[3] ? parseInt(ak9.elements[3], 10) : undefined,
+            }
+          : undefined,
       },
+      unmappedSegments: unmappedSegments.length > 0 ? unmappedSegments : undefined,
     },
+    allSegments: segments.map((s) => ({
+      tag: s.tag,
+      lineNumber: s.lineNumber,
+      elements: s.elements,
+    })),
   };
   return JSON.stringify(res, null, 2);
 }
@@ -764,13 +1160,30 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
       const segTerm = trimmed[105];
       if (elemSep) setElementSeparator(elemSep);
       if (compSep) setSubElementSeparator(compSep);
-      if (segTerm && !/\s/.test(segTerm)) {
+      if (segTerm === '\r' || segTerm === '\n') {
+        setSegmentTerminator('\n');
+      } else if (segTerm && !/\s/.test(segTerm)) {
         setSegmentTerminator(segTerm);
       }
     } else if (trimmed.startsWith('UNA') && trimmed.length >= 9) {
       setSubElementSeparator(trimmed[3]);
       setElementSeparator(trimmed[4]);
       setSegmentTerminator(trimmed[8]);
+    } else if (trimmed.startsWith('UNB') || trimmed.includes('UNH+')) {
+      setElementSeparator('+');
+      setSubElementSeparator(':');
+      setSegmentTerminator("'");
+    } else if (trimmed) {
+      // Auto-detect for EDI snippets or files without ISA envelope
+      if (trimmed.includes('~')) {
+        setSegmentTerminator('~');
+      } else if (trimmed.includes("'")) {
+        setSegmentTerminator("'");
+      } else if (trimmed.includes('\n')) {
+        setSegmentTerminator('\n');
+      }
+      if (trimmed.includes('*')) setElementSeparator('*');
+      else if (trimmed.includes('+')) setElementSeparator('+');
     }
   }, [input]);
 
@@ -808,23 +1221,50 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
       const segTerm = trimmed[105];
       setElementSeparator(elemSep);
       setSubElementSeparator(compSep);
-      if (segTerm && !/\s/.test(segTerm)) {
+      if (segTerm === '\r' || segTerm === '\n') {
+        setSegmentTerminator('\n');
+      } else if (segTerm && !/\s/.test(segTerm)) {
         setSegmentTerminator(segTerm);
       } else {
         setSegmentTerminator('~');
       }
+    } else if (trimmed.startsWith('UNA') && trimmed.length >= 9) {
+      setSubElementSeparator(trimmed[3]);
+      setElementSeparator(trimmed[4]);
+      setSegmentTerminator(trimmed[8]);
+    } else if (trimmed.startsWith('UNB') || trimmed.includes('UNH+')) {
+      setElementSeparator('+');
+      setSubElementSeparator(':');
+      setSegmentTerminator("'");
+    } else if (trimmed) {
+      if (trimmed.includes('~')) setSegmentTerminator('~');
+      else if (trimmed.includes("'")) setSegmentTerminator("'");
+      else if (trimmed.includes('\n')) setSegmentTerminator('\n');
+      if (trimmed.includes('*')) setElementSeparator('*');
+      else if (trimmed.includes('+')) setElementSeparator('+');
     }
   };
 
   const parsedSegments = useMemo<ParsedSegment[]>(() => {
-    if (!input) return [];
-    let rawSegs: string[] = [];
-    const term = segmentTerminator || '~';
-    if (term === '\n') {
-      rawSegs = input.split(/\r?\n/);
-    } else {
-      rawSegs = input.split(term);
+    const trimmedInput = input.trim();
+    if (!trimmedInput) return [];
+
+    let term = segmentTerminator || '~';
+    // If terminator is '~' but input has NO '~' and contains linebreaks, gracefully handle as newline
+    if (term === '~' && !input.includes('~') && input.includes('\n')) {
+      term = '\n';
     }
+
+    let rawSegs: string[] = [];
+    if (term === '\n' || term === '\r\n') {
+      rawSegs = input.split(/\r?\n+/);
+    } else {
+      // Split on the terminator AND strip any immediate CRLF following it
+      const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const splitRegex = new RegExp(`${escapedTerm}[\\r\\n]*`, 'g');
+      rawSegs = input.split(splitRegex);
+    }
+
     const segments: ParsedSegment[] = [];
     let currentLevel = 0;
     rawSegs.forEach((seg, idx) => {
@@ -846,7 +1286,7 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
         id: `${tag}-${idx}`,
         tag,
         name,
-        elements: elements.slice(1),
+        elements: elements.slice(1).map((el) => el.trim()),
         raw: cleaned,
         lineNumber: idx + 1,
         level: currentLevel,
@@ -864,10 +1304,104 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
     if (segments.length === 0) {
       return [{ type: 'error', message: 'No valid EDI segments detected with current delimiters.' }];
     }
+
+    const isEdifact =
+      segments.some((s) => ['UNA', 'UNB', 'UNH', 'UNT', 'UNZ'].includes(s.tag)) ||
+      (segments[0] && ['UNA', 'UNB'].includes(segments[0].tag));
+
+    if (isEdifact) {
+      // --- UN/EDIFACT Validation Suite ---
+      const unb = segments.find((s) => s.tag === 'UNB');
+      const unz = segments.find((s) => s.tag === 'UNZ');
+      const unhList = segments.filter((s) => s.tag === 'UNH');
+      const untList = segments.filter((s) => s.tag === 'UNT');
+
+      if (!unb && !unz && unhList.length > 0) {
+        issues.push({
+          type: 'info',
+          message: 'UN/EDIFACT Message snippet (UNH/UNT) detected without outer Interchange (UNB/UNZ) envelope. Validating message structure.',
+        });
+      } else {
+        if (!unb) {
+          issues.push({ type: 'error', message: 'Missing mandatory UN/EDIFACT Interchange Header (UNB).' });
+        }
+        if (!unz) {
+          issues.push({ type: 'error', message: 'Missing mandatory UN/EDIFACT Interchange Trailer (UNZ).' });
+        } else if (unb && unz) {
+          const unbCtrl = unb.elements[4]?.trim();
+          const unzCtrl = unz.elements[1]?.trim();
+          if (unbCtrl && unzCtrl && unbCtrl !== unzCtrl) {
+            issues.push({
+              type: 'error',
+              message: `Interchange Control Reference mismatch: UNB05 (${unbCtrl}) != UNZ02 (${unzCtrl}).`,
+              line: unz.lineNumber,
+              segment: 'UNZ',
+            });
+          }
+          const declaredMsgCount = parseInt(unz.elements[0], 10);
+          if (!isNaN(declaredMsgCount) && declaredMsgCount !== unhList.length) {
+            issues.push({
+              type: 'error',
+              message: `Interchange message count mismatch in UNZ01: declared ${declaredMsgCount}, but found ${unhList.length} UNH message(s).`,
+              line: unz.lineNumber,
+              segment: 'UNZ',
+            });
+          }
+        }
+      }
+
+      // Message (UNH/UNT) validation
+      if (unhList.length !== untList.length) {
+        issues.push({
+          type: 'error',
+          message: `UN/EDIFACT Message Header/Trailer count mismatch: found ${unhList.length} UNH and ${untList.length} UNT.`,
+        });
+      }
+
+      unhList.forEach((unh, idx) => {
+        const unt = untList[idx];
+        if (unt) {
+          const unhRef = unh.elements[0]?.trim();
+          const untRef = unt.elements[1]?.trim();
+          if (unhRef && untRef && unhRef !== untRef) {
+            issues.push({
+              type: 'error',
+              message: `Message Reference Number mismatch: UNH01 (${unhRef}) != UNT02 (${untRef}).`,
+              line: unt.lineNumber,
+              segment: 'UNT',
+            });
+          }
+          const unhIndex = segments.findIndex((s) => s === unh);
+          const untIndex = segments.findIndex((s) => s === unt);
+          if (unhIndex !== -1 && untIndex !== -1 && untIndex >= unhIndex) {
+            const actualCount = untIndex - unhIndex + 1;
+            const declaredCount = parseInt(unt.elements[0], 10);
+            if (!isNaN(declaredCount) && declaredCount !== actualCount) {
+              issues.push({
+                type: 'error',
+                message: `Segment count mismatch in UNT01: declared ${declaredCount}, but actual count between UNH and UNT is ${actualCount}.`,
+                line: unt.lineNumber,
+                segment: 'UNT',
+              });
+            }
+          }
+        }
+      });
+
+      if (issues.length === 0) {
+        issues.push({
+          type: 'info',
+          message: 'All UN/EDIFACT envelope pairing, control references, and segment counts passed validation successfully!',
+        });
+      }
+      return issues;
+    }
+
+    // --- ANSI X12 Validation Suite ---
     const isa = segments.find((s) => s.tag === 'ISA');
     const iea = segments.find((s) => s.tag === 'IEA');
-    const gs = segments.find((s) => s.tag === 'GS');
-    const ge = segments.find((s) => s.tag === 'GE');
+    const gsList = segments.filter((s) => s.tag === 'GS');
+    const geList = segments.filter((s) => s.tag === 'GE');
     const stList = segments.filter((s) => s.tag === 'ST');
     const seList = segments.filter((s) => s.tag === 'SE');
 
@@ -887,51 +1421,83 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
       });
     }
 
-    if (!isa) {
-      issues.push({ type: 'error', message: 'Missing mandatory Interchange Header (ISA).' });
-    } else if (isa.elements.length !== 16) {
+    if (!isa && !iea && stList.length > 0) {
       issues.push({
-        type: 'warning',
-        message: `ISA segment has ${isa.elements.length} elements. Standard ANSI X12 requires exactly 16 elements (TA1 Error Code 006).`,
-        line: isa.lineNumber,
-        segment: 'ISA',
+        type: 'info',
+        message: 'Transaction Set snippet (ST/SE) detected without outer Interchange (ISA/IEA) or Functional Group (GS/GE) envelopes. Validating transaction structure.',
       });
-    }
-    if (!iea) {
-      issues.push({ type: 'error', message: 'Missing mandatory Interchange Trailer (IEA).' });
-    } else if (isa && iea) {
-      const isaCtrl = isa.elements[12]?.trim();
-      const ieaCtrl = iea.elements[1]?.trim();
-      if (isaCtrl && ieaCtrl && isaCtrl !== ieaCtrl) {
+    } else {
+      if (!isa) {
+        issues.push({ type: 'error', message: 'Missing mandatory Interchange Header (ISA).' });
+      } else if (isa.elements.length !== 16) {
         issues.push({
-          type: 'error',
-          message: `Interchange Control Number mismatch: ISA13 (${isaCtrl}) != IEA02 (${ieaCtrl}). Triggers Gateway TA1 Rejection with Note Code 001.`,
-          line: iea.lineNumber,
-          segment: 'IEA',
+          type: 'warning',
+          message: `ISA segment has ${isa.elements.length} elements. Standard ANSI X12 requires exactly 16 elements (TA1 Error Code 006).`,
+          line: isa.lineNumber,
+          segment: 'ISA',
         });
       }
-    }
+      if (!iea) {
+        issues.push({ type: 'error', message: 'Missing mandatory Interchange Trailer (IEA).' });
+      } else if (isa && iea) {
+        const isaCtrl = isa.elements[12]?.trim();
+        const ieaCtrl = iea.elements[1]?.trim();
+        if (isaCtrl && ieaCtrl && isaCtrl !== ieaCtrl) {
+          issues.push({
+            type: 'error',
+            message: `Interchange Control Number mismatch: ISA13 (${isaCtrl}) != IEA02 (${ieaCtrl}). Triggers Gateway TA1 Rejection with Note Code 001.`,
+            line: iea.lineNumber,
+            segment: 'IEA',
+          });
+        }
+        const declaredGroupCount = parseInt(iea.elements[0], 10);
+        if (!isNaN(declaredGroupCount) && declaredGroupCount !== gsList.length) {
+          issues.push({
+            type: 'warning',
+            message: `Functional group count in IEA01 (${declaredGroupCount}) differs from actual GS count (${gsList.length}).`,
+            line: iea.lineNumber,
+            segment: 'IEA',
+          });
+        }
+      }
 
-    // 2. Functional Group Envelope (GS/GE)
-    if (!gs && isa) {
-      issues.push({ type: 'warning', message: 'No Functional Group Header (GS) found.' });
-    }
-    if (gs && !ge) {
-      issues.push({ type: 'error', message: 'Missing Functional Group Trailer (GE).' });
-    } else if (gs && ge) {
-      const gsCtrl = gs.elements[5]?.trim();
-      const geCtrl = ge.elements[1]?.trim();
-      if (gsCtrl && geCtrl && gsCtrl !== geCtrl) {
+      // 2. Functional Group Envelope (GS/GE)
+      if (gsList.length === 0 && isa) {
+        issues.push({ type: 'warning', message: 'No Functional Group Header (GS) found.' });
+      }
+      if (gsList.length !== geList.length) {
         issues.push({
           type: 'error',
-          message: `Functional Group Control Number mismatch: GS06 (${gsCtrl}) != GE02 (${geCtrl}).`,
-          line: ge.lineNumber,
-          segment: 'GE',
+          message: `Functional Group Header/Trailer count mismatch: found ${gsList.length} GS and ${geList.length} GE.`,
+        });
+      } else {
+        gsList.forEach((gs, idx) => {
+          const ge = geList[idx];
+          if (ge) {
+            const gsCtrl = gs.elements[5]?.trim();
+            const geCtrl = ge.elements[1]?.trim();
+            if (gsCtrl && geCtrl && gsCtrl !== geCtrl) {
+              issues.push({
+                type: 'error',
+                message: `Functional Group Control Number mismatch: GS06 (${gsCtrl}) != GE02 (${geCtrl}).`,
+                line: ge.lineNumber,
+                segment: 'GE',
+              });
+            }
+          }
         });
       }
     }
 
     // 3. Transaction Set (ST/SE)
+    if (stList.length === 0 && !isa) {
+      issues.push({
+        type: 'error',
+        message: 'No recognizable ANSI X12 (ISA/ST) or UN/EDIFACT (UNB/UNH) transaction structures detected.',
+      });
+      return issues;
+    }
+
     if (stList.length !== seList.length) {
       issues.push({
         type: 'error',

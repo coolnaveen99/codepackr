@@ -287,6 +287,68 @@ export const JsonToEdiConverter: React.FC<JsonToEdiConverterProps> = ({
       const ccyymmdd = `${now.getFullYear()}${mm}${dd}`;
       const hhmm = `${hh}${min}`;
 
+      // Case 0: Direct Segment Array (e.g. from EdiToolsView allSegments, or pure segment list)
+      const rawSegList = Array.isArray(parsed)
+        ? parsed
+        : Array.isArray(parsed.allSegments)
+        ? parsed.allSegments
+        : Array.isArray(parsed.segments)
+        ? parsed.segments
+        : null;
+
+      if (rawSegList && rawSegList.length > 0) {
+        const hasEnvelopes = rawSegList.some(
+          (s: any) => s && typeof s.tag === 'string' && ['ISA', 'UNB', 'GS', 'ST', 'UNH'].includes(s.tag.toUpperCase())
+        );
+
+        if (hasEnvelopes) {
+          // Direct 1:1 reconstruction - preserve all segments exactly as defined
+          rawSegList.forEach((s: any) => {
+            if (s && s.tag && Array.isArray(s.elements)) {
+              segments.push([s.tag, ...s.elements].join(elemSep));
+            }
+          });
+          const term = segTerm === '\\n' ? '\n' : segTerm;
+          setEdiOutput(multiLine ? segments.join(term + '\n') + term : segments.join(term) + term);
+          return;
+        } else {
+          // Wrap body segments with appropriate ISA/GS/ST envelopes
+          const sender = parsed.interchange?.sender || 'BUYER_RETAIL';
+          const receiver = parsed.interchange?.receiver || 'ACME_SUPPLIER';
+          const sQual = parsed.interchange?.senderQualifier || 'ZZ';
+          const rQual = parsed.interchange?.receiverQualifier || 'ZZ';
+          const ctrl = String(parsed.interchange?.controlNumber || '000000001');
+          const setCode = parsed.transaction?.set || '850';
+          const grpCode =
+            parsed.group?.functionalCode ||
+            (setCode === '850' ? 'PO' : setCode === '860' ? 'PC' : setCode === '856' ? 'SH' : setCode === '810' ? 'IN' : 'PO');
+          const grpCtrl = String(parsed.group?.controlNumber || '1');
+          const grpVersion = parsed.group?.version || '004010';
+          const tranCtrl = String(parsed.transaction?.controlNumber || '0001');
+
+          segments.push(
+            `ISA*00*          *00*          *${sQual}*${sender.padEnd(15, ' ')}*${rQual}*${receiver.padEnd(15, ' ')}*${yymmdd}*${hhmm}*U*00401*${ctrl.padStart(9, '0')}*0*P*${subSep}`
+          );
+          segments.push(`GS*${grpCode}*${sender}*${receiver}*${ccyymmdd}*${hhmm}*${grpCtrl}*X*${grpVersion}`);
+          segments.push(`ST*${setCode}*${tranCtrl}`);
+
+          rawSegList.forEach((s: any) => {
+            if (s && s.tag && Array.isArray(s.elements)) {
+              segments.push([s.tag, ...s.elements].join(elemSep));
+            }
+          });
+
+          const seCount = segments.length - 2 + 1; // inclusive ST to SE
+          segments.push(`SE*${seCount}*${tranCtrl}`);
+          segments.push(`GE*1*${grpCtrl}`);
+          segments.push(`IEA*1*${ctrl.padStart(9, '0')}`);
+
+          const term = segTerm === '\\n' ? '\n' : segTerm;
+          setEdiOutput(multiLine ? segments.join(term + '\n') + term : segments.join(term) + term);
+          return;
+        }
+      }
+
       const sender = parsed.interchange?.sender || 'BUYER_RETAIL';
       const receiver = parsed.interchange?.receiver || 'ACME_SUPPLIER';
       const sQual = parsed.interchange?.senderQualifier || 'ZZ';
@@ -295,45 +357,32 @@ export const JsonToEdiConverter: React.FC<JsonToEdiConverterProps> = ({
       const setCode = parsed.transaction?.set || '850';
       const grpCode = parsed.group?.functionalCode || (setCode === '850' ? 'PO' : setCode === '860' ? 'PC' : setCode === '856' ? 'SH' : setCode === '810' ? 'IN' : 'PO');
       const grpCtrl = String(parsed.group?.controlNumber || '1');
+      const grpVersion = parsed.group?.version || '004010';
       const tranCtrl = String(parsed.transaction?.controlNumber || '0001');
 
-      // Case A: Raw Segment array format
-      if (Array.isArray(parsed.segments)) {
-        segments.push(
-          `ISA*00*          *00*          *${sQual}*${sender.padEnd(15, ' ')}*${rQual}*${receiver.padEnd(15, ' ')}*${yymmdd}*${hhmm}*U*00401*${ctrl.padStart(9, '0')}*0*P*${subSep}`
-        );
-        segments.push(`GS*${grpCode}*${sender}*${receiver}*${ccyymmdd}*${hhmm}*${grpCtrl}*X*004010`);
-        segments.push(`ST*${setCode}*${tranCtrl}`);
-
-        parsed.segments.forEach((s: any) => {
-          if (s.tag && Array.isArray(s.elements)) {
-            segments.push([s.tag, ...s.elements].join('*'));
-          }
-        });
-
-        const seCount = segments.length - 2 + 1; // inclusive ST to SE
-        segments.push(`SE*${seCount}*${tranCtrl}`);
-        segments.push(`GE*1*${grpCtrl}`);
-        segments.push(`IEA*1*${ctrl.padStart(9, '0')}`);
-      } else if (setCode === '860') {
+      if (setCode === '860') {
         // Case B1: 860 Purchase Order Change Request
         const poNumber = parsed.transaction?.poNumber || 'PO-2026-9901';
         const changeDate = parsed.transaction?.changeDate || ccyymmdd;
         const changeSeq = parsed.transaction?.changeOrderSequence || '01';
-        const cur = parsed.transaction?.currency || 'USD';
+        const cur = parsed.transaction?.currency;
 
         segments.push(`ISA*00*          *00*          *${sQual}*${sender.padEnd(15, ' ')}*${rQual}*${receiver.padEnd(15, ' ')}*${yymmdd}*${hhmm}*U*00401*${ctrl.padStart(9, '0')}*0*P*${subSep}`);
         segments.push(`GS*PC*${sender}*${receiver}*${ccyymmdd}*${hhmm}*${grpCtrl}*X*004010`);
         segments.push(`ST*860*${tranCtrl}`);
         segments.push(`BCH*04*NE*${poNumber}**${changeDate}*${changeSeq}*${changeDate}`);
-        segments.push(`CUR*BY*${cur}`);
+        if (cur) {
+          segments.push(`CUR*BY*${cur}`);
+        }
 
         if (Array.isArray(parsed.parties)) {
           parsed.parties.forEach((p: any) => {
             segments.push(`N1*${p.type || 'ST'}*${p.name || ''}*${p.idQualifier || '92'}*${p.idCode || ''}`);
             if (p.address) segments.push(`N3*${p.address}`);
-            if (p.city || p.state || p.zip) {
-              segments.push(`N4*${p.city || ''}*${p.state || ''}*${p.zip || ''}*US`);
+            if (p.city || p.state || p.zip || p.country) {
+              const n4Parts = ['N4', p.city || '', p.state || '', p.zip || ''];
+              if (p.country) n4Parts.push(p.country);
+              segments.push(n4Parts.join('*'));
             }
           });
         }
@@ -384,8 +433,10 @@ export const JsonToEdiConverter: React.FC<JsonToEdiConverterProps> = ({
           parsed.parties.forEach((p: any) => {
             segments.push(`N1*${p.type || 'ST'}*${p.name || ''}*${p.idQualifier || '91'}*${p.idCode || ''}`);
             if (p.address) segments.push(`N3*${p.address}`);
-            if (p.city || p.state || p.zip) {
-              segments.push(`N4*${p.city || ''}*${p.state || ''}*${p.zip || ''}*US`);
+            if (p.city || p.state || p.zip || p.country) {
+              const n4Parts = ['N4', p.city || '', p.state || '', p.zip || ''];
+              if (p.country) n4Parts.push(p.country);
+              segments.push(n4Parts.join('*'));
             }
           });
         }
@@ -428,21 +479,25 @@ export const JsonToEdiConverter: React.FC<JsonToEdiConverterProps> = ({
         // Case B3: 810 Commercial Invoice
         const invNumber = parsed.transaction?.invoiceNumber || 'INV-2026-4401';
         const invDate = parsed.transaction?.invoiceDate || ccyymmdd;
-        const poNumber = parsed.transaction?.poNumber || 'PO-2026-9901';
-        const cur = parsed.transaction?.currency || 'USD';
+        const poNumber = parsed.transaction?.poNumber || '';
+        const cur = parsed.transaction?.currency;
 
         segments.push(`ISA*00*          *00*          *${sQual}*${sender.padEnd(15, ' ')}*${rQual}*${receiver.padEnd(15, ' ')}*${yymmdd}*${hhmm}*U*00401*${ctrl.padStart(9, '0')}*0*P*${subSep}`);
         segments.push(`GS*IN*${sender}*${receiver}*${ccyymmdd}*${hhmm}*${grpCtrl}*X*004010`);
         segments.push(`ST*810*${tranCtrl}`);
-        segments.push(`BIG*${invDate}*${invNumber}*${invDate}*${poNumber}`);
-        segments.push(`CUR*SE*${cur}`);
+        segments.push(`BIG*${invDate}*${invNumber}*${invDate}${poNumber ? `*${poNumber}` : ''}`);
+        if (cur) {
+          segments.push(`CUR*SE*${cur}`);
+        }
 
         if (Array.isArray(parsed.parties)) {
           parsed.parties.forEach((p: any) => {
             segments.push(`N1*${p.type || 'RE'}*${p.name || ''}*${p.idQualifier || '91'}*${p.idCode || ''}`);
             if (p.address) segments.push(`N3*${p.address}`);
-            if (p.city || p.state || p.zip) {
-              segments.push(`N4*${p.city || ''}*${p.state || ''}*${p.zip || ''}*US`);
+            if (p.city || p.state || p.zip || p.country) {
+              const n4Parts = ['N4', p.city || '', p.state || '', p.zip || ''];
+              if (p.country) n4Parts.push(p.country);
+              segments.push(n4Parts.join('*'));
             }
           });
         }
@@ -470,10 +525,12 @@ export const JsonToEdiConverter: React.FC<JsonToEdiConverterProps> = ({
         segments.push(`GE*1*${grpCtrl}`);
         segments.push(`IEA*1*${ctrl.padStart(9, '0')}`);
       } else {
-        // Case B4: Default 850 Purchase Order
-        const poNumber = parsed.transaction?.poNumber || 'PO-2026-9901';
-        const poDate = parsed.transaction?.poDate || ccyymmdd;
-        const cur = parsed.transaction?.currency || 'USD';
+        // Case B4: 850 Purchase Order
+        const tx = parsed.transaction || {};
+        const header = tx.header || {};
+        const poNumber = header.poNumber || tx.poNumber || '';
+        const poDate = header.date || header.poDate || tx.poDate || ccyymmdd;
+        const cur = (typeof header.currency === 'object' ? header.currency?.code : header.currency) || tx.currency;
 
         segments.push(
           `ISA*00*          *00*          *${sQual}*${sender.padEnd(15, ' ')}*${rQual}*${receiver.padEnd(15, ' ')}*${yymmdd}*${hhmm}*U*00401*${ctrl.padStart(9, '0')}*0*P*${subSep}`
@@ -481,33 +538,96 @@ export const JsonToEdiConverter: React.FC<JsonToEdiConverterProps> = ({
         segments.push(`GS*PO*${sender}*${receiver}*${ccyymmdd}*${hhmm}*${grpCtrl}*X*004010`);
         segments.push(`ST*850*${tranCtrl}`);
         segments.push(`BEG*00*NE*${poNumber}**${poDate}`);
-        segments.push(`CUR*BY*${cur}`);
+        if (cur) {
+          segments.push(`CUR*BY*${cur}`);
+        }
 
-        if (Array.isArray(parsed.parties)) {
-          parsed.parties.forEach((p: any) => {
-            segments.push(`N1*${p.type || 'ST'}*${p.name || ''}*${p.idQualifier || '92'}*${p.idCode || ''}`);
-            if (p.address) segments.push(`N3*${p.address}`);
-            if (p.city || p.state || p.zip) {
-              segments.push(`N4*${p.city || ''}*${p.state || ''}*${p.zip || ''}*US`);
+        // Header references
+        if (Array.isArray(header.references)) {
+          header.references.forEach((ref: any) => {
+            if (ref.qualifier && ref.value) {
+              segments.push(`REF*${ref.qualifier}*${ref.value}${ref.description ? `*${ref.description}` : ''}`);
             }
           });
         }
 
+        // Header dates
+        if (Array.isArray(header.dates)) {
+          header.dates.forEach((d: any) => {
+            if (d.qualifier && d.date) {
+              segments.push(`DTM*${d.qualifier}*${d.date}${d.time ? `*${d.time}` : ''}`);
+            }
+          });
+        }
+
+        // Header contacts
+        if (Array.isArray(header.contacts)) {
+          header.contacts.forEach((c: any) => {
+            if (c.functionCode) {
+              segments.push(`PER*${c.functionCode}*${c.name || ''}*${c.commQualifier || 'TE'}*${c.commNumber || ''}`);
+            }
+          });
+        }
+
+        // Header payment terms
+        if (Array.isArray(header.paymentTerms)) {
+          header.paymentTerms.forEach((term: any) => {
+            segments.push(`ITD*${term.termsTypeCode || '01'}*${term.termsBasisDateCode || '3'}*${term.termsDiscountPercent || ''}**${term.termsDiscountDays || ''}**${term.termsNetDays || '30'}`);
+          });
+        }
+
+        // Header notes
+        if (Array.isArray(header.notes)) {
+          header.notes.forEach((note: string) => {
+            segments.push(`MSG*${note}`);
+          });
+        }
+
+        const partiesList = Array.isArray(tx.parties) ? tx.parties : Array.isArray(parsed.parties) ? parsed.parties : [];
+        partiesList.forEach((p: any) => {
+          segments.push(`N1*${p.type || 'ST'}*${p.name || ''}*${p.idQualifier || '92'}*${p.idCode || ''}`);
+          if (p.address) segments.push(`N3*${p.address}`);
+          if (p.city || p.state || p.zip || p.country) {
+            const n4Parts = ['N4', p.city || '', p.state || '', p.zip || ''];
+            if (p.country) n4Parts.push(p.country);
+            segments.push(n4Parts.join('*'));
+          }
+        });
+
+        const itemsList = Array.isArray(tx.items) ? tx.items : Array.isArray(parsed.items) ? parsed.items : [];
         let totalQuantity = 0;
-        if (Array.isArray(parsed.items)) {
-          parsed.items.forEach((item: any, idx: number) => {
-            const line = item.line || idx + 1;
-            const qty = item.quantity || 1;
-            totalQuantity += Number(qty);
-            const uom = item.uom || 'EA';
-            const price = Number(item.unitPrice || 0).toFixed(2);
-            segments.push(`PO1*${line}*${qty}*${uom}*${price}**VN*${item.vendorPart || ''}*UP*${item.upc || ''}`);
-            if (item.description) {
-              segments.push(`PID*F****${item.description}`);
-            }
-          });
-          segments.push(`CTT*${parsed.items.length}*${totalQuantity}`);
-        }
+        itemsList.forEach((item: any, idx: number) => {
+          const line = item.line || idx + 1;
+          const qty = item.quantity !== undefined ? item.quantity : 1;
+          totalQuantity += Number(qty);
+          const uom = item.uom || 'EA';
+          const price = item.unitPrice !== undefined ? Number(item.unitPrice).toFixed(2) : '0.00';
+          
+          let idPairs = '';
+          if (Array.isArray(item.productIds) && item.productIds.length > 0) {
+            idPairs = '*' + item.productIds.map((p: any) => `${p.qualifier}*${p.id}`).join('*');
+          } else if (item.vendorPart || item.upc) {
+            idPairs = `*VN*${item.vendorPart || ''}*UP*${item.upc || ''}`;
+          }
+          
+          segments.push(`PO1*${line}*${qty}*${uom}*${price}*${idPairs}`);
+          if (item.description) {
+            segments.push(`PID*F****${item.description}`);
+          } else if (Array.isArray(item.descriptions)) {
+            item.descriptions.forEach((desc: string) => segments.push(`PID*F****${desc}`));
+          }
+          if (Array.isArray(item.references)) {
+            item.references.forEach((ref: any) => {
+              if (ref.qualifier && ref.value) segments.push(`REF*${ref.qualifier}*${ref.value}`);
+            });
+          }
+          if (Array.isArray(item.dates)) {
+            item.dates.forEach((d: any) => {
+              if (d.qualifier && d.date) segments.push(`DTM*${d.qualifier}*${d.date}`);
+            });
+          }
+        });
+        segments.push(`CTT*${itemsList.length}*${totalQuantity}`);
 
         const bodySegCount = segments.length - 2 + 1;
         segments.push(`SE*${bodySegCount}*${tranCtrl}`);

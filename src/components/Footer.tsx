@@ -64,7 +64,7 @@ export const Footer: React.FC<FooterProps> = ({
             )}
           </div>
           <div className="flex items-center gap-4">
-            <a href="https://github.com/coolnaveen99/codepackr" target="_blank" rel="noreferrer" className="hover:text-[color:var(--ink)] transition-colors" aria-label="GitHub">
+            <a href="#github" onClick={(e) => e.preventDefault()} className="opacity-50 hover:opacity-75 transition-opacity cursor-default" aria-label="GitHub" title="GitHub (Repository Private)">
               <GithubIcon className="w-5 h-5" />
             </a>
             <a href="https://x.com/Codepackr" target="_blank" rel="noreferrer" className="hover:text-[color:var(--ink)] transition-colors" aria-label="Twitter">
