@@ -24,10 +24,13 @@ jobs:
           p = Path('src/components/tools/EdiToolsView.tsx')
           s = p.read_text(encoding='utf-8')
           anchor = "import { popSmartPastePayload } from '../../lib/workspace';\n"
-          imp = "import { EdiPhase2Inspector } from '../edi/EdiPhase2Inspector';\n"
-          if imp not in s:
-              if anchor not in s: raise SystemExit('import anchor missing')
-              s = s.replace(anchor, anchor + imp, 1)
+          for imp in [
+              "import { EdiPhase2Inspector } from '../edi/EdiPhase2Inspector';\n",
+              "import { EdiPhase2UxBoundary } from '../edi/EdiPhase2UxBoundary';\n",
+          ]:
+              if imp not in s:
+                  if anchor not in s: raise SystemExit('import anchor missing')
+                  s = s.replace(anchor, anchor + imp, 1)
           old = """        {activeTab === 'edi-message-gateway' && (\n          <EdiMessageGatewayView tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} initialInput={input} />\n        )}"""
           new = """        {activeTab === 'edi-message-gateway' && (\n          <EdiPhase2UxBoundary\n            title=\"EDI Message Gateway\"\n            description=\"Guided inbound/outbound EDI gateway with progressive disclosure, Story Mode samples, and synchronized segment inspection.\"\n            defaultSampleId={selectedSampleId}\n            initialInput={input}\n            onSampleLoad={(payload, sampleId) => {\n              setSelectedSampleId(sampleId);\n              setInput(payload);\n            }}\n          >\n            <EdiMessageGatewayView\n              key={`phase2-gateway-${selectedSampleId}`}\n              tool={tool}\n              onBackToHome={onBackToHome}\n              onSelectRelated={onSelectRelated}\n              initialInput={input}\n            />\n          </EdiPhase2UxBoundary>\n        )}"""
           if old not in s: raise SystemExit('gateway anchor missing')
