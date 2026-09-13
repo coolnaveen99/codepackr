@@ -17,6 +17,14 @@ interface NavbarProps {
   onGoAdmin?: () => void;
 }
 
+const FinanceIcon = ({ className = 'w-3.5 h-3.5' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="18" y1="20" x2="18" y2="10" />
+    <line x1="12" y1="20" x2="12" y2="4" />
+    <line x1="6" y1="20" x2="6" y2="14" />
+  </svg>
+);
+
 export const Navbar: React.FC<NavbarProps> = ({
   theme,
   onToggleTheme,
@@ -47,18 +55,21 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
+  const financeLinkClass =
+    'inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all shadow-xs cursor-pointer group shrink-0';
+
   return (
     <header id="main-header" className="sticky top-0 z-40 w-full border-b backdrop-blur-md transition-colors border-[color:var(--border)] bg-[color:var(--surface)]/85">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-3 sm:gap-6">
-          
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 gap-2 sm:gap-4 min-w-0">
+
           {/* Left: Sidebar Toggle & Brand */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
             {onToggleSidebar && (
               <button
                 id="sidebar-toggle-btn"
                 onClick={onToggleSidebar}
-                className="p-2 rounded-xl border border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)] transition-colors cursor-pointer"
+                className="p-2 rounded-xl border border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)] transition-colors cursor-pointer shrink-0"
                 aria-label="Toggle navigation sidebar"
               >
                 <Menu className="w-5 h-5" />
@@ -72,22 +83,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onGoHome();
                 }
               }}
-              className="flex items-center gap-3 group text-left cursor-pointer focus:outline-none"
+              className="flex items-center gap-2 sm:gap-3 group text-left cursor-pointer focus:outline-none min-w-0 shrink"
             >
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-sm bg-[color:var(--brand)] transition-transform group-hover:scale-105">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-sm bg-[color:var(--brand)] transition-transform group-hover:scale-105 shrink-0">
                 <Terminal className="w-5 h-5" />
               </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-lg leading-tight tracking-tight text-[color:var(--ink)]">
+              <div className="flex flex-col min-w-0">
+                <span className="font-bold text-base sm:text-lg leading-tight tracking-tight text-[color:var(--ink)] truncate">
                   CodePackr
                 </span>
-                <span className="text-[10px] font-mono font-medium tracking-wider text-[color:var(--ink-muted)] uppercase">
+                <span className="hidden xs:inline sm:inline text-[10px] font-mono font-medium tracking-wider text-[color:var(--ink-muted)] uppercase">
                   Enterprise
                 </span>
               </div>
             </a>
 
-            {/* Codepackr Finance Portal Pill Link */}
+            {/* Finance link — always visible from sm up (full label); mobile uses right-side compact control */}
             <a
               id="nav-codepackr-finance-link"
               href="https://finance.codepackr.com/"
@@ -95,22 +106,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               rel="noopener noreferrer"
               title="Codepackr Finance — Calculators, Planning & Wealth Projections"
               aria-label="Codepackr Finance — Calculators, Planning & Wealth Projections"
-              className="inline-flex items-center gap-1.5 px-2 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all shadow-xs cursor-pointer group ml-1"
+              className={`${financeLinkClass} hidden sm:inline-flex ml-1`}
             >
               <span className="text-emerald-600 dark:text-emerald-400 transition-transform group-hover:scale-110">
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="20" x2="18" y2="10" />
-                  <line x1="12" y1="20" x2="12" y2="4" />
-                  <line x1="6" y1="20" x2="6" y2="14" />
-                </svg>
+                <FinanceIcon />
               </span>
-              <span className="hidden sm:inline font-semibold">Codepackr Finance</span>
-              <span className="hidden sm:inline text-[10px] opacity-70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
+              <span className="font-semibold">Codepackr Finance</span>
+              <span className="text-[10px] opacity-70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
             </a>
           </div>
 
           {/* Center: Command Palette Trigger */}
-          <div className="flex-1 max-w-xl mx-2 hidden sm:block">
+          <div className="flex-1 max-w-xl mx-2 hidden md:block min-w-0">
             <button
               id="search-trigger-btn"
               onClick={onOpenSearch}
@@ -120,27 +127,39 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <Search className="w-4 h-4 group-hover:text-[color:var(--brand)] transition-colors shrink-0" />
                 <span className="truncate">Search tools, converters, formatters...</span>
               </div>
-              <kbd className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono font-medium rounded-md border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] shrink-0">
+              <kbd className="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono font-medium rounded-md border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] shrink-0">
                 <span className="text-[10px]">{isMac ? '⌘' : 'Ctrl'}</span>K
               </kbd>
             </button>
           </div>
 
-          {/* Right: Actions */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Right: Actions — Finance always visible on mobile here */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <a
+              id="nav-codepackr-finance-link-mobile"
+              href="https://finance.codepackr.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Codepackr Finance"
+              aria-label="Codepackr Finance — Calculators, Planning & Wealth Projections"
+              className={`${financeLinkClass} sm:hidden`}
+            >
+              <FinanceIcon />
+              <span>Finance</span>
+            </a>
+
             <button
               onClick={onOpenSearch}
-              className="sm:hidden p-2 rounded-xl border border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)] transition-colors cursor-pointer"
+              className="md:hidden p-2 rounded-xl border border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)] transition-colors cursor-pointer"
               aria-label="Search"
             >
               <Search className="w-5 h-5" />
             </button>
 
-            {/* Bookmarks */}
             <button
               id="nav-bookmarks-btn"
               onClick={handleSelectBookmarks}
-              className={`px-3 py-1.5 text-sm font-medium rounded-xl border transition-all flex items-center gap-2 cursor-pointer shadow-sm ${
+              className={`px-2 sm:px-3 py-1.5 text-sm font-medium rounded-xl border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm ${
                 selectedCategory === 'bookmarks'
                   ? 'bg-[color:var(--warning)] text-white border-[color:var(--warning)]'
                   : 'bg-[color:var(--surface)] border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:border-[color:var(--border-hover)]'
@@ -148,7 +167,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               title="Saved Tools"
             >
               <Star className={`w-4 h-4 ${selectedCategory === 'bookmarks' ? 'fill-white' : bookmarkCount > 0 ? 'text-[color:var(--warning)] fill-[color:var(--warning)]' : ''}`} />
-              <span className="hidden md:inline">Favorites</span>
+              <span className="hidden lg:inline">Favorites</span>
               {bookmarkCount > 0 && (
                 <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${selectedCategory === 'bookmarks' ? 'bg-white/20' : 'bg-[color:var(--surface-elevated)] text-[color:var(--ink)]'}`}>
                   {bookmarkCount}
@@ -160,7 +179,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="nav-admin-btn"
                 onClick={onGoAdmin}
-                className="flex px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-colors items-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs"
+                className="hidden sm:flex px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-colors items-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs"
                 title="Admin Console"
               >
                 <Shield className="w-4 h-4 text-amber-500" />
