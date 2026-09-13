@@ -153,21 +153,30 @@ code, pre, kbd, samp, .font-mono {
 
 /* Visual Magic Animations */
 @keyframes softFloat1 {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-7px) rotate(0.4deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(0.4deg);
+  }
 }
 
 @keyframes softFloat2 {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-10px) rotate(-0.5deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-0.5deg);
+  }
 }
 
 @keyframes softFloat3 {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-6px) rotate(0.3deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(0.3deg);
+  }
 }
 
 @keyframes driftSlow {
@@ -219,6 +228,12 @@ code, pre, kbd, samp, .font-mono {
   }
 }
 
+@keyframes starPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
 @keyframes particleFly {
   0% {
     opacity: 1;
@@ -230,16 +245,42 @@ code, pre, kbd, samp, .font-mono {
   }
 }
 
+.hero-floating-card-1 {
+  animation: softFloat1 4.6s ease-in-out infinite;
+  animation-delay: 0s;
+  will-change: transform;
+}
+
+.hero-floating-card-2 {
+  animation: softFloat2 5.4s ease-in-out infinite;
+  animation-delay: 0.8s;
+  will-change: transform;
+}
+
+.hero-floating-card-3 {
+  animation: softFloat3 4.9s ease-in-out infinite;
+  animation-delay: 1.6s;
+  will-change: transform;
+}
+
+.hero-floating-card-1:hover,
+.hero-floating-card-2:hover,
+.hero-floating-card-3:hover {
+  animation-play-state: paused !important;
+}
+
 .animate-soft-float-1 {
-  animation: softFloat1 4.2s ease-in-out infinite;
+  animation: softFloat1 4.6s ease-in-out infinite;
 }
 
 .animate-soft-float-2 {
-  animation: softFloat2 5.1s ease-in-out infinite;
+  animation: softFloat2 5.4s ease-in-out infinite;
+  animation-delay: 0.8s;
 }
 
 .animate-soft-float-3 {
-  animation: softFloat3 4.7s ease-in-out infinite;
+  animation: softFloat3 4.9s ease-in-out infinite;
+  animation-delay: 1.6s;
 }
 
 .animate-drift-slow {
@@ -269,18 +310,26 @@ code, pre, kbd, samp, .font-mono {
   animation: springPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
+.animate-star-pop {
+  animation: starPop 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
 .stagger-card-in {
   animation: cardCascade 0.45s ease-out backwards;
 }
 
 /* Reduced motion accessibility */
 @media (prefers-reduced-motion: reduce) {
+  .hero-floating-card-1,
+  .hero-floating-card-2,
+  .hero-floating-card-3,
   .animate-soft-float-1,
   .animate-soft-float-2,
   .animate-soft-float-3,
   .animate-drift-slow,
   .animate-badge-shimmer,
   .animate-lock-pulse,
+  .animate-star-pop,
   .stagger-card-in,
   .animate-spring-pop {
     animation: none !important;

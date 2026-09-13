@@ -589,9 +589,11 @@ export const SmartPasteHero: React.FC<SmartPasteHeroProps> = ({ onSelectTool }) 
   return (
     <div className="w-full max-w-4xl mx-auto mb-12">
       <div
-        className={`relative rounded-2xl border transition-all duration-300 bg-[color:var(--surface)] p-2.5 sm:p-3.5 shadow-lg ${
-          isFocused || pasteInput.trim()
-            ? 'border-[color:var(--brand)] ring-4 ring-[color:var(--brand)]/15 shadow-[0_10px_35px_-10px_rgba(37,99,235,0.2)]'
+        className={`relative rounded-2xl border transition-all duration-200 bg-[color:var(--surface)] p-2.5 sm:p-3.5 shadow-lg ${
+          isFocused
+            ? 'border-[color:var(--brand)] ring-4 ring-[color:var(--brand)]/20 shadow-[0_12px_36px_-8px_rgba(37,99,235,0.28)]'
+            : pasteInput.trim()
+            ? 'border-[color:var(--brand)] ring-2 ring-[color:var(--brand)]/15 shadow-[0_8px_24px_-8px_rgba(37,99,235,0.18)]'
             : 'border-[color:var(--border)] hover:border-[color:var(--border-hover)]'
         }`}
       >
@@ -645,7 +647,7 @@ export const SmartPasteHero: React.FC<SmartPasteHeroProps> = ({ onSelectTool }) 
                     setPasteInput(s.payload);
                     setIsFocused(true);
                   }}
-                  className="px-2.5 py-1 rounded-lg border border-[color:var(--border)] bg-[color:var(--surface-elevated)] hover:border-[color:var(--brand)] hover:text-[color:var(--brand)] text-[11px] font-mono text-[color:var(--ink-muted)] transition-all hover:scale-105 cursor-pointer shadow-xs"
+                  className="px-2.5 py-1 rounded-lg border border-[color:var(--border)] bg-[color:var(--surface-elevated)] hover:border-[color:var(--brand)] hover:ring-2 hover:ring-[color:var(--brand)]/20 hover:text-[color:var(--brand)] text-[11px] font-mono text-[color:var(--ink-muted)] transition-all duration-150 hover:scale-[1.03] active:scale-95 cursor-pointer shadow-xs"
                 >
                   +{s.label}
                 </button>
@@ -656,7 +658,7 @@ export const SmartPasteHero: React.FC<SmartPasteHeroProps> = ({ onSelectTool }) 
 
         {/* Floating Primary Suggestion Banner (Magic Moment) */}
         {primaryChip && (
-          <div className="mx-2 mb-2 p-2 rounded-xl border animate-spring-pop flex items-center justify-between gap-3 bg-gradient-to-r from-blue-500/5 via-[color:var(--surface-elevated)] to-teal-500/5 border-[color:var(--brand)]/30">
+          <div className="mx-2 mb-2 p-2 rounded-xl border animate-spring-pop flex items-center justify-between gap-3 bg-gradient-to-r from-blue-500/5 via-[color:var(--surface-elevated)] to-teal-500/5 border-[color:var(--brand)]/30 hover:scale-[1.01] transition-transform duration-200">
             <div className="flex items-center gap-2 min-w-0">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0"></span>
               <span className="text-xs font-bold text-[color:var(--ink)] truncate">
@@ -666,7 +668,7 @@ export const SmartPasteHero: React.FC<SmartPasteHeroProps> = ({ onSelectTool }) 
             <button
               type="button"
               onClick={() => handleExecuteSuggestion(primaryChip.toolId)}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-[color:var(--brand)] hover:bg-[color:var(--brand-hover)] transition-all hover:scale-105 shadow-sm cursor-pointer shrink-0 flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-[color:var(--brand)] hover:bg-[color:var(--brand-hover)] transition-all hover:scale-105 active:scale-95 shadow-sm cursor-pointer shrink-0 flex items-center gap-1.5"
             >
               <span>Launch Now</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -685,7 +687,7 @@ export const SmartPasteHero: React.FC<SmartPasteHeroProps> = ({ onSelectTool }) 
                 <button
                   key={sugg.toolId}
                   onClick={() => handleExecuteSuggestion(sugg.toolId)}
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-[color:var(--surface-elevated)] border border-[color:var(--border)] hover:border-[color:var(--brand)] hover:bg-[color:var(--brand-light)] text-[color:var(--ink)] hover:text-[color:var(--brand)] transition-all shadow-xs cursor-pointer group"
+                  className="animate-spring-pop flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-[color:var(--surface-elevated)] border border-[color:var(--border)] hover:border-[color:var(--brand)] hover:ring-2 hover:ring-[color:var(--brand)]/20 hover:bg-[color:var(--brand-light)] text-[color:var(--ink)] hover:text-[color:var(--brand)] transition-all duration-200 hover:scale-[1.025] shadow-xs cursor-pointer group"
                 >
                   {sugg.icon}
                   <span>{sugg.label}</span>

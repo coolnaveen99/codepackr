@@ -43,7 +43,7 @@ export const HeroPreviewCards: React.FC<HeroPreviewCardsProps> = ({ onSelectTool
             )
           )
         }
-        className="animate-soft-float-1 group relative rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)]/90 backdrop-blur-md p-3.5 shadow-md hover:shadow-xl hover:border-[color:var(--brand)] transition-all duration-300 hover:scale-[1.03] cursor-pointer"
+        className="hero-floating-card-1 group relative rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)]/90 backdrop-blur-md p-3.5 shadow-md hover:shadow-2xl hover:shadow-[0_20px_45px_-12px_rgba(37,99,235,0.22)] dark:hover:shadow-[0_20px_45px_-12px_rgba(0,0,0,0.6)] hover:border-[color:var(--brand)] transition-all duration-300 hover:scale-[1.04] cursor-pointer"
       >
         <div className="flex items-center justify-between pb-2 mb-2 border-b border-[color:var(--border)]/60 text-xs">
           <div className="flex items-center gap-2 font-mono font-bold text-[color:var(--ink)]">
@@ -92,7 +92,7 @@ export const HeroPreviewCards: React.FC<HeroPreviewCardsProps> = ({ onSelectTool
             'ISA*00*          *00*          *ZZ*SENDER         *ZZ*RECEIVER       *260401*1230*U*00401*000000001*0*P*>~\nGS*PO*SENDER*RECEIVER*20260401*1230*1*X*004010~\nST*850*0001~\nBEG*00*SA*PO-9842**20260401~\nN1*BY*ACME SUPPLY CORP*92*11029~\nPO1*1*50*EA*14.95**BP*SKU-9912~\nTDS*74750~\nSE*6*0001~\nGE*1*1~\nIEA*1*000000001~'
           )
         }
-        className="animate-soft-float-2 group relative rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)]/90 backdrop-blur-md p-3.5 shadow-md hover:shadow-xl hover:border-teal-500/60 transition-all duration-300 hover:scale-[1.03] cursor-pointer"
+        className="hero-floating-card-2 group relative rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)]/90 backdrop-blur-md p-3.5 shadow-md hover:shadow-2xl hover:shadow-[0_20px_45px_-12px_rgba(20,184,166,0.22)] dark:hover:shadow-[0_20px_45px_-12px_rgba(0,0,0,0.6)] hover:border-teal-500/70 transition-all duration-300 hover:scale-[1.04] cursor-pointer"
       >
         <div className="flex items-center justify-between pb-2 mb-2 border-b border-[color:var(--border)]/60 text-xs">
           <div className="flex items-center gap-2 font-mono font-bold text-[color:var(--ink)]">
@@ -156,7 +156,7 @@ export const HeroPreviewCards: React.FC<HeroPreviewCardsProps> = ({ onSelectTool
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyXzEyMzQ1IiwibmFtZSI6IkFsZXggRGV2Iiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
           )
         }
-        className="animate-soft-float-3 group relative rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)]/90 backdrop-blur-md p-3.5 shadow-md hover:shadow-xl hover:border-purple-500/60 transition-all duration-300 hover:scale-[1.03] cursor-pointer"
+        className="hero-floating-card-3 group relative rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)]/90 backdrop-blur-md p-3.5 shadow-md hover:shadow-2xl hover:shadow-[0_20px_45px_-12px_rgba(168,85,247,0.22)] dark:hover:shadow-[0_20px_45px_-12px_rgba(0,0,0,0.6)] hover:border-purple-500/70 transition-all duration-300 hover:scale-[1.04] cursor-pointer"
       >
         <div className="flex items-center justify-between pb-2 mb-2 border-b border-[color:var(--border)]/60 text-xs">
           <div className="flex items-center gap-2 font-mono font-bold text-[color:var(--ink)]">

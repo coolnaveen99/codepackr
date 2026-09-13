@@ -48,10 +48,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   const { isAuthenticated } = useAdminAuth();
   const [isMac, setIsMac] = React.useState(false);
 
-  // Dynamic Typewriter State
+  // Dynamic Rotating Example State with smooth crossfade
   const [exampleIdx, setExampleIdx] = useState(0);
-  const [displayedText, setDisplayedText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [fadeState, setFadeState] = useState<'in' | 'out'>('in');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -59,35 +58,18 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     }
   }, []);
 
-  // Real-time typewriter effect cycling every 2.8 - 3.2 seconds
+  // Smooth rotating text transition: fade out (240ms) -> change text -> fade in (240ms)
   useEffect(() => {
-    const currentFull = ROTATING_EXAMPLES[exampleIdx].text;
-    let timer: ReturnType<typeof setTimeout>;
-
-    if (!isDeleting) {
-      if (displayedText.length < currentFull.length) {
-        timer = setTimeout(() => {
-          setDisplayedText(currentFull.slice(0, displayedText.length + 1));
-        }, 38);
-      } else {
-        // Pause at completion
-        timer = setTimeout(() => {
-          setIsDeleting(true);
-        }, 2800);
-      }
-    } else {
-      if (displayedText.length > 0) {
-        timer = setTimeout(() => {
-          setDisplayedText(displayedText.slice(0, -1));
-        }, 24);
-      } else {
-        setIsDeleting(false);
+    const timer = setInterval(() => {
+      setFadeState('out');
+      setTimeout(() => {
         setExampleIdx((prev) => (prev + 1) % ROTATING_EXAMPLES.length);
-      }
-    }
+        setFadeState('in');
+      }, 240);
+    }, 3400);
 
-    return () => clearTimeout(timer);
-  }, [displayedText, isDeleting, exampleIdx]);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleLaunchCurrentLiveTool = () => {
     const currentItem = ROTATING_EXAMPLES[exampleIdx];
@@ -188,9 +170,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               Engineered for <span className="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--brand)] to-[color:var(--accent)]">Speed &amp; Privacy.</span>
             </h1>
 
-            {/* Dynamic Typewriter / Rotating Example Line with LIVE Indicator */}
-            <div className="flex items-center gap-2.5 text-sm sm:text-base font-mono text-[color:var(--brand)] font-semibold mb-4 min-h-[1.75rem]">
-              {/* Broadcast LIVE indicator with animated red dot placed directly after LIVE */}
+            {/* Dynamic Rotating Example Line with LIVE Indicator */}
+            <div className="flex items-center gap-2.5 text-sm sm:text-base font-mono text-[color:var(--brand)] font-semibold mb-4 h-7">
+              {/* Broadcast LIVE indicator with animated red dot placed directly after LIVE - stays completely stable */}
               <div
                 className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 font-sans font-extrabold text-[11px] uppercase tracking-wider select-none shadow-xs shrink-0"
                 title="Live developer utilities stream"
@@ -201,14 +183,21 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600 shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
                 </span>
               </div>
-              <span
-                onClick={handleLaunchCurrentLiveTool}
-                className="cursor-pointer hover:underline transition-all truncate"
-                title="Click to open this tool"
-              >
-                {displayedText}
-              </span>
-              <span className="inline-block w-1.5 h-4 bg-[color:var(--brand)] animate-type-cursor shrink-0" />
+
+              {/* Smooth crossfading text container with fixed height preventing layout shift */}
+              <div className="overflow-hidden flex items-center h-full min-w-0">
+                <span
+                  onClick={handleLaunchCurrentLiveTool}
+                  className={`cursor-pointer hover:underline truncate inline-block transition-all duration-250 ease-out ${
+                    fadeState === 'in'
+                      ? 'opacity-100 translate-y-0'
+                      : 'opacity-0 -translate-y-1.5'
+                  }`}
+                  title="Click to open this tool"
+                >
+                  {ROTATING_EXAMPLES[exampleIdx].text}
+                </span>
+              </div>
             </div>
 
             <p className="text-base sm:text-lg text-[color:var(--ink-muted)] mb-8 max-w-xl leading-relaxed">
@@ -284,7 +273,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               key={tool.id}
               onClick={() => onSelectTool(tool)}
               style={{ animationDelay: `${Math.min(idx * 45, 450)}ms` }}
-              className="stagger-card-in group relative flex flex-col bg-[color:var(--surface)] rounded-2xl border border-[color:var(--border)] p-5 cursor-pointer transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-xl hover:border-[color:var(--brand)]/70 hover:shadow-[0_10px_30px_-10px_rgba(37,99,235,0.15)]"
+              className="stagger-card-in group relative flex flex-col bg-[color:var(--surface)] rounded-2xl border border-[color:var(--border)] p-5 cursor-pointer transition-all duration-200 ease-out hover:-translate-y-2 hover:scale-[1.015] hover:border-[color:var(--brand)] hover:ring-2 hover:ring-[color:var(--brand)]/20 hover:shadow-[0_20px_40px_-12px_rgba(37,99,235,0.18)] dark:hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.65)]"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink)] group-hover:text-[color:var(--brand)] group-hover:border-[color:var(--brand)] group-hover:scale-110 transition-all duration-300 shadow-sm">
@@ -314,7 +303,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                       }`}
                       aria-label="Bookmark"
                     >
-                      <Star className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
+                      <Star className={`w-4 h-4 transition-transform ${bookmarked ? 'fill-current' : ''} ${hasConfetti ? 'animate-star-pop' : ''}`} />
                     </button>
 
                     {/* Micro Confetti Particle Pop */}
@@ -366,8 +355,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 <span className="text-xs font-bold uppercase tracking-wider text-[color:var(--ink-muted)]">
                   {tool.category}
                 </span>
-                <span className="flex items-center gap-1 text-sm font-bold text-[color:var(--brand)] group-hover:translate-x-1.5 transition-transform duration-200">
-                  Open <ArrowRight className="w-4 h-4" />
+                <span className="flex items-center gap-1 text-sm font-bold text-[color:var(--brand)] group-hover:translate-x-1 transition-transform duration-200">
+                  Open <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
                 </span>
               </div>
             </div>
