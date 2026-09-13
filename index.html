@@ -1,21 +1,25 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <!-- Force-clear stale Service Workers / Cache Storage (org devices that cannot clear cache) -->
+    <!-- One-time cleanup of leftover Service Workers (do not re-register) -->
     <script>
     (function () {
       if (!('serviceWorker' in navigator)) return;
-      var FLAG = 'codepackr_sw_cleared_v6';
+      var FLAG = 'codepackr_sw_disabled_v7';
       try {
         if (sessionStorage.getItem(FLAG)) return;
       } catch (e) {}
       navigator.serviceWorker.getRegistrations().then(function (regs) {
-        if (!regs || !regs.length) return;
+        if (!regs || !regs.length) {
+          try { sessionStorage.setItem(FLAG, '1'); } catch (e) {}
+          return;
+        }
         return Promise.all(regs.map(function (r) { return r.unregister(); })).then(function () {
-          if (!('caches' in window)) return;
-          return caches.keys().then(function (keys) {
-            return Promise.all(keys.map(function (k) { return caches.delete(k); }));
-          });
+          if ('caches' in window) {
+            return caches.keys().then(function (keys) {
+              return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+            });
+          }
         }).then(function () {
           try { sessionStorage.setItem(FLAG, '1'); } catch (e) {}
           location.reload();
@@ -23,7 +27,6 @@
       }).catch(function () {});
     })();
     </script>
-    <!-- Google Tag Manager (GTM): A centralized tag management platform from Google that allows managing, updating, and deploying website measurement, analytics, and marketing tags without modifying source code directly. Container ID: GTM-NK24VGVG -->
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -50,16 +53,13 @@
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
 
-    <!-- Google AdSense: An advertising platform provided by Google that places context-relevant banner ads across pages to support free hosting and development of the platform. Publisher Account: ca-pub-7526363571565796 -->
     <meta name="google-adsense-account" content="ca-pub-7526363571565796" />
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7526363571565796"
      crossorigin="anonymous"></script>
 
-    <!-- Search Engine Verifications -->
     <meta name="yandex-verification" content="7c4e5ec0ba30b993" />
     <meta name="msvalidate.01" content="BC8B27F46BBCD43F50A45F870843689D" />
 
-    <!-- Microsoft Clarity: A user behavior analysis tool provided by Microsoft Bing that collects anonymous heatmap and session interaction data to help understand user pain points and improve website usability. Project ID: ya1n0vs9s5 -->
     <script>
     (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
@@ -70,7 +70,6 @@
 
     <link rel="canonical" href="https://www.codepackr.com/" id="canonical-url" />
 
-    <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Codepackr" />
     <meta property="og:locale" content="en_US" />
@@ -82,7 +81,6 @@
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Codepackr - Free Online Developer Tools" />
 
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@Codepackr" />
     <meta name="twitter:creator" content="@Codepackr" />
@@ -90,7 +88,6 @@
     <meta name="twitter:description" content="Free online developer tools for formatting, validating, encoding, converting, and inspecting data locally in your browser." />
     <meta name="twitter:image" content="https://www.codepackr.com/assets/og/default.png" />
 
-    <!-- Schema.org JSON-LD Structured Data for SEO -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -112,30 +109,7 @@
             "@type": "Offer",
             "price": "0",
             "priceCurrency": "USD"
-          },
-          "featureList": [
-            "EDI X12 & EDIFACT Formatter, Segment Viewer, and Validator",
-            "EDI 997 & CONTRL Functional Acknowledgment Generator",
-            "JSON to EDI X12 / EDIFACT Segment Converter",
-            "EDI Template & Sample Generator (850, 810, 856, ORDERS, INVOIC)",
-            "EDI Delimiter Swapper & 106-Char ISA Normalizer",
-            "XSLT 1.0/2.0 Browser-Native Transformer & Tester",
-            "XML to W3C XSD Schema Generator",
-            "XSD to XML Mock Instance Generator",
-            "XPath 1.0 Query Evaluator & Inspector",
-            "XML Entity & CDATA Escaper",
-            "JSON Formatter & Validator",
-            "Base64 Text & Image Encoder / Decoder",
-            "Side-by-Side Diff Checker",
-            "Live Regex Tester with Match Extraction",
-            "JWT Token Debugger & Expiration Inspector",
-            "SQL Query Beautifier",
-            "Bi-directional JSON to CSV & XML Converter",
-            "Cryptographic Hash Generator (MD5, SHA-256, SHA-512)",
-            "UUID v4 Generator",
-            "HEX/RGB/HSL Color Space Converter",
-            "Unix Timestamp Converter"
-          ]
+          }
         },
         {
           "@type": "WebSite",
@@ -147,91 +121,7 @@
             "@type": "Organization",
             "name": "Codepackr",
             "url": "https://www.codepackr.com/"
-          },
-          "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://www.codepackr.com/?tool={search_term_string}",
-            "query-input": "required name=search_term_string"
           }
-        },
-        {
-          "@type": "ItemList",
-          "name": "Featured Developer Utilities",
-          "description": "High-performance developer tools running locally in the browser",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "JSON Formatter & Validator",
-              "url": "https://www.codepackr.com/json-formatter"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Base64 Encoder & Decoder",
-              "url": "https://www.codepackr.com/base64"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": "Code Diff Checker",
-              "url": "https://www.codepackr.com/diff-checker"
-            },
-            {
-              "@type": "ListItem",
-              "position": 4,
-              "name": "Regular Expression Tester",
-              "url": "https://www.codepackr.com/regex-tester"
-            },
-            {
-              "@type": "ListItem",
-              "position": 5,
-              "name": "JWT Token Decoder",
-              "url": "https://www.codepackr.com/jwt-decoder"
-            },
-            {
-              "@type": "ListItem",
-              "position": 6,
-              "name": "SQL Formatter & Beautifier",
-              "url": "https://www.codepackr.com/sql-formatter"
-            },
-            {
-              "@type": "ListItem",
-              "position": 7,
-              "name": "UUID v4 Generator",
-              "url": "https://www.codepackr.com/uuid-generator"
-            },
-            {
-              "@type": "ListItem",
-              "position": 8,
-              "name": "JSON to CSV Converter",
-              "url": "https://www.codepackr.com/json-csv-converter"
-            },
-            {
-              "@type": "ListItem",
-              "position": 9,
-              "name": "EDI X12 Formatter",
-              "url": "https://www.codepackr.com/edi-x12-formatter"
-            },
-            {
-              "@type": "ListItem",
-              "position": 10,
-              "name": "XML Formatter & Beautifier",
-              "url": "https://www.codepackr.com/xml-formatter"
-            },
-            {
-              "@type": "ListItem",
-              "position": 11,
-              "name": "YAML to JSON Converter",
-              "url": "https://www.codepackr.com/yaml-json-converter"
-            },
-            {
-              "@type": "ListItem",
-              "position": 12,
-              "name": "Markdown Preview & Editor",
-              "url": "https://www.codepackr.com/markdown"
-            }
-          ]
         }
       ]
     }
@@ -242,11 +132,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
   <body>
-    <!-- Google Tag Manager (noscript): A fallback tracking iframe that records basic page visits for users who have disabled JavaScript execution in their web browser. Container ID: GTM-NK24VGVG -->
-    <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NK24VGVG"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
