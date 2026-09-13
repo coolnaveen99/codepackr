@@ -1,7 +1,22 @@
 import React, { useState, useMemo } from 'react';
-import { Copy, Check, Download, RefreshCw, SlidersHorizontal, CheckCircle2, AlertTriangle, ShieldCheck, Upload, Trash2 } from 'lucide-react';
+import {
+  Copy,
+  Check,
+  Download,
+  RefreshCw,
+  SlidersHorizontal,
+  CheckCircle2,
+  AlertTriangle,
+  ShieldCheck,
+  Upload,
+  Trash2,
+  Sparkles,
+} from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
+import { ToolShell } from './ToolShell';
+import { EDI_TRANSACTIONS } from '../../data/ediDictionary';
+import { downloadFile } from '../../lib/smartDownload';
 
 interface EdiDelimiterCleanerProps {
   tool: ToolDef;
@@ -19,12 +34,15 @@ export const EdiDelimiterCleaner: React.FC<EdiDelimiterCleanerProps> = ({
   initialInput = '',
 }) => {
   const [input, setInput] = useState<string>(initialInput || SAMPLE_RAW_EDI);
+  const [selectedSampleId, setSelectedSampleId] = useState<string>('850');
   const [targetElemSep, setTargetElemSep] = useState<string>('*');
   const [targetSegTerm, setTargetSegTerm] = useState<string>('~');
+  const [targetSubElemSep, setTargetSubElemSep] = useState<string>('>');
   const [wrapLines, setWrapLines] = useState<boolean>(true);
   const [normalizeIsa, setNormalizeIsa] = useState<boolean>(true);
   const [stripTrailingSpaces, setStripTrailingSpaces] = useState<boolean>(true);
   const [removeCR, setRemoveCR] = useState<boolean>(true);
+  const [isPhiMasked, setIsPhiMasked] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
 
   // Auto-detect current separators
@@ -32,26 +50,87 @@ export const EdiDelimiterCleaner: React.FC<EdiDelimiterCleanerProps> = ({
     const trimmed = input.trim();
     let elem = '*';
     let term = '~';
+    let sub = '>';
     if (trimmed.startsWith('ISA') && trimmed.length >= 106) {
       elem = trimmed[3];
+      sub = trimmed[104] || '>';
       const charAt105 = trimmed[105];
       if (charAt105 && !/\s/.test(charAt105)) {
         term = charAt105;
       }
+    } else if (trimmed.startsWith('UNA') && trimmed.length >= 9) {
+      sub = trimmed[3];
+      elem = trimmed[4];
+      term = trimmed[8];
     } else if (trimmed.includes('~')) {
       term = '~';
     } else if (trimmed.includes("'")) {
       term = "'";
       elem = '+';
+      sub = ':';
     }
-    return { elem, term };
+    return { elem, term, sub };
   }, [input]);
 
-  // Process and clean EDI
-  const { cleanedEdi, isaStatus } = useMemo(() => {
-    if (!input.trim()) return { cleanedEdi: '', isaStatus: null };
+  // Load preset sample
+  const handleSelectSample = (sampleId: string) => {
+    const tx = EDI_TRANSACTIONS.find((t) => t.id === sampleId || t.code === sampleId);
+    if (tx) {
+      setSelectedSampleId(tx.id);
+      setInput(tx.samplePayload);
+      if (tx.standard === 'EDIFACT') {
+        setTargetElemSep('+');
+        setTargetSegTerm("'");
+        setTargetSubElemSep(':');
+      } else {
+        setTargetElemSep('*');
+        setTargetSegTerm('~');
+        setTargetSubElemSep('>');
+      }
+    }
+  };
 
-    let text = input;
+  // PHI Masking helper (HIPAA Safe Harbor)
+  const { processedInputText, maskedCount } = useMemo(() => {
+    if (!isPhiMasked || !input) return { processedInputText: input, maskedCount: 0 };
+
+    let count = 0;
+    // Replace patient / member names in NM1*IL or NM1*QC, addresses in N3, N4
+    const lines = input.split(currentDelims.term);
+    const maskedLines = lines.map((line) => {
+      const parts = line.split(currentDelims.elem);
+      const tag = parts[0]?.trim().toUpperCase();
+
+      if (['NM1', 'N1'].includes(tag) && parts.length > 3) {
+        if (['IL', 'QC', '74', 'PR'].includes(parts[1]?.trim())) {
+          count++;
+          if (parts[3]) parts[3] = '[REDACTED_NAME]';
+          if (parts[4]) parts[4] = '[REDACTED]';
+          if (parts[9]) parts[9] = 'MEMBER-***-****';
+          return parts.join(currentDelims.elem);
+        }
+      }
+      if (tag === 'DMG' && parts.length > 2) {
+        count++;
+        parts[2] = '19800101'; // Standardized mask date
+        return parts.join(currentDelims.elem);
+      }
+      if (tag === 'N3' && parts.length > 1) {
+        count++;
+        parts[1] = '100 REDACTED HEALTHWAY';
+        return parts.join(currentDelims.elem);
+      }
+      return line;
+    });
+
+    return { processedInputText: maskedLines.join(currentDelims.term), maskedCount: count };
+  }, [input, isPhiMasked, currentDelims]);
+
+  // Process and clean EDI
+  const { cleanedEdi, isaStatus, segmentCount } = useMemo(() => {
+    if (!processedInputText.trim()) return { cleanedEdi: '', isaStatus: null, segmentCount: 0 };
+
+    let text = processedInputText;
     if (removeCR) {
       text = text.replace(/\r/g, '');
     }
@@ -67,9 +146,6 @@ export const EdiDelimiterCleaner: React.FC<EdiDelimiterCleanerProps> = ({
       const tag = parts[0]?.toUpperCase();
 
       if (tag === 'ISA' && normalizeIsa && parts.length >= 16) {
-        // Enforce ANSI X12 strict fixed-width lengths:
-        // ISA01: 2, ISA02: 10, ISA03: 2, ISA04: 10, ISA05: 2, ISA06: 15, ISA07: 2, ISA08: 15
-        // ISA09: 6, ISA10: 4, ISA11: 1, ISA12: 5, ISA13: 9, ISA14: 1, ISA15: 1, ISA16: 1
         const isa01 = (parts[1] || '00').padEnd(2, ' ').slice(0, 2);
         const isa02 = (parts[2] || '').padEnd(10, ' ').slice(0, 10);
         const isa03 = (parts[3] || '00').padEnd(2, ' ').slice(0, 2);
@@ -85,7 +161,7 @@ export const EdiDelimiterCleaner: React.FC<EdiDelimiterCleanerProps> = ({
         const isa13 = (parts[13] || '000000001').padStart(9, '0').slice(-9);
         const isa14 = (parts[14] || '0').slice(0, 1);
         const isa15 = (parts[15] || 'P').slice(0, 1);
-        const isa16 = (parts[16] || '>').slice(0, 1);
+        const isa16 = (parts[16] || targetSubElemSep || '>').slice(0, 1);
 
         const normalizedParts = [
           'ISA',
@@ -106,288 +182,233 @@ export const EdiDelimiterCleaner: React.FC<EdiDelimiterCleanerProps> = ({
           isa15,
           isa16,
         ];
-        const rebuilt = normalizedParts.join(targetElemSep);
-        isaLen = rebuilt.length + (targetSegTerm ? targetSegTerm.length : 1);
-        return rebuilt;
+        const rebuiltIsa = normalizedParts.join(targetElemSep) + targetSegTerm;
+        isaLen = rebuiltIsa.length;
+        return normalizedParts.join(targetElemSep);
       }
 
-      // Other segments
-      const cleanedParts = parts.map((p) => (stripTrailingSpaces ? p.trim() : p));
+      const cleanedParts = parts.map((elem) => (stripTrailingSpaces ? elem.trim() : elem));
       return cleanedParts.join(targetElemSep);
     });
 
-    let result = '';
-    if (wrapLines) {
-      result = processedSegments.map((s) => `${s}${targetSegTerm}`).join('\n');
-    } else {
-      result = processedSegments.map((s) => `${s}${targetSegTerm}`).join('');
-    }
+    const joiner = wrapLines ? `${targetSegTerm}\n` : targetSegTerm;
+    const finalEdi = processedSegments.join(joiner) + targetSegTerm;
 
     return {
-      cleanedEdi: result,
-      isaStatus: {
-        length: isaLen,
-        isExact106: isaLen === 106,
-        segmentCount: processedSegments.length,
-      },
+      cleanedEdi: finalEdi,
+      segmentCount: processedSegments.length,
+      isaStatus:
+        isaLen > 0
+          ? {
+              length: isaLen,
+              isExact106: isaLen === 106,
+              segmentCount: processedSegments.length,
+            }
+          : null,
     };
-  }, [input, currentDelims, targetElemSep, targetSegTerm, wrapLines, normalizeIsa, stripTrailingSpaces, removeCR]);
+  }, [
+    processedInputText,
+    currentDelims,
+    targetElemSep,
+    targetSegTerm,
+    targetSubElemSep,
+    normalizeIsa,
+    wrapLines,
+    stripTrailingSpaces,
+    removeCR,
+  ]);
 
   const handleCopy = () => {
+    if (!cleanedEdi) return;
     navigator.clipboard.writeText(cleanedEdi);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleDownload = () => {
-    const blob = new Blob([cleanedEdi], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'cleaned_edi.edi';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleClearWorkspace = () => {
-    setInput('');
+    if (!cleanedEdi) return;
+    downloadFile({
+      file: cleanedEdi,
+      filename: `cleaned_edi_${Date.now()}.edi`,
+      mimeType: 'text/plain',
+      expectedExtension: 'edi',
+    });
   };
 
   return (
     <div className="space-y-6">
-      <ToolHeader
-        tool={tool}
-        onBackToHome={onBackToHome}
-        onSelectRelated={onSelectRelated}
-        onResetOrClear={handleClearWorkspace}
-        resetLabel="Clear Workspace"
-      />
+      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
 
-      {/* Control Panel */}
-      <div
-        className="p-4 rounded-2xl border space-y-3 text-xs"
-        style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-      >
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-4">
-            <span className="font-semibold text-[var(--ink)]">Target Delimiters:</span>
-            <div className="flex items-center gap-2">
-              <span className="text-[var(--muted)]">Element Separator:</span>
+      {/* Modern ToolShell with Universal Toolbar, Story Mode & Status Bar */}
+      <ToolShell
+        selectedSampleId={selectedSampleId}
+        onSelectSample={handleSelectSample}
+        isPhiMasked={isPhiMasked}
+        onTogglePhiMask={setIsPhiMasked}
+        maskedPhiCount={maskedCount}
+        hasInput={!!input.trim()}
+        onClear={() => setInput('')}
+        onResetSample={() => setInput(SAMPLE_RAW_EDI)}
+        segmentTerminator={targetSegTerm}
+        elementSeparator={targetElemSep}
+        subElementSeparator={targetSubElemSep}
+        onSegmentTerminatorChange={setTargetSegTerm}
+        onElementSeparatorChange={setTargetElemSep}
+        onSubElementSeparatorChange={setTargetSubElemSep}
+        onAutoDetectDelimiters={() => {
+          setTargetElemSep(currentDelims.elem);
+          setTargetSegTerm(currentDelims.term);
+          setTargetSubElemSep(currentDelims.sub);
+        }}
+        secondaryActions={
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold select-none px-2 py-1 rounded-lg bg-[var(--surface-2)] border border-[var(--line)] text-emerald-600 dark:text-emerald-400">
               <input
-                type="text"
-                maxLength={1}
-                value={targetElemSep}
-                onChange={(e) => setTargetElemSep(e.target.value || '*')}
-                className="w-8 h-8 text-center rounded-lg border font-mono font-bold"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                type="checkbox"
+                checked={normalizeIsa}
+                onChange={(e) => setNormalizeIsa(e.target.checked)}
+                className="rounded"
               />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[var(--muted)]">Segment Terminator:</span>
+              <span>106-Char ISA</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer text-xs select-none px-2 py-1 rounded-lg bg-[var(--surface-2)] border border-[var(--line)]">
               <input
-                type="text"
-                maxLength={1}
-                value={targetSegTerm}
-                onChange={(e) => setTargetSegTerm(e.target.value || '~')}
-                className="w-8 h-8 text-center rounded-lg border font-mono font-bold"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                type="checkbox"
+                checked={wrapLines}
+                onChange={(e) => setWrapLines(e.target.checked)}
+                className="rounded"
               />
-            </div>
+              <span>Wrap Lines</span>
+            </label>
           </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setInput(SAMPLE_RAW_EDI)}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-xl border font-medium hover:opacity-80 transition-opacity"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>Reset Sample</span>
-            </button>
-            <button
-              onClick={handleCopy}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-              style={{ backgroundColor: copied ? 'var(--ok)' : 'var(--brand)' }}
-            >
-              {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copied ? 'Copied Clean EDI!' : 'Copy Clean EDI'}</span>
-            </button>
-            <button
-              onClick={handleDownload}
-              className="p-2 rounded-xl border font-semibold hover:opacity-80 transition-opacity"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            >
-              <Download className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Checkbox Options */}
-        <div className="flex flex-wrap items-center gap-5 pt-2 border-t" style={{ borderColor: 'var(--line)' }}>
-          <label className="flex items-center gap-2 cursor-pointer font-medium select-none">
+        }
+        leftPaneTitle="RAW / UNWRAPPED EDI SOURCE"
+        leftPaneBadge={
+          <span className="font-mono text-[10px] text-[var(--muted)]">
+            Detected: {currentDelims.elem} &amp; {currentDelims.term}
+          </span>
+        }
+        leftPaneActions={
+          <label className="cursor-pointer hover:opacity-80 flex items-center gap-1 text-[var(--muted)] text-xs">
+            <Upload className="w-3.5 h-3.5" />
+            <span>Upload</span>
             <input
-              type="checkbox"
-              checked={normalizeIsa}
-              onChange={(e) => setNormalizeIsa(e.target.checked)}
-              className="rounded"
-            />
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-              Fix ISA 106-Char Mandatory Padding (ISA01-16)
-            </span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={wrapLines}
-              onChange={(e) => setWrapLines(e.target.checked)}
-              className="rounded"
-            />
-            <span>Wrap segments into new lines</span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={stripTrailingSpaces}
-              onChange={(e) => setStripTrailingSpaces(e.target.checked)}
-              className="rounded"
-            />
-            <span>Trim element whitespace</span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={removeCR}
-              onChange={(e) => setRemoveCR(e.target.checked)}
-              className="rounded"
-            />
-            <span>Strip Windows CR (\r)</span>
-          </label>
-        </div>
-      </div>
-
-      {/* ISA 106-Char Health Banner */}
-      {isaStatus && (
-        <div
-          className="p-3.5 rounded-xl border flex items-center justify-between text-xs"
-          style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-        >
-          <div className="flex items-center gap-2">
-            {isaStatus.isExact106 ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-            ) : (
-              <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
-            )}
-            <span className="font-semibold" style={{ color: 'var(--ink)' }}>
-              ISA Segment Length: {isaStatus.length} characters{' '}
-              {isaStatus.isExact106 ? (
-                <span className="text-emerald-600">(Complies with ANSI X12 106-character standard)</span>
-              ) : (
-                <span className="text-amber-600">(Standard requires exactly 106 chars)</span>
-              )}
-            </span>
-          </div>
-          <span className="text-[var(--muted)] font-mono">{isaStatus.segmentCount} Segments Cleaned</span>
-        </div>
-      )}
-
-      {/* Editor & Output Columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Source EDI */}
-        <div
-          className="p-4 rounded-2xl border shadow-sm flex flex-col"
-          style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-        >
-          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-            <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-              RAW OR UNWRAPPED EDI
-            </span>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] text-[var(--muted)] hidden sm:inline">
-                Detected: {currentDelims.elem} &amp; {currentDelims.term}
-              </span>
-              <label className="cursor-pointer hover:opacity-80 flex items-center gap-1 text-[var(--muted)] text-xs">
-                <Upload className="w-3.5 h-3.5" />
-                <span>Upload</span>
-                <input
-                  type="file"
-                  accept=".edi,.txt,.x12"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onload = (evt) => {
-                        if (typeof evt.target?.result === 'string') {
-                          setInput(evt.target.result);
-                        }
-                      };
-                      reader.readAsText(file);
+              type="file"
+              accept=".edi,.txt,.x12"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = (evt) => {
+                    if (typeof evt.target?.result === 'string') {
+                      setInput(evt.target.result);
                     }
-                  }}
-                  className="hidden"
-                />
-              </label>
-              <button
-                onClick={() => setInput('')}
-                disabled={!input}
-                className="hover:opacity-80 text-rose-500 disabled:opacity-40 flex items-center gap-1 text-xs cursor-pointer"
-                title="Clear input"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Clear</span>
-              </button>
-            </div>
-          </div>
+                  };
+                  reader.readAsText(file);
+                }
+              }}
+              className="hidden"
+            />
+          </label>
+        }
+        leftPaneContent={
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            rows={14}
+            rows={15}
             className="w-full flex-1 p-3.5 font-mono text-xs rounded-xl border outline-none leading-relaxed resize-y"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+            style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+            placeholder="Paste raw wrapped or unwrapped EDI stream..."
           />
-        </div>
-
-        {/* Cleaned EDI */}
-        <div
-          className="p-4 rounded-2xl border shadow-sm flex flex-col"
-          style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-        >
-          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4" />
-              CLEANED &amp; NORMALIZED EDI
+        }
+        rightPaneTitle="NORMALIZED & CLEANED EDI STREAM"
+        rightPaneBadge={
+          isaStatus && (
+            <span
+              className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                isaStatus.isExact106
+                  ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                  : 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+              }`}
+            >
+              ISA: {isaStatus.length}/106
             </span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleCopy}
-                disabled={!cleanedEdi}
-                className="text-xs flex items-center gap-1 hover:opacity-80 text-[var(--brand)] font-medium disabled:opacity-40 cursor-pointer"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? 'Copied!' : 'Copy'}</span>
-              </button>
-              <button
-                onClick={handleDownload}
-                disabled={!cleanedEdi}
-                className="text-xs flex items-center gap-1 hover:opacity-80 text-[var(--muted)] font-medium disabled:opacity-40 cursor-pointer"
-                title="Download cleaned .edi"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download</span>
-              </button>
-            </div>
+          )
+        }
+        rightPaneActions={
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handleCopy}
+              disabled={!cleanedEdi}
+              className="px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1 hover:opacity-80 disabled:opacity-40 cursor-pointer shadow-xs"
+              style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: copied ? 'var(--ok)' : 'var(--brand)' }}
+            >
+              {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copied ? 'Copied' : 'Copy'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleDownload}
+              disabled={!cleanedEdi}
+              className="px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1 hover:opacity-80 disabled:opacity-40 cursor-pointer shadow-xs"
+              style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              title="Download Cleaned File"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Download</span>
+            </button>
           </div>
+        }
+        rightPaneContent={
           <textarea
             readOnly
             value={cleanedEdi}
-            rows={14}
-            className="w-full flex-1 p-3.5 font-mono text-xs rounded-xl border outline-none leading-relaxed bg-emerald-50/20 dark:bg-emerald-950/20"
-            style={{ borderColor: 'var(--line)', color: 'var(--ink)' }}
+            rows={15}
+            className="w-full flex-1 p-3.5 font-mono text-xs rounded-xl border outline-none leading-relaxed resize-y"
+            style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
           />
-        </div>
-      </div>
+        }
+        bottomContent={
+          <div
+            className="p-3.5 rounded-2xl border flex items-center justify-between gap-3 text-xs flex-wrap shadow-xs"
+            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+          >
+            <div className="flex items-center gap-4 flex-wrap">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={stripTrailingSpaces}
+                  onChange={(e) => setStripTrailingSpaces(e.target.checked)}
+                  className="rounded"
+                />
+                <span>Trim element trailing whitespace</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={removeCR}
+                  onChange={(e) => setRemoveCR(e.target.checked)}
+                  className="rounded"
+                />
+                <span>Strip Carriage Returns (\r)</span>
+              </label>
+            </div>
+            {isaStatus && (
+              <span className="text-[11px] font-mono text-[var(--muted)]">
+                Status: {isaStatus.isExact106 ? 'Valid 106-character ISA' : 'Non-standard ISA length'}
+              </span>
+            )}
+          </div>
+        }
+        statusBarMetrics={{
+          segmentCount,
+          byteSize: cleanedEdi ? new Blob([cleanedEdi]).size : 0,
+          encodingStandard: input.startsWith('UN') ? 'UN/EDIFACT' : 'ANSI ASC X12',
+          complianceStatus: isaStatus ? (isaStatus.isExact106 ? 'valid' : 'warning') : 'valid',
+          customMessage: 'Delimiters normalized in-browser',
+        }}
+      />
     </div>
   );
 };

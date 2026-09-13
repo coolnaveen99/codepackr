@@ -9,15 +9,19 @@ import {
   Search,
   BookOpen,
   ArrowRight,
-  Send,
   Layers,
   CheckCircle2,
   X,
   Trash2,
+  Tag,
+  Building2,
+  Hash,
 } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
+import { ToolShell } from './ToolShell';
 import { EDI_TRANSACTIONS, EdiTransactionDefinition } from '../../data/ediDictionary';
+import { downloadFile } from '../../lib/smartDownload';
 
 interface EdiTemplateGeneratorProps {
   tool: ToolDef;
@@ -32,20 +36,27 @@ export const EdiTemplateGenerator: React.FC<EdiTemplateGeneratorProps> = ({
   onSelectRelated,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('860');
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('850');
   const [searchFilter, setSearchFilter] = useState<string>('');
   const [senderId, setSenderId] = useState<string>('BUYER_RETAIL');
   const [receiverId, setReceiverId] = useState<string>('ACME_SUPPLIER');
   const [senderQual, setSenderQual] = useState<string>('ZZ');
   const [receiverQual, setReceiverQual] = useState<string>('ZZ');
   const [docNumber, setDocNumber] = useState<string>('PO-2026-9901');
-  const [itemCount, setItemCount] = useState<number>(2);
   const [elemSep, setElemSep] = useState<string>('*');
   const [segTerm, setSegTerm] = useState<string>('~');
+  const [isPhiMasked, setIsPhiMasked] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
 
   // Categories list
-  const categories = ['All', 'Supply Chain & Retail', 'Logistics & Warehousing', 'Manufacturing & Automotive', 'Finance & Healthcare', 'Administrative & Acknowledgment'];
+  const categories = [
+    'All',
+    'Supply Chain & Retail',
+    'Logistics & Warehousing',
+    'Manufacturing & Automotive',
+    'Finance & Healthcare',
+    'Administrative & Acknowledgment',
+  ];
 
   // Filtered transactions
   const filteredTransactions = useMemo(() => {
@@ -76,17 +87,12 @@ export const EdiTemplateGenerator: React.FC<EdiTemplateGeneratorProps> = ({
     const min = String(now.getMinutes()).padStart(2, '0');
     const yymmdd = `${yy}${mm}${dd}`;
     const ccyymmdd = `${now.getFullYear()}${mm}${dd}`;
-    const hhmm = `${hh}${min}`;
-    const ctrl = '000000001';
 
-    const pSender = senderId.padEnd(15, ' ').slice(0, 15);
-    const pReceiver = receiverId.padEnd(15, ' ').slice(0, 15);
+    const pSender = (isPhiMasked ? 'MASKED_SENDER' : senderId).padEnd(15, ' ').slice(0, 15);
+    const pReceiver = (isPhiMasked ? 'MASKED_RCVR' : receiverId).padEnd(15, ' ').slice(0, 15);
     const pSQual = senderQual.padEnd(2, ' ').slice(0, 2);
     const pRQual = receiverQual.padEnd(2, ' ').slice(0, 2);
-    const sep = elemSep || '*';
-    const term = segTerm || '~';
 
-    // If the template has sample payload, we customize sender, receiver, dates, docNumber, and separators
     const base = currentTransaction.samplePayload;
 
     if (currentTransaction.standard === 'EDIFACT') {
@@ -101,12 +107,10 @@ export const EdiTemplateGenerator: React.FC<EdiTemplateGeneratorProps> = ({
       return customized;
     }
 
-    // X12 Customization
-    const lines = base.split('\n').map((rawLine) => {
-      let l = rawLine.trim().replace(/~$/, '');
-      if (!l) return '';
-
-      const parts = l.split('*');
+    // ANSI X12 Customization
+    const lines = base.split('~').map((l) => l.trim()).filter(Boolean);
+    const customizedLines = lines.map((line) => {
+      const parts = line.split('*');
       const tag = parts[0];
 
       if (tag === 'ISA') {
@@ -115,407 +119,259 @@ export const EdiTemplateGenerator: React.FC<EdiTemplateGeneratorProps> = ({
         parts[7] = pRQual;
         parts[8] = pReceiver;
         parts[9] = yymmdd;
-        parts[10] = hhmm;
-        return parts.join(sep);
-      }
-      if (tag === 'GS') {
-        parts[2] = senderId.trim();
-        parts[3] = receiverId.trim();
+        parts[10] = `${hh}${min}`;
+      } else if (tag === 'GS') {
+        parts[2] = isPhiMasked ? 'MASKED_APP' : senderId.trim().slice(0, 15);
+        parts[3] = isPhiMasked ? 'MASKED_APP' : receiverId.trim().slice(0, 15);
         parts[4] = ccyymmdd;
-        parts[5] = hhmm;
-        return parts.join(sep);
-      }
-      if (tag === 'BEG' || tag === 'BIG' || tag === 'BCH' || tag === 'BCA' || tag === 'BAK' || tag === 'BSN' || tag === 'B2') {
-        // Update document number if present
-        if (parts[3]) parts[3] = docNumber;
-        return parts.join(sep);
-      }
-      if (tag === 'N1' && (parts[1] === 'ST' || parts[1] === 'BY' || parts[1] === 'BT')) {
-        parts[2] = `${receiverId.trim()} FACILITY`;
-        return parts.join(sep);
-      }
-      if (tag === 'N1' && (parts[1] === 'SF' || parts[1] === 'SU' || parts[1] === 'VN' || parts[1] === 'RE')) {
-        parts[2] = `${senderId.trim()} OPERATIONS`;
-        return parts.join(sep);
+        parts[5] = `${hh}${min}`;
+      } else if (['BEG', 'BIG', 'BHT', 'B4', 'B2', 'B3'].includes(tag)) {
+        if (tag === 'BEG' && parts[3]) parts[3] = docNumber;
+        if (tag === 'BIG' && parts[2]) parts[2] = docNumber;
+        if (tag === 'BHT' && parts[3]) parts[3] = docNumber;
       }
 
-      // Default replacement of delimiter
-      return parts.join(sep);
-    }).filter(Boolean);
+      if (isPhiMasked && ['N1', 'NM1'].includes(tag)) {
+        if (parts[2]) parts[2] = 'AUTHORIZED ENTITY LLC';
+      }
 
-    return lines.map((l) => `${l}${term}`).join('\n');
-  }, [currentTransaction, senderId, receiverId, senderQual, receiverQual, docNumber, elemSep, segTerm]);
+      return parts.join(elemSep);
+    });
+
+    return customizedLines.join(`${segTerm}\n`) + segTerm;
+  }, [
+    currentTransaction,
+    senderId,
+    receiverId,
+    senderQual,
+    receiverQual,
+    docNumber,
+    elemSep,
+    segTerm,
+    isPhiMasked,
+  ]);
+
+  const handleSelectSamplePreset = (sampleId: string) => {
+    setSelectedTemplate(sampleId);
+    const tx = EDI_TRANSACTIONS.find((t) => t.id === sampleId);
+    if (tx) {
+      if (tx.standard === 'EDIFACT') {
+        setElemSep('+');
+        setSegTerm("'");
+      } else {
+        setElemSep('*');
+        setSegTerm('~');
+      }
+    }
+  };
 
   const handleCopy = () => {
+    if (!generatedEdi) return;
     navigator.clipboard.writeText(generatedEdi);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleDownload = () => {
-    const blob = new Blob([generatedEdi], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${currentTransaction.code}_sample.edi`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleResetToDefaults = () => {
-    setSelectedTemplate('850');
-    setSenderId('SENDERQUAL');
-    setReceiverId('RECEIVERQUAL');
-    setSenderQual('ZZ');
-    setReceiverQual('ZZ');
-    setDocNumber('PO-2026-9901');
-    setItemCount(2);
-    setElemSep('*');
-    setSegTerm('~');
-    setSelectedCategory('All');
-    setSearchFilter('');
+    if (!generatedEdi) return;
+    downloadFile({
+      file: generatedEdi,
+      filename: `${currentTransaction.code}_template_${Date.now()}.edi`,
+      mimeType: 'text/plain',
+      expectedExtension: 'edi',
+    });
   };
 
   return (
     <div className="space-y-6">
-      <ToolHeader
-        tool={tool}
-        onBackToHome={onBackToHome}
-        onSelectRelated={onSelectRelated}
-        onResetOrClear={handleResetToDefaults}
-        resetLabel="Reset to Defaults"
-      />
+      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} />
 
-      {/* Category Tabs & Search Bar */}
-      <div
-        className="p-4 rounded-2xl border space-y-3"
-        style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-[var(--brand)]" />
-            <span className="font-semibold text-xs" style={{ color: 'var(--ink)' }}>
-              EDI Transaction Standards Catalog ({EDI_TRANSACTIONS.length} Total Standards)
-            </span>
-          </div>
-
-          {/* Search Box */}
-          <div className="relative w-full sm:w-64">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
-            <input
-              type="text"
-              placeholder="Search 860, 856, 850, ASN, 204..."
-              value={searchFilter}
-              onChange={(e) => setSearchFilter(e.target.value)}
-              className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl border outline-none font-medium"
-              style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            />
-            {searchFilter && (
-              <button
-                onClick={() => setSearchFilter('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--ink)] cursor-pointer"
-                title="Clear search"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Category Pills */}
-        <div className="flex items-center gap-1.5 flex-wrap pt-1">
-          {categories.map((cat) => {
-            const isCatActive = selectedCategory === cat;
-            return (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  isCatActive
-                    ? 'bg-[var(--brand)] text-white shadow-xs'
-                    : 'border hover:opacity-80'
-                }`}
-                style={{
-                  borderColor: isCatActive ? 'var(--brand)' : 'var(--line)',
-                  backgroundColor: isCatActive ? 'var(--brand)' : 'var(--surface-2)',
-                  color: isCatActive ? '#ffffff' : 'var(--ink)',
-                }}
-              >
-                {cat}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Transaction Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 pt-2">
-          {filteredTransactions.map((tmpl) => {
-            const isSelected = selectedTemplate === tmpl.id;
-            return (
-              <button
-                key={tmpl.id}
-                onClick={() => {
-                  setSelectedTemplate(tmpl.id);
-                  if (tmpl.code.startsWith('850')) setDocNumber('PO-2026-9901');
-                  else if (tmpl.code.startsWith('855')) setDocNumber('PO-2026-9901');
-                  else if (tmpl.code.startsWith('860')) setDocNumber('PO-2026-9901');
-                  else if (tmpl.code.startsWith('856')) setDocNumber('ASN-2026-1102');
-                  else if (tmpl.code.startsWith('810')) setDocNumber('INV-2026-4401');
-                  else if (tmpl.code.startsWith('204')) setDocNumber('LOAD-99441');
-                  else if (tmpl.code.startsWith('214')) setDocNumber('LOAD-99441');
-                  else if (tmpl.code.startsWith('846')) setDocNumber('STK-2026-09');
-                  else if (tmpl.code.startsWith('820')) setDocNumber('PAY-55019');
-                  else if (tmpl.code.startsWith('940')) setDocNumber('SO-2026-88901');
-                  else if (tmpl.code.startsWith('837')) setDocNumber('CLM-99120');
-                  else setDocNumber(`DOC-${tmpl.code}-1001`);
-                }}
-                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-                  isSelected ? 'ring-2 ring-[var(--brand)] shadow-sm' : 'hover:opacity-80'
-                }`}
-                style={{
-                  backgroundColor: isSelected ? 'var(--surface-2)' : 'var(--bg)',
-                  borderColor: isSelected ? 'var(--brand)' : 'var(--line)',
-                }}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-mono text-xs font-bold" style={{ color: isSelected ? 'var(--brand)' : 'var(--ink)' }}>
-                    {tmpl.code}
-                  </span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded font-semibold bg-[var(--line)] text-[var(--muted)]">
-                    {tmpl.standard}
-                  </span>
-                </div>
-                <div className="text-[11px] font-medium truncate" style={{ color: 'var(--ink)' }}>
-                  {tmpl.name}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Transaction Details & Guide Card */}
-      <div
-        className="p-4 rounded-2xl border space-y-3"
-        style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3" style={{ borderColor: 'var(--line)' }}>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono font-bold text-sm px-2 py-0.5 rounded bg-[var(--brand)] text-white">
-                {currentTransaction.code}
-              </span>
-              <h3 className="font-semibold text-sm" style={{ color: 'var(--ink)' }}>
-                {currentTransaction.name}
-              </h3>
-              <span className="text-xs px-2 py-0.5 rounded-full font-medium border text-[var(--muted)]" style={{ borderColor: 'var(--line)' }}>
-                Group: {currentTransaction.functionalGroup}
-              </span>
-            </div>
-            <p className="text-xs text-[var(--muted)] mt-1">
-              {currentTransaction.description}
-            </p>
-          </div>
-
-          <div className="text-xs font-medium px-3 py-1.5 rounded-xl bg-[var(--surface-2)] border self-start sm:self-auto" style={{ borderColor: 'var(--line)' }}>
-            <span className="text-[var(--muted)]">Category: </span>
-            <span className="font-semibold text-[var(--brand)]">{currentTransaction.category}</span>
-          </div>
-        </div>
-
-        {/* Purpose & Key Segments */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-          <div className="md:col-span-2 p-3 rounded-xl bg-[var(--surface-2)] border" style={{ borderColor: 'var(--line)' }}>
-            <span className="font-semibold block mb-1 text-[var(--ink)]">Business Purpose &amp; Usage:</span>
-            <p className="text-[var(--muted)] leading-relaxed">
-              {currentTransaction.purpose}
-            </p>
-          </div>
-
-          <div className="p-3 rounded-xl bg-[var(--surface-2)] border" style={{ borderColor: 'var(--line)' }}>
-            <span className="font-semibold block mb-1 text-[var(--ink)]">Key Envelope &amp; Loop Segments:</span>
-            <div className="flex flex-wrap gap-1">
-              {currentTransaction.keySegments.map((seg) => (
-                <span
-                  key={seg}
-                  className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg)] border font-semibold text-[var(--ink)]"
-                  style={{ borderColor: 'var(--line)' }}
+      <ToolShell
+        selectedSampleId={selectedTemplate}
+        onSelectSample={handleSelectSamplePreset}
+        isPhiMasked={isPhiMasked}
+        onTogglePhiMask={setIsPhiMasked}
+        hasInput={true}
+        segmentTerminator={segTerm}
+        elementSeparator={elemSep}
+        onSegmentTerminatorChange={setSegTerm}
+        onElementSeparatorChange={setElemSep}
+        leftPaneTitle="EDI TEMPLATE CONFIGURATOR"
+        leftPaneBadge={
+          <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-[var(--surface-2)] text-[var(--brand)] border border-[var(--line)]">
+            {currentTransaction.code} ({currentTransaction.standard})
+          </span>
+        }
+        leftPaneContent={
+          <div className="space-y-4 text-xs">
+            {/* Category Filter Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer border ${
+                    selectedCategory === cat
+                      ? 'border-[var(--brand)] text-[var(--brand)] bg-[var(--surface-2)]'
+                      : 'border-transparent text-[var(--muted)] hover:text-[var(--ink)]'
+                  }`}
                 >
-                  {seg}
-                </span>
+                  {cat}
+                </button>
               ))}
             </div>
+
+            {/* Quick Template Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[140px] overflow-y-auto p-1 rounded-xl border border-[var(--line)] bg-[var(--bg)]">
+              {filteredTransactions.map((tx) => {
+                const isSelected = selectedTemplate === tx.id;
+                return (
+                  <button
+                    key={tx.id}
+                    type="button"
+                    onClick={() => handleSelectSamplePreset(tx.id)}
+                    className={`p-2 rounded-lg text-left border transition-all cursor-pointer ${
+                      isSelected
+                        ? 'border-[var(--brand)] bg-[var(--surface)] shadow-xs'
+                        : 'border-[var(--line)] hover:border-[var(--brand)] bg-[var(--surface)] opacity-80 hover:opacity-100'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="font-mono font-bold text-xs" style={{ color: isSelected ? 'var(--brand)' : 'var(--ink)' }}>
+                        {tx.code}
+                      </span>
+                      <span className="text-[9px] font-mono text-[var(--muted)]">
+                        {tx.standard}
+                      </span>
+                    </div>
+                    <span className="text-[10px] truncate block text-[var(--muted)] mt-0.5">
+                      {tx.name.replace(`${tx.code} `, '')}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Parameter Fields */}
+            <div className="space-y-3 pt-2 border-t border-[var(--line)]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-[var(--muted)] mb-1">
+                    Sender ID (ISA06 / GS02)
+                  </label>
+                  <input
+                    type="text"
+                    value={senderId}
+                    onChange={(e) => setSenderId(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-lg border font-mono text-xs outline-none"
+                    style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[var(--muted)] mb-1">
+                    Receiver ID (ISA08 / GS03)
+                  </label>
+                  <input
+                    type="text"
+                    value={receiverId}
+                    onChange={(e) => setReceiverId(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-lg border font-mono text-xs outline-none"
+                    style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-[var(--muted)] mb-1">
+                    Sender Qual (ISA05)
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={2}
+                    value={senderQual}
+                    onChange={(e) => setSenderQual(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-lg border font-mono text-xs text-center outline-none"
+                    style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[var(--muted)] mb-1">
+                    Receiver Qual (ISA07)
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={2}
+                    value={receiverQual}
+                    onChange={(e) => setReceiverQual(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-lg border font-mono text-xs text-center outline-none"
+                    style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[var(--muted)] mb-1">
+                    Document Ref / Number
+                  </label>
+                  <input
+                    type="text"
+                    value={docNumber}
+                    onChange={(e) => setDocNumber(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-lg border font-mono text-xs outline-none"
+                    style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-
-      {/* Parameter Customizer Bar */}
-      <div
-        className="p-4 rounded-2xl border grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 text-xs"
-        style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-      >
-        <div>
-          <label className="block text-[10px] font-semibold text-[var(--muted)] uppercase mb-1">
-            Sender ID &amp; Qual
-          </label>
-          <div className="flex gap-1">
-            <input
-              type="text"
-              value={senderQual}
-              onChange={(e) => setSenderQual(e.target.value.toUpperCase())}
-              maxLength={2}
-              className="w-10 p-2 rounded-lg border font-mono text-xs text-center uppercase font-bold"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            />
-            <input
-              type="text"
-              value={senderId}
-              onChange={(e) => setSenderId(e.target.value.toUpperCase())}
-              maxLength={15}
-              className="flex-1 p-2 rounded-lg border font-mono text-xs uppercase"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-[10px] font-semibold text-[var(--muted)] uppercase mb-1">
-            Receiver ID &amp; Qual
-          </label>
-          <div className="flex gap-1">
-            <input
-              type="text"
-              value={receiverQual}
-              onChange={(e) => setReceiverQual(e.target.value.toUpperCase())}
-              maxLength={2}
-              className="w-10 p-2 rounded-lg border font-mono text-xs text-center uppercase font-bold"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            />
-            <input
-              type="text"
-              value={receiverId}
-              onChange={(e) => setReceiverId(e.target.value.toUpperCase())}
-              maxLength={15}
-              className="flex-1 p-2 rounded-lg border font-mono text-xs uppercase"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-[10px] font-semibold text-[var(--muted)] uppercase mb-1">
-            Document / Reference #
-          </label>
-          <input
-            type="text"
-            value={docNumber}
-            onChange={(e) => setDocNumber(e.target.value)}
-            className="w-full p-2 rounded-lg border font-mono text-xs"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-          />
-        </div>
-
-        <div>
-          <label className="block text-[10px] font-semibold text-[var(--muted)] uppercase mb-1">
-            Line Items Count
-          </label>
-          <input
-            type="number"
-            min={1}
-            max={10}
-            value={itemCount}
-            onChange={(e) => setItemCount(Math.max(1, parseInt(e.target.value, 10) || 1))}
-            className="w-full p-2 rounded-lg border font-mono text-xs text-center"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-          />
-        </div>
-
-        <div>
-          <label className="block text-[10px] font-semibold text-[var(--muted)] uppercase mb-1">
-            Separators (* / ~)
-          </label>
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={elemSep}
-              onChange={(e) => setElemSep(e.target.value || '*')}
-              maxLength={1}
-              className="w-9 p-1.5 rounded-lg border font-mono text-xs text-center font-bold"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            />
-            <input
-              type="text"
-              value={segTerm}
-              onChange={(e) => setSegTerm(e.target.value || '~')}
-              maxLength={1}
-              className="w-9 p-1.5 rounded-lg border font-mono text-xs text-center font-bold"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            />
-            <span className="text-[11px] text-[var(--muted)]">Elem &amp; Seg</span>
-          </div>
-        </div>
-
-        <div className="flex items-end gap-2">
-          <button
-            onClick={handleCopy}
-            className="flex-1 flex items-center justify-center gap-1.5 p-2 rounded-xl font-semibold text-white shadow-sm transition-opacity hover:opacity-90 cursor-pointer"
-            style={{ backgroundColor: copied ? 'var(--ok)' : 'var(--brand)' }}
-          >
-            {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copied ? 'Copied!' : 'Copy EDI'}</span>
-          </button>
-          <button
-            onClick={handleDownload}
-            className="p-2 rounded-xl border font-semibold hover:opacity-80 transition-opacity cursor-pointer"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            title="Download .edi file"
-          >
-            <Download className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Generated Code Area */}
-      <div
-        className="p-4 rounded-2xl border shadow-sm flex flex-col"
-        style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-      >
-        <div className="flex items-center justify-between mb-3 text-xs flex-wrap gap-2">
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4" />
-            LIVE GENERATED {currentTransaction.code} ({currentTransaction.standard}) DOCUMENT
+        }
+        rightPaneTitle="SYNTACTICALLY COMPLETE EDI TEMPLATE"
+        rightPaneBadge={
+          <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
+            {currentTransaction.functionalGroup} Loop
           </span>
-          <div className="flex items-center gap-2">
-            <span className="text-[var(--muted)] font-mono">
-              {generatedEdi.split('\n').filter(Boolean).length} Segments
-            </span>
+        }
+        rightPaneActions={
+          <div className="flex items-center gap-1.5">
             <button
+              type="button"
               onClick={handleCopy}
-              className="px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 hover:opacity-80 transition-opacity cursor-pointer"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              className="px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1 hover:opacity-80 cursor-pointer shadow-xs"
+              style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: copied ? 'var(--ok)' : 'var(--brand)' }}
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copied ? 'Copied' : 'Copy'}</span>
             </button>
             <button
+              type="button"
               onClick={handleDownload}
-              className="px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 hover:opacity-80 transition-opacity cursor-pointer"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-              title={`Download ${currentTransaction.code} template`}
+              className="px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1 hover:opacity-80 cursor-pointer shadow-xs"
+              style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              title="Download Template EDI"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Download .edi</span>
+              <span>Download</span>
             </button>
           </div>
-        </div>
-        <textarea
-          readOnly
-          value={generatedEdi}
-          rows={16}
-          className="w-full flex-1 p-3.5 font-mono text-xs rounded-xl border outline-none leading-relaxed bg-emerald-50/20 dark:bg-emerald-950/20"
-          style={{ borderColor: 'var(--line)', color: 'var(--ink)' }}
-        />
-      </div>
+        }
+        rightPaneContent={
+          <textarea
+            readOnly
+            value={generatedEdi}
+            rows={16}
+            className="w-full flex-1 p-3.5 font-mono text-xs rounded-xl border outline-none leading-relaxed resize-y"
+            style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+          />
+        }
+        statusBarMetrics={{
+          segmentCount: generatedEdi.split('\n').filter(Boolean).length,
+          byteSize: new Blob([generatedEdi]).size,
+          encodingStandard: currentTransaction.standard === 'EDIFACT' ? 'UN/EDIFACT' : 'ANSI ASC X12',
+          functionalGroup: currentTransaction.functionalGroup,
+          complianceStatus: 'valid',
+          customMessage: `${currentTransaction.code} template generated`,
+        }}
+      />
     </div>
   );
 };

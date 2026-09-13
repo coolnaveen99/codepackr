@@ -21,7 +21,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Bun lockfiles (prevent Cloudflare Pages lockfileVersion mismatch)
+# Vercel
+.vercel/
+
+# Bun lockfiles
 bun.lock
 bun.lockb
 
