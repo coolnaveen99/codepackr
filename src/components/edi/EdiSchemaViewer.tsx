@@ -211,11 +211,11 @@ export const EdiSchemaViewer: React.FC<EdiSchemaViewerProps> = ({
   const [ediText, setEdiText] = useState<string>(initialInput || EDI_TRANSACTIONS[0].samplePayload);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [expandedLoops, setExpandedLoops] = useState<Record<string, boolean>>({
-    Interchange: true,
-    'Functional Group': true,
-    Header: true,
-    Detail: true,
-    Summary: true,
+    Interchange: false,
+    'Functional Group': false,
+    Header: false,
+    Detail: false,
+    Summary: false,
   });
   const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null);
   const [selectedElement, setSelectedElement] = useState<ElementDef | null>(null);
@@ -522,7 +522,7 @@ export const EdiSchemaViewer: React.FC<EdiSchemaViewerProps> = ({
 
           <div className="space-y-3">
             {filteredLoopGroups.map((group) => {
-              const isExpanded = expandedLoops[group.category] ?? true;
+              const isExpanded = expandedLoops[group.category] ?? false;
 
               return (
                 <div

@@ -1,0 +1,77 @@
+{
+  "standard": "EDIFACT",
+  "version": "D01B",
+  "description": "UN/EDIFACT Directory D.01B Standard Message Dictionary",
+  "segments": {
+    "UNB": {
+      "tag": "UNB",
+      "name": "Interchange Header",
+      "purpose": "To start, identify and specify an interchange with version 4 syntax support.",
+      "elements": [
+        { "pos": "01", "name": "Syntax Identifier (UNOD/UNOE)", "type": "C", "min": 4, "max": 4, "req": "M" },
+        { "pos": "02", "name": "Interchange Sender Identification", "type": "C", "min": 1, "max": 35, "req": "M" },
+        { "pos": "03", "name": "Interchange Recipient Identification", "type": "C", "min": 1, "max": 35, "req": "M" },
+        { "pos": "04", "name": "Date / Time of Preparation (CCYYMMDD:HHMM)", "type": "C", "min": 1, "max": 14, "req": "M" },
+        { "pos": "05", "name": "Interchange Control Reference", "type": "AN", "min": 1, "max": 14, "req": "M" },
+        { "pos": "07", "name": "Application Reference", "type": "AN", "min": 1, "max": 14, "req": "O" }
+      ]
+    },
+    "UNH": {
+      "tag": "UNH",
+      "name": "Message Header",
+      "purpose": "To head, identify and specify a message under D.01B directory.",
+      "elements": [
+        { "pos": "01", "name": "Message Reference Number", "type": "AN", "min": 1, "max": 14, "req": "M" },
+        { "pos": "02", "name": "Message Identifier (Type, Version, Release D01B)", "type": "C", "min": 1, "max": 20, "req": "M" },
+        { "pos": "03", "name": "Common Access Reference", "type": "AN", "min": 1, "max": 35, "req": "O" }
+      ]
+    },
+    "BGM": {
+      "tag": "BGM",
+      "name": "Beginning of Message",
+      "purpose": "To indicate the type, purpose and number of a message.",
+      "elements": [
+        { "pos": "01", "name": "Document Name Identification", "type": "C", "min": 1, "max": 3, "req": "C" },
+        { "pos": "02", "name": "Document Number", "type": "AN", "min": 1, "max": 35, "req": "C" },
+        { "pos": "03", "name": "Message Function Code", "type": "ID", "min": 1, "max": 3, "req": "O" }
+      ]
+    },
+    "CNT": {
+      "tag": "CNT",
+      "name": "Control Total",
+      "purpose": "To provide control total values (e.g. total number of line items, total quantity).",
+      "elements": [
+        { "pos": "01", "name": "Control Total Qualifier (2=Number of line items)", "type": "ID", "min": 1, "max": 3, "req": "M" },
+        { "pos": "02", "name": "Control Total Value", "type": "N", "min": 1, "max": 18, "req": "M" }
+      ]
+    },
+    "TAX": {
+      "tag": "TAX",
+      "name": "Duty / Tax / Fee Details",
+      "purpose": "To specify relevant duty/tax/fee information and VAT percentage.",
+      "elements": [
+        { "pos": "01", "name": "Tax Function Qualifier (7=Customs/VAT)", "type": "ID", "min": 1, "max": 3, "req": "M" },
+        { "pos": "02", "name": "Duty/Tax/Fee Type Identification (VAT)", "type": "C", "min": 1, "max": 3, "req": "C" },
+        { "pos": "05", "name": "Duty/Tax/Fee Rate (Percentage)", "type": "R", "min": 1, "max": 17, "req": "O" }
+      ]
+    },
+    "UNT": {
+      "tag": "UNT",
+      "name": "Message Trailer",
+      "purpose": "To end and check the completeness of a message.",
+      "elements": [
+        { "pos": "01", "name": "Number of Segments in a Message", "type": "N", "min": 1, "max": 6, "req": "M" },
+        { "pos": "02", "name": "Message Reference Number", "type": "AN", "min": 1, "max": 14, "req": "M" }
+      ]
+    },
+    "UNZ": {
+      "tag": "UNZ",
+      "name": "Interchange Trailer",
+      "purpose": "To end and check the completeness of an interchange.",
+      "elements": [
+        { "pos": "01", "name": "Interchange Control Count", "type": "N", "min": 1, "max": 6, "req": "M" },
+        { "pos": "02", "name": "Interchange Control Reference", "type": "AN", "min": 1, "max": 14, "req": "M" }
+      ]
+    }
+  }
+}

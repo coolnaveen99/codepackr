@@ -1,7 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Copy, Check, Download, RefreshCw, CheckCircle2, AlertTriangle, ShieldCheck, ArrowLeftRight, Upload, Trash2, Info } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  CheckCircle2,
+  AlertTriangle,
+  Copy,
+  Check,
+  Download,
+  Upload,
+  Trash2,
+} from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
+import { ToolShell } from './ToolShell';
+import { EDI_TRANSACTIONS } from '../../data/ediDictionary';
+import { maskEdiPhi } from '../../lib/ediPhiMasker';
+import { downloadFile } from '../../lib/smartDownload';
 
 interface EdiAckGeneratorProps {
   tool: ToolDef;
@@ -9,6 +21,9 @@ interface EdiAckGeneratorProps {
   onSelectRelated?: (t: ToolDef) => void;
   initialInput?: string;
 }
+
+type AckType = 'x12_997' | 'x12_ta1' | 'edifact_contrl';
+type AckStatus = 'A' | 'E' | 'R';
 
 const TA1_NOTE_CODES = [
   { code: '000', label: '000 – No Error Reported', desc: 'Interchange control structure accepted successfully.' },
@@ -40,14 +55,17 @@ export const EdiAckGenerator: React.FC<EdiAckGeneratorProps> = ({
   onSelectRelated,
   initialInput = '',
 }) => {
-  const [inputEdi, setInputEdi] = useState(initialInput || SAMPLE_850_INPUT);
-  const [generatedAck, setGeneratedAck] = useState('');
-  const [ackType, setAckType] = useState<'x12_997' | 'x12_ta1' | 'edifact_contrl'>('x12_997');
-  const [ackStatus, setAckStatus] = useState<'A' | 'E' | 'R'>('A'); // A = Accepted, E = Accepted with Errors, R = Rejected
+  const [inputEdi, setInputEdi] = useState<string>(initialInput || SAMPLE_850_INPUT);
+  const [selectedSampleId, setSelectedSampleId] = useState<string>('850');
+  const [ackType, setAckType] = useState<AckType>('x12_997');
+  const [ackStatus, setAckStatus] = useState<AckStatus>('A');
   const [ta1NoteCode, setTa1NoteCode] = useState<string>('000');
-  const [copied, setCopied] = useState(false);
-  const [delimiter, setDelimiter] = useState('~');
-  const [elementSep, setElementSep] = useState('*');
+  const [delimiter, setDelimiter] = useState<string>('~');
+  const [elementSep, setElementSep] = useState<string>('*');
+  const [isPhiMasked, setIsPhiMasked] = useState<boolean>(false);
+  const [generatedAck, setGeneratedAck] = useState<string>('');
+  const [copied, setCopied] = useState<boolean>(false);
+
   const [autoDetectDetails, setAutoDetectDetails] = useState<{
     senderId?: string;
     receiverId?: string;
@@ -61,32 +79,47 @@ export const EdiAckGenerator: React.FC<EdiAckGeneratorProps> = ({
     hasIsaMismatch?: boolean;
   }>({});
 
-  // Parse input EDI and generate 997, TA1, or CONTRL
+  // Mask PHI dynamically if enabled
+  const phiInfo = useMemo(() => maskEdiPhi(inputEdi), [inputEdi]);
+  const activeInput = isPhiMasked ? phiInfo.maskedEdi : inputEdi;
+
+  const handleSelectSample = (sampleId: string) => {
+    setSelectedSampleId(sampleId);
+    const txn = EDI_TRANSACTIONS.find((t) => t.id === sampleId);
+    if (txn && txn.samplePayload) {
+      setInputEdi(txn.samplePayload);
+    }
+  };
+
+  // Generate Acknowledgment on input change
   useEffect(() => {
-    if (!inputEdi.trim()) {
+    const raw = activeInput.trim();
+    if (!raw) {
       setGeneratedAck('');
+      setAutoDetectDetails({});
       return;
     }
 
-    const trimmed = inputEdi.trim();
-    // Auto-detect separators
-    let elemSep = elementSep;
     let segTerm = delimiter;
+    let elemSep = elementSep;
 
-    if (trimmed.startsWith('ISA') && trimmed.length >= 106) {
-      elemSep = trimmed[3];
-      const charAt105 = trimmed[105];
-      if (charAt105 && !/\s/.test(charAt105)) {
-        segTerm = charAt105;
+    if (raw.startsWith('ISA') && raw.length >= 106) {
+      elemSep = raw[3];
+      const termChar = raw[105];
+      if (termChar && !/\s/.test(termChar)) {
+        segTerm = termChar;
       }
-    } else if (trimmed.startsWith('UNB')) {
-      elemSep = '+';
+    } else if (raw.includes('~')) {
+      segTerm = '~';
+      elemSep = '*';
+    } else if (raw.includes("'")) {
       segTerm = "'";
+      elemSep = '+';
     }
 
-    // Split segments
-    const rawLines = segTerm === '\n' ? trimmed.split(/\r?\n/) : trimmed.split(segTerm);
-    const segments = rawLines.map((s) => s.trim()).filter(Boolean);
+    const segments = (segTerm === '\n' ? raw.split(/\r?\n/) : raw.split(segTerm))
+      .map((s) => s.trim())
+      .filter(Boolean);
 
     let sender = 'RECEIVERID     ';
     let receiver = 'SENDERID       ';
@@ -161,7 +194,6 @@ export const EdiAckGenerator: React.FC<EdiAckGeneratorProps> = ({
     const paddedReceiverQual = receiverQual.padEnd(2, ' ').slice(0, 2);
 
     if (ackType === 'x12_ta1') {
-      // ANSI X12 TA1 Interchange Acknowledgment
       const outSegments: string[] = [];
       outSegments.push(
         `ISA*00*          *00*          *${paddedSenderQual}*${paddedSender}*${paddedReceiverQual}*${paddedReceiver}*${yymmdd}*${hhmm}*U*00401*${newAckCtrl.padStart(9, '0')}*0*P*>`
@@ -169,12 +201,9 @@ export const EdiAckGenerator: React.FC<EdiAckGeneratorProps> = ({
       outSegments.push(
         `TA1*${interchangeCtrl.padStart(9, '0')}*${interchangeDate}*${interchangeTime}*${ackStatus}*${ta1NoteCode}`
       );
-      // Standalone TA1 contains 0 functional groups
       outSegments.push(`IEA*0*${newAckCtrl.padStart(9, '0')}`);
-
-      setGeneratedAck(outSegments.join(segTerm === '\n' ? '\n' : `${segTerm}\n`));
+      setGeneratedAck(outSegments.join(segTerm === '\n' ? '\n' : `${segTerm}\n`) + (segTerm !== '\n' ? segTerm : ''));
     } else if (ackType === 'x12_997') {
-      // ANSI X12 997 Functional Acknowledgment
       const outSegments: string[] = [];
       outSegments.push(
         `ISA*00*          *00*          *${paddedSenderQual}*${paddedSender}*${paddedReceiverQual}*${paddedReceiver}*${yymmdd}*${hhmm}*U*00401*${newAckCtrl.padStart(9, '0')}*0*P*>`
@@ -198,9 +227,8 @@ export const EdiAckGenerator: React.FC<EdiAckGeneratorProps> = ({
       outSegments.push(`GE*1*${newAckCtrl}`);
       outSegments.push(`IEA*1*${newAckCtrl.padStart(9, '0')}`);
 
-      setGeneratedAck(outSegments.join(segTerm === '\n' ? '\n' : `${segTerm}\n`));
+      setGeneratedAck(outSegments.join(segTerm === '\n' ? '\n' : `${segTerm}\n`) + (segTerm !== '\n' ? segTerm : ''));
     } else {
-      // EDIFACT CONTRL message
       const outSegments: string[] = [];
       outSegments.push(`UNB+UNOA:2+${sender.trim()}:ZZZ+${receiver.trim()}:ZZZ+${yymmdd}:${hhmm}+${newAckCtrl}'`);
       outSegments.push(`UNH+1+CONTRL:D:4:UN'`);
@@ -208,12 +236,12 @@ export const EdiAckGenerator: React.FC<EdiAckGeneratorProps> = ({
       transactions.forEach((tx) => {
         outSegments.push(`UCM+${tx.ctrl}+${tx.id}:D:96A:UN+${ackStatus === 'A' ? '7' : '4'}'`);
       });
-      outSegments.push(`UNT*${3 + transactions.length}*1'`);
+      outSegments.push(`UNT+${3 + transactions.length}+1'`);
       outSegments.push(`UNZ+1+${newAckCtrl}'`);
 
       setGeneratedAck(outSegments.join('\n'));
     }
-  }, [inputEdi, ackType, ackStatus, ta1NoteCode, delimiter, elementSep]);
+  }, [activeInput, ackType, ackStatus, ta1NoteCode, delimiter, elementSep]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedAck);
@@ -222,28 +250,11 @@ export const EdiAckGenerator: React.FC<EdiAckGeneratorProps> = ({
   };
 
   const handleDownload = () => {
-    const blob = new Blob([generatedAck], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download =
-      ackType === 'x12_ta1'
-        ? 'TA1_Interchange_Ack.edi'
-        : ackType === 'x12_997'
-        ? 'Acknowledgment_997.edi'
-        : 'CONTRL.edi';
-    a.click();
-    URL.revokeObjectURL(url);
+    const filename = `${ackType}_acknowledgment_${ackStatus}.edi`;
+    downloadFile({ file: generatedAck, filename, mimeType: 'text/plain;charset=utf-8' });
   };
 
-  const handleResetToDefaults = () => {
-    setInputEdi(SAMPLE_850_INPUT);
-    setAckType('x12_997');
-    setAckStatus('A');
-    setTa1NoteCode('000');
-    setDelimiter('~');
-    setElementSep('*');
-  };
+  const generatedSegmentsCount = generatedAck ? generatedAck.split('\n').filter(Boolean).length : 0;
 
   return (
     <div className="space-y-6">
@@ -251,336 +262,280 @@ export const EdiAckGenerator: React.FC<EdiAckGeneratorProps> = ({
         tool={tool}
         onBackToHome={onBackToHome}
         onSelectRelated={onSelectRelated}
-        onResetOrClear={handleResetToDefaults}
-        resetLabel="Reset to Defaults"
+        onResetOrClear={() => {
+          setInputEdi(SAMPLE_850_INPUT);
+          setAckType('x12_997');
+          setAckStatus('A');
+          setTa1NoteCode('000');
+        }}
+        resetLabel="Reset Defaults"
       />
 
-      {/* Control Banner */}
-      <div
-        className="p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-4 text-xs"
-        style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-      >
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="font-semibold" style={{ color: 'var(--ink)' }}>
-            Acknowledgment Type:
-          </span>
-          <div className="flex rounded-xl border p-0.5" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}>
-            <button
-              onClick={() => setAckType('x12_997')}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
-                ackType === 'x12_997' ? 'bg-white dark:bg-slate-700 shadow-sm text-[var(--brand)]' : 'text-[var(--muted)]'
-              }`}
-            >
-              ANSI X12 (997)
-            </button>
-            <button
-              onClick={() => {
-                setAckType('x12_ta1');
-                if (autoDetectDetails.hasIsaMismatch) {
-                  setTa1NoteCode('001');
-                  setAckStatus('R');
-                }
-              }}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
-                ackType === 'x12_ta1' ? 'bg-white dark:bg-slate-700 shadow-sm text-[var(--brand)]' : 'text-[var(--muted)]'
-              }`}
-            >
-              <span>TA1 Interchange Ack</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-500 font-bold">ISA</span>
-            </button>
-            <button
-              onClick={() => setAckType('edifact_contrl')}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
-                ackType === 'edifact_contrl' ? 'bg-white dark:bg-slate-700 shadow-sm text-[var(--brand)]' : 'text-[var(--muted)]'
-              }`}
-            >
-              EDIFACT (CONTRL)
-            </button>
-          </div>
-
-          <span className="font-semibold ml-2" style={{ color: 'var(--ink)' }}>
-            Status:
-          </span>
-          <div className="flex rounded-xl border p-0.5" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}>
-            <button
-              onClick={() => {
-                setAckStatus('A');
-                if (ackType === 'x12_ta1' && ta1NoteCode !== '000') setTa1NoteCode('000');
-              }}
-              className={`px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-all ${
-                ackStatus === 'A' ? 'bg-emerald-500 text-white shadow-sm' : 'text-[var(--muted)]'
-              }`}
-            >
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Accepted (A)</span>
-            </button>
-            <button
-              onClick={() => setAckStatus('E')}
-              className={`px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-all ${
-                ackStatus === 'E' ? 'bg-amber-500 text-white shadow-sm' : 'text-[var(--muted)]'
-              }`}
-            >
-              <AlertTriangle className="w-3.5 h-3.5" />
-              <span>With Errors (E)</span>
-            </button>
-            <button
-              onClick={() => {
-                setAckStatus('R');
-                if (ackType === 'x12_ta1' && ta1NoteCode === '000') setTa1NoteCode('001');
-              }}
-              className={`px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-all ${
-                ackStatus === 'R' ? 'bg-rose-500 text-white shadow-sm' : 'text-[var(--muted)]'
-              }`}
-            >
-              <AlertTriangle className="w-3.5 h-3.5" />
-              <span>Rejected (R)</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setInputEdi(SAMPLE_850_INPUT)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl border font-medium hover:opacity-80 transition-opacity"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Reset Sample</span>
-          </button>
-          <button
-            onClick={handleCopy}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-            style={{ backgroundColor: copied ? 'var(--ok)' : 'var(--brand)' }}
-          >
-            {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copied ? 'Copied Ack!' : ackType === 'x12_ta1' ? 'Copy TA1' : ackType === 'x12_997' ? 'Copy 997' : 'Copy CONTRL'}</span>
-          </button>
-          <button
-            onClick={handleDownload}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-semibold hover:opacity-80 transition-opacity"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Download</span>
-          </button>
-        </div>
-      </div>
-
-      {/* TA1 Specific Controls Banner */}
-      {ackType === 'x12_ta1' && (
-        <div
-          className="p-4 rounded-2xl border space-y-3 text-xs"
-          style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <span className="font-semibold text-sm flex items-center gap-2" style={{ color: 'var(--ink)' }}>
-                <span>TA105 Interchange Note Code</span>
-                <span className="text-[11px] px-2 py-0.5 rounded-md font-mono bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
-                  Level 1 (Envelope)
-                </span>
-              </span>
-              <p className="text-[11px] text-[var(--muted)] mt-0.5">
-                TA1 acknowledges the outer ISA/IEA interchange envelope before functional group translation.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-[var(--muted)] font-medium">Quick Sim:</span>
+      <ToolShell
+        title="EDI 997 & TA1 Acknowledgment Generator"
+        description="Instant reversal and generation of ANSI X12 997 Functional Acknowledgments, TA1 Interchange Envelope Acknowledgments, and EDIFACT CONTRL messages."
+        badge="Zero-Data-Loss"
+        selectedSampleId={selectedSampleId}
+        onSelectSample={handleSelectSample}
+        isPhiMasked={isPhiMasked}
+        onTogglePhiMask={setIsPhiMasked}
+        maskedPhiCount={phiInfo.maskedCount}
+        segmentTerminator={delimiter}
+        elementSeparator={elementSep}
+        onClear={() => setInputEdi('')}
+        onResetSample={() => setInputEdi(SAMPLE_850_INPUT)}
+        hasInput={Boolean(inputEdi.trim())}
+        secondaryActions={
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex rounded-xl border p-0.5" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}>
+              <button
+                onClick={() => setAckType('x12_997')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  ackType === 'x12_997' ? 'bg-white dark:bg-slate-700 shadow-xs text-[var(--brand)] font-bold' : 'text-[var(--muted)]'
+                }`}
+              >
+                997 (FA)
+              </button>
               <button
                 onClick={() => {
-                  setTa1NoteCode('000');
-                  setAckStatus('A');
+                  setAckType('x12_ta1');
+                  if (autoDetectDetails.hasIsaMismatch) {
+                    setTa1NoteCode('001');
+                    setAckStatus('R');
+                  }
                 }}
-                className="px-2.5 py-1 rounded-lg border font-medium hover:opacity-80 transition-opacity"
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  ackType === 'x12_ta1' ? 'bg-white dark:bg-slate-700 shadow-xs text-[var(--brand)] font-bold' : 'text-[var(--muted)]'
+                }`}
+              >
+                <span>TA1 (Interchange)</span>
+              </button>
+              <button
+                onClick={() => setAckType('edifact_contrl')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  ackType === 'edifact_contrl' ? 'bg-white dark:bg-slate-700 shadow-xs text-[var(--brand)] font-bold' : 'text-[var(--muted)]'
+                }`}
+              >
+                CONTRL
+              </button>
+            </div>
+
+            <div className="flex rounded-xl border p-0.5" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}>
+              <button
+                onClick={() => {
+                  setAckStatus('A');
+                  if (ackType === 'x12_ta1' && ta1NoteCode !== '000') setTa1NoteCode('000');
+                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                  ackStatus === 'A' ? 'bg-emerald-500 text-white shadow-xs' : 'text-[var(--muted)]'
+                }`}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Accepted (A)</span>
+              </button>
+              <button
+                onClick={() => setAckStatus('E')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                  ackStatus === 'E' ? 'bg-amber-500 text-white shadow-xs' : 'text-[var(--muted)]'
+                }`}
+              >
+                <AlertTriangle className="w-3.5 h-3.5" />
+                <span>Errors (E)</span>
+              </button>
+              <button
+                onClick={() => {
+                  setAckStatus('R');
+                  if (ackType === 'x12_ta1' && ta1NoteCode === '000') setTa1NoteCode('001');
+                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                  ackStatus === 'R' ? 'bg-rose-500 text-white shadow-xs' : 'text-[var(--muted)]'
+                }`}
+              >
+                <AlertTriangle className="w-3.5 h-3.5" />
+                <span>Rejected (R)</span>
+              </button>
+            </div>
+          </div>
+        }
+        leftPaneTitle="Inbound Source EDI"
+        leftPaneBadge={
+          autoDetectDetails.transId ? (
+            <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--brand)] border border-[var(--line)]">
+              {autoDetectDetails.groupType} / {autoDetectDetails.transId}
+            </span>
+          ) : undefined
+        }
+        leftPaneActions={
+          <div className="flex items-center gap-2">
+            <label className="cursor-pointer hover:opacity-80 flex items-center gap-1 text-[var(--muted)] text-xs">
+              <Upload className="w-3.5 h-3.5" />
+              <span>Upload</span>
+              <input
+                type="file"
+                accept=".edi,.txt,.x12"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                      if (typeof evt.target?.result === 'string') {
+                        setInputEdi(evt.target.result);
+                      }
+                    };
+                    reader.readAsText(file);
+                  }
+                }}
+                className="hidden"
+              />
+            </label>
+            <button
+              onClick={() => setInputEdi('')}
+              disabled={!inputEdi}
+              className="hover:opacity-80 text-rose-500 disabled:opacity-40 flex items-center gap-1 text-xs cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Clear</span>
+            </button>
+          </div>
+        }
+        leftPaneContent={
+          <div className="flex flex-col h-full space-y-3">
+            {/* Auto-detected Envelope summary */}
+            <div
+              className="p-3 rounded-xl border text-xs grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono"
+              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+            >
+              <div>
+                <span className="text-[var(--muted)] block text-[10px] uppercase">Ack Sender</span>
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400 truncate block">
+                  {autoDetectDetails.senderId || 'N/A'}
+                </span>
+              </div>
+              <div>
+                <span className="text-[var(--muted)] block text-[10px] uppercase">Ack Receiver</span>
+                <span className="font-semibold text-sky-600 dark:text-sky-400 truncate block">
+                  {autoDetectDetails.receiverId || 'N/A'}
+                </span>
+              </div>
+              <div>
+                <span className="text-[var(--muted)] block text-[10px] uppercase">Group (GS01)</span>
+                <span className="font-semibold">
+                  {autoDetectDetails.groupType || 'N/A'} #{autoDetectDetails.groupCtrl || '1'}
+                </span>
+              </div>
+              <div>
+                <span className="text-[var(--muted)] block text-[10px] uppercase">Transaction (ST)</span>
+                <span className="font-semibold">
+                  {autoDetectDetails.transId || 'N/A'} #{autoDetectDetails.transCtrl || '0001'}
+                </span>
+              </div>
+            </div>
+
+            <textarea
+              value={activeInput}
+              onChange={(e) => setInputEdi(e.target.value)}
+              rows={16}
+              className="w-full flex-1 p-3.5 font-mono text-xs rounded-xl border outline-none leading-relaxed resize-y"
+              style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              placeholder="Paste raw inbound EDI message here (e.g. 850, 810, 856, ORDERS)..."
+            />
+          </div>
+        }
+        rightPaneTitle={
+          ackType === 'x12_ta1'
+            ? 'TA1 Interchange Acknowledgment'
+            : ackType === 'x12_997'
+            ? '997 Functional Acknowledgment'
+            : 'EDIFACT CONTRL Message'
+        }
+        rightPaneBadge={
+          <span
+            className={`font-mono text-[10px] px-2 py-0.5 rounded-full font-bold ${
+              ackStatus === 'A'
+                ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                : ackStatus === 'E'
+                ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
+                : 'bg-rose-500/20 text-rose-600 dark:text-rose-400'
+            }`}
+          >
+            Status: {ackStatus === 'A' ? 'ACCEPTED' : ackStatus === 'E' ? 'ERRORS' : 'REJECTED'}
+          </span>
+        }
+        rightPaneActions={
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCopy}
+              disabled={!generatedAck}
+              className="px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1.5 hover:opacity-80 transition-all disabled:opacity-40 cursor-pointer"
+              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copied ? 'Copied' : 'Copy'}</span>
+            </button>
+            <button
+              onClick={handleDownload}
+              disabled={!generatedAck}
+              className="px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1.5 hover:opacity-80 transition-all disabled:opacity-40 cursor-pointer"
+              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Download</span>
+            </button>
+          </div>
+        }
+        rightPaneContent={
+          <div className="flex flex-col h-full space-y-3">
+            {ackType === 'x12_ta1' && (
+              <div
+                className="p-3 rounded-xl border text-xs space-y-2"
                 style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
               >
-                Clean Accept (000)
-              </button>
-              <button
-                onClick={() => {
-                  setTa1NoteCode('001');
-                  setAckStatus('R');
-                }}
-                className="px-2.5 py-1 rounded-lg border font-medium text-rose-500 border-rose-500/30 hover:bg-rose-500/10 transition-colors"
-              >
-                Control Mismatch (001)
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-            <div>
-              <label className="block text-[11px] font-semibold text-[var(--muted)] mb-1">
-                Select Standard Interchange Note Code (TA105):
-              </label>
-              <select
-                value={ta1NoteCode}
-                onChange={(e) => {
-                  const code = e.target.value;
-                  setTa1NoteCode(code);
-                  if (code === '000') setAckStatus('A');
-                  else setAckStatus('R');
-                }}
-                className="w-full p-2.5 rounded-xl border font-mono outline-none text-xs"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-              >
-                {TA1_NOTE_CODES.map((n) => (
-                  <option key={n.code} value={n.code}>
-                    {n.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div
-              className="p-3 rounded-xl border flex items-start gap-2.5 text-xs"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-            >
-              <Info className="w-4 h-4 shrink-0 text-indigo-500 mt-0.5" />
-              <div>
-                <span className="font-semibold block" style={{ color: 'var(--ink)' }}>
-                  Selected Error Description:
-                </span>
-                <p className="text-[var(--muted)] text-[11px] mt-0.5 leading-relaxed">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-semibold" style={{ color: 'var(--ink)' }}>
+                    TA105 Interchange Note Code:
+                  </span>
+                  <select
+                    value={ta1NoteCode}
+                    onChange={(e) => {
+                      const code = e.target.value;
+                      setTa1NoteCode(code);
+                      if (code === '000') setAckStatus('A');
+                      else setAckStatus('R');
+                    }}
+                    className="p-1 rounded-lg border text-xs font-mono outline-none"
+                    style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  >
+                    {TA1_NOTE_CODES.map((n) => (
+                      <option key={n.code} value={n.code}>
+                        {n.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <p className="text-[11px] text-[var(--muted)]">
                   {TA1_NOTE_CODES.find((c) => c.code === ta1NoteCode)?.desc}
                 </p>
               </div>
-            </div>
+            )}
+
+            <textarea
+              readOnly
+              value={generatedAck}
+              rows={16}
+              className="w-full flex-1 p-3.5 font-mono text-xs rounded-xl border outline-none leading-relaxed resize-y bg-emerald-50/10 dark:bg-emerald-950/10"
+              style={{ borderColor: 'var(--line)', color: 'var(--ink)' }}
+              placeholder="Generated acknowledgment segments will appear here..."
+            />
           </div>
-
-          {autoDetectDetails.hasIsaMismatch && (
-            <div className="p-3 rounded-xl border flex items-center gap-2 text-xs bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
-              <span>
-                <strong>Envelope Alert:</strong> Interchange Control Number mismatch detected between ISA13 and IEA02 trailer. Auto-flagged with Note Code 001 (Rejected).
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Detected Envelope Info */}
-      <div
-        className="p-3.5 rounded-xl border text-xs grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono"
-        style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-      >
-        <div>
-          <span className="text-[var(--muted)] block text-[10px] uppercase">Ack Sender (Flipped)</span>
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400">{autoDetectDetails.senderId || 'N/A'}</span>
-        </div>
-        <div>
-          <span className="text-[var(--muted)] block text-[10px] uppercase">Ack Receiver (Flipped)</span>
-          <span className="font-semibold text-sky-600 dark:text-sky-400">{autoDetectDetails.receiverId || 'N/A'}</span>
-        </div>
-        <div>
-          <span className="text-[var(--muted)] block text-[10px] uppercase">Functional Group</span>
-          <span className="font-semibold">{autoDetectDetails.groupType} (Ctrl: {autoDetectDetails.groupCtrl})</span>
-        </div>
-        <div>
-          <span className="text-[var(--muted)] block text-[10px] uppercase">Transaction Set</span>
-          <span className="font-semibold">{autoDetectDetails.transId} (Ctrl: {autoDetectDetails.transCtrl})</span>
-        </div>
-      </div>
-
-      {/* Editor & Generator Columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Source EDI Document */}
-        <div
-          className="p-4 rounded-2xl border shadow-sm flex flex-col"
-          style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-        >
-          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-            <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-              INPUT EDI INTERCHANGE (PASTE 850, 810, 856...)
-            </span>
-            <div className="flex items-center gap-2">
-              <label className="cursor-pointer hover:opacity-80 flex items-center gap-1 text-[var(--muted)] text-xs">
-                <Upload className="w-3.5 h-3.5" />
-                <span>Upload</span>
-                <input
-                  type="file"
-                  accept=".edi,.txt,.x12"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onload = (evt) => {
-                        if (typeof evt.target?.result === 'string') {
-                          setInputEdi(evt.target.result);
-                        }
-                      };
-                      reader.readAsText(file);
-                    }
-                  }}
-                  className="hidden"
-                />
-              </label>
-              <button
-                onClick={() => setInputEdi('')}
-                disabled={!inputEdi}
-                className="hover:opacity-80 text-rose-500 disabled:opacity-40 flex items-center gap-1 text-xs cursor-pointer"
-                title="Clear EDI input"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Clear</span>
-              </button>
-            </div>
-          </div>
-          <textarea
-            value={inputEdi}
-            onChange={(e) => setInputEdi(e.target.value)}
-            rows={14}
-            className="w-full flex-1 p-3.5 font-mono text-xs rounded-xl border outline-none leading-relaxed resize-y"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            placeholder="Paste raw EDI here..."
-          />
-        </div>
-
-        {/* Generated 997 Functional Acknowledgment */}
-        <div
-          className="p-4 rounded-2xl border shadow-sm flex flex-col"
-          style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-        >
-          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4" />
-              GENERATED{' '}
-              {ackType === 'x12_ta1'
-                ? 'TA1 INTERCHANGE ACKNOWLEDGMENT'
-                : ackType === 'x12_997'
-                ? 'EDI 997 ACKNOWLEDGMENT'
-                : 'EDIFACT CONTRL'}
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleCopy}
-                disabled={!generatedAck}
-                className="text-xs flex items-center gap-1 hover:opacity-80 text-[var(--brand)] font-medium disabled:opacity-40 cursor-pointer"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? 'Copied!' : 'Copy'}</span>
-              </button>
-              <button
-                onClick={handleDownload}
-                disabled={!generatedAck}
-                className="text-xs flex items-center gap-1 hover:opacity-80 text-[var(--muted)] font-medium disabled:opacity-40 cursor-pointer"
-                title="Download acknowledgment"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download</span>
-              </button>
-            </div>
-          </div>
-          <textarea
-            readOnly
-            value={generatedAck}
-            rows={14}
-            className="w-full flex-1 p-3.5 font-mono text-xs rounded-xl border outline-none leading-relaxed bg-emerald-50/20 dark:bg-emerald-950/20"
-            style={{ borderColor: 'var(--line)', color: 'var(--ink)' }}
-          />
-        </div>
-      </div>
+        }
+        statusBarMetrics={{
+          segmentCount: generatedSegmentsCount,
+          encodingStandard: ackType === 'edifact_contrl' ? 'UN/EDIFACT' : 'ANSI ASC X12',
+          functionalGroup: ackType === 'x12_ta1' ? 'Interchange (TA1)' : ackType === 'x12_997' ? 'FA (997)' : 'CONTRL',
+          complianceStatus: ackStatus === 'A' ? 'valid' : ackStatus === 'E' ? 'warning' : 'error',
+          customMessage: `${ackStatus === 'A' ? 'Accepted' : ackStatus === 'E' ? 'Errors Reported' : 'Rejected'} (${generatedSegmentsCount} segments generated)`,
+        }}
+      />
     </div>
   );
 };

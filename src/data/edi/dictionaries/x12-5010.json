@@ -1,0 +1,128 @@
+{
+  "standard": "X12",
+  "version": "005010",
+  "description": "ANSI ASC X12 Release 005010 Standard & HIPAA Transaction Dictionary",
+  "segments": {
+    "ISA": {
+      "tag": "ISA",
+      "name": "Interchange Control Header",
+      "purpose": "To start and identify an interchange of zero or more functional groups.",
+      "elements": [
+        { "pos": "01", "name": "Authorization Information Qualifier", "type": "ID", "min": 2, "max": 2, "req": "M" },
+        { "pos": "02", "name": "Authorization Information", "type": "AN", "min": 10, "max": 10, "req": "M" },
+        { "pos": "03", "name": "Security Information Qualifier", "type": "ID", "min": 2, "max": 2, "req": "M" },
+        { "pos": "04", "name": "Security Information", "type": "AN", "min": 10, "max": 10, "req": "M" },
+        { "pos": "05", "name": "Interchange ID Qualifier (Sender)", "type": "ID", "min": 2, "max": 2, "req": "M" },
+        { "pos": "06", "name": "Interchange Sender ID", "type": "AN", "min": 15, "max": 15, "req": "M" },
+        { "pos": "07", "name": "Interchange ID Qualifier (Receiver)", "type": "ID", "min": 2, "max": 2, "req": "M" },
+        { "pos": "08", "name": "Interchange Receiver ID", "type": "AN", "min": 15, "max": 15, "req": "M" },
+        { "pos": "09", "name": "Interchange Date (YYMMDD)", "type": "DT", "min": 6, "max": 6, "req": "M" },
+        { "pos": "10", "name": "Interchange Time (HHMM)", "type": "TM", "min": 4, "max": 4, "req": "M" },
+        { "pos": "11", "name": "Repetition Separator", "type": "AN", "min": 1, "max": 1, "req": "M" },
+        { "pos": "12", "name": "Interchange Control Version (00501)", "type": "ID", "min": 5, "max": 5, "req": "M" },
+        { "pos": "13", "name": "Interchange Control Number", "type": "N0", "min": 9, "max": 9, "req": "M" },
+        { "pos": "14", "name": "Acknowledgment Requested (0/1)", "type": "ID", "min": 1, "max": 1, "req": "M" },
+        { "pos": "15", "name": "Usage Indicator (P=Prod, T=Test)", "type": "ID", "min": 1, "max": 1, "req": "M" },
+        { "pos": "16", "name": "Component Element Separator", "type": "AN", "min": 1, "max": 1, "req": "M" }
+      ]
+    },
+    "BHT": {
+      "tag": "BHT",
+      "name": "Beginning of Hierarchical Transaction",
+      "purpose": "To define the business purpose of the transaction set and assign a reference trace ID.",
+      "elements": [
+        { "pos": "01", "name": "Hierarchical Structure Code (0019=Claim)", "type": "ID", "min": 4, "max": 4, "req": "M" },
+        { "pos": "02", "name": "Transaction Set Purpose Code (00=Original)", "type": "ID", "min": 2, "max": 2, "req": "M" },
+        { "pos": "03", "name": "Reference Identification", "type": "AN", "min": 1, "max": 50, "req": "M" },
+        { "pos": "04", "name": "Date (CCYYMMDD)", "type": "DT", "min": 8, "max": 8, "req": "M" },
+        { "pos": "05", "name": "Time (HHMM[SS])", "type": "TM", "min": 4, "max": 8, "req": "O" },
+        { "pos": "06", "name": "Transaction Type Code (CH=Chargeable)", "type": "ID", "min": 2, "max": 2, "req": "O" }
+      ]
+    },
+    "NM1": {
+      "tag": "NM1",
+      "name": "Individual or Organizational Name",
+      "purpose": "To supply the full name of an individual or organization, along with identification numbers.",
+      "elements": [
+        { "pos": "01", "name": "Entity Identifier Code (41=Submitter, 40=Payer, 85=Billing Provider, IL=Insured)", "type": "ID", "min": 2, "max": 3, "req": "M" },
+        { "pos": "02", "name": "Entity Type Qualifier (1=Person, 2=Non-Person)", "type": "ID", "min": 1, "max": 1, "req": "M" },
+        { "pos": "03", "name": "Name Last or Organization Name", "type": "AN", "min": 1, "max": 60, "req": "C" },
+        { "pos": "04", "name": "Name First", "type": "AN", "min": 1, "max": 35, "req": "O" },
+        { "pos": "05", "name": "Name Middle", "type": "AN", "min": 1, "max": 25, "req": "O" },
+        { "pos": "06", "name": "Name Prefix", "type": "AN", "min": 1, "max": 10, "req": "O" },
+        { "pos": "07", "name": "Name Suffix", "type": "AN", "min": 1, "max": 10, "req": "O" },
+        { "pos": "08", "name": "Identification Code Qualifier (XX=NPI, MI=Member ID, PI=Payer ID)", "type": "ID", "min": 1, "max": 2, "req": "C" },
+        { "pos": "09", "name": "Identification Code (NPI / SSN / Member Number)", "type": "AN", "min": 2, "max": 80, "req": "C" }
+      ]
+    },
+    "HL": {
+      "tag": "HL",
+      "name": "Hierarchical Level",
+      "purpose": "To identify dependencies among and the content of hierarchically related groups of data segments.",
+      "elements": [
+        { "pos": "01", "name": "Hierarchical ID Number", "type": "AN", "min": 1, "max": 12, "req": "M" },
+        { "pos": "02", "name": "Hierarchical Parent ID Number", "type": "AN", "min": 1, "max": 12, "req": "O" },
+        { "pos": "03", "name": "Hierarchical Level Code (20=Info Source, 22=Subscriber, 23=Dependent)", "type": "ID", "min": 1, "max": 2, "req": "M" },
+        { "pos": "04", "name": "Hierarchical Child Code (1=Additional Subordinates, 0=No Children)", "type": "ID", "min": 1, "max": 1, "req": "O" }
+      ]
+    },
+    "SBR": {
+      "tag": "SBR",
+      "name": "Subscriber Information",
+      "purpose": "To record payer responsibility sequence, relationship code, and claim filing indicator.",
+      "elements": [
+        { "pos": "01", "name": "Payer Responsibility Sequence Number (P=Primary, S=Secondary)", "type": "ID", "min": 1, "max": 1, "req": "M" },
+        { "pos": "02", "name": "Individual Relationship Code (18=Self)", "type": "ID", "min": 2, "max": 2, "req": "O" },
+        { "pos": "03", "name": "Policy or Group Number", "type": "AN", "min": 1, "max": 50, "req": "O" },
+        { "pos": "04", "name": "Group Name", "type": "AN", "min": 1, "max": 60, "req": "O" },
+        { "pos": "09", "name": "Claim Filing Indicator Code (CI=Commercial, MB=Medicare)", "type": "ID", "min": 1, "max": 2, "req": "O" }
+      ]
+    },
+    "DMG": {
+      "tag": "DMG",
+      "name": "Demographic Information",
+      "purpose": "To supply patient date of birth and biological gender.",
+      "elements": [
+        { "pos": "01", "name": "Date Time Period Format Qualifier (D8=CCYYMMDD)", "type": "ID", "min": 2, "max": 3, "req": "M" },
+        { "pos": "02", "name": "Date of Birth (CCYYMMDD)", "type": "AN", "min": 1, "max": 35, "req": "M" },
+        { "pos": "03", "name": "Gender Code (M=Male, F=Female, U=Unknown)", "type": "ID", "min": 1, "max": 1, "req": "O" }
+      ]
+    },
+    "CLM": {
+      "tag": "CLM",
+      "name": "Health Claim Information",
+      "purpose": "To specify bill control numbers, total billed charge, place of service, and claim frequency.",
+      "elements": [
+        { "pos": "01", "name": "Patient Control Number (Claim ID)", "type": "AN", "min": 1, "max": 38, "req": "M" },
+        { "pos": "02", "name": "Total Claim Charge Amount", "type": "R", "min": 1, "max": 18, "req": "M" },
+        { "pos": "05", "name": "Health Care Service Location Information (POS)", "type": "C", "min": 1, "max": 10, "req": "C" },
+        { "pos": "06", "name": "Provider or Supplier Signature Indicator", "type": "ID", "min": 1, "max": 1, "req": "M" },
+        { "pos": "07", "name": "Assignment or Plan Participation Code", "type": "ID", "min": 1, "max": 1, "req": "M" },
+        { "pos": "08", "name": "Benefits Assignment Certification Indicator", "type": "ID", "min": 1, "max": 1, "req": "M" },
+        { "pos": "09", "name": "Release of Information Code", "type": "ID", "min": 1, "max": 1, "req": "M" }
+      ]
+    },
+    "SV1": {
+      "tag": "SV1",
+      "name": "Professional Service Information",
+      "purpose": "To specify the medical service rendered, procedure code (CPT/HCPCS), modifiers, charge, and units.",
+      "elements": [
+        { "pos": "01", "name": "Composite Medical Procedure Identifier (HC:CPT)", "type": "C", "min": 1, "max": 48, "req": "M" },
+        { "pos": "02", "name": "Line Item Charge Amount", "type": "R", "min": 1, "max": 18, "req": "M" },
+        { "pos": "03", "name": "Unit or Basis for Measurement Code (UN=Units)", "type": "ID", "min": 2, "max": 2, "req": "M" },
+        { "pos": "04", "name": "Service Unit Count", "type": "R", "min": 1, "max": 15, "req": "M" },
+        { "pos": "07", "name": "Composite Diagnosis Code Pointer", "type": "C", "min": 1, "max": 8, "req": "M" }
+      ]
+    },
+    "HI": {
+      "tag": "HI",
+      "name": "Health Care Information Codes (Diagnosis)",
+      "purpose": "To supply diagnosis codes (ICD-10-CM), present on admission flags, and condition codes.",
+      "elements": [
+        { "pos": "01", "name": "Health Care Code Information (BK:ICD10 Principal)", "type": "C", "min": 1, "max": 30, "req": "M" },
+        { "pos": "02", "name": "Health Care Code Information (BF:ICD10 Secondary)", "type": "C", "min": 1, "max": 30, "req": "O" },
+        { "pos": "03", "name": "Health Care Code Information 3", "type": "C", "min": 1, "max": 30, "req": "O" }
+      ]
+    }
+  }
+}

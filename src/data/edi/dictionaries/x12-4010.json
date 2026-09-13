@@ -1,0 +1,215 @@
+{
+  "standard": "X12",
+  "version": "004010",
+  "description": "ANSI ASC X12 Release 004010 Standard Dictionary",
+  "segments": {
+    "ISA": {
+      "tag": "ISA",
+      "name": "Interchange Control Header",
+      "purpose": "To start and identify an interchange of zero or more functional groups and interchange-related control segments.",
+      "elements": [
+        { "pos": "01", "name": "Authorization Information Qualifier", "type": "ID", "min": 2, "max": 2, "req": "M" },
+        { "pos": "02", "name": "Authorization Information", "type": "AN", "min": 10, "max": 10, "req": "M" },
+        { "pos": "03", "name": "Security Information Qualifier", "type": "ID", "min": 2, "max": 2, "req": "M" },
+        { "pos": "04", "name": "Security Information", "type": "AN", "min": 10, "max": 10, "req": "M" },
+        { "pos": "05", "name": "Interchange ID Qualifier (Sender)", "type": "ID", "min": 2, "max": 2, "req": "M" },
+        { "pos": "06", "name": "Interchange Sender ID", "type": "AN", "min": 15, "max": 15, "req": "M" },
+        { "pos": "07", "name": "Interchange ID Qualifier (Receiver)", "type": "ID", "min": 2, "max": 2, "req": "M" },
+        { "pos": "08", "name": "Interchange Receiver ID", "type": "AN", "min": 15, "max": 15, "req": "M" },
+        { "pos": "09", "name": "Interchange Date (YYMMDD)", "type": "DT", "min": 6, "max": 6, "req": "M" },
+        { "pos": "10", "name": "Interchange Time (HHMM)", "type": "TM", "min": 4, "max": 4, "req": "M" },
+        { "pos": "11", "name": "Interchange Control Standards Identifier", "type": "ID", "min": 1, "max": 1, "req": "M" },
+        { "pos": "12", "name": "Interchange Control Version Number", "type": "ID", "min": 5, "max": 5, "req": "M" },
+        { "pos": "13", "name": "Interchange Control Number", "type": "N0", "min": 9, "max": 9, "req": "M" },
+        { "pos": "14", "name": "Acknowledgment Requested (0/1)", "type": "ID", "min": 1, "max": 1, "req": "M" },
+        { "pos": "15", "name": "Usage Indicator (P=Prod, T=Test)", "type": "ID", "min": 1, "max": 1, "req": "M" },
+        { "pos": "16", "name": "Component Element Separator", "type": "AN", "min": 1, "max": 1, "req": "M" }
+      ]
+    },
+    "GS": {
+      "tag": "GS",
+      "name": "Functional Group Header",
+      "purpose": "To indicate the beginning of a functional group and to provide control information.",
+      "elements": [
+        { "pos": "01", "name": "Functional Identifier Code", "type": "ID", "min": 2, "max": 2, "req": "M" },
+        { "pos": "02", "name": "Application Sender's Code", "type": "AN", "min": 2, "max": 15, "req": "M" },
+        { "pos": "03", "name": "Application Receiver's Code", "type": "AN", "min": 2, "max": 15, "req": "M" },
+        { "pos": "04", "name": "Date (CCYYMMDD)", "type": "DT", "min": 8, "max": 8, "req": "M" },
+        { "pos": "05", "name": "Time (HHMM[SS])", "type": "TM", "min": 4, "max": 8, "req": "M" },
+        { "pos": "06", "name": "Group Control Number", "type": "N0", "min": 1, "max": 9, "req": "M" },
+        { "pos": "07", "name": "Responsible Agency Code", "type": "ID", "min": 1, "max": 2, "req": "M" },
+        { "pos": "08", "name": "Version / Release / Industry Identifier", "type": "AN", "min": 1, "max": 12, "req": "M" }
+      ]
+    },
+    "ST": {
+      "tag": "ST",
+      "name": "Transaction Set Header",
+      "purpose": "To indicate the start of a transaction set and assign a control number.",
+      "elements": [
+        { "pos": "01", "name": "Transaction Set Identifier Code", "type": "ID", "min": 3, "max": 3, "req": "M" },
+        { "pos": "02", "name": "Transaction Set Control Number", "type": "AN", "min": 4, "max": 9, "req": "M" },
+        { "pos": "03", "name": "Implementation Convention Reference", "type": "AN", "min": 1, "max": 35, "req": "O" }
+      ]
+    },
+    "BEG": {
+      "tag": "BEG",
+      "name": "Beginning Segment for Purchase Order",
+      "purpose": "To indicate the beginning of the Purchase Order Transaction Set and transmit identifying numbers and dates.",
+      "elements": [
+        { "pos": "01", "name": "Transaction Set Purpose Code", "type": "ID", "min": 2, "max": 2, "req": "M" },
+        { "pos": "02", "name": "Purchase Order Type Code", "type": "ID", "min": 2, "max": 2, "req": "M" },
+        { "pos": "03", "name": "Purchase Order Number", "type": "AN", "min": 1, "max": 22, "req": "M" },
+        { "pos": "04", "name": "Release Number", "type": "AN", "min": 1, "max": 30, "req": "O" },
+        { "pos": "05", "name": "Date (CCYYMMDD)", "type": "DT", "min": 8, "max": 8, "req": "M" }
+      ]
+    },
+    "CUR": {
+      "tag": "CUR",
+      "name": "Currency Identification",
+      "purpose": "To specify the currency (e.g. USD, EUR) used in a transaction.",
+      "elements": [
+        { "pos": "01", "name": "Entity Identifier Code", "type": "ID", "min": 2, "max": 3, "req": "M" },
+        { "pos": "02", "name": "Currency Code (ISO 4217)", "type": "ID", "min": 3, "max": 3, "req": "M" },
+        { "pos": "03", "name": "Exchange Rate", "type": "R", "min": 4, "max": 10, "req": "O" }
+      ]
+    },
+    "REF": {
+      "tag": "REF",
+      "name": "Reference Information",
+      "purpose": "To specify identifying information, department numbers, internal order codes, or vendor qualifiers.",
+      "elements": [
+        { "pos": "01", "name": "Reference Identification Qualifier", "type": "ID", "min": 2, "max": 3, "req": "M" },
+        { "pos": "02", "name": "Reference Identification", "type": "AN", "min": 1, "max": 30, "req": "C" },
+        { "pos": "03", "name": "Description", "type": "AN", "min": 1, "max": 80, "req": "O" }
+      ]
+    },
+    "PER": {
+      "tag": "PER",
+      "name": "Administrative Communications Contact",
+      "purpose": "To identify a person or office to whom administrative communications should be directed.",
+      "elements": [
+        { "pos": "01", "name": "Contact Function Code", "type": "ID", "min": 2, "max": 2, "req": "M" },
+        { "pos": "02", "name": "Name", "type": "AN", "min": 1, "max": 60, "req": "O" },
+        { "pos": "03", "name": "Communication Number Qualifier", "type": "ID", "min": 2, "max": 2, "req": "C" },
+        { "pos": "04", "name": "Communication Number (Phone/Email)", "type": "AN", "min": 1, "max": 80, "req": "C" },
+        { "pos": "05", "name": "Communication Number Qualifier 2", "type": "ID", "min": 2, "max": 2, "req": "O" },
+        { "pos": "06", "name": "Communication Number 2", "type": "AN", "min": 1, "max": 80, "req": "O" }
+      ]
+    },
+    "DTM": {
+      "tag": "DTM",
+      "name": "Date/Time Reference",
+      "purpose": "To specify pertinent dates and times (e.g. 002 Delivery Requested, 011 Shipped, 004 Purchase Order).",
+      "elements": [
+        { "pos": "01", "name": "Date/Time Qualifier", "type": "ID", "min": 3, "max": 3, "req": "M" },
+        { "pos": "02", "name": "Date (CCYYMMDD)", "type": "DT", "min": 8, "max": 8, "req": "C" },
+        { "pos": "03", "name": "Time (HHMM[SS])", "type": "TM", "min": 4, "max": 8, "req": "O" },
+        { "pos": "04", "name": "Time Code", "type": "ID", "min": 2, "max": 2, "req": "O" }
+      ]
+    },
+    "N1": {
+      "tag": "N1",
+      "name": "Party Identification",
+      "purpose": "To identify a party by type of organization, name, and code (e.g. ST Ship To, BT Bill To, VN Vendor, SE Seller).",
+      "elements": [
+        { "pos": "01", "name": "Entity Identifier Code", "type": "ID", "min": 2, "max": 3, "req": "M" },
+        { "pos": "02", "name": "Name", "type": "AN", "min": 1, "max": 60, "req": "C" },
+        { "pos": "03", "name": "Identification Code Qualifier (91/92/UL)", "type": "ID", "min": 1, "max": 2, "req": "C" },
+        { "pos": "04", "name": "Identification Code (DUNS / Internal Code)", "type": "AN", "min": 2, "max": 80, "req": "C" }
+      ]
+    },
+    "N2": {
+      "tag": "N2",
+      "name": "Additional Name Information",
+      "purpose": "To specify additional names or in care of information.",
+      "elements": [
+        { "pos": "01", "name": "Name", "type": "AN", "min": 1, "max": 60, "req": "M" },
+        { "pos": "02", "name": "Name 2", "type": "AN", "min": 1, "max": 60, "req": "O" }
+      ]
+    },
+    "N3": {
+      "tag": "N3",
+      "name": "Address Information",
+      "purpose": "To specify the location of the named party by street, building, or suite.",
+      "elements": [
+        { "pos": "01", "name": "Address Information Line 1", "type": "AN", "min": 1, "max": 55, "req": "M" },
+        { "pos": "02", "name": "Address Information Line 2", "type": "AN", "min": 1, "max": 55, "req": "O" }
+      ]
+    },
+    "N4": {
+      "tag": "N4",
+      "name": "Geographic Location",
+      "purpose": "To specify the geographic place of the named party.",
+      "elements": [
+        { "pos": "01", "name": "City Name", "type": "AN", "min": 2, "max": 30, "req": "O" },
+        { "pos": "02", "name": "State or Province Code", "type": "ID", "min": 2, "max": 2, "req": "O" },
+        { "pos": "03", "name": "Postal Code", "type": "ID", "min": 3, "max": 15, "req": "O" },
+        { "pos": "04", "name": "Country Code", "type": "ID", "min": 2, "max": 3, "req": "O" }
+      ]
+    },
+    "PO1": {
+      "tag": "PO1",
+      "name": "Purchase Order Line Item",
+      "purpose": "To specify basic and most frequently used line item data including quantity, unit price, and product IDs.",
+      "elements": [
+        { "pos": "01", "name": "Assigned Identification (Line Number)", "type": "AN", "min": 1, "max": 20, "req": "O" },
+        { "pos": "02", "name": "Quantity Ordered", "type": "R", "min": 1, "max": 15, "req": "C" },
+        { "pos": "03", "name": "Unit or Basis for Measurement Code (EA/CA)", "type": "ID", "min": 2, "max": 2, "req": "O" },
+        { "pos": "04", "name": "Unit Price", "type": "R", "min": 1, "max": 17, "req": "C" },
+        { "pos": "05", "name": "Basis of Unit Price Code", "type": "ID", "min": 2, "max": 2, "req": "O" },
+        { "pos": "06", "name": "Product/Service ID Qualifier (VN/UP/IN)", "type": "ID", "min": 2, "max": 2, "req": "C" },
+        { "pos": "07", "name": "Product/Service ID", "type": "AN", "min": 1, "max": 48, "req": "C" },
+        { "pos": "08", "name": "Product/Service ID Qualifier 2 (UP/UK)", "type": "ID", "min": 2, "max": 2, "req": "O" },
+        { "pos": "09", "name": "Product/Service ID 2", "type": "AN", "min": 1, "max": 48, "req": "O" }
+      ]
+    },
+    "PID": {
+      "tag": "PID",
+      "name": "Product/Item Description",
+      "purpose": "To describe a product or process in coded or free-form format.",
+      "elements": [
+        { "pos": "01", "name": "Item Description Type (F=Free-form)", "type": "ID", "min": 1, "max": 1, "req": "M" },
+        { "pos": "02", "name": "Product/Process Characteristic Code", "type": "ID", "min": 2, "max": 3, "req": "O" },
+        { "pos": "03", "name": "Agency Qualifier Code", "type": "ID", "min": 2, "max": 2, "req": "O" },
+        { "pos": "04", "name": "Product Description Code", "type": "AN", "min": 1, "max": 12, "req": "O" },
+        { "pos": "05", "name": "Description", "type": "AN", "min": 1, "max": 80, "req": "C" }
+      ]
+    },
+    "CTT": {
+      "tag": "CTT",
+      "name": "Transaction Totals",
+      "purpose": "To transmit a hash total for a specific element in the transaction set (e.g. line count, total quantity).",
+      "elements": [
+        { "pos": "01", "name": "Number of Line Items", "type": "N0", "min": 1, "max": 6, "req": "M" },
+        { "pos": "02", "name": "Hash Total (Total Units)", "type": "R", "min": 1, "max": 10, "req": "O" }
+      ]
+    },
+    "SE": {
+      "tag": "SE",
+      "name": "Transaction Set Trailer",
+      "purpose": "To indicate the end of the transaction set and provide the count of the transmitted segments including ST and SE.",
+      "elements": [
+        { "pos": "01", "name": "Number of Included Segments", "type": "N0", "min": 1, "max": 10, "req": "M" },
+        { "pos": "02", "name": "Transaction Set Control Number", "type": "AN", "min": 4, "max": 9, "req": "M" }
+      ]
+    },
+    "GE": {
+      "tag": "GE",
+      "name": "Functional Group Trailer",
+      "purpose": "To indicate the end of a functional group and to provide control information.",
+      "elements": [
+        { "pos": "01", "name": "Number of Transaction Sets Included", "type": "N0", "min": 1, "max": 6, "req": "M" },
+        { "pos": "02", "name": "Group Control Number", "type": "N0", "min": 1, "max": 9, "req": "M" }
+      ]
+    },
+    "IEA": {
+      "tag": "IEA",
+      "name": "Interchange Control Trailer",
+      "purpose": "To define the end of an interchange of zero or more functional groups.",
+      "elements": [
+        { "pos": "01", "name": "Number of Included Functional Groups", "type": "N0", "min": 1, "max": 5, "req": "M" },
+        { "pos": "02", "name": "Interchange Control Number", "type": "N0", "min": 9, "max": 9, "req": "M" }
+      ]
+    }
+  }
+}

@@ -50,7 +50,7 @@ export const EdiTreeView: React.FC<EdiTreeViewProps> = ({
   onSegmentClick,
   className = '',
 }) => {
-  const [expanded, setExpanded] = useState<Set<string>>(() => new Set(segments.slice(0, 5).map((s) => s.id)));
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const [search, setSearch] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -61,6 +61,14 @@ export const EdiTreeView: React.FC<EdiTreeViewProps> = ({
       else next.add(id);
       return next;
     });
+  };
+
+  const toggleAll = () => {
+    if (expanded.size > 0) {
+      setExpanded(new Set());
+    } else {
+      setExpanded(new Set(filtered.map((s) => s.id)));
+    }
   };
 
   const filtered = search.trim()
@@ -85,6 +93,15 @@ export const EdiTreeView: React.FC<EdiTreeViewProps> = ({
         <span className="text-xs font-semibold text-[var(--ink)]">Segment Tree</span>
         <span className="text-[10px] text-[var(--muted)] font-mono">{filtered.length} segments</span>
         <div className="flex-1" />
+        <button
+          type="button"
+          onClick={toggleAll}
+          className="text-[10px] px-2 py-0.5 rounded border hover:opacity-80 transition-opacity text-[var(--muted)] hover:text-[var(--ink)] cursor-pointer"
+          style={{ borderColor: 'var(--line)', backgroundColor: 'var(--bg)' }}
+          title={expanded.size > 0 ? 'Collapse all segments' : 'Expand all segments'}
+        >
+          {expanded.size > 0 ? 'Collapse all' : 'Expand all'}
+        </button>
         <div className="relative">
           <Search className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
           <input

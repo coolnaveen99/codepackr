@@ -3,7 +3,7 @@ import { Code2, Copy, Check, Eye, GitCompare, Info, Search, Sparkles } from 'luc
 import { EdiTreeView, EdiTreeSegment } from './EdiTreeView';
 import { EDI_TRANSACTIONS } from '../../data/ediDictionary';
 
-interface EdiPhase2InspectorProps {
+interface EdiVisualTreeInspectorProps {
   input: string;
   elementSeparator: string;
   segmentTerminator: string;
@@ -28,7 +28,7 @@ function parseTree(input: string, elementSeparator: string, segmentTerminator: s
     const values = rawSeg.split(elementSeparator || '*');
     const tag = (values.shift() || '').trim().toUpperCase();
     return {
-      id: `phase2-${tag}-${index}`,
+      id: `tree-${tag}-${index}`,
       tag,
       name: tag,
       lineNumber: index + 1,
@@ -43,7 +43,7 @@ function parseTree(input: string, elementSeparator: string, segmentTerminator: s
   });
 }
 
-export const EdiPhase2Inspector: React.FC<EdiPhase2InspectorProps> = ({
+export const EdiVisualTreeInspector: React.FC<EdiVisualTreeInspectorProps> = ({
   input,
   elementSeparator,
   segmentTerminator,
@@ -74,7 +74,7 @@ export const EdiPhase2Inspector: React.FC<EdiPhase2InspectorProps> = ({
   if (!input.trim()) {
     return (
       <section className="rounded-2xl border p-4" style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}>
-        <div className="flex items-center gap-2 text-xs font-bold text-[var(--ink)]"><GitCompare className="w-4 h-4 text-[var(--brand)]" /> Phase 2 Visual Inspector</div>
+        <div className="flex items-center gap-2 text-xs font-bold text-[var(--ink)]"><GitCompare className="w-4 h-4 text-[var(--brand)]" /> Visual Tree & Segment Inspector</div>
         <p className="text-[11px] text-[var(--muted)] mt-1">Load or paste an EDI document to inspect its hierarchy, segment positions, and element values side-by-side.</p>
       </section>
     );
@@ -85,7 +85,7 @@ export const EdiPhase2Inspector: React.FC<EdiPhase2InspectorProps> = ({
     <section className="space-y-3 rounded-2xl border p-3" style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}>
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <div className="flex items-center gap-2 text-sm font-bold text-[var(--ink)]"><GitCompare className="w-4 h-4 text-[var(--brand)]" /> Visual Tree & Segment Inspector <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--brand)]/10 text-[var(--brand)]">PHASE 2</span></div>
+          <div className="flex items-center gap-2 text-sm font-bold text-[var(--ink)]"><GitCompare className="w-4 h-4 text-[var(--brand)]" /> Visual Tree & Segment Inspector</div>
           <p className="text-[11px] text-[var(--muted)] mt-0.5">Synchronized document view: inspect hierarchy and exact element positions without losing the original EDI payload.</p>
         </div>
         <div className="flex items-center gap-1 rounded-xl border p-1" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--bg)' }}>
@@ -100,7 +100,7 @@ export const EdiPhase2Inspector: React.FC<EdiPhase2InspectorProps> = ({
           <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Find segment or element value…" className="w-full pl-8 pr-3 py-1.5 rounded-xl border text-xs outline-none" style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }} />
         </div>
         {onLoadSample && (
-          <select aria-label="Phase 2 sample" className="px-2.5 py-1.5 rounded-xl border text-xs" style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }} onChange={e => e.target.value && onLoadSample(e.target.value)} defaultValue="">
+          <select aria-label="EDI sample" className="px-2.5 py-1.5 rounded-xl border text-xs" style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }} onChange={e => e.target.value && onLoadSample(e.target.value)} defaultValue="">
             <option value="">Quick sample…</option>
             {EDI_TRANSACTIONS.slice(0, 12).map(tx => <option key={tx.id} value={tx.id}>{tx.code} — {tx.name}</option>)}
           </select>
@@ -127,7 +127,7 @@ export const EdiPhase2Inspector: React.FC<EdiPhase2InspectorProps> = ({
       </div>
 
       {mode === 'advanced' && (
-        <div className="text-[10px] text-[var(--muted)] px-1">{segments.length} segments parsed • separator <code>{elementSeparator}</code> • terminator <code>{segmentTerminator === '\n' ? 'newline' : segmentTerminator}</code> • Phase 2 preserves the original input and performs inspection in-browser.</div>
+        <div className="text-[10px] text-[var(--muted)] px-1">{segments.length} segments parsed • separator <code>{elementSeparator}</code> • terminator <code>{segmentTerminator === '\n' ? 'newline' : segmentTerminator}</code> • Preserves the original input and performs inspection in-browser.</div>
       )}
     </section>
   );

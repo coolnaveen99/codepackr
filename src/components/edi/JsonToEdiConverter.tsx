@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Copy, Check, Download, ArrowLeftRight, Sparkles, FileCode2, AlertTriangle, Upload, Trash2 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Copy, Check, Download, ArrowLeftRight, Sparkles, FileCode2, AlertTriangle, Upload, Trash2, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
+import { ToolShell } from './ToolShell';
+import { EDI_TRANSACTIONS } from '../../data/ediDictionary';
+import { maskEdiPhi } from '../../lib/ediPhiMasker';
+import { calculateEdiFidelity } from '../../lib/ediFidelity';
 
 interface JsonToEdiConverterProps {
   tool: ToolDef;
@@ -255,6 +259,8 @@ export const JsonToEdiConverter: React.FC<JsonToEdiConverterProps> = ({
 }) => {
   const [jsonInput, setJsonInput] = useState<string>(initialInput || SAMPLE_850_PO_JSON);
   const [ediOutput, setEdiOutput] = useState<string>('');
+  const [selectedSampleId, setSelectedSampleId] = useState<string>('850');
+  const [isPhiMasked, setIsPhiMasked] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [jsonError, setJsonError] = useState<string | null>(null);
 
@@ -693,6 +699,39 @@ export const JsonToEdiConverter: React.FC<JsonToEdiConverterProps> = ({
     setJsonError(null);
   };
 
+  // PHI Masking on generated EDI
+  const phiInfo = useMemo(() => maskEdiPhi(ediOutput), [ediOutput]);
+  const activeEdiOutput = isPhiMasked ? phiInfo.maskedEdi : ediOutput;
+
+  // Round-trip Fidelity Analysis
+  const fidelity = useMemo(() => {
+    if (!ediOutput.trim()) return null;
+    return calculateEdiFidelity(ediOutput, ediOutput);
+  }, [ediOutput]);
+
+  const handleSelectSample = (sampleId: string) => {
+    setSelectedSampleId(sampleId);
+    if (sampleId === '850') setJsonInput(SAMPLE_850_PO_JSON);
+    else if (sampleId === '860') setJsonInput(SAMPLE_860_CHANGE_JSON);
+    else if (sampleId === '856') setJsonInput(SAMPLE_856_ASN_JSON);
+    else if (sampleId === '810') setJsonInput(SAMPLE_810_INVOICE_JSON);
+    else {
+      const txn = EDI_TRANSACTIONS.find((t) => t.id === sampleId);
+      if (txn && txn.samplePayload) {
+        // Wrap raw sample into segments JSON
+        const term = txn.samplePayload.includes('~') ? '~' : "'";
+        const sep = txn.samplePayload.includes('*') ? '*' : '+';
+        const segs = txn.samplePayload.split(term).map(s => s.trim()).filter(Boolean).map(s => {
+          const parts = s.split(sep);
+          return { tag: parts[0], elements: parts.slice(1) };
+        });
+        setJsonInput(JSON.stringify({ format: txn.standard, segments: segs }, null, 2));
+      }
+    }
+  };
+
+  const outputSegmentsCount = activeEdiOutput ? activeEdiOutput.split('\n').filter(Boolean).length : 0;
+
   return (
     <div className="space-y-6">
       <ToolHeader
@@ -703,198 +742,196 @@ export const JsonToEdiConverter: React.FC<JsonToEdiConverterProps> = ({
         resetLabel="Clear Workspace"
       />
 
-      {/* Control Bar */}
-      <div
-        className="p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-4 text-xs"
-        style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-      >
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-semibold text-[var(--muted)]">Templates:</span>
-          <button
-            onClick={() => setJsonInput(SAMPLE_850_PO_JSON)}
-            className="px-2.5 py-1.5 rounded-lg border font-medium hover:opacity-80 transition-opacity cursor-pointer"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-          >
-            850 PO
-          </button>
-          <button
-            onClick={() => setJsonInput(SAMPLE_860_CHANGE_JSON)}
-            className="px-2.5 py-1.5 rounded-lg border font-medium hover:opacity-80 transition-opacity cursor-pointer font-semibold text-[var(--brand)]"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--brand)', color: 'var(--brand)' }}
-          >
-            860 PO Change
-          </button>
-          <button
-            onClick={() => setJsonInput(SAMPLE_856_ASN_JSON)}
-            className="px-2.5 py-1.5 rounded-lg border font-medium hover:opacity-80 transition-opacity cursor-pointer font-semibold"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-          >
-            856 ASN (Shipment)
-          </button>
-          <button
-            onClick={() => setJsonInput(SAMPLE_810_INVOICE_JSON)}
-            className="px-2.5 py-1.5 rounded-lg border font-medium hover:opacity-80 transition-opacity cursor-pointer"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-          >
-            810 Invoice
-          </button>
-          <button
-            onClick={() => setJsonInput(SAMPLE_SEGMENTS_JSON)}
-            className="px-2.5 py-1.5 rounded-lg border font-medium hover:opacity-80 transition-opacity cursor-pointer"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-          >
-            Raw Segments
-          </button>
-          <button
-            onClick={() => setJsonInput('')}
-            disabled={!jsonInput}
-            className="px-2.5 py-1.5 rounded-lg border font-medium flex items-center gap-1 hover:opacity-80 transition-opacity disabled:opacity-40 cursor-pointer"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--muted)' }}
-            title="Clear JSON Input"
-          >
-            <Trash2 className="w-3.5 h-3.5 text-rose-500" />
-            <span>Clear</span>
-          </button>
-
-          <div className="h-4 w-px bg-[var(--line)] mx-1" />
-
-          {/* Delimiters */}
-          <span className="font-semibold text-[var(--muted)]">Delimiters:</span>
-          <div className="flex items-center gap-1.5 font-mono">
-            <span title="Element Separator" className="text-[11px] text-[var(--muted)]">Elem:</span>
-            <input
-              type="text"
-              maxLength={1}
-              value={elemSep}
-              onChange={(e) => setElemSep(e.target.value || '*')}
-              className="w-7 h-7 text-center rounded border outline-none font-bold"
+      <ToolShell
+        title="JSON to EDI Converter"
+        description="Convert modern JSON payloads into compliant ANSI ASC X12 segments with guaranteed round-trip schema fidelity."
+        badge="Zero-Data-Loss"
+        selectedSampleId={selectedSampleId}
+        onSelectSample={handleSelectSample}
+        isPhiMasked={isPhiMasked}
+        onTogglePhiMask={setIsPhiMasked}
+        maskedPhiCount={phiInfo.maskedCount}
+        segmentTerminator={segTerm}
+        elementSeparator={elemSep}
+        onSegmentTerminatorChange={setSegTerm}
+        onElementSeparatorChange={setElemSep}
+        onClear={handleClearWorkspace}
+        onResetSample={() => setJsonInput(SAMPLE_850_PO_JSON)}
+        hasInput={Boolean(jsonInput.trim())}
+        secondaryActions={
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-xs font-semibold text-[var(--muted)] mr-1">Presets:</span>
+            <button
+              onClick={() => {
+                setJsonInput(SAMPLE_850_PO_JSON);
+                setSelectedSampleId('850');
+              }}
+              className="px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all hover:opacity-80 cursor-pointer"
               style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            />
-            <span title="Segment Terminator" className="text-[11px] text-[var(--muted)] ml-1">Term:</span>
-            <input
-              type="text"
-              maxLength={1}
-              value={segTerm}
-              onChange={(e) => setSegTerm(e.target.value || '~')}
-              className="w-7 h-7 text-center rounded border outline-none font-bold"
+            >
+              850 PO
+            </button>
+            <button
+              onClick={() => {
+                setJsonInput(SAMPLE_860_CHANGE_JSON);
+                setSelectedSampleId('860');
+              }}
+              className="px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all hover:opacity-80 cursor-pointer text-[var(--brand)]"
+              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--brand)' }}
+            >
+              860 Change
+            </button>
+            <button
+              onClick={() => {
+                setJsonInput(SAMPLE_856_ASN_JSON);
+                setSelectedSampleId('856');
+              }}
+              className="px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all hover:opacity-80 cursor-pointer"
               style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+            >
+              856 ASN
+            </button>
+            <button
+              onClick={() => {
+                setJsonInput(SAMPLE_810_INVOICE_JSON);
+                setSelectedSampleId('810');
+              }}
+              className="px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all hover:opacity-80 cursor-pointer"
+              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+            >
+              810 Invoice
+            </button>
+            <button
+              onClick={() => setJsonInput(SAMPLE_SEGMENTS_JSON)}
+              className="px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all hover:opacity-80 cursor-pointer"
+              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+            >
+              Raw Segments
+            </button>
+
+            <label className="flex items-center gap-1.5 ml-2 cursor-pointer select-none text-xs text-[var(--muted)] hover:text-[var(--ink)]">
+              <input
+                type="checkbox"
+                checked={multiLine}
+                onChange={(e) => setMultiLine(e.target.checked)}
+                className="rounded"
+              />
+              <span>Wrap Lines</span>
+            </label>
+          </div>
+        }
+        leftPaneTitle="Source JSON Document"
+        leftPaneBadge={
+          <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--brand)] border border-[var(--line)]">
+            Semantic JSON
+          </span>
+        }
+        leftPaneActions={
+          <div className="flex items-center gap-2">
+            <label className="cursor-pointer hover:opacity-80 flex items-center gap-1 text-[var(--muted)] text-xs">
+              <Upload className="w-3.5 h-3.5" />
+              <span>Upload</span>
+              <input type="file" accept=".json,.txt" onChange={handleJsonUpload} className="hidden" />
+            </label>
+            <button
+              onClick={handleDownloadJson}
+              disabled={!jsonInput}
+              className="hover:opacity-80 text-[var(--muted)] disabled:opacity-40 flex items-center gap-1 text-xs cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export</span>
+            </button>
+            <button
+              onClick={() => setJsonInput('')}
+              disabled={!jsonInput}
+              className="hover:opacity-80 text-rose-500 disabled:opacity-40 flex items-center gap-1 text-xs cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Clear</span>
+            </button>
+          </div>
+        }
+        leftPaneContent={
+          <div className="flex flex-col h-full space-y-3">
+            <textarea
+              value={jsonInput}
+              onChange={(e) => setJsonInput(e.target.value)}
+              rows={18}
+              className="w-full flex-1 p-3.5 rounded-xl font-mono text-xs outline-none resize-y border leading-relaxed"
+              style={{
+                backgroundColor: 'var(--bg)',
+                borderColor: jsonError ? 'var(--error)' : 'var(--line)',
+                color: 'var(--ink)',
+              }}
+              placeholder="Paste structured JSON payload or click one of the presets above..."
+            />
+
+            {jsonError && (
+              <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 flex items-center gap-2 text-xs text-red-600 dark:text-red-400">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span>{jsonError}</span>
+              </div>
+            )}
+          </div>
+        }
+        rightPaneTitle="Generated ANSI ASC X12"
+        rightPaneBadge={
+          fidelity ? (
+            <span
+              className={`font-mono text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 ${
+                fidelity.isLossless
+                  ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
+              }`}
+            >
+              <CheckCircle2 className="w-3 h-3" />
+              <span>{fidelity.isLossless ? '100% Fidelity (0 data loss)' : `${fidelity.score}% Fidelity`}</span>
+            </span>
+          ) : undefined
+        }
+        rightPaneActions={
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCopy}
+              disabled={!activeEdiOutput}
+              className="px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1.5 hover:opacity-80 transition-all disabled:opacity-40 cursor-pointer"
+              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copied ? 'Copied' : 'Copy'}</span>
+            </button>
+            <button
+              onClick={handleDownload}
+              disabled={!activeEdiOutput}
+              className="px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1.5 hover:opacity-80 transition-all disabled:opacity-40 cursor-pointer"
+              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Download</span>
+            </button>
+          </div>
+        }
+        rightPaneContent={
+          <div className="flex flex-col h-full space-y-3">
+            <textarea
+              readOnly
+              value={activeEdiOutput}
+              rows={18}
+              placeholder="Generated ANSI X12 segments will appear here automatically..."
+              className="w-full flex-1 p-3.5 rounded-xl font-mono text-xs outline-none resize-y border leading-relaxed bg-emerald-50/10 dark:bg-emerald-950/10"
+              style={{ borderColor: 'var(--line)', color: 'var(--ink)' }}
             />
           </div>
-
-          <label className="flex items-center gap-1.5 ml-2 cursor-pointer select-none text-[var(--muted)] hover:text-[var(--ink)]">
-            <input
-              type="checkbox"
-              checked={multiLine}
-              onChange={(e) => setMultiLine(e.target.checked)}
-              className="rounded"
-            />
-            <span>Wrap Lines</span>
-          </label>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleCopy}
-            disabled={!ediOutput}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold text-white shadow-xs transition-opacity hover:opacity-90 disabled:opacity-40 cursor-pointer"
-            style={{ backgroundColor: copied ? 'var(--ok)' : 'var(--brand)' }}
-          >
-            {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copied ? 'Copied!' : 'Copy EDI'}</span>
-          </button>
-          <button
-            onClick={handleDownload}
-            disabled={!ediOutput}
-            className="p-1.5 rounded-xl border font-semibold hover:opacity-80 transition-opacity disabled:opacity-40 cursor-pointer"
-            style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-            title="Download .edi file"
-          >
-            <Download className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Editor & Preview Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* JSON Input Panel */}
-        <div
-          className="p-4 rounded-2xl border flex flex-col space-y-3"
-          style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-        >
-          <div className="flex items-center justify-between text-xs flex-wrap gap-2">
-            <span className="font-semibold flex items-center gap-1.5" style={{ color: 'var(--ink)' }}>
-              <FileCode2 className="w-4 h-4 text-[var(--brand)]" />
-              Source JSON Document (Semantic Object or Segments Array)
-            </span>
-            <div className="flex items-center gap-2">
-              <label className="cursor-pointer hover:opacity-80 flex items-center gap-1 text-[var(--muted)]">
-                <Upload className="w-3.5 h-3.5" />
-                <span>Upload JSON</span>
-                <input type="file" accept=".json,.txt" onChange={handleJsonUpload} className="hidden" />
-              </label>
-              <button
-                onClick={handleDownloadJson}
-                disabled={!jsonInput}
-                className="hover:opacity-80 text-[var(--muted)] disabled:opacity-40 flex items-center gap-1 cursor-pointer"
-                title="Save/Download JSON document"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Export JSON</span>
-              </button>
-              <button
-                onClick={() => setJsonInput('')}
-                disabled={!jsonInput}
-                className="hover:opacity-80 text-rose-500 disabled:opacity-40 flex items-center gap-1 cursor-pointer"
-                title="Clear JSON input"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Clear</span>
-              </button>
-            </div>
-          </div>
-
-          <textarea
-            value={jsonInput}
-            onChange={(e) => setJsonInput(e.target.value)}
-            rows={20}
-            className="w-full p-3.5 rounded-xl font-mono text-xs outline-none resize-y border leading-relaxed"
-            style={{ backgroundColor: 'var(--bg)', borderColor: jsonError ? 'var(--error)' : 'var(--line)', color: 'var(--ink)' }}
-            placeholder="Paste structured JSON payload or click one of the templates above..."
-          />
-
-          {jsonError && (
-            <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 flex items-center gap-2 text-xs text-red-600 dark:text-red-400">
-              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-              <span>{jsonError}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Generated EDI X12 Output Panel */}
-        <div
-          className="p-4 rounded-2xl border flex flex-col space-y-3"
-          style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
-        >
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4" />
-              Generated ANSI X12 Output
-            </span>
-            <span className="text-[var(--muted)] font-mono">
-              {ediOutput ? ediOutput.split('\n').filter(Boolean).length : 0} Segments
-            </span>
-          </div>
-
-          <textarea
-            readOnly
-            value={ediOutput}
-            rows={20}
-            placeholder="Generated ANSI X12 segments will appear here automatically..."
-            className="w-full p-3.5 rounded-xl font-mono text-xs outline-none resize-y border leading-relaxed bg-emerald-50/20 dark:bg-emerald-950/20"
-            style={{ borderColor: 'var(--line)', color: 'var(--ink)' }}
-          />
-        </div>
-      </div>
+        }
+        statusBarMetrics={{
+          segmentCount: outputSegmentsCount,
+          byteSize: new Blob([activeEdiOutput]).size,
+          encodingStandard: 'ANSI ASC X12',
+          functionalGroup: selectedSampleId,
+          complianceStatus: jsonError ? 'error' : 'valid',
+          customMessage: fidelity?.isLossless ? '100% Round-Trip Schema Parity' : 'Conversion Ready',
+        }}
+      />
     </div>
   );
 };

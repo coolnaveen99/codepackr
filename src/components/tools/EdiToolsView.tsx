@@ -57,8 +57,7 @@ import {
 } from '../../data/ediDictionary';
 import { TOOLS } from '../../data/tools';
 import { popSmartPastePayload } from '../../lib/workspace';
-import { EdiPhase2UxBoundary } from '../edi/EdiPhase2UxBoundary';
-import { EdiPhase2Inspector } from '../edi/EdiPhase2Inspector';
+import { EdiVisualTreeInspector } from '../edi/EdiVisualTreeInspector';
 
 const SEGMENT_NAMES: Record<string, string> = COMPREHENSIVE_SEGMENT_DICTIONARY;
 
@@ -1189,7 +1188,7 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
   const [output, setOutput] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
   const [filterQuery, setFilterQuery] = useState<string>('');
-  const [expandedSegment, setExpandedSegment] = useState<number | null>(0);
+  const [expandedSegment, setExpandedSegment] = useState<number | null>(null);
 
   // P1.4: X12 JSON Schema Modes ('semantic' | 'segmentArray' | 'loops')
   const [x12JsonSchemaMode, setX12JsonSchemaMode] = useState<'semantic' | 'segmentArray' | 'loops'>('semantic');
@@ -2042,13 +2041,15 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
         </div>
       )}
 
-      {/* Phase 2: synchronized raw ↔ visual tree inspector for every EDI tool */}
-      <EdiPhase2Inspector
-        input={input}
-        elementSeparator={elementSeparator}
-        segmentTerminator={segmentTerminator}
-        onLoadSample={loadTransactionSample}
-      />
+      {/* Visual tree inspector specifically for the segment viewer tab */}
+      {activeTab === 'edi-segment-viewer' && (
+        <EdiVisualTreeInspector
+          input={input}
+          elementSeparator={elementSeparator}
+          segmentTerminator={segmentTerminator}
+          onLoadSample={loadTransactionSample}
+        />
+      )}
 
       {/* 4. EDI VALIDATOR VIEW: Full Dashboard, Report & Live Editor */}
       {activeTab === 'edi-validator' && (
@@ -2747,24 +2748,13 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
           <EdiDiffCompareView tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} initialInput={input} />
         )}
         {activeTab === 'edi-message-gateway' && (
-          <EdiPhase2UxBoundary
-            title="EDI Message Gateway"
-            description="Guided inbound/outbound EDI gateway with progressive disclosure, Story Mode samples, and synchronized segment inspection."
-            defaultSampleId={selectedSampleId}
+          <EdiMessageGatewayView
+            key={`gateway-${selectedSampleId}`}
+            tool={tool}
+            onBackToHome={onBackToHome}
+            onSelectRelated={onSelectRelated}
             initialInput={input}
-            onSampleLoad={(payload, sampleId) => {
-              setSelectedSampleId(sampleId);
-              setInput(payload);
-            }}
-          >
-            <EdiMessageGatewayView
-              key={`phase2-gateway-${selectedSampleId}`}
-              tool={tool}
-              onBackToHome={onBackToHome}
-              onSelectRelated={onSelectRelated}
-              initialInput={input}
-            />
-          </EdiPhase2UxBoundary>
+          />
         )}
         {activeTab === 'edi-schema-viewer' && (
           <EdiSchemaViewer initialInput={input} onNavigateToTab={setActiveTab} />
