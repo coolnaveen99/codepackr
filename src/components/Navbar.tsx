@@ -55,16 +55,17 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
-  const financeLinkClass =
-    'inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all shadow-xs cursor-pointer group shrink-0';
+  // Shared styles WITHOUT display utilities (avoid Tailwind conflict with hidden/sm:inline-flex)
+  const financePillBase =
+    'items-center gap-1.5 rounded-full text-xs font-semibold border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all shadow-xs cursor-pointer group shrink-0';
 
   return (
     <header id="main-header" className="sticky top-0 z-40 w-full border-b backdrop-blur-md transition-colors border-[color:var(--border)] bg-[color:var(--surface)]/85">
       <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-2 sm:gap-4 min-w-0">
+        <div className="flex items-center justify-between h-16 gap-2 sm:gap-3 min-w-0">
 
-          {/* Left: Sidebar Toggle & Brand */}
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
+          {/* Left: Menu + Brand + Finance link */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             {onToggleSidebar && (
               <button
                 id="sidebar-toggle-btn"
@@ -75,6 +76,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <Menu className="w-5 h-5" />
               </button>
             )}
+
             <a
               href="/"
               onClick={(e) => {
@@ -83,7 +85,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onGoHome();
                 }
               }}
-              className="flex items-center gap-2 sm:gap-3 group text-left cursor-pointer focus:outline-none min-w-0 shrink"
+              className="flex items-center gap-2 group text-left cursor-pointer focus:outline-none min-w-0 shrink"
+              aria-label="CodePackr home"
             >
               <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-sm bg-[color:var(--brand)] transition-transform group-hover:scale-105 shrink-0">
                 <Terminal className="w-5 h-5" />
@@ -92,31 +95,31 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span className="font-bold text-base sm:text-lg leading-tight tracking-tight text-[color:var(--ink)] truncate">
                   CodePackr
                 </span>
-                <span className="hidden xs:inline sm:inline text-[10px] font-mono font-medium tracking-wider text-[color:var(--ink-muted)] uppercase">
+                <span className="hidden sm:block text-[10px] font-mono font-medium tracking-wider text-[color:var(--ink-muted)] uppercase">
                   Enterprise
                 </span>
               </div>
             </a>
 
-            {/* Finance link — always visible from sm up (full label); mobile uses right-side compact control */}
+            {/* Single Finance cross-link — short on mobile, full on sm+ */}
             <a
               id="nav-codepackr-finance-link"
               href="https://finance.codepackr.com/"
               target="_blank"
               rel="noopener noreferrer"
-              title="Codepackr Finance — Calculators, Planning & Wealth Projections"
-              aria-label="Codepackr Finance — Calculators, Planning & Wealth Projections"
-              className={`${financeLinkClass} hidden sm:inline-flex ml-1`}
+              title="Codepackr Finance — Calculators & Planning"
+              aria-label="Open Codepackr Finance"
+              className={`inline-flex ${financePillBase} px-2.5 sm:px-3 py-1.5 ml-0.5`}
             >
-              <span className="text-emerald-600 dark:text-emerald-400 transition-transform group-hover:scale-110">
+              <span className="text-emerald-600 dark:text-emerald-400">
                 <FinanceIcon />
               </span>
-              <span className="font-semibold">Codepackr Finance</span>
-              <span className="text-[10px] opacity-70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
+              <span className="sm:hidden">Finance</span>
+              <span className="hidden sm:inline">Codepackr Finance</span>
             </a>
           </div>
 
-          {/* Center: Command Palette Trigger */}
+          {/* Center search — desktop only */}
           <div className="flex-1 max-w-xl mx-2 hidden md:block min-w-0">
             <button
               id="search-trigger-btn"
@@ -125,7 +128,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <div className="flex items-center gap-3 min-w-0">
                 <Search className="w-4 h-4 group-hover:text-[color:var(--brand)] transition-colors shrink-0" />
-                <span className="truncate">Search tools, converters, formatters...</span>
+                <span className="truncate">Search tools...</span>
               </div>
               <kbd className="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono font-medium rounded-md border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] shrink-0">
                 <span className="text-[10px]">{isMac ? '⌘' : 'Ctrl'}</span>K
@@ -133,25 +136,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           </div>
 
-          {/* Right: Actions — Finance always visible on mobile here */}
+          {/* Right actions */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <a
-              id="nav-codepackr-finance-link-mobile"
-              href="https://finance.codepackr.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Codepackr Finance"
-              aria-label="Codepackr Finance — Calculators, Planning & Wealth Projections"
-              className={`${financeLinkClass} sm:hidden`}
-            >
-              <FinanceIcon />
-              <span>Finance</span>
-            </a>
-
             <button
               onClick={onOpenSearch}
               className="md:hidden p-2 rounded-xl border border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)] transition-colors cursor-pointer"
-              aria-label="Search"
+              aria-label="Search tools"
             >
               <Search className="w-5 h-5" />
             </button>
@@ -196,7 +186,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
           </div>
-
         </div>
       </div>
     </header>
