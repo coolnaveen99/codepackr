@@ -156,7 +156,7 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'qr-generator': 'qr-generator',
   'password-generator': 'password-generator',
   'lorem-ipsum': 'lorem-ipsum',
-  'what-is-my-screen-resolution': 'uuid-generator', // fallback to utility
+  'what-is-my-screen-resolution': 'uuid-generator',
   'what-is-my-user-agent': 'uuid-generator',
   'markdown': 'markdown-preview',
   'markdown-preview': 'markdown-preview',
@@ -182,9 +182,6 @@ export const SLUG_TO_TOOL_ID: Record<string, string> = {
   'reverse-line-order': 'text-tools',
 };
 
-/**
- * Preferred direct canonical URL slug for each tool ID
- */
 export const TOOL_ID_TO_CANONICAL_SLUG: Record<string, string> = {
   'edi-csv-converter': 'edi-csv-converter',
   'edi-hipaa-sanitizer': 'edi-hipaa-sanitizer',
@@ -207,25 +204,16 @@ export const TOOL_ID_TO_CANONICAL_SLUG: Record<string, string> = {
   'connection-string-parser': 'connection-string-parser',
 };
 
-/**
- * Returns the clean direct path for a tool: e.g. "/json-formatter"
- */
 export function getToolPath(tool: ToolDef | string): string {
   const toolId = typeof tool === 'string' ? tool : tool.id;
   const slug = TOOL_ID_TO_CANONICAL_SLUG[toolId] || toolId;
   return `/${slug}`;
 }
 
-/**
- * Returns the full direct canonical URL: e.g. "https://www.codepackr.com/json-formatter"
- */
 export function getToolDirectUrl(tool: ToolDef | string): string {
   return `https://www.codepackr.com${getToolPath(tool)}`;
 }
 
-/**
- * Mapping of direct category URL slugs to category filter keys
- */
 export const CATEGORY_SLUG_MAP: Record<string, string> = {
   'image': 'image',
   'image-tools': 'image',
@@ -263,11 +251,13 @@ export const FINANCIAL_REDIRECT_SLUGS = new Set([
   'loan-calculator',
 ]);
 
+export type AppPage = 'home' | 'contact' | 'privacy' | 'admin' | 'notFound';
+
 /**
  * Resolves the active route based on the current window location (pathname + search)
  */
 export function resolveCurrentRoute(): {
-  page: 'home' | 'contact' | 'privacy' | 'admin';
+  page: AppPage;
   tool: ToolDef | null;
   category?: string;
   externalRedirect?: string;
@@ -279,7 +269,6 @@ export function resolveCurrentRoute(): {
   const pathname = window.location.pathname.replace(/^\/+|\/+$/g, '');
   const searchParams = new URLSearchParams(window.location.search);
 
-  // Check legacy financial tool & calculator routes -> Redirect to finance.codepackr.com
   const rawSlug = pathname.replace(/\.html$/, '');
   const toolParam = searchParams.get('tool');
   const catParam = searchParams.get('cat') || searchParams.get('category');
@@ -292,21 +281,18 @@ export function resolveCurrentRoute(): {
     return {
       page: 'home',
       tool: null,
-      externalRedirect: 'https://finance.codepackr.com/'
+      externalRedirect: 'https://finance.codepackr.com/',
     };
   }
 
-  // 0. Check admin console page
   if (pathname === 'admin.html' || pathname === 'admin' || searchParams.get('page') === 'admin') {
     return { page: 'admin', tool: null };
   }
 
-  // 1. Check contact page
   if (pathname === 'contact.html' || pathname === 'contact' || searchParams.get('page') === 'contact') {
     return { page: 'contact', tool: null };
   }
 
-  // 2. Check privacy and terms pages
   if (pathname === 'privacy.html' || pathname === 'privacy' || searchParams.get('page') === 'privacy') {
     return { page: 'privacy', tool: null };
   }
@@ -315,29 +301,41 @@ export function resolveCurrentRoute(): {
     return { page: 'privacy', tool: null, category: 'terms' };
   }
 
-  // 3. Check direct path slug (e.g. "json-formatter.html", "json-formatter", or "formatters")
-  if (pathname && pathname !== 'index.html') {
-    // Check category hubs first
-    if (CATEGORY_SLUG_MAP[rawSlug]) {
-      return { page: 'home', tool: null, category: CATEGORY_SLUG_MAP[rawSlug] };
-    }
-
-    const mappedToolId = SLUG_TO_TOOL_ID[rawSlug] || rawSlug;
-    const foundTool = TOOLS.find((t) => t.id === mappedToolId || t.id === rawSlug);
-    if (foundTool) {
-      return { page: 'home', tool: foundTool };
-    }
+  // Empty path or index → home
+  if (!pathname || pathname === 'index.html' || pathname === 'index') {
+    return { page: 'home', tool: null, category: catParam || undefined };
   }
 
-  // 4. Check query param: ?tool=...
+  // Category hubs
+  if (CATEGORY_SLUG_MAP[rawSlug]) {
+    return { page: 'home', tool: null, category: CATEGORY_SLUG_MAP[rawSlug] };
+  }
+
+  // Known tool slug
+  const mappedToolId = SLUG_TO_TOOL_ID[rawSlug] || rawSlug;
+  const foundTool = TOOLS.find((t) => t.id === mappedToolId || t.id === rawSlug);
+  if (foundTool) {
+    return { page: 'home', tool: foundTool };
+  }
+
+  // Query ?tool=
   if (toolParam) {
-    const mappedToolId = SLUG_TO_TOOL_ID[toolParam] || toolParam;
-    const foundTool = TOOLS.find((t) => t.id === mappedToolId);
-    if (foundTool) {
-      return { page: 'home', tool: foundTool };
+    const mapped = SLUG_TO_TOOL_ID[toolParam] || toolParam;
+    const found = TOOLS.find((t) => t.id === mapped);
+    if (found) {
+      return { page: 'home', tool: found };
     }
   }
 
-  // 5. Category filter param: ?cat=... or ?category=...
+  // Unknown path with only ?cat= → still home with category
+  if (catParam && !rawSlug) {
+    return { page: 'home', tool: null, category: catParam };
+  }
+
+  // Unknown non-empty path → 404 (do not silently show homepage)
+  if (rawSlug) {
+    return { page: 'notFound', tool: null };
+  }
+
   return { page: 'home', tool: null, category: catParam || undefined };
 }
