@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codepackr-v4';
+const CACHE_NAME = 'codepackr-v5-vercel';
 const STATIC_PRECACHE = [
   '/',
   '/index.html',
