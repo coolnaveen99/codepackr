@@ -124,13 +124,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="search-trigger-btn"
               onClick={onOpenSearch}
-              className="w-full flex items-center justify-between px-4 py-2 text-sm rounded-xl border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink-muted)] hover:border-[color:var(--brand)] focus:outline-none transition-all shadow-sm cursor-pointer group"
+              className="w-full flex items-center justify-between px-4 py-2 text-sm rounded-xl border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink-muted)] hover:border-[color:var(--brand)] hover:ring-2 hover:ring-[color:var(--brand)]/15 focus:outline-none transition-all duration-200 hover:scale-[1.008] shadow-sm cursor-pointer group"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <Search className="w-4 h-4 group-hover:text-[color:var(--brand)] transition-colors shrink-0" />
-                <span className="truncate">Search tools...</span>
+                <span className="truncate group-hover:text-[color:var(--ink)] transition-colors">Search tools...</span>
               </div>
-              <kbd className="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono font-medium rounded-md border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] shrink-0">
+              <kbd className="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono font-medium rounded-md border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] group-hover:border-[color:var(--brand)]/40 transition-colors shrink-0">
                 <span className="text-[10px]">{isMac ? '⌘' : 'Ctrl'}</span>K
               </kbd>
             </button>
@@ -140,7 +140,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={onOpenSearch}
-              className="md:hidden p-2 rounded-xl border border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)] transition-colors cursor-pointer"
+              className="md:hidden p-2 rounded-xl border border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)] active:scale-95 transition-all cursor-pointer"
               aria-label="Search tools"
             >
               <Search className="w-5 h-5" />
@@ -149,9 +149,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="nav-bookmarks-btn"
               onClick={handleSelectBookmarks}
-              className={`px-2 sm:px-3 py-1.5 text-sm font-medium rounded-xl border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm ${
+              className={`px-2 sm:px-3 py-1.5 text-sm font-medium rounded-xl border transition-all duration-200 hover:scale-[1.03] active:scale-[0.98] flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm ${
                 selectedCategory === 'bookmarks'
-                  ? 'bg-[color:var(--warning)] text-white border-[color:var(--warning)]'
+                  ? 'bg-[color:var(--warning)] text-white border-[color:var(--warning)] shadow-md'
                   : 'bg-[color:var(--surface)] border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:border-[color:var(--border-hover)]'
               }`}
               title="Saved Tools"
@@ -169,7 +169,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="nav-admin-btn"
                 onClick={onGoAdmin}
-                className="hidden sm:flex px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-colors items-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs"
+                className="hidden sm:flex px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 hover:scale-[1.03] active:scale-[0.98] transition-all items-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs"
                 title="Admin Console"
               >
                 <Shield className="w-4 h-4 text-amber-500" />
@@ -180,10 +180,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="theme-toggle-btn"
               onClick={onToggleTheme}
-              className="p-2 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)] transition-colors cursor-pointer"
+              className="group p-2 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:border-[color:var(--brand)]/40 hover:bg-[color:var(--surface-elevated)] hover:scale-[1.05] active:scale-95 transition-all duration-200 cursor-pointer shadow-xs"
               aria-label="Toggle Theme"
             >
-              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {darkMode ? (
+                <Sun className="w-5 h-5 text-amber-400 transition-transform duration-500 group-hover:rotate-90" />
+              ) : (
+                <Moon className="w-5 h-5 text-blue-500 transition-transform duration-500 group-hover:-rotate-45" />
+              )}
             </button>
           </div>
         </div>

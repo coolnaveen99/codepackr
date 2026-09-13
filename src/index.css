@@ -151,6 +151,143 @@ code, pre, kbd, samp, .font-mono {
   animation: fadeIn 0.2s ease-in-out;
 }
 
+/* Visual Magic Animations */
+@keyframes softFloat1 {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-7px) rotate(0.4deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes softFloat2 {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(-0.5deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes softFloat3 {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(0.3deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes driftSlow {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(14px, -10px) scale(1.03); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+@keyframes badgeShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes lockPulse {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.18); }
+  50% { transform: scale(0.95); }
+  75% { transform: scale(1.08); }
+}
+
+@keyframes blinkCursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes cardCascade {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes springPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(6px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.03) translateY(-1px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes particleFly {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tw-particle-x, 12px), var(--tw-particle-y, -16px)) scale(0.2);
+  }
+}
+
+.animate-soft-float-1 {
+  animation: softFloat1 4.2s ease-in-out infinite;
+}
+
+.animate-soft-float-2 {
+  animation: softFloat2 5.1s ease-in-out infinite;
+}
+
+.animate-soft-float-3 {
+  animation: softFloat3 4.7s ease-in-out infinite;
+}
+
+.animate-drift-slow {
+  animation: driftSlow 16s ease-in-out infinite alternate;
+}
+
+.animate-badge-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(245, 158, 11, 0.12) 0%,
+    rgba(245, 158, 11, 0.3) 50%,
+    rgba(245, 158, 11, 0.12) 100%
+  );
+  background-size: 200% 100%;
+  animation: badgeShimmer 2.8s linear infinite;
+}
+
+.animate-lock-pulse {
+  animation: lockPulse 1.8s ease-in-out 1;
+}
+
+.animate-type-cursor {
+  animation: blinkCursor 0.9s infinite;
+}
+
+.animate-spring-pop {
+  animation: springPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.stagger-card-in {
+  animation: cardCascade 0.45s ease-out backwards;
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .animate-soft-float-1,
+  .animate-soft-float-2,
+  .animate-soft-float-3,
+  .animate-drift-slow,
+  .animate-badge-shimmer,
+  .animate-lock-pulse,
+  .stagger-card-in,
+  .animate-spring-pop {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
 /* ==========================================================================
    CodePackr Print & PDF Engine (A4 Portrait & Specialized Media)
    ========================================================================== */

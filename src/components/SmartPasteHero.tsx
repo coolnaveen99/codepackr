@@ -38,6 +38,97 @@ interface SmartPasteHeroProps {
 export const SmartPasteHero: React.FC<SmartPasteHeroProps> = ({ onSelectTool }) => {
   const [pasteInput, setPasteInput] = useState('');
 
+  const [isFocused, setIsFocused] = useState(false);
+
+  // Quick interactive samples for visitors to test instant detection
+  const SAMPLE_PAYLOADS = [
+    {
+      label: 'JSON',
+      payload: '{\n  "status": "ready",\n  "code": 200,\n  "clientSide": true\n}',
+    },
+    {
+      label: 'EDI 850',
+      payload: 'ISA*00*          *00*          *ZZ*SENDER         *ZZ*RECEIVER       *260401*1230*U*00401*000000001*0*P*>~\nGS*PO*SENDER*RECEIVER*20260401*1230*1*X*004010~\nST*850*0001~\nBEG*00*SA*PO-9921**20260401~\nPO1*1*20*EA*24.50**BP*SKU-4401~\nSE*5*0001~',
+    },
+    {
+      label: 'JWT',
+      payload: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsZXggRGV2Iiwicm9sZSI6ImVuZ2luZWVyIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+    },
+    {
+      label: 'cURL',
+      payload: 'curl -X POST "https://api.example.com/v1/orders" \\\n  -H "Authorization: Bearer sec_tok_9912" \\\n  -H "Content-Type: application/json" \\\n  -d \'{"item": "book", "qty": 2}\'',
+    },
+    {
+      label: 'SQL',
+      payload: 'SELECT u.id, u.username, COUNT(o.id) as order_count FROM users u LEFT JOIN orders o ON o.user_id = u.id WHERE u.status = \'active\' GROUP BY u.id, u.username ORDER BY order_count DESC;',
+    },
+  ];
+
+  // Primary highlight chip detection for the visual magic moment
+  const primaryChip = useMemo(() => {
+    const raw = pasteInput.trim();
+    if (!raw) return null;
+    const lower = raw.toLowerCase();
+
+    if (raw.startsWith('ISA*') || raw.startsWith('ISA~') || raw.startsWith('ST*') || raw.includes('GS*PO*')) {
+      return {
+        text: 'Looks like EDI X12 → Open EDI Formatter',
+        toolId: 'edi-formatter',
+        badge: 'EDI X12',
+        color: 'border-orange-500/40 bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20',
+      };
+    }
+    if ((raw.startsWith('{') && raw.endsWith('}')) || (raw.startsWith('[') && raw.endsWith(']'))) {
+      return {
+        text: 'JSON detected → Open JSON Formatter',
+        toolId: 'json-formatter',
+        badge: 'JSON Formatter',
+        color: 'border-blue-500/40 bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20',
+      };
+    }
+    if (/^ey[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+/.test(raw)) {
+      return {
+        text: 'JWT token detected → Open JWT Decoder',
+        toolId: 'jwt-decoder',
+        badge: 'JWT Decoder',
+        color: 'border-purple-500/40 bg-purple-500/10 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20',
+      };
+    }
+    if (/^\s*curl\s+/i.test(raw)) {
+      return {
+        text: 'cURL command detected → Open cURL to Code',
+        toolId: 'curl-code-converter',
+        badge: 'cURL to Code',
+        color: 'border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:bg-sky-500/20',
+      };
+    }
+    if (raw.startsWith('<?xml') || (raw.startsWith('<') && raw.endsWith('>'))) {
+      return {
+        text: 'XML payload detected → Open XML Formatter',
+        toolId: 'xml-formatter',
+        badge: 'XML Formatter',
+        color: 'border-indigo-500/40 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20',
+      };
+    }
+    if (/^(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|WITH)\s+/i.test(raw)) {
+      return {
+        text: 'SQL query detected → Open SQL Formatter',
+        toolId: 'sql-formatter',
+        badge: 'SQL Formatter',
+        color: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20',
+      };
+    }
+    if (raw.length >= 16 && /^[A-Za-z0-9+/=]+$/.test(raw)) {
+      return {
+        text: 'Base64 detected → Decode Base64',
+        toolId: 'base64',
+        badge: 'Base64 Decoder',
+        color: 'border-violet-500/40 bg-violet-500/10 text-violet-600 dark:text-violet-400 hover:bg-violet-500/20',
+      };
+    }
+    return null;
+  }, [pasteInput]);
+
   // Analyze pasted data heuristics
   const suggestions = useMemo<SmartSuggestion[]>(() => {
     const raw = pasteInput.trim();
@@ -497,27 +588,95 @@ export const SmartPasteHero: React.FC<SmartPasteHeroProps> = ({ onSelectTool }) 
 
   return (
     <div className="w-full max-w-4xl mx-auto mb-12">
-      <div className="relative rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-2 sm:p-3 shadow-lg transition-all focus-within:border-[color:var(--brand)] focus-within:ring-2 focus-within:ring-[color:var(--brand)]/20">
-        <div className="flex items-center gap-2 px-3 py-1.5 border-b border-[color:var(--border)]/60 text-xs font-semibold text-[color:var(--ink-muted)]">
-          <Sparkles className="w-3.5 h-3.5 text-[color:var(--brand)]" />
-          <span>Omni-Input &amp; Smart Paste Discovery</span>
-          <span className="ml-auto text-[11px] font-mono opacity-70">100% Client-Side Heuristics</span>
+      <div
+        className={`relative rounded-2xl border transition-all duration-300 bg-[color:var(--surface)] p-2.5 sm:p-3.5 shadow-lg ${
+          isFocused || pasteInput.trim()
+            ? 'border-[color:var(--brand)] ring-4 ring-[color:var(--brand)]/15 shadow-[0_10px_35px_-10px_rgba(37,99,235,0.2)]'
+            : 'border-[color:var(--border)] hover:border-[color:var(--border-hover)]'
+        }`}
+      >
+        {/* Header Bar */}
+        <div className="flex items-center justify-between gap-2 px-3 py-1.5 border-b border-[color:var(--border)]/60 text-xs font-semibold text-[color:var(--ink-muted)] flex-wrap">
+          <div className="flex items-center gap-2">
+            <Sparkles className={`w-3.5 h-3.5 transition-colors ${isFocused ? 'text-[color:var(--brand)] animate-spin' : 'text-[color:var(--brand)]'}`} />
+            <span className="text-[color:var(--ink)]">Omni-Input &amp; Smart Paste Discovery</span>
+          </div>
+          
+          <div className="flex items-center gap-2 ml-auto">
+            {isFocused && !pasteInput.trim() && (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-blue-500 font-medium animate-pulse">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                Listening for paste / input...
+              </span>
+            )}
+            {primaryChip && (
+              <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold animate-fade-in">
+                <Check className="w-3 h-3" /> {primaryChip.badge}
+              </span>
+            )}
+            <span className="text-[10px] font-mono opacity-60">100% In-Browser</span>
+          </div>
         </div>
 
+        {/* Textarea */}
         <div className="relative">
           <textarea
             value={pasteInput}
             onChange={(e) => setPasteInput(e.target.value)}
-            placeholder="Paste raw JSON, JWT, EDI X12, SQL, XML, XSLT, cURL, Image data, or keywords (e.g. 'retirement', 'loan', 'exif', 'diff')..."
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            placeholder="Paste raw JSON, JWT, EDI X12, SQL, XML, XSLT, cURL, or keywords (e.g. 'diff', 'exif', 'loan')..."
             rows={pasteInput ? 4 : 2}
             className="w-full p-3 font-mono text-xs sm:text-sm bg-transparent border-none outline-none resize-none text-[color:var(--ink)] placeholder-[color:var(--ink-muted)] custom-scrollbar leading-relaxed"
             spellCheck={false}
           />
         </div>
 
-        {/* Suggestion Actions Bar */}
+        {/* Quick Sample Presets (When empty) */}
+        {!pasteInput.trim() && (
+          <div className="px-3 pt-1 pb-2 border-t border-[color:var(--border)]/40 flex items-center gap-2 flex-wrap text-xs">
+            <span className="text-[11px] font-medium text-[color:var(--ink-muted)]">Try instant sample:</span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {SAMPLE_PAYLOADS.map((s) => (
+                <button
+                  key={s.label}
+                  type="button"
+                  onClick={() => {
+                    setPasteInput(s.payload);
+                    setIsFocused(true);
+                  }}
+                  className="px-2.5 py-1 rounded-lg border border-[color:var(--border)] bg-[color:var(--surface-elevated)] hover:border-[color:var(--brand)] hover:text-[color:var(--brand)] text-[11px] font-mono text-[color:var(--ink-muted)] transition-all hover:scale-105 cursor-pointer shadow-xs"
+                >
+                  +{s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Floating Primary Suggestion Banner (Magic Moment) */}
+        {primaryChip && (
+          <div className="mx-2 mb-2 p-2 rounded-xl border animate-spring-pop flex items-center justify-between gap-3 bg-gradient-to-r from-blue-500/5 via-[color:var(--surface-elevated)] to-teal-500/5 border-[color:var(--brand)]/30">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0"></span>
+              <span className="text-xs font-bold text-[color:var(--ink)] truncate">
+                {primaryChip.text}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleExecuteSuggestion(primaryChip.toolId)}
+              className="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-[color:var(--brand)] hover:bg-[color:var(--brand-hover)] transition-all hover:scale-105 shadow-sm cursor-pointer shrink-0 flex items-center gap-1.5"
+            >
+              <span>Launch Now</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
+        {/* Additional Suggestion Actions Bar */}
         {suggestions.length > 0 && (
-          <div className="mt-2 pt-2.5 border-t border-[color:var(--border)] flex flex-col gap-2 animate-fade-in">
+          <div className="mt-1 pt-2.5 border-t border-[color:var(--border)] flex flex-col gap-2 animate-fade-in">
             <div className="text-[11px] font-bold uppercase tracking-wider text-[color:var(--ink-muted)] px-2">
               Detected payload &bull; Recommended Quick Actions:
             </div>

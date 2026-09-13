@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LayoutGrid, Star, Workflow, Code2, ArrowLeftRight, Calculator,
   CheckCircle2, Binary, Wrench, Type, FileCode, ShieldCheck,
-  ChevronLeft, ChevronRight, X, Image as ImageIcon, ExternalLink
+  ChevronLeft, ChevronRight, X, Image as ImageIcon, ExternalLink, Lock
 } from 'lucide-react';
 import { ToolCategory, CategoryFilter } from '../types';
 import { TOOLS, CATEGORIES } from '../data/tools';
@@ -33,6 +33,38 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   utilities: <Wrench className="w-4 h-4" />,
   text: <Type className="w-4 h-4" />,
   xml: <FileCode className="w-4 h-4" />,
+};
+
+// Smooth count-up micro-animation for numbers
+const AnimatedNumber: React.FC<{ value: number }> = ({ value }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      setDisplayValue(value);
+      return;
+    }
+    const duration = 400;
+    const startTime = performance.now();
+
+    const update = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayValue(Math.round(value * eased));
+
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        setDisplayValue(value);
+      }
+    };
+
+    const frame = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(frame);
+  }, [value]);
+
+  return <span>{displayValue}</span>;
 };
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -86,38 +118,44 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="space-y-1">
             <button
               onClick={() => { onSelectCategory('all'); onGoHome(); onClose(); }}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer group ${
+              className={`relative w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer group overflow-hidden ${
                 selectedCategory === 'all'
                   ? 'bg-[color:var(--brand)] text-white shadow-sm'
                   : 'text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)]'
               }`}
             >
+              {selectedCategory === 'all' && (
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-white shadow-xs" />
+              )}
               <div className="flex items-center gap-3 min-w-0">
                 <LayoutGrid className="w-4 h-4 shrink-0" />
                 {!isCollapsed && <span className="font-medium">All Tools</span>}
               </div>
               {!isCollapsed && (
-                <span className={`text-xs font-mono px-2 py-0.5 rounded-md ${selectedCategory === 'all' ? 'bg-white/20' : 'bg-[color:var(--surface-muted)]'}`}>
-                  {TOOLS.length}
+                <span className={`text-xs font-mono px-2 py-0.5 rounded-md ${selectedCategory === 'all' ? 'bg-white/20 font-bold' : 'bg-[color:var(--surface-muted)]'}`}>
+                  <AnimatedNumber value={TOOLS.length} />
                 </span>
               )}
             </button>
 
             <button
               onClick={() => { onSelectCategory('bookmarks'); onGoBookmarks(); onClose(); }}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer group ${
+              className={`relative w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer group overflow-hidden ${
                 selectedCategory === 'bookmarks'
                   ? 'bg-[color:var(--warning)] text-white shadow-sm'
                   : 'text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)]'
               }`}
             >
+              {selectedCategory === 'bookmarks' && (
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-white shadow-xs" />
+              )}
               <div className="flex items-center gap-3 min-w-0">
                 <Star className={`w-4 h-4 shrink-0 ${selectedCategory === 'bookmarks' ? 'fill-white' : bookmarkCount > 0 ? 'text-[color:var(--warning)] fill-[color:var(--warning)]' : ''}`} />
                 {!isCollapsed && <span className="font-medium">Favorites</span>}
               </div>
               {!isCollapsed && bookmarkCount > 0 && (
                 <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-md ${selectedCategory === 'bookmarks' ? 'bg-white/20' : 'bg-[color:var(--warning)]/10 text-[color:var(--warning)]'}`}>
-                  {bookmarkCount}
+                  <AnimatedNumber value={bookmarkCount} />
                 </span>
               )}
             </button>
@@ -169,12 +207,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     key={cat.id}
                     onClick={() => { onSelectCategory(cat.id); onClose(); }}
                     title={cat.label}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer group ${
+                    className={`relative w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer group overflow-hidden ${
                       isSelected
                         ? 'bg-[color:var(--brand-light)] text-[color:var(--brand)] font-semibold'
                         : 'text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)]'
                     }`}
                   >
+                    {isSelected && (
+                      <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-[color:var(--brand)] shadow-xs animate-scale-in" />
+                    )}
                     <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-1.5 text-left">
                       <span className="shrink-0">{icon}</span>
                       {!isCollapsed && (
@@ -185,7 +226,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                     {!isCollapsed && (
                       <span className={`text-xs font-mono px-2 py-0.5 rounded-md shrink-0 ml-1 ${isSelected ? 'bg-[color:var(--brand)]/10 font-bold' : 'bg-[color:var(--surface-muted)]'}`}>
-                        {count}
+                        <AnimatedNumber value={count} />
                       </span>
                     )}
                   </button>
@@ -197,18 +238,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         <div className="p-4 border-t border-[color:var(--border)] bg-[color:var(--surface)] space-y-3">
           {!isCollapsed ? (
-            <div className="p-3 rounded-xl border border-[color:var(--success)]/20 bg-[color:var(--success)]/5 text-xs space-y-1">
+            <div className="p-3 rounded-xl border border-[color:var(--success)]/20 bg-[color:var(--success)]/5 text-xs space-y-1.5 group hover:border-[color:var(--success)]/40 transition-colors">
               <div className="flex items-center gap-2 text-[color:var(--success)] font-semibold">
-                <ShieldCheck className="w-4 h-4" />
+                <ShieldCheck className="w-4 h-4 animate-lock-pulse" />
                 <span>Client-Side Processing</span>
+                <span className="relative flex h-2 w-2 ml-auto">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
               </div>
-              <p className="text-[color:var(--ink-muted)] leading-relaxed">
-                Zero server data transmission.
+              <p className="text-[color:var(--ink-muted)] leading-relaxed flex items-center gap-1.5">
+                <Lock className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>Zero server data transmission.</span>
               </p>
             </div>
           ) : (
-            <div className="flex justify-center" title="100% Client-Side Processing">
-              <ShieldCheck className="w-5 h-5 text-[color:var(--success)]" />
+            <div className="flex justify-center py-1" title="100% Client-Side Processing">
+              <ShieldCheck className="w-5 h-5 text-[color:var(--success)] animate-lock-pulse" />
             </div>
           )}
           <button
