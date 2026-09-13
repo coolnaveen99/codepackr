@@ -157,7 +157,7 @@ code, pre, kbd, samp, .font-mono {
     transform: translateY(0px) rotate(0deg);
   }
   50% {
-    transform: translateY(-8px) rotate(0.4deg);
+    transform: translateY(-5px) rotate(0.3deg);
   }
 }
 
@@ -166,7 +166,7 @@ code, pre, kbd, samp, .font-mono {
     transform: translateY(0px) rotate(0deg);
   }
   50% {
-    transform: translateY(-10px) rotate(-0.5deg);
+    transform: translateY(-6px) rotate(-0.35deg);
   }
 }
 
@@ -175,7 +175,7 @@ code, pre, kbd, samp, .font-mono {
     transform: translateY(0px) rotate(0deg);
   }
   50% {
-    transform: translateY(-7px) rotate(0.3deg);
+    transform: translateY(-5px) rotate(0.25deg);
   }
 }
 

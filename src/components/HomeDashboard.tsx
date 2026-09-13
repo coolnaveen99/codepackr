@@ -152,7 +152,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         </div>
 
         <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
-          <div className="max-w-2xl flex-1">
+          <div className="max-w-2xl flex-1 w-full">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold border border-[color:var(--border)] bg-[color:var(--surface-elevated)]/85 text-[color:var(--ink-muted)] mb-6 shadow-xs backdrop-blur-xs">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -273,10 +273,10 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               key={tool.id}
               onClick={() => onSelectTool(tool)}
               style={{ animationDelay: `${Math.min(idx * 45, 450)}ms` }}
-              className="stagger-card-in group relative flex flex-col bg-[color:var(--surface)] rounded-2xl border border-[color:var(--border)] p-5 cursor-pointer transition-all duration-200 ease-out hover:-translate-y-2 hover:scale-[1.015] hover:border-[color:var(--brand)] hover:ring-2 hover:ring-[color:var(--brand)]/20 hover:shadow-[0_20px_40px_-12px_rgba(37,99,235,0.18)] dark:hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.65)]"
+              className="stagger-card-in group relative flex flex-col bg-[color:var(--surface)] rounded-2xl border border-[color:var(--border)] p-5 cursor-pointer transition-all duration-200 ease-out hover:-translate-y-3 hover:scale-[1.02] hover:border-[color:var(--brand)] hover:ring-2 hover:ring-[color:var(--brand)]/35 hover:shadow-[0_24px_50px_-10px_rgba(37,99,235,0.26)] dark:hover:shadow-[0_24px_50px_-10px_rgba(0,0,0,0.85)]"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink)] group-hover:text-[color:var(--brand)] group-hover:border-[color:var(--brand)] group-hover:scale-110 transition-all duration-300 shadow-sm">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink)] group-hover:text-[color:var(--brand)] group-hover:border-[color:var(--brand)] group-hover:bg-[color:var(--brand)]/10 group-hover:scale-110 group-hover:shadow-md transition-all duration-200 shadow-sm">
                   {getIcon(tool.icon, 24)}
                 </div>
                 <div className="flex items-center gap-2">
@@ -355,8 +355,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 <span className="text-xs font-bold uppercase tracking-wider text-[color:var(--ink-muted)]">
                   {tool.category}
                 </span>
-                <span className="flex items-center gap-1 text-sm font-bold text-[color:var(--brand)] group-hover:translate-x-1 transition-transform duration-200">
-                  Open <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
+                <span className="flex items-center gap-1.5 text-sm font-bold text-[color:var(--brand)] group-hover:text-[color:var(--brand-hover)] group-hover:translate-x-1.5 transition-all duration-200">
+                  Open <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
                 </span>
               </div>
             </div>
