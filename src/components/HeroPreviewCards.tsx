@@ -1,24 +1,350 @@
-import React from 'react';
-import { Braces, Workflow, KeyRound, ArrowRight, CheckCircle2, Shield } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { ToolDef } from '../types';
 import { TOOLS } from '../data/tools';
+import { HERO_TOOL_ADS, HeroToolAd, BadgeTone, AccentFamily } from '../data/heroToolAds';
 
 interface HeroPreviewCardsProps {
   onSelectTool: (tool: ToolDef, initialPayload?: string) => void;
 }
 
+const glowClassForAccent = (accent: AccentFamily): string => {
+  switch (accent) {
+    case 'teal':
+      return 'hover:border-teal-500/70 hover:shadow-[0_20px_45px_-12px_rgba(20,184,166,0.25)]';
+    case 'purple':
+      return 'hover:border-purple-500/70 hover:shadow-[0_20px_45px_-12px_rgba(168,85,247,0.25)]';
+    case 'emerald':
+      return 'hover:border-emerald-500/70 hover:shadow-[0_20px_45px_-12px_rgba(16,185,129,0.25)]';
+    case 'amber':
+      return 'hover:border-amber-500/70 hover:shadow-[0_20px_45px_-12px_rgba(245,158,11,0.25)]';
+    case 'orange':
+      return 'hover:border-orange-500/70 hover:shadow-[0_20px_45px_-12px_rgba(249,115,22,0.25)]';
+    case 'cyan':
+      return 'hover:border-cyan-500/70 hover:shadow-[0_20px_45px_-12px_rgba(6,182,212,0.25)]';
+    case 'rose':
+      return 'hover:border-rose-500/70 hover:shadow-[0_20px_45px_-12px_rgba(244,63,94,0.25)]';
+    case 'indigo':
+      return 'hover:border-indigo-500/70 hover:shadow-[0_20px_45px_-12px_rgba(99,102,241,0.25)]';
+    case 'blue':
+    default:
+      return 'hover:border-blue-500/70 hover:shadow-[0_20px_45px_-12px_rgba(37,99,235,0.25)]';
+  }
+};
+
+const badgeStyleForTone = (tone: BadgeTone): string => {
+  switch (tone) {
+    case 'teal':
+      return 'bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20';
+    case 'purple':
+      return 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20';
+    case 'emerald':
+      return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
+    case 'amber':
+      return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
+    case 'orange':
+      return 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20';
+    case 'cyan':
+      return 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20';
+    case 'rose':
+      return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20';
+    case 'indigo':
+      return 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20';
+    case 'blue':
+    default:
+      return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
+  }
+};
+
+const iconBgForAccent = (accent: AccentFamily): string => {
+  switch (accent) {
+    case 'teal':
+      return 'bg-teal-500/10 text-teal-600 dark:text-teal-400';
+    case 'purple':
+      return 'bg-purple-500/10 text-purple-600 dark:text-purple-400';
+    case 'emerald':
+      return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
+    case 'amber':
+      return 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+    case 'orange':
+      return 'bg-orange-500/10 text-orange-600 dark:text-orange-400';
+    case 'cyan':
+      return 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400';
+    case 'rose':
+      return 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
+    case 'indigo':
+      return 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400';
+    case 'blue':
+    default:
+      return 'bg-blue-500/10 text-blue-600 dark:text-blue-400';
+  }
+};
+
+const ctaColorForAccent = (accent: AccentFamily): string => {
+  switch (accent) {
+    case 'teal':
+      return 'text-teal-600 dark:text-teal-400';
+    case 'purple':
+      return 'text-purple-600 dark:text-purple-400';
+    case 'emerald':
+      return 'text-emerald-600 dark:text-emerald-400';
+    case 'amber':
+      return 'text-amber-600 dark:text-amber-400';
+    case 'orange':
+      return 'text-orange-600 dark:text-orange-400';
+    case 'cyan':
+      return 'text-cyan-600 dark:text-cyan-400';
+    case 'rose':
+      return 'text-rose-600 dark:text-rose-400';
+    case 'indigo':
+      return 'text-indigo-600 dark:text-indigo-400';
+    case 'blue':
+    default:
+      return 'text-blue-600 dark:text-blue-400';
+  }
+};
+
 export const HeroPreviewCards: React.FC<HeroPreviewCardsProps> = ({ onSelectTool }) => {
-  const handleLaunch = (toolId: string, initialPayload?: string) => {
-    const target = TOOLS.find((t) => t.id === toolId);
-    if (target) {
-      onSelectTool(target, initialPayload);
-    }
+  const [slotAIndex, setSlotAIndex] = useState(0);
+  const [slotBIndex, setSlotBIndex] = useState(1);
+  const [slotCIndex, setSlotCIndex] = useState(2);
+
+  const [fadingA, setFadingA] = useState(false);
+  const [fadingB, setFadingB] = useState(false);
+  const [fadingC, setFadingC] = useState(false);
+
+  const isHoveredARef = useRef(false);
+  const isHoveredBRef = useRef(false);
+  const isHoveredCRef = useRef(false);
+  const cursorRef = useRef(3);
+
+  const slotAIndexRef = useRef(slotAIndex);
+  slotAIndexRef.current = slotAIndex;
+
+  const slotBIndexRef = useRef(slotBIndex);
+  slotBIndexRef.current = slotBIndex;
+
+  const slotCIndexRef = useRef(slotCIndex);
+  slotCIndexRef.current = slotCIndex;
+
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  const handleLaunch = useCallback(
+    (toolId: string, initialPayload?: string) => {
+      const target = TOOLS.find((t) => t.id === toolId);
+      if (target) {
+        onSelectTool(target, initialPayload);
+      }
+    },
+    [onSelectTool]
+  );
+
+  const rotateSlotA = useCallback(() => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+    if (isHoveredARef.current) return;
+    if (prefersReducedMotion) return;
+
+    setFadingA(true);
+    setTimeout(() => {
+      setSlotAIndex(() => {
+        let next = cursorRef.current % HERO_TOOL_ADS.length;
+        cursorRef.current = (cursorRef.current + 1) % HERO_TOOL_ADS.length;
+        let attempts = 0;
+        while (
+          (next === slotBIndexRef.current || next === slotCIndexRef.current) &&
+          attempts < HERO_TOOL_ADS.length
+        ) {
+          next = cursorRef.current % HERO_TOOL_ADS.length;
+          cursorRef.current = (cursorRef.current + 1) % HERO_TOOL_ADS.length;
+          attempts++;
+        }
+        return next;
+      });
+      setFadingA(false);
+    }, 220);
+  }, [prefersReducedMotion]);
+
+  const rotateSlotB = useCallback(() => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+    if (isHoveredBRef.current) return;
+    if (prefersReducedMotion) return;
+
+    setFadingB(true);
+    setTimeout(() => {
+      setSlotBIndex(() => {
+        let next = cursorRef.current % HERO_TOOL_ADS.length;
+        cursorRef.current = (cursorRef.current + 1) % HERO_TOOL_ADS.length;
+        let attempts = 0;
+        while (
+          (next === slotAIndexRef.current || next === slotCIndexRef.current) &&
+          attempts < HERO_TOOL_ADS.length
+        ) {
+          next = cursorRef.current % HERO_TOOL_ADS.length;
+          cursorRef.current = (cursorRef.current + 1) % HERO_TOOL_ADS.length;
+          attempts++;
+        }
+        return next;
+      });
+      setFadingB(false);
+    }, 220);
+  }, [prefersReducedMotion]);
+
+  const rotateSlotC = useCallback(() => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+    if (isHoveredCRef.current) return;
+    if (prefersReducedMotion) return;
+
+    setFadingC(true);
+    setTimeout(() => {
+      setSlotCIndex(() => {
+        let next = cursorRef.current % HERO_TOOL_ADS.length;
+        cursorRef.current = (cursorRef.current + 1) % HERO_TOOL_ADS.length;
+        let attempts = 0;
+        while (
+          (next === slotAIndexRef.current || next === slotBIndexRef.current) &&
+          attempts < HERO_TOOL_ADS.length
+        ) {
+          next = cursorRef.current % HERO_TOOL_ADS.length;
+          cursorRef.current = (cursorRef.current + 1) % HERO_TOOL_ADS.length;
+          attempts++;
+        }
+        return next;
+      });
+      setFadingC(false);
+    }, 220);
+  }, [prefersReducedMotion]);
+
+  // Delay time increased by 3.5s (from 4000ms to 7500ms) with evenly staggered 2500ms transitions across the 3 slots
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+
+    const ROTATION_INTERVAL = 7500;
+    const STAGGER_STEP = 2500;
+
+    const intervalA = setInterval(() => {
+      rotateSlotA();
+    }, ROTATION_INTERVAL);
+
+    let intervalB: NodeJS.Timeout | null = null;
+    const timeoutB = setTimeout(() => {
+      rotateSlotB();
+      intervalB = setInterval(() => {
+        rotateSlotB();
+      }, ROTATION_INTERVAL);
+    }, STAGGER_STEP);
+
+    let intervalC: NodeJS.Timeout | null = null;
+    const timeoutC = setTimeout(() => {
+      rotateSlotC();
+      intervalC = setInterval(() => {
+        rotateSlotC();
+      }, ROTATION_INTERVAL);
+    }, STAGGER_STEP * 2);
+
+    return () => {
+      clearInterval(intervalA);
+      clearTimeout(timeoutB);
+      clearTimeout(timeoutC);
+      if (intervalB) clearInterval(intervalB);
+      if (intervalC) clearInterval(intervalC);
+    };
+  }, [rotateSlotA, rotateSlotB, rotateSlotC, prefersReducedMotion]);
+
+  const adA = HERO_TOOL_ADS[slotAIndex] || HERO_TOOL_ADS[0];
+  const adB = HERO_TOOL_ADS[slotBIndex] || HERO_TOOL_ADS[1];
+  const adC = HERO_TOOL_ADS[slotCIndex] || HERO_TOOL_ADS[2];
+
+  const renderCard = (
+    ad: HeroToolAd,
+    slotKey: 'A' | 'B' | 'C',
+    floatingClass: string,
+    isFading: boolean,
+    onMouseEnter: () => void,
+    onMouseLeave: () => void
+  ) => {
+    const IconComponent = ad.icon;
+
+    return (
+      <div
+        key={`hero-slot-${slotKey}`}
+        id={`hero-card-slot-${slotKey.toLowerCase()}`}
+        role="button"
+        tabIndex={0}
+        onClick={() => handleLaunch(ad.toolId, ad.launchPayload)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleLaunch(ad.toolId, ad.launchPayload);
+          }
+        }}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        aria-label={`${ad.title}: ${ad.badge}. Click to open ${ad.cta}`}
+        className={`${floatingClass} group relative rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)]/90 backdrop-blur-md p-3 shadow-md hover:shadow-2xl transition-all duration-300 hover:scale-[1.03] cursor-pointer h-[156px] flex flex-col justify-between select-none ${glowClassForAccent(
+          ad.accent
+        )}`}
+      >
+        <div
+          className={`flex flex-col justify-between h-full transition-all duration-200 ease-in-out ${
+            isFading ? 'opacity-0 scale-[0.98]' : 'opacity-100 scale-100'
+          }`}
+        >
+          {/* Card Header */}
+          <div className="flex items-center justify-between pb-1.5 mb-1 border-b border-[color:var(--border)]/60 text-xs">
+            <div className="flex items-center gap-2 font-mono font-bold text-[color:var(--ink)] truncate pr-2">
+              <span
+                className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${iconBgForAccent(
+                  ad.accent
+                )}`}
+              >
+                <IconComponent className="w-3.5 h-3.5" />
+              </span>
+              <span className="truncate">{ad.title}</span>
+            </div>
+            <span
+              className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded-md font-semibold border shrink-0 whitespace-nowrap ${badgeStyleForTone(
+                ad.badgeTone
+              )}`}
+            >
+              {ad.badgeTone === 'emerald' && <CheckCircle2 className="w-2.5 h-2.5 shrink-0" />}
+              <span>{ad.badge}</span>
+            </span>
+          </div>
+
+          {/* Monospace Code Preview */}
+          <div className="font-mono text-[10.5px] leading-relaxed text-[color:var(--ink-muted)] bg-[color:var(--surface-elevated)] p-2 rounded-xl border border-[color:var(--border)]/50 h-[68px] flex flex-col justify-center overflow-hidden">
+            {ad.body}
+          </div>
+
+          {/* Card Footer / CTA */}
+          <div className="mt-1.5 flex items-center justify-between text-[11px] font-medium opacity-85 group-hover:opacity-100 transition-opacity">
+            <span className="text-[color:var(--ink-muted)] text-[10px] truncate pr-2">{ad.footerLeft}</span>
+            <span
+              className={`inline-flex items-center gap-1 font-bold shrink-0 whitespace-nowrap group-hover:translate-x-1 transition-transform ${ctaColorForAccent(
+                ad.accent
+              )}`}
+            >
+              {ad.cta} <ArrowRight className="w-3 h-3" />
+            </span>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
     <div
       aria-label="Interactive tool previews"
-      className="hidden lg:flex flex-col gap-3.5 relative w-[320px] xl:w-[360px] shrink-0 pointer-events-auto select-none"
+      className="hidden lg:flex flex-col gap-3 relative w-[320px] xl:w-[360px] shrink-0 pointer-events-auto select-none"
     >
       {/* Decorative ambient backdrop glow behind floating cards */}
       <div
@@ -26,169 +352,45 @@ export const HeroPreviewCards: React.FC<HeroPreviewCardsProps> = ({ onSelectTool
         aria-hidden="true"
       />
 
-      {/* Card 1: Mini JSON Tree Preview */}
-      <div
-        onClick={() =>
-          handleLaunch(
-            'json-formatter',
-            JSON.stringify(
-              {
-                status: 'success',
-                execution: 'client-side',
-                secure: true,
-                latencyMs: 0.8,
-              },
-              null,
-              2
-            )
-          )
+      {renderCard(
+        adA,
+        'A',
+        'hero-floating-card-1',
+        fadingA,
+        () => {
+          isHoveredARef.current = true;
+        },
+        () => {
+          isHoveredARef.current = false;
         }
-        className="hero-floating-card-1 group relative rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)]/90 backdrop-blur-md p-3.5 shadow-md hover:shadow-2xl hover:shadow-[0_20px_45px_-12px_rgba(37,99,235,0.22)] dark:hover:shadow-[0_20px_45px_-12px_rgba(0,0,0,0.6)] hover:border-[color:var(--brand)] transition-all duration-300 hover:scale-[1.04] cursor-pointer"
-      >
-        <div className="flex items-center justify-between pb-2 mb-2 border-b border-[color:var(--border)]/60 text-xs">
-          <div className="flex items-center gap-2 font-mono font-bold text-[color:var(--ink)]">
-            <span className="w-5 h-5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-              <Braces className="w-3.5 h-3.5" />
-            </span>
-            <span>JSON Inspector</span>
-          </div>
-          <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold">
-            <CheckCircle2 className="w-2.5 h-2.5" /> valid
-          </span>
-        </div>
+      )}
 
-        <div className="font-mono text-[11px] leading-relaxed text-[color:var(--ink-muted)] bg-[color:var(--surface-elevated)] p-2 rounded-xl border border-[color:var(--border)]/50">
-          <div>
-            <span className="text-[color:var(--ink-muted)]">&#123;</span>
-          </div>
-          <div className="pl-3">
-            <span className="text-blue-500 dark:text-blue-400 font-semibold">&quot;status&quot;</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;success&quot;</span>,
-          </div>
-          <div className="pl-3">
-            <span className="text-blue-500 dark:text-blue-400 font-semibold">&quot;clientSide&quot;</span>: <span className="text-amber-500 font-bold">true</span>,
-          </div>
-          <div className="pl-3">
-            <span className="text-blue-500 dark:text-blue-400 font-semibold">&quot;latency&quot;</span>: <span className="text-purple-500 font-bold">0ms</span>
-          </div>
-          <div>
-            <span className="text-[color:var(--ink-muted)]">&#125;</span>
-          </div>
-        </div>
-
-        {/* Hover Action Badge */}
-        <div className="mt-2.5 flex items-center justify-between text-[11px] font-medium text-[color:var(--brand)] opacity-80 group-hover:opacity-100 transition-opacity">
-          <span className="text-[color:var(--ink-muted)] text-[10px]">Zero server telemetry</span>
-          <span className="inline-flex items-center gap-1 font-bold group-hover:translate-x-1 transition-transform">
-            Try JSON Formatter <ArrowRight className="w-3 h-3" />
-          </span>
-        </div>
-      </div>
-
-      {/* Card 2: Tiny EDI Segment View */}
-      <div
-        onClick={() =>
-          handleLaunch(
-            'edi-segment-viewer',
-            'ISA*00*          *00*          *ZZ*SENDER         *ZZ*RECEIVER       *260401*1230*U*00401*000000001*0*P*>~\nGS*PO*SENDER*RECEIVER*20260401*1230*1*X*004010~\nST*850*0001~\nBEG*00*SA*PO-9842**20260401~\nN1*BY*ACME SUPPLY CORP*92*11029~\nPO1*1*50*EA*14.95**BP*SKU-9912~\nTDS*74750~\nSE*6*0001~\nGE*1*1~\nIEA*1*000000001~'
-          )
+      {renderCard(
+        adB,
+        'B',
+        'hero-floating-card-2',
+        fadingB,
+        () => {
+          isHoveredBRef.current = true;
+        },
+        () => {
+          isHoveredBRef.current = false;
         }
-        className="hero-floating-card-2 group relative rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)]/90 backdrop-blur-md p-3.5 shadow-md hover:shadow-2xl hover:shadow-[0_20px_45px_-12px_rgba(20,184,166,0.22)] dark:hover:shadow-[0_20px_45px_-12px_rgba(0,0,0,0.6)] hover:border-teal-500/70 transition-all duration-300 hover:scale-[1.04] cursor-pointer"
-      >
-        <div className="flex items-center justify-between pb-2 mb-2 border-b border-[color:var(--border)]/60 text-xs">
-          <div className="flex items-center gap-2 font-mono font-bold text-[color:var(--ink)]">
-            <span className="w-5 h-5 rounded-md bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center">
-              <Workflow className="w-3.5 h-3.5" />
-            </span>
-            <span>EDI X12 Segment Stream</span>
-          </div>
-          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-teal-500/10 text-teal-600 dark:text-teal-400 font-semibold">
-            ANSI 850
-          </span>
-        </div>
+      )}
 
-        <div className="font-mono text-[11px] space-y-1 bg-[color:var(--surface-elevated)] p-2 rounded-xl border border-[color:var(--border)]/50">
-          <div className="flex items-center gap-1.5">
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400">
-              ST
-            </span>
-            <span className="text-[color:var(--ink)]">850</span>
-            <span className="text-[color:var(--ink-muted)] opacity-60">*</span>
-            <span className="text-[color:var(--ink-muted)]">0001</span>
-            <span className="text-teal-600 dark:text-teal-400 font-bold">~</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-teal-500/15 text-teal-600 dark:text-teal-400">
-              BEG
-            </span>
-            <span className="text-[color:var(--ink)]">00</span>
-            <span className="text-[color:var(--ink-muted)] opacity-60">*</span>
-            <span className="text-[color:var(--ink)]">SA</span>
-            <span className="text-[color:var(--ink-muted)] opacity-60">*</span>
-            <span className="text-amber-600 dark:text-amber-400 font-semibold">PO-9842</span>
-            <span className="text-teal-600 dark:text-teal-400 font-bold">~</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/15 text-purple-600 dark:text-purple-400">
-              PO1
-            </span>
-            <span className="text-[color:var(--ink)]">1</span>
-            <span className="text-[color:var(--ink-muted)] opacity-60">*</span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">50 EA</span>
-            <span className="text-[color:var(--ink-muted)] opacity-60">*</span>
-            <span className="text-[color:var(--ink)]">14.95</span>
-            <span className="text-teal-600 dark:text-teal-400 font-bold">~</span>
-          </div>
-        </div>
-
-        <div className="mt-2.5 flex items-center justify-between text-[11px] font-medium text-teal-600 dark:text-teal-400 opacity-80 group-hover:opacity-100 transition-opacity">
-          <span className="text-[color:var(--ink-muted)] text-[10px]">Parse &amp; validate loops</span>
-          <span className="inline-flex items-center gap-1 font-bold group-hover:translate-x-1 transition-transform">
-            Try EDI Tools <ArrowRight className="w-3 h-3" />
-          </span>
-        </div>
-      </div>
-
-      {/* Card 3: JWT / Security Decoder Preview */}
-      <div
-        onClick={() =>
-          handleLaunch(
-            'jwt-decoder',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyXzEyMzQ1IiwibmFtZSI6IkFsZXggRGV2Iiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
-          )
+      {renderCard(
+        adC,
+        'C',
+        'hero-floating-card-3',
+        fadingC,
+        () => {
+          isHoveredCRef.current = true;
+        },
+        () => {
+          isHoveredCRef.current = false;
         }
-        className="hero-floating-card-3 group relative rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)]/90 backdrop-blur-md p-3.5 shadow-md hover:shadow-2xl hover:shadow-[0_20px_45px_-12px_rgba(168,85,247,0.22)] dark:hover:shadow-[0_20px_45px_-12px_rgba(0,0,0,0.6)] hover:border-purple-500/70 transition-all duration-300 hover:scale-[1.04] cursor-pointer"
-      >
-        <div className="flex items-center justify-between pb-2 mb-2 border-b border-[color:var(--border)]/60 text-xs">
-          <div className="flex items-center gap-2 font-mono font-bold text-[color:var(--ink)]">
-            <span className="w-5 h-5 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-              <KeyRound className="w-3.5 h-3.5" />
-            </span>
-            <span>JWT Decoder &amp; Verify</span>
-          </div>
-          <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 font-semibold">
-            <Shield className="w-2.5 h-2.5" /> HS256
-          </span>
-        </div>
-
-        <div className="font-mono text-[11px] space-y-1.5 bg-[color:var(--surface-elevated)] p-2 rounded-xl border border-[color:var(--border)]/50">
-          <div className="text-[10px] truncate">
-            <span className="text-rose-500 font-semibold">eyJhbGciOi...</span>
-            <span className="text-purple-500 font-semibold">.eyJzdWIi...</span>
-            <span className="text-cyan-500 font-semibold">.SflKxwRJ...</span>
-          </div>
-          <div className="text-[10px] text-[color:var(--ink-muted)] flex items-center justify-between border-t border-[color:var(--border)]/40 pt-1">
-            <span>role: &quot;admin&quot;</span>
-            <span className="text-emerald-500 font-semibold">signature verified</span>
-          </div>
-        </div>
-
-        <div className="mt-2.5 flex items-center justify-between text-[11px] font-medium text-purple-600 dark:text-purple-400 opacity-80 group-hover:opacity-100 transition-opacity">
-          <span className="text-[color:var(--ink-muted)] text-[10px]">Zero key exfiltration</span>
-          <span className="inline-flex items-center gap-1 font-bold group-hover:translate-x-1 transition-transform">
-            Decode JWT <ArrowRight className="w-3 h-3" />
-          </span>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
+
