@@ -18,3 +18,9 @@ When adding or updating tools, keep `src/data/tools.ts`, `src/lib/seo.ts`, `scri
 
 ### 4. Backward-Compatible URL Routing
 Never delete legacy slugs or aliases in `src/lib/urls.ts`.
+
+### 5. Layman Documentation Sync
+Whenever a tool is added, renamed, or its behavior changes, update `docs/tools/` by
+following `.github/skills/update-tool-docs.md`. Edit the `TOOL_CONTENT` data in
+`scripts/generate-tool-docs.py` and re-run `python3 scripts/generate-tool-docs.py` — never
+hand-edit the generated files under `docs/tools/<category>/*.md` directly.

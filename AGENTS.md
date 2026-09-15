@@ -105,6 +105,27 @@ When adding a new tool to Codepackr, complete this sequential checklist:
 5. [ ] **Add Metadata in `scripts/generate-metadata.mjs`**: Include tool name, description, category, and features for prerendering.
 6. [ ] **Run Full Build & Sync**: Run `npm run build` (which automatically regenerates `sitemap.xml`, `toolMetadata.json`, `codepackr_social_media_promotions.csv`, prerenders HTML, and dispatches IndexNow pings).
 7. [ ] **Verify with `lint_applet` and `compile_applet`**: Ensure zero type errors and a clean build.
+8. [ ] **Add layman documentation**: Follow `.github/skills/update-tool-docs.md` to add a `TOOL_CONTENT` entry and regenerate `docs/tools/<category>/<tool-id>.md` via `python3 scripts/generate-tool-docs.py`.
+
+---
+
+## 📚 Layman Documentation Directive
+
+- **DO keep `docs/tools/` in sync with every tool change**: CodePackr maintains a full,
+  plain-English documentation set — one Markdown file per tool at
+  `docs/tools/<category>/<tool-id>.md`, written for people who are not already
+  EDI/XML/dev-tool experts, with a real worked example and common-mistakes section for
+  every tool.
+- **DO follow `.github/skills/update-tool-docs.md`** whenever a tool is added, renamed, or its
+  behavior changes — it's the fifth synchronization layer alongside `tools.ts`, `seo.ts`,
+  `generate-metadata.mjs`, and `sitemap.xml`.
+- **DO NOT hand-edit generated files** inside `docs/tools/<category>/*.md` or
+  `docs/tools/README.md` — edit the `TOOL_CONTENT` data in `scripts/generate-tool-docs.py`
+  and re-run it (`python3 scripts/generate-tool-docs.py`) instead, or your edit will be lost
+  next time someone regenerates.
+- **DO cross-check `toolMetadata.json` before trusting it** in documentation — it has
+  historically contained copy-pasted boilerplate for some tools (see the `_EDI_OVERRIDES`
+  pattern in `scripts/generate-tool-docs.py` for the known example and how it was fixed).
 
 ---
 
