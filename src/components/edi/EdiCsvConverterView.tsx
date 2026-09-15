@@ -68,7 +68,7 @@ export const EdiCsvConverterView: React.FC<EdiCsvConverterViewProps> = ({
   // -------------------------------------------------------------
   const [csvInput, setCsvInput] = useState<string>('');
   const [targetTxType, setTargetTxType] = useState<'850' | '810'>('850');
-  const [senderId, setSenderId] = useState<string>('ACMEBUYER');
+  const [senderId, setSenderId] = useState<string>('CONTOSO_BUYER');
   const [receiverId, setReceiverId] = useState<string>('SUPPLIERCO');
   const [testProdIndicator, setTestProdIndicator] = useState<'P' | 'T'>('P');
   const [copiedEdi, setCopiedEdi] = useState<boolean>(false);
@@ -76,16 +76,16 @@ export const EdiCsvConverterView: React.FC<EdiCsvConverterViewProps> = ({
 
   // Preloaded Samples
   const loadSample850Edi = () => {
-    const sample = `ISA*00*          *00*          *ZZ*ACMEBUYER      *ZZ*SUPPLIERCO     *260912*1030*U*00401*000000850*0*P*>~
-GS*PO*ACMEBUYER*SUPPLIERCO*20260912*1030*85001*X*004010~
+    const sample = `ISA*00*          *00*          *ZZ*CONTOSO_BUYER      *ZZ*SUPPLIERCO     *260912*1030*U*00401*000000850*0*P*>~
+GS*PO*CONTOSO_BUYER*SUPPLIERCO*20260912*1030*85001*X*004010~
 ST*850*0001~
 BEG*00*NE*PO-994820**20260912~
 CUR*SE*USD~
 REF*DP*042~
-N1*BY*ACME GLOBAL PURCHASING*9*0012345678901~
+N1*BY*CONTOSO RETAIL PURCHASING*9*0012345678901~
 N3*100 CORPORATE PARKWAY*SUITE 400~
 N4*CHICAGO*IL*60601~
-N1*ST*ACME FULFILLMENT DC #8*9*0098765432100~
+N1*ST*CONTOSO DISTRIBUTION DC #8*9*0098765432100~
 N3*4500 LOGISTICS BOULEVARD~
 N4*INDIANAPOLIS*IN*46241~
 N1*VN*PRECISION INDUSTRIAL TOOLS*92*VEND-7731~
@@ -108,15 +108,15 @@ IEA*1*000000850~`;
   };
 
   const loadSample810Edi = () => {
-    const sample = `ISA*00*          *00*          *ZZ*SUPPLIERCO     *ZZ*ACMEBUYER      *260915*1400*U*00401*000000810*0*P*>~
-GS*IN*SUPPLIERCO*ACMEBUYER*20260915*1400*81001*X*004010~
+    const sample = `ISA*00*          *00*          *ZZ*SUPPLIERCO     *ZZ*CONTOSO_BUYER      *260915*1400*U*00401*000000810*0*P*>~
+GS*IN*SUPPLIERCO*CONTOSO_BUYER*20260915*1400*81001*X*004010~
 ST*810*0001~
 BIG*20260915*INV-2026-8812*20260912*PO-994820~
 CUR*SE*USD~
 N1*RE*PRECISION INDUSTRIAL TOOLS*92*VEND-7731~
 N3*12 INDUSTRIAL WAY~
 N4*DETROIT*MI*48201~
-N1*BT*ACME GLOBAL PURCHASING*9*0012345678901~
+N1*BT*CONTOSO RETAIL PURCHASING*9*0012345678901~
 N3*100 CORPORATE PARKWAY*SUITE 400~
 N4*CHICAGO*IL*60601~
 IT1*1*150*EA*45.50**VN*SKU-A101*UP*012345678905~

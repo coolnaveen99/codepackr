@@ -8,6 +8,7 @@ import { getIcon } from '../lib/icons';
 interface ToolHeaderProps {
   tool: ToolDef;
   onBackToHome?: () => void;
+  onBack?: () => void;
   onSelectRelated?: (t: ToolDef) => void;
   onResetOrClear?: () => void;
   resetLabel?: string;
@@ -16,6 +17,7 @@ interface ToolHeaderProps {
 export const ToolHeader: React.FC<ToolHeaderProps> = ({
   tool,
   onBackToHome,
+  onBack,
   onSelectRelated,
   onResetOrClear,
   resetLabel,
@@ -28,6 +30,16 @@ export const ToolHeader: React.FC<ToolHeaderProps> = ({
 
   const defaultActionLabel = isCalcOrPlanner ? 'Reset to Defaults' : 'Clear Workspace';
   const effectiveResetLabel = resetLabel || defaultActionLabel;
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else if (onBackToHome) {
+      onBackToHome();
+    } else if (typeof window !== 'undefined') {
+      window.history.back();
+    }
+  };
 
   const handleShare = async () => {
     const success = await shareToolUrl(tool.id, tool.name, tool.description);
@@ -43,15 +55,14 @@ export const ToolHeader: React.FC<ToolHeaderProps> = ({
     <div className="mb-8 animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
         <div className="flex items-start gap-4">
-          {onBackToHome && (
-            <button
-              onClick={onBackToHome}
-              className="p-2.5 mt-1 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:border-[color:var(--brand)] transition-colors shadow-sm cursor-pointer"
-              title="Back to all tools"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-          )}
+          <button
+            onClick={handleBack}
+            className="p-2.5 mt-1 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:border-[color:var(--brand)] transition-colors shadow-sm cursor-pointer"
+            title="Go back to previous page"
+            aria-label="Go back to previous page"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
           <div className="flex items-start gap-3.5">
             <div className="p-2 rounded-xl bg-[color:var(--surface)] border border-[color:var(--border)] shadow-xs shrink-0 mt-0.5">
               {getIcon(tool.icon, 28)}

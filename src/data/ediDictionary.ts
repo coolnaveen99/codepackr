@@ -63,10 +63,10 @@ export const EDI_TRANSACTIONS: EdiTransactionDefinition[] = [
     functionalGroup: 'PO',
     category: 'Supply Chain & Retail',
     description: 'Buyer ordering merchandise, parts, or services with prices, quantities, and ship-to locations.',
-    purpose: 'Placed by a buyer (e.g. Walmart, Target) to request item quantities, delivery schedules, and pricing from a seller.',
+    purpose: 'Placed by an enterprise retail buyer to request item quantities, delivery schedules, and pricing from a seller.',
     keySegments: ['ST', 'BEG', 'CUR', 'REF', 'PER', 'N1', 'N3', 'N4', 'PO1', 'PID', 'CTT', 'SE'],
-    samplePayload: `ISA*00*          *00*          *ZZ*BUYER_RETAIL   *ZZ*ACME_SUPPLIER  *260904*1000*U*00401*000000850*0*P*>~
-GS*PO*BUYER_RETAIL*ACME_SUPPLIER*20260904*1000*85001*X*004010~
+    samplePayload: `ISA*00*          *00*          *ZZ*CONTOSO_BUYER  *ZZ*NORTHWIND      *260904*1000*U*00401*000000850*0*P*>~
+GS*PO*CONTOSO_BUYER*NORTHWIND*20260904*1000*85001*X*004010~
 ST*850*0001~
 BEG*00*NE*PO-2026-9901**20260904~
 CUR*BY*USD~
@@ -97,8 +97,8 @@ IEA*1*000000850~`,
     description: 'Seller confirming, rejecting, or making line-item changes (price, date, backorders) to an 850 PO.',
     purpose: 'Notifies buyer whether the purchase order was accepted without changes (AD), accepted with changes (AC), or rejected (RD).',
     keySegments: ['ST', 'BAK', 'CUR', 'REF', 'N1', 'PO1', 'ACK', 'CTT', 'SE'],
-    samplePayload: `ISA*00*          *00*          *ZZ*ACME_SUPPLIER  *ZZ*BUYER_RETAIL   *260904*1130*U*00401*000000855*0*P*>~
-GS*PR*ACME_SUPPLIER*BUYER_RETAIL*20260904*1130*85501*X*004010~
+    samplePayload: `ISA*00*          *00*          *ZZ*NORTHWIND      *ZZ*CONTOSO_BUYER  *260904*1130*U*00401*000000855*0*P*>~
+GS*PR*NORTHWIND*CONTOSO_BUYER*20260904*1130*85501*X*004010~
 ST*855*0001~
 BAK*00*AC*PO-2026-9901*20260904****20260904~
 CUR*SE*USD~
@@ -124,8 +124,8 @@ IEA*1*000000855~`,
     description: 'Buyer requesting modifications to a previously submitted 850 PO (quantity revision, cancellation, date shift).',
     purpose: 'Transmits additions, cancellations, or revisions to items, quantities, or ship dates of an open purchase order.',
     keySegments: ['ST', 'BCH', 'CUR', 'REF', 'N1', 'POC', 'PID', 'CTT', 'SE'],
-    samplePayload: `ISA*00*          *00*          *ZZ*BUYER_RETAIL   *ZZ*ACME_SUPPLIER  *260904*1400*U*00401*000000860*0*P*>~
-GS*PC*BUYER_RETAIL*ACME_SUPPLIER*20260904*1400*86001*X*004010~
+    samplePayload: `ISA*00*          *00*          *ZZ*CONTOSO_BUYER   *ZZ*NORTHWIND  *260904*1400*U*00401*000000860*0*P*>~
+GS*PC*CONTOSO_BUYER*NORTHWIND*20260904*1400*86001*X*004010~
 ST*860*0001~
 BCH*04*NE*PO-2026-9901**20260904*01*20260904~
 CUR*BY*USD~
@@ -150,8 +150,8 @@ IEA*1*000000860~`,
     description: 'Seller acknowledging acceptance, rejection, or counter-proposals to a buyer 860 change request.',
     purpose: 'Confirming whether the supplier accepts or rejects the requested cancellations, price shifts, or delivery reschedules.',
     keySegments: ['ST', 'BCA', 'REF', 'N1', 'POC', 'ACK', 'CTT', 'SE'],
-    samplePayload: `ISA*00*          *00*          *ZZ*ACME_SUPPLIER  *ZZ*BUYER_RETAIL   *260904*1530*U*00401*000000865*0*P*>~
-GS*CA*ACME_SUPPLIER*BUYER_RETAIL*20260904*1530*86501*X*004010~
+    samplePayload: `ISA*00*          *00*          *ZZ*NORTHWIND  *ZZ*CONTOSO_BUYER   *260904*1530*U*00401*000000865*0*P*>~
+GS*CA*NORTHWIND*CONTOSO_BUYER*20260904*1530*86501*X*004010~
 ST*865*0001~
 BCA*00*AT*PO-2026-9901*20260904*01*20260904~
 REF*DP*042~
@@ -175,8 +175,8 @@ IEA*1*000000865~`,
     description: 'Informs receiver about shipment contents, carrier details, barcodes (GS1-128 / UCC-128), and packaging hierarchy (SOPI).',
     purpose: 'Enables automated receiving docks and cross-docking without manual box unpacking by transmitting packing structures.',
     keySegments: ['ST', 'BSN', 'DTM', 'HL', 'TD1', 'TD5', 'REF', 'N1', 'PRF', 'MAN', 'LIN', 'SN1', 'CTT', 'SE'],
-    samplePayload: `ISA*00*          *00*          *ZZ*ACME_SUPPLIER  *ZZ*BUYER_RETAIL   *260904*1600*U*00401*000000856*0*P*>~
-GS*SH*ACME_SUPPLIER*BUYER_RETAIL*20260904*1600*85601*X*004010~
+    samplePayload: `ISA*00*          *00*          *ZZ*NORTHWIND  *ZZ*CONTOSO_BUYER   *260904*1600*U*00401*000000856*0*P*>~
+GS*SH*NORTHWIND*CONTOSO_BUYER*20260904*1600*85601*X*004010~
 ST*856*0001~
 BSN*00*ASN-2026-1102*20260904*1600*0001~
 DTM*011*20260904~
@@ -184,7 +184,7 @@ HL*1**S~
 TD1*CTN25*2~
 TD5*B*2*FDEG*M*FEDEX FREIGHT~
 REF*BM*BOL-98841~
-N1*SF*ACME LOGISTICS DOCK*91*FAC01~
+N1*SF*NORTHWIND LOGISTICS DOCK*91*FAC01~
 N3*12 INDUSTRIAL WAY~
 N4*CHICAGO*IL*60601*US~
 N1*ST*CENTRAL DISTRIBUTION #12*92*DC12~
@@ -213,13 +213,13 @@ IEA*1*000000856~`,
     description: 'Supplier requesting payment for goods or services delivered, detailing item quantities, payment terms, and taxes.',
     purpose: 'Triggers accounts payable matching against 850 PO and 856 ASN (3-way match) for electronic settlement.',
     keySegments: ['ST', 'BIG', 'CUR', 'REF', 'N1', 'ITD', 'IT1', 'PID', 'TDS', 'TXI', 'CTT', 'SE'],
-    samplePayload: `ISA*00*          *00*          *ZZ*ACME_SUPPLIER  *ZZ*BUYER_RETAIL   *260904*1700*U*00401*000000810*0*P*>~
-GS*IN*ACME_SUPPLIER*BUYER_RETAIL*20260904*1700*81001*X*004010~
+    samplePayload: `ISA*00*          *00*          *ZZ*NORTHWIND  *ZZ*CONTOSO_BUYER   *260904*1700*U*00401*000000810*0*P*>~
+GS*IN*NORTHWIND*CONTOSO_BUYER*20260904*1700*81001*X*004010~
 ST*810*0001~
 BIG*20260904*INV-2026-4401*20260904*PO-2026-9901~
 CUR*SE*USD~
 REF*DP*042~
-N1*RE*ACME REMITTANCE CENTER*91*REMIT1~
+N1*RE*NORTHWIND REMITTANCE*91*REMIT1~
 N3*PO BOX 7700~
 N4*DALLAS*TX*75201*US~
 N1*BT*BUYER CORPORATE ACCOUNTS*92*BUY01~
@@ -244,14 +244,14 @@ IEA*1*000000810~`,
     description: 'Buyer ordering payment via bank ACH or notifying vendor which specific invoices are being settled.',
     purpose: 'Transfers remittance detail (invoice number, discounts taken, net paid) alongside or preceding electronic bank funds.',
     keySegments: ['ST', 'BPR', 'TRN', 'CUR', 'REF', 'N1', 'RMR', 'SE'],
-    samplePayload: `ISA*00*          *00*          *ZZ*BUYER_RETAIL   *ZZ*ACME_SUPPLIER  *260904*1800*U*00401*000000820*0*P*>~
-GS*RA*BUYER_RETAIL*ACME_SUPPLIER*20260904*1800*82001*X*004010~
+    samplePayload: `ISA*00*          *00*          *ZZ*CONTOSO_BUYER   *ZZ*NORTHWIND  *260904*1800*U*00401*000000820*0*P*>~
+GS*RA*CONTOSO_BUYER*NORTHWIND*20260904*1800*82001*X*004010~
 ST*820*0001~
 BPR*C*3822.00*C*ACH*CTX*01*123456789*DA*987654321***01*987654321*DA*123456789*20260904~
 TRN*1*CHK-2026-9901*1234567890~
 CUR*PR*USD~
 N1*PR*BUYER RETAIL CORP*91*BUY01~
-N1*PE*ACME SUPPLIER CORP*91*ACME1~
+N1*PE*NORTHWIND TRADING*91*NWT1~
 RMR*IV*INV-2026-4401*PO*3900.00*3822.00*78.00~
 SE*9*0001~
 GE*1*82001~
@@ -267,8 +267,8 @@ IEA*1*000000820~`,
     description: 'Vendor or warehouse providing real-time inventory on-hand, safety stock, backorders, and committed quantities.',
     purpose: 'Ensures omni-channel retailers and drop-shippers have accurate available-to-promise (ATP) quantities.',
     keySegments: ['ST', 'BIA', 'N1', 'LIN', 'QTY', 'UIT', 'CTT', 'SE'],
-    samplePayload: `ISA*00*          *00*          *ZZ*ACME_SUPPLIER  *ZZ*BUYER_RETAIL   *260904*0800*U*00401*000000846*0*P*>~
-GS*IB*ACME_SUPPLIER*BUYER_RETAIL*20260904*0800*84601*X*004010~
+    samplePayload: `ISA*00*          *00*          *ZZ*NORTHWIND  *ZZ*CONTOSO_BUYER   *260904*0800*U*00401*000000846*0*P*>~
+GS*IB*NORTHWIND*CONTOSO_BUYER*20260904*0800*84601*X*004010~
 ST*846*0001~
 BIA*00*MB*STK-2026-0904*20260904~
 N1*WH*CENTRAL STOCK LOCATION*91*STK01~
@@ -293,8 +293,8 @@ IEA*1*000000846~`,
     description: 'Retail point-of-sale (POS) data, historical turnover, and inventory positions sent to vendors (VMI).',
     purpose: 'Used in Vendor-Managed Inventory (VMI) arrangements so the manufacturer can plan automated replenishment.',
     keySegments: ['ST', 'XQ', 'N1', 'LIN', 'ZA', 'QTY', 'CTT', 'SE'],
-    samplePayload: `ISA*00*          *00*          *ZZ*BUYER_RETAIL   *ZZ*ACME_SUPPLIER  *260904*0600*U*00401*000000852*0*P*>~
-GS*PD*BUYER_RETAIL*ACME_SUPPLIER*20260904*0600*85201*X*004010~
+    samplePayload: `ISA*00*          *00*          *ZZ*CONTOSO_BUYER   *ZZ*NORTHWIND  *260904*0600*U*00401*000000852*0*P*>~
+GS*PD*CONTOSO_BUYER*NORTHWIND*20260904*0600*85201*X*004010~
 ST*852*0001~
 XQ*H*20260828*20260903~
 N1*ST*STORE #4022*92*STR4022~
@@ -572,7 +572,7 @@ ST*837*0001*005010X222A1~
 BHT*0019*00*CLAIM-2026-001*20260904*1100*CH~
 NM1*41*2*VALLEY MEDICAL CLINIC*****46*123456789~
 PER*IC*BILLING OFFICE*TE*5550188~
-NM1*40*2*BLUE CROSS BLUE SHIELD*****46*BCBS001~
+NM1*40*2*SUMMIT HEALTH PLAN*****46*SUMMIT001~
 HL*1**20*1~
 PRV*BI*PXC*207Q00000X~
 NM1*85*2*VALLEY MEDICAL CLINIC*****XX*1982736450~
@@ -584,7 +584,7 @@ NM1*IL*1*SMITH*JANE****MI*W123456780~
 N3*456 MAPLE AVE~
 N4*SCOTTSDALE*AZ*85251~
 DMG*D8*19850412*F~
-NM1*PR*BLUE CROSS BLUE SHIELD*****PI*BCBS001~
+NM1*PR*SUMMIT HEALTH PLAN*****PI*SUMMIT001~
 CLM*CLM-99120*150.00***11:B:1*Y*A*Y*Y~
 HI*BK:J029~
 LX*1~
@@ -609,10 +609,10 @@ GS*HP*HEALTH_INSUR*CLINIC_MED*20260904*1200*83501*X*005010X221A1~
 ST*835*0001~
 BPR*I*120.00*C*ACH*CCP*01*011000015*DA*12345678*1234567890**01*043000096*DA*98765432*20260904~
 TRN*1*ERA-2026-9901*1999999999~
-N1*PR*BLUE CROSS BLUE SHIELD~
+N1*PR*SUMMIT HEALTH PLAN~
 N1*PE*VALLEY MEDICAL CLINIC*XX*1982736450~
 LX*1~
-CLP*CLM-99120*1*150.00*120.00*30.00*MC*BCBS-REF-01~
+CLP*CLM-99120*1*150.00*120.00*30.00*MC*SUMMIT-REF-01~
 CAS*PR*1*30.00~
 NM1*QC*1*SMITH*JANE****MI*W123456780~
 SVC*HC:99213*150.00*120.00~
@@ -637,7 +637,7 @@ GS*HS*CLINIC_MED*HEALTH_INSUR*20260904*0945*27001*X*005010X279A1~
 ST*270*0001*005010X279A1~
 BHT*0022*13*INQ-2026-001*20260904*0945~
 HL*1**20*1~
-NM1*PR*2*BLUE CROSS BLUE SHIELD*****PI*BCBS001~
+NM1*PR*2*SUMMIT HEALTH PLAN*****PI*SUMMIT001~
 HL*2*1*21*1~
 NM1*1P*1*JOHNSON*ROBERT****XX*1982736450~
 HL*3*2*22*0~
@@ -664,7 +664,7 @@ GS*HB*HEALTH_INSUR*CLINIC_MED*20260904*0946*27101*X*005010X279A1~
 ST*271*0001*005010X279A1~
 BHT*0022*11*RESP-2026-001*20260904*0946~
 HL*1**20*1~
-NM1*PR*2*BLUE CROSS BLUE SHIELD*****PI*BCBS001~
+NM1*PR*2*SUMMIT HEALTH PLAN*****PI*SUMMIT001~
 HL*2*1*21*1~
 NM1*1P*1*JOHNSON*ROBERT****XX*1982736450~
 HL*3*2*22*0~
@@ -744,12 +744,12 @@ IEA*1*000000999~`,
     description: 'Application-level business acceptance or rejection (e.g. invalid customer ID, missing warehouse code).',
     purpose: 'Communicates business rule errors that passed syntax parsing (997) but failed application ingestion.',
     keySegments: ['ST', 'BGN', 'N1', 'OTI', 'TED', 'SE'],
-    samplePayload: `ISA*00*          *00*          *ZZ*BUYER_RETAIL   *ZZ*ACME_SUPPLIER  *260904*1830*U*00401*000000824*0*P*>~
-GS*AG*BUYER_RETAIL*ACME_SUPPLIER*20260904*1830*82401*X*004010~
+    samplePayload: `ISA*00*          *00*          *ZZ*CONTOSO_BUYER   *ZZ*NORTHWIND  *260904*1830*U*00401*000000824*0*P*>~
+GS*AG*CONTOSO_BUYER*NORTHWIND*20260904*1830*82401*X*004010~
 ST*824*0001~
 BGN*00*APP-ADV-9901*20260904*1830~
 N1*FR*BUYER RETAIL CORP~
-N1*TO*ACME SUPPLIER CORP~
+N1*TO*NORTHWIND TRADING~
 OTI*TR*TN*PO*PO-2026-9901~
 TED*024*VENDOR SKU-B202 DISCONTINUED BY BUYER CATEGORY~
 SE*7*0001~
@@ -769,12 +769,12 @@ IEA*1*000000824~`,
     description: 'Global international purchase order message used across European, Asian, and worldwide supply chains.',
     purpose: 'International equivalent of ANSI X12 850.',
     keySegments: ['UNB', 'UNH', 'BGM', 'DTM', 'NAD', 'LIN', 'QTY', 'PRI', 'UNS', 'CNT', 'UNT', 'UNZ'],
-    samplePayload: `UNB+UNOA:2+BUYER_GLOBAL:ZZZ+ACME_GLOBAL:ZZZ+260904:1000+00000001'
+    samplePayload: `UNB+UNOA:2+CONTOSO_RETAIL:ZZZ+NORTHWIND_TRADING:ZZZ+260904:1000+00000001'
 UNH+1+ORDERS:D:96A:UN'
 BGM+220+ORD-2026-8801+9'
 DTM+137:20260904:102'
-NAD+BY+BUYER_GLOBAL::92'
-NAD+SU+ACME_GLOBAL::91'
+NAD+BY+CONTOSO_RETAIL::92'
+NAD+SU+NORTHWIND_TRADING::91'
 LIN+1++PROD-101:VN'
 QTY+21:100:EA'
 PRI+AAA:25.50'
@@ -796,13 +796,13 @@ UNZ+1+00000001'`,
     description: 'Supplier responding to an EDIFACT ORDERS message confirming acceptance, modifications, or line rejections.',
     purpose: 'International equivalent of ANSI X12 855.',
     keySegments: ['UNB', 'UNH', 'BGM', 'DTM', 'RFF', 'NAD', 'LIN', 'QTY', 'UNT', 'UNZ'],
-    samplePayload: `UNB+UNOA:2+ACME_GLOBAL:ZZZ+BUYER_GLOBAL:ZZZ+260904:1100+00000002'
+    samplePayload: `UNB+UNOA:2+NORTHWIND_TRADING:ZZZ+CONTOSO_RETAIL:ZZZ+260904:1100+00000002'
 UNH+1+ORDRSP:D:96A:UN'
 BGM+231+ORD-2026-8801+9'
 DTM+137:20260904:102'
 RFF+ON:ORD-2026-8801'
-NAD+BY+BUYER_GLOBAL::92'
-NAD+SU+ACME_GLOBAL::91'
+NAD+BY+CONTOSO_RETAIL::92'
+NAD+SU+NORTHWIND_TRADING::91'
 LIN+1+1+PROD-101:VN'
 QTY+113:100:EA'
 LIN+2+1+PROD-202:VN'
@@ -820,12 +820,12 @@ UNZ+1+00000002'`,
     description: 'Buyer requesting changes to a previously issued EDIFACT ORDERS message.',
     purpose: 'International equivalent of ANSI X12 860.',
     keySegments: ['UNB', 'UNH', 'BGM', 'DTM', 'RFF', 'NAD', 'LIN', 'QTY', 'UNT', 'UNZ'],
-    samplePayload: `UNB+UNOA:2+BUYER_GLOBAL:ZZZ+ACME_GLOBAL:ZZZ+260904:1200+00000003'
+    samplePayload: `UNB+UNOA:2+CONTOSO_RETAIL:ZZZ+NORTHWIND_TRADING:ZZZ+260904:1200+00000003'
 UNH+1+ORDCHG:D:96A:UN'
 BGM+230+ORD-2026-8801+9'
 DTM+137:20260904:102'
 RFF+ON:ORD-2026-8801'
-NAD+BY+BUYER_GLOBAL::92'
+NAD+BY+CONTOSO_RETAIL::92'
 LIN+1+3+PROD-101:VN'
 QTY+21:120:EA'
 UNT+8+1'
@@ -841,13 +841,13 @@ UNZ+1+00000003'`,
     description: 'Despatch advice notifying receiver about consignment packages, transport details, and item breakdowns.',
     purpose: 'International equivalent of ANSI X12 856 ASN.',
     keySegments: ['UNB', 'UNH', 'BGM', 'DTM', 'RFF', 'NAD', 'CPS', 'PAC', 'LIN', 'QTY', 'UNT', 'UNZ'],
-    samplePayload: `UNB+UNOA:2+ACME_GLOBAL:ZZZ+BUYER_GLOBAL:ZZZ+260904:1500+00000004'
+    samplePayload: `UNB+UNOA:2+NORTHWIND_TRADING:ZZZ+CONTOSO_RETAIL:ZZZ+260904:1500+00000004'
 UNH+1+DESADV:D:96A:UN'
 BGM+351+DES-2026-9901+9'
 DTM+137:20260904:102'
 RFF+ON:ORD-2026-8801'
-NAD+CN+BUYER_GLOBAL::92'
-NAD+CZ+ACME_GLOBAL::91'
+NAD+CN+CONTOSO_RETAIL::92'
+NAD+CZ+NORTHWIND_TRADING::91'
 CPS+1'
 PAC+2++CTN'
 LIN+1++PROD-101:VN'
@@ -865,13 +865,13 @@ UNZ+1+00000004'`,
     description: 'International commercial invoice message billing for exported, imported, or domestically delivered goods.',
     purpose: 'International equivalent of ANSI X12 810.',
     keySegments: ['UNB', 'UNH', 'BGM', 'DTM', 'RFF', 'NAD', 'LIN', 'QTY', 'MOA', 'UNT', 'UNZ'],
-    samplePayload: `UNB+UNOA:2+ACME_GLOBAL:ZZZ+BUYER_GLOBAL:ZZZ+260904:1700+00000005'
+    samplePayload: `UNB+UNOA:2+NORTHWIND_TRADING:ZZZ+CONTOSO_RETAIL:ZZZ+260904:1700+00000005'
 UNH+1+INVOIC:D:96A:UN'
 BGM+380+INV-2026-7701+9'
 DTM+137:20260904:102'
 RFF+ON:ORD-2026-8801'
-NAD+BY+BUYER_GLOBAL::92'
-NAD+SU+ACME_GLOBAL::91'
+NAD+BY+CONTOSO_RETAIL::92'
+NAD+SU+NORTHWIND_TRADING::91'
 LIN+1++PROD-101:VN'
 QTY+47:120:EA'
 MOA+203:3060.00'
@@ -888,7 +888,7 @@ UNZ+1+00000005'`,
     description: 'Inventory report specifying quantities of stock held in store, transit, or distribution centers.',
     purpose: 'International equivalent of ANSI X12 846.',
     keySegments: ['UNB', 'UNH', 'BGM', 'DTM', 'NAD', 'LIN', 'QTY', 'UNT', 'UNZ'],
-    samplePayload: `UNB+UNOA:2+ACME_GLOBAL:ZZZ+BUYER_GLOBAL:ZZZ+260904:0800+00000006'
+    samplePayload: `UNB+UNOA:2+NORTHWIND_TRADING:ZZZ+CONTOSO_RETAIL:ZZZ+260904:0800+00000006'
 UNH+1+INVRPT:D:96A:UN'
 BGM+35+INV-REP-2026-09+9'
 DTM+137:20260904:102'
@@ -912,7 +912,7 @@ UNZ+1+00000006'`,
     keySegments: ['UNB', 'UNH', 'UCI', 'UCM', 'UNT', 'UNZ'],
     samplePayload: `UNB+UNOA:2+RECEIVER_GLOBAL:ZZZ+SENDER_GLOBAL:ZZZ+260904:1020+00000007'
 UNH+1+CONTRL:4:1'
-UCI+00000001+BUYER_GLOBAL:ZZZ+ACME_GLOBAL:ZZZ+7'
+UCI+00000001+CONTOSO_RETAIL:ZZZ+NORTHWIND_TRADING:ZZZ+7'
 UCM+1+ORDERS:D:96A:UN+7'
 UNT+4+1'
 UNZ+1+00000007'`,

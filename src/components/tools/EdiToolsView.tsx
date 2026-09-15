@@ -165,8 +165,8 @@ const ENVELOPE_ELEMENT_NAMES: Record<string, string[]> = {
   ],
 };
 
-const SAMPLE_850 = `ISA*00*          *00*          *ZZ*ACMESUPPLY     *ZZ*GLOBALBUYER    *260903*1430*U*00401*000000001*0*P*>~
-GS*PO*ACMESUPPLY*GLOBALBUYER*20260903*1430*1*X*004010~
+const SAMPLE_850 = `ISA*00*          *00*          *ZZ*NORTHWIND_SUPPLY     *ZZ*GLOBALBUYER    *260903*1430*U*00401*000000001*0*P*>~
+GS*PO*NORTHWIND_SUPPLY*GLOBALBUYER*20260903*1430*1*X*004010~
 ST*850*0001~
 BEG*00*NE*PO-987654**20260903~
 CUR*BY*USD~
@@ -1801,10 +1801,14 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
             <button
               key={tab.id}
               onClick={() => {
-                setActiveTab(tab.id);
                 const targetTool = TOOLS.find((t) => t.id === tab.id);
-                if (targetTool) {
-                  window.history.pushState({}, '', `/${targetTool.id}`);
+                if (targetTool && onSelectRelated) {
+                  onSelectRelated(targetTool);
+                } else {
+                  setActiveTab(tab.id);
+                  if (targetTool) {
+                    window.history.pushState({}, '', `/${targetTool.id}`);
+                  }
                 }
               }}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer relative ${
@@ -2733,7 +2737,18 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
         </div>
       )}
 
-      {/* 8. Other Sub-Tools without duplicate ToolHeaders */}
+      {/* 8. EDI Message Gateway (Full custom toolbar & controls) */}
+      {activeTab === 'edi-message-gateway' && (
+        <EdiMessageGatewayView
+          key={`gateway-${selectedSampleId}`}
+          tool={tool}
+          onBackToHome={onBackToHome}
+          onSelectRelated={onSelectRelated}
+          initialInput={input}
+        />
+      )}
+
+      {/* 9. Other Sub-Tools without duplicate ToolHeaders */}
       <div className="[&>div>div:first-child]:hidden">
         {activeTab === 'edi-csv-converter' && (
           <EdiCsvConverterView tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} initialInput={input} />
@@ -2746,15 +2761,6 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
         )}
         {activeTab === 'edi-diff-compare' && (
           <EdiDiffCompareView tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} initialInput={input} />
-        )}
-        {activeTab === 'edi-message-gateway' && (
-          <EdiMessageGatewayView
-            key={`gateway-${selectedSampleId}`}
-            tool={tool}
-            onBackToHome={onBackToHome}
-            onSelectRelated={onSelectRelated}
-            initialInput={input}
-          />
         )}
         {activeTab === 'edi-schema-viewer' && (
           <EdiSchemaViewer initialInput={input} onNavigateToTab={setActiveTab} />

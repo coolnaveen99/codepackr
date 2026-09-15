@@ -82,6 +82,13 @@ This skill specifies the standard operating procedure (SOP) and mandatory file s
   }
   ```
 
+### Step 5b: Synchronize Tutorial Reference (Tutorial Sync Rule)
+**Target File**: `src/components/edi/EdiTutorialPanel.tsx` (for EDI tools) or contextual tutorial drawers
+- **Tutorial Sync Rule**: Every tool or major tool feature update must keep its embedded tutorial, quick-reference guide, and scenario definitions accurate and up-to-date.
+- Stale tutorials that contradict current UI controls, features, or naming conventions are considered product defects.
+- For all EDI tools, verify that trading partner names in `EDI_TUTORIALS` adhere to the mandatory fictional naming policy (`Northwind Trading`, `Contoso Retail`, `Fabrikam Logistics`, `Tailwind Carrier`, `Horizon Clinic`, `Summit Health Plan`) and never reference real brand entities.
+
+
 ### Step 6: Execute Build & Automatic Synchronization
 Run the full production pipeline:
 ```bash

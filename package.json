@@ -12,6 +12,7 @@
     "indexnow": "node scripts/build-sitemap.mjs && node scripts/indexnow.mjs",
     "generate-icons": "node scripts/generate-icons.mjs",
     "lint": "tsc --noEmit",
+    "test": "vitest run",
     "preview": "vite preview --port 3000 --host 0.0.0.0"
   },
   "dependencies": {
@@ -48,7 +49,8 @@
     "esbuild": "^0.28.2",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.6.3",
-    "vite": "^6.0.0"
+    "vite": "^6.0.0",
+    "vitest": "^5.0.1"
   },
   "optionalDependencies": {
     "@rollup/rollup-win32-x64-msvc": "^4.63.1",

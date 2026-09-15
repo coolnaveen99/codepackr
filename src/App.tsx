@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TOOLS } from './data/tools';
 import { ToolDef, CategoryFilter } from './types';
 import { Navbar } from './components/Navbar';
@@ -38,6 +38,14 @@ import { safeLocalStorage } from './lib/storage';
 import { popSmartPastePayload } from './lib/workspace';
 import { AlertTriangle, Lock, Shield } from 'lucide-react';
 
+interface HistorySnapshot {
+  page: 'home' | 'contact' | 'privacy' | 'admin' | 'notFound';
+  tool: ToolDef | null;
+  category: CategoryFilter;
+  legalTab?: 'privacy' | 'terms';
+  url: string;
+}
+
 export const App: React.FC = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const saved = safeLocalStorage.getItem('codepackr_theme');
@@ -70,6 +78,8 @@ export const App: React.FC = () => {
   const { getToolStatus, isToolVisible } = useToolGovernance();
   const { isAuthenticated } = useAdminAuth();
 
+  const inAppHistoryRef = useRef<HistorySnapshot[]>([]);
+
   useEffect(() => {
     if (theme === 'dark') document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
@@ -96,7 +106,7 @@ export const App: React.FC = () => {
         window.location.replace(route.externalRedirect);
         return;
       }
-      if (route.category) setSelectedCategory(route.category as CategoryFilter);
+      setSelectedCategory((route.category as CategoryFilter) || 'all');
       if (route.page === 'admin') {
         setActivePage('admin');
         setActiveTool(null);
@@ -119,6 +129,15 @@ export const App: React.FC = () => {
         setActiveTool(null);
         setActivePage('home');
       }
+
+      // Keep in-app history synchronized when browser forward/back is used
+      if (typeof window !== 'undefined') {
+        const currentUrl = window.location.pathname + window.location.search;
+        const matchIdx = inAppHistoryRef.current.findIndex((e) => e.url === currentUrl);
+        if (matchIdx !== -1) {
+          inAppHistoryRef.current = inAppHistoryRef.current.slice(0, matchIdx);
+        }
+      }
     };
     handleLocationChange();
     window.addEventListener('popstate', handleLocationChange);
@@ -140,42 +159,113 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const recordCurrentLocation = () => {
+    if (typeof window === 'undefined') return;
+    const currentUrl = window.location.pathname + window.location.search;
+    const lastEntry = inAppHistoryRef.current[inAppHistoryRef.current.length - 1];
+    if (!lastEntry || lastEntry.url !== currentUrl) {
+      inAppHistoryRef.current.push({
+        page: activePage,
+        tool: activeTool,
+        category: selectedCategory,
+        legalTab,
+        url: currentUrl,
+      });
+    }
+  };
+
+  const navigateBack = () => {
+    const currentUrl = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/';
+
+    // Pop any trailing entry that matches current URL
+    while (
+      inAppHistoryRef.current.length > 0 &&
+      inAppHistoryRef.current[inAppHistoryRef.current.length - 1].url === currentUrl
+    ) {
+      inAppHistoryRef.current.pop();
+    }
+
+    if (inAppHistoryRef.current.length > 0) {
+      const prev = inAppHistoryRef.current.pop()!;
+      setActiveTool(prev.tool);
+      setActivePage(prev.page);
+      setSelectedCategory(prev.category);
+      if (prev.legalTab) setLegalTab(prev.legalTab);
+      setSmartPasteInput('');
+      const nextIndex = Math.max(0, inAppHistoryRef.current.length);
+      window.history.pushState({ appIndex: nextIndex }, '', prev.url);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // If browser session has history, navigate back
+    if (typeof window !== 'undefined' && window.history.state?.appIndex > 0) {
+      window.history.back();
+      return;
+    }
+
+    // Safe fallback when landing directly on a tool with no prior history in this tab
+    if (activeTool) {
+      const toolCategory = (activeTool.category as CategoryFilter) || 'all';
+      setSelectedCategory(toolCategory);
+      setActiveTool(null);
+      setActivePage('home');
+      setSmartPasteInput('');
+      const catUrl = toolCategory !== 'all' ? `/?cat=${toolCategory}` : '/';
+      window.history.pushState({ appIndex: 0 }, '', catUrl);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (activePage !== 'home') {
+      navigateToHome();
+    }
+  };
+
   const navigateToTool = (tool: ToolDef, initialPayload?: string) => {
+    recordCurrentLocation();
     setActiveTool(tool);
     if (initialPayload !== undefined) setSmartPasteInput(initialPayload);
     setActivePage('home');
-    window.history.pushState({}, '', getToolPath(tool));
+    const nextIndex = ((typeof window !== 'undefined' && window.history.state?.appIndex) || 0) + 1;
+    window.history.pushState({ appIndex: nextIndex }, '', getToolPath(tool));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const navigateToHome = () => {
+    recordCurrentLocation();
     setActiveTool(null);
     setSmartPasteInput('');
     setActivePage('home');
-    window.history.pushState({}, '', '/');
+    const nextIndex = ((typeof window !== 'undefined' && window.history.state?.appIndex) || 0) + 1;
+    window.history.pushState({ appIndex: nextIndex }, '', '/');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const navigateToContact = () => {
+    recordCurrentLocation();
     setActiveTool(null);
     setActivePage('contact');
-    window.history.pushState({}, '', '/contact');
+    const nextIndex = ((typeof window !== 'undefined' && window.history.state?.appIndex) || 0) + 1;
+    window.history.pushState({ appIndex: nextIndex }, '', '/contact');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const navigateToPrivacy = (tab: 'privacy' | 'terms' = 'privacy') => {
+    recordCurrentLocation();
     setLegalTab(tab);
     setActiveTool(null);
     setActivePage('privacy');
-    window.history.pushState({}, '', tab === 'terms' ? '/terms' : '/privacy');
+    const nextIndex = ((typeof window !== 'undefined' && window.history.state?.appIndex) || 0) + 1;
+    window.history.pushState({ appIndex: nextIndex }, '', tab === 'terms' ? '/terms' : '/privacy');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSelectCategory = (cat: CategoryFilter) => {
+    recordCurrentLocation();
     setSelectedCategory(cat);
     setActiveTool(null);
     setActivePage('home');
-    window.history.pushState({}, '', cat !== 'all' ? `/?cat=${cat}` : '/');
+    const catUrl = cat !== 'all' ? `/?cat=${cat}` : '/';
+    const nextIndex = ((typeof window !== 'undefined' && window.history.state?.appIndex) || 0) + 1;
+    window.history.pushState({ appIndex: nextIndex }, '', catUrl);
     if (cat !== 'all') {
       setTimeout(() => {
         const catSection = document.getElementById('tool-grid');
@@ -234,25 +324,25 @@ export const App: React.FC = () => {
     };
     const initialInputForTool = smartPasteInput || popSmartPastePayload(tool.id) || popSmartPastePayload(tool.category) || '';
     let toolViewContent: React.ReactNode = null;
-    if (tool.id === 'json-definition-generator') toolViewContent = <JsonDefinitionView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
-    else if (tool.id === 'mock-json-generator') toolViewContent = <MockDataGeneratorView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
-    else if (tool.id === 'jwt-inspector') toolViewContent = <JwtInspectorView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
-    else if (tool.id === 'pkce-generator') toolViewContent = <PkceGeneratorView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} />;
-    else if (tool.id === 'openapi-validator') toolViewContent = <OpenApiValidatorView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
-    else if (tool.id === 'docker-k8s-validator') toolViewContent = <DockerK8sValidatorView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
-    else if (tool.id === 'connection-string-parser') toolViewContent = <ConnectionStringParserView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
+    if (tool.id === 'json-definition-generator') toolViewContent = <JsonDefinitionView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
+    else if (tool.id === 'mock-json-generator') toolViewContent = <MockDataGeneratorView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
+    else if (tool.id === 'jwt-inspector') toolViewContent = <JwtInspectorView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
+    else if (tool.id === 'pkce-generator') toolViewContent = <PkceGeneratorView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} />;
+    else if (tool.id === 'openapi-validator') toolViewContent = <OpenApiValidatorView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
+    else if (tool.id === 'docker-k8s-validator') toolViewContent = <DockerK8sValidatorView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
+    else if (tool.id === 'connection-string-parser') toolViewContent = <ConnectionStringParserView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />;
     else {
       switch (tool.category) {
-        case 'image': toolViewContent = <ImageToolsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
-        case 'formatters': toolViewContent = <FormattersView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
-        case 'encoders': toolViewContent = <EncodersView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
-        case 'validators': toolViewContent = <ValidatorsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
-        case 'converters': toolViewContent = <ConvertersView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
-        case 'edi': toolViewContent = <EdiToolsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
-        case 'xml': toolViewContent = <XmlToolsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
-        case 'utilities': toolViewContent = <UtilitiesView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
-        case 'text': toolViewContent = <TextToolsView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
-        default: toolViewContent = <FormattersView tool={tool} onBackToHome={navigateToHome} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
+        case 'image': toolViewContent = <ImageToolsView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
+        case 'formatters': toolViewContent = <FormattersView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
+        case 'encoders': toolViewContent = <EncodersView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
+        case 'validators': toolViewContent = <ValidatorsView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
+        case 'converters': toolViewContent = <ConvertersView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
+        case 'edi': toolViewContent = <EdiToolsView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
+        case 'xml': toolViewContent = <XmlToolsView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
+        case 'utilities': toolViewContent = <UtilitiesView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
+        case 'text': toolViewContent = <TextToolsView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
+        default: toolViewContent = <FormattersView tool={tool} onBackToHome={navigateBack} onSelectRelated={navigateToTool} initialInput={initialInputForTool} />; break;
       }
     }
     return (<div className="space-y-4">{renderAdminPreviewBanner()}{renderMaintenanceBanner()}{toolViewContent}</div>);
@@ -291,11 +381,11 @@ export const App: React.FC = () => {
           />
           <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-10 py-8 lg:py-10">
             {activePage === 'admin' ? (
-              <AdminPortal onBack={navigateToHome} />
+              <AdminPortal onBack={navigateBack} />
             ) : activePage === 'contact' ? (
-              <ContactView onBack={navigateToHome} />
+              <ContactView onBack={navigateBack} />
             ) : activePage === 'privacy' ? (
-              <PrivacyPolicyView onBack={navigateToHome} onContactClick={navigateToContact} initialTab={legalTab} />
+              <PrivacyPolicyView onBack={navigateBack} onContactClick={navigateToContact} initialTab={legalTab} />
             ) : activePage === 'notFound' ? (
               <NotFoundView onGoHome={navigateToHome} onOpenSearch={() => setIsSearchOpen(true)} onSelectTool={navigateToTool} />
             ) : activeTool ? (

@@ -34,8 +34,8 @@ interface As2ToolsViewProps {
 }
 
 // Pre-packaged EDI Sample Payloads for AS2 Testing
-const SAMPLE_EDI_850 = `ISA*00*          *00*          *ZZ*ACMESUPPLY     *ZZ*WALMART_HQ     *260904*2230*U*00401*000000850*0*P*>~
-GS*PO*ACMESUPPLY*WALMART_HQ*20260904*2230*85001*X*004010~
+const SAMPLE_EDI_850 = `ISA*00*          *00*          *ZZ*NORTHWIND_SUPPLY     *ZZ*CONTOSO_HQ     *260904*2230*U*00401*000000850*0*P*>~
+GS*PO*NORTHWIND_SUPPLY*CONTOSO_HQ*20260904*2230*85001*X*004010~
 ST*850*0001~
 BEG*00*NE*PO-2026-99881**20260904~
 CUR*SE*USD~
@@ -52,8 +52,8 @@ SE*14*0001~
 GE*1*85001~
 IEA*1*000000850~`;
 
-const SAMPLE_EDI_810 = `ISA*00*          *00*          *ZZ*ACMESUPPLY     *ZZ*AMAZON_EDI     *260904*2235*U*00401*000000810*0*P*>~
-GS*IN*ACMESUPPLY*AMAZON_EDI*20260904*2235*81001*X*004010~
+const SAMPLE_EDI_810 = `ISA*00*          *00*          *ZZ*NORTHWIND_SUPPLY     *ZZ*AMAZON_EDI     *260904*2235*U*00401*000000810*0*P*>~
+GS*IN*NORTHWIND_SUPPLY*AMAZON_EDI*20260904*2235*81001*X*004010~
 ST*810*0001~
 BIG*20260904*INV-77341*20260901*PO-987654~
 CUR*SE*USD~
@@ -352,7 +352,7 @@ export const As2ToolsView: React.FC<As2ToolsViewProps> = ({
 
   // --- 1. ENCODER STATE ---
   const [as2From, setAs2From] = useState('MYCOMPANY_AS2');
-  const [as2To, setAs2To] = useState('WALMART_AS2');
+  const [as2To, setAs2To] = useState('CONTOSO_AS2');
   const [messageId, setMessageId] = useState('');
   const [subject, setSubject] = useState('EDI X12 Transaction AS2 Transmission');
   const [contentType, setContentType] = useState<'application/edi-x12' | 'application/edifact' | 'application/xml' | 'text/plain'>('application/edi-x12');
@@ -408,8 +408,8 @@ export const As2ToolsView: React.FC<As2ToolsViewProps> = ({
   // MDN Generator Fields
   const [mdnReportingUa, setMdnReportingUa] = useState('Codepackr AS2 Gateway 1.2');
   const [mdnOriginalMessageId, setMdnOriginalMessageId] = useState('<20260904-223000-850@mycompany.com>');
-  const [mdnOriginalRecipient, setMdnOriginalRecipient] = useState('WALMART_AS2');
-  const [mdnFinalRecipient, setMdnFinalRecipient] = useState('WALMART_AS2');
+  const [mdnOriginalRecipient, setMdnOriginalRecipient] = useState('CONTOSO_AS2');
+  const [mdnFinalRecipient, setMdnFinalRecipient] = useState('CONTOSO_AS2');
   const [mdnOriginalSender, setMdnOriginalSender] = useState('MYCOMPANY_AS2');
   const [mdnDispositionStatus, setMdnDispositionStatus] = useState<'success' | 'warning_duplicate' | 'error_mic' | 'error_decrypt' | 'error_unexpected'>('success');
   const [mdnMicValue, setMdnMicValue] = useState('');
@@ -1147,7 +1147,7 @@ export const As2ToolsView: React.FC<As2ToolsViewProps> = ({
 
   const handleResetToDefaults = () => {
     setAs2From('MYCOMPANY_AS2');
-    setAs2To('WALMART_AS2');
+    setAs2To('CONTOSO_AS2');
     setSubject('EDI X12 Transaction AS2 Transmission');
     setContentType('application/edi-x12');
     setFilename('PO_20260904_850.x12');
@@ -1248,9 +1248,9 @@ export const As2ToolsView: React.FC<As2ToolsViewProps> = ({
                     setEncoderPayload(SAMPLE_EDI_850);
                     setContentType('application/edi-x12');
                     setFilename('PO_20260904_850.x12');
-                    setSubject('Walmart Purchase Order 850 PO-2026-99881');
+                    setSubject('Contoso Purchase Order 850 PO-2026-99881');
                     setAs2From('MYCOMPANY_AS2');
-                    setAs2To('WALMART_HQ');
+                    setAs2To('CONTOSO_HQ');
                   }}
                   className="px-2.5 py-1 rounded-lg border font-medium hover:opacity-80 transition-opacity"
                   style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
@@ -1297,7 +1297,7 @@ export const As2ToolsView: React.FC<As2ToolsViewProps> = ({
                   onChange={(e) => setAs2To(e.target.value)}
                   className="w-full p-2.5 rounded-xl border font-mono outline-none"
                   style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                  placeholder="e.g. WALMART_AS2"
+                  placeholder="e.g. CONTOSO_AS2"
                 />
               </div>
 

@@ -39,7 +39,7 @@ export const EdiTemplateGenerator: React.FC<EdiTemplateGeneratorProps> = ({
   const [selectedTemplate, setSelectedTemplate] = useState<string>('850');
   const [searchFilter, setSearchFilter] = useState<string>('');
   const [senderId, setSenderId] = useState<string>('BUYER_RETAIL');
-  const [receiverId, setReceiverId] = useState<string>('ACME_SUPPLIER');
+  const [receiverId, setReceiverId] = useState<string>('NORTHWIND_SUPPLY');
   const [senderQual, setSenderQual] = useState<string>('ZZ');
   const [receiverQual, setReceiverQual] = useState<string>('ZZ');
   const [docNumber, setDocNumber] = useState<string>('PO-2026-9901');
@@ -98,7 +98,7 @@ export const EdiTemplateGenerator: React.FC<EdiTemplateGeneratorProps> = ({
     if (currentTransaction.standard === 'EDIFACT') {
       let customized = base
         .replace(/BUYER_GLOBAL/g, receiverId.trim())
-        .replace(/ACME_GLOBAL/g, senderId.trim())
+        .replace(/NORTHWIND_TRADING/g, senderId.trim())
         .replace(/ORD-2026-8801/g, docNumber)
         .replace(/INV-2026-7701/g, docNumber)
         .replace(/DES-2026-9901/g, docNumber)

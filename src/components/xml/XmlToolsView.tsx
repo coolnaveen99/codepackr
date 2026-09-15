@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, FileCode2, ArrowLeftRight, Search, Code, FileCheck2 } from 'lucide-react';
 import { ToolDef } from '../../types';
+import { TOOLS } from '../../data/tools';
 import { XsltTransformerView } from './XsltTransformerView';
 import { XmlToXsdGeneratorView } from './XmlToXsdGeneratorView';
 import { XsdToXmlGeneratorView } from './XsdToXmlGeneratorView';
@@ -47,7 +48,14 @@ export const XmlToolsView: React.FC<XmlToolsViewProps> = ({
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                const targetTool = TOOLS.find((t) => t.id === tab.id);
+                if (targetTool && onSelectRelated) {
+                  onSelectRelated(targetTool);
+                } else {
+                  setActiveTab(tab.id);
+                }
+              }}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 isActive ? 'shadow-sm' : 'hover:opacity-80'
               }`}

@@ -61,15 +61,15 @@ export const EDI_TUTORIALS: Record<string, EdiTutorial> = {
     steps: [
       {
         stepNumber: 1,
-        title: 'Select Integration Direction or Use the Swap Option',
+        title: 'Select Integration Direction & Business Scenario Preset',
         description:
-          'Choose between Inbound Integration (Partner EDI to ERP) and Outbound Integration (ERP business data to partner EDI), or use the instant Swap Option to toggle between processes.',
+          'Choose between Inbound Gateway (Partner EDI to ERP) and Outbound Dispatch (ERP business data to partner EDI), or use the instant Swap button to toggle between flows.',
         details: [
-          'Inbound Mode: Converts EDI 850/810/856/837 or AS2 S/MIME messages into canonical JSON/XML for internal systems.',
-          'Outbound Mode: Accepts purchase order or invoice JSON from your ERP/WMS and generates compliant ANSI X12 with matching envelopes.',
-          'Swap Option: Click "Swap to Outbound Process" to instantly transfer parsed canonical ERP data into the Outbound pipeline for roundtrip synthesis.',
+          'Inbound Mode: Select from business presets across Retail (850/860), Warehousing (944), Logistics (214), Healthcare (837 Claim), International (EDIFACT ORDERS), or AS2 S/MIME Envelopes.',
+          'Outbound Mode: Accepts canonical ERP JSON for Invoices (810), Ship Notices (856), Catalog (888), or Stock Advice (943) and synthesizes valid ANSI X12 or UN/EDIFACT streams.',
+          'Swap Pipeline: Click the "Swap" button in the top toolbar to transfer in-memory canonical data into Outbound synthesis, or transfer synthesized EDI into Inbound ingestion for full loopback verification.',
         ],
-        proTip: 'Use the top-level "Swap to Outbound Process" button to test bi-directional roundtripping without manual copy-pasting.',
+        proTip: 'Use the "Randomize Numbers" button to generate fresh ISA13, GS06, and ST02 control numbers with synchronized timestamps on demand.',
       },
       {
         stepNumber: 2,
@@ -77,8 +77,8 @@ export const EDI_TUTORIALS: Record<string, EdiTutorial> = {
         description:
           'Select your protocol (Browser Paste/Upload, AS2 S/MIME container, or simulated SFTP/HTTPS/VAN).',
         details: [
-          'For AS2 messages: The gateway strips HTTP/MIME wrappers, verifies S/MIME signatures, and prepares an automated MDN receipt.',
-          'For raw X12 or EDIFACT: The parser identifies delimiters directly from the ISA or UNB header.',
+          'For AS2 messages: The gateway strips HTTP/MIME wrappers, decrypts/verifies simulated S/MIME payloads, and prepares an automated synchronous MDN receipt.',
+          'For raw X12 or EDIFACT: The parser identifies delimiters dynamically from the 106-character ISA or UNB header, with optional manual overrides in Expert Mode.',
         ],
       },
       {
@@ -110,8 +110,8 @@ export const EDI_TUTORIALS: Record<string, EdiTutorial> = {
       },
     ],
     keySegments: [
-      { tag: 'ISA', name: 'Interchange Control Header', usage: 'Mandatory', description: 'Defines sender (ISA06), receiver (ISA08), date/time, and interchange control number (ISA13).', example: 'ISA*00*          *00*          *ZZ*PARTNERA       *ZZ*MYCOMPANY      *260912*0830*U*00401*000000850*0*P*>' },
-      { tag: 'GS', name: 'Functional Group Header', usage: 'Mandatory', description: 'Groups related transaction sets. GS01 is functional code (PO, IN, SH, FA). GS06 is group control number.', example: 'GS*PO*PARTNERA*MYCOMPANY*20260912*0830*85001*X*004010' },
+      { tag: 'ISA', name: 'Interchange Control Header', usage: 'Mandatory', description: 'Defines sender (ISA06), receiver (ISA08), date/time, and interchange control number (ISA13).', example: 'ISA*00*          *00*          *ZZ*NORTHWIND      *ZZ*CONTOSO        *260912*0830*U*00401*000000850*0*P*>' },
+      { tag: 'GS', name: 'Functional Group Header', usage: 'Mandatory', description: 'Groups related transaction sets. GS01 is functional code (PO, IN, SH, FA). GS06 is group control number.', example: 'GS*PO*NORTHWIND*CONTOSO*20260912*0830*85001*X*004010' },
       { tag: 'ST', name: 'Transaction Set Header', usage: 'Mandatory', description: 'Starts transaction set (850, 810, 856). ST02 is transaction set control number.', example: 'ST*850*0001' },
       { tag: 'BEG/BIG', name: 'Beginning Segment', usage: 'Mandatory', description: 'Carries PO number (BEG03), PO date (BEG05), or Invoice number (BIG02).', example: 'BEG*00*NE*PO-2026-78901**20260912' },
       { tag: 'PO1/IT1', name: 'Purchase Order / Invoice Line', usage: 'Mandatory', description: 'Item quantity, UOM, unit price, and item identifiers (VN=Vendor Part, UP=UPC).', example: 'PO1*1*150*EA*45.00**VN*SKU-A101*UP*012345678905' },
@@ -120,8 +120,8 @@ export const EDI_TUTORIALS: Record<string, EdiTutorial> = {
     ],
     businessScenario: {
       domain: 'Retail & Omnichannel Logistics',
-      scenario: 'A retailer transmits an EDI 850 purchase order via AS2. Your system ingests the order, maps it into your ERP database via JSON, and immediately generates an AS2 MDN receipt and 997 Functional Acknowledgment to confirm receipt without human intervention.',
-      tradingPartners: 'Walmart, Amazon Vendor Central, Target, Home Depot',
+      scenario: 'Contoso Retail transmits an EDI 850 purchase order via AS2. The gateway ingests the order, maps it into your ERP database via canonical JSON, and immediately generates an AS2 MDN receipt and 997 Functional Acknowledgment to confirm receipt without human intervention.',
+      tradingPartners: 'Contoso Retail, Northwind Trading, Fabrikam Logistics, Tailwind Carrier',
     },
     commonPitfalls: [
       {
