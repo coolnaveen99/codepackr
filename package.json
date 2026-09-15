@@ -11,6 +11,7 @@
     "submit:index": "node scripts/build-sitemap.mjs && node scripts/indexnow.mjs",
     "indexnow": "node scripts/build-sitemap.mjs && node scripts/indexnow.mjs",
     "generate-icons": "node scripts/generate-icons.mjs",
+    "sync:wiki": "node scripts/sync-wiki.mjs",
     "lint": "tsc --noEmit",
     "test": "vitest run",
     "preview": "vite preview --port 3000 --host 0.0.0.0"
