@@ -3,6 +3,7 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude)*.md' ':(exclude)**/*.md' ':(exclude)docs/**' ':(exclude).github/**' ':(exclude)LICENSE' ':(exclude).gitignore' ':(exclude).node-version' ':(exclude).nvmrc' ':(exclude)codepackr_social_media_promotions.csv' ':(exclude)scripts/generate-tool-docs.py'",
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [

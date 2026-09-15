@@ -3,6 +3,16 @@ name: CI Check
 on:
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/**'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.node-version'
+      - '.nvmrc'
+      - 'codepackr_social_media_promotions.csv'
+      - 'scripts/generate-tool-docs.py'
 
 jobs:
   validate:
