@@ -106,6 +106,24 @@ When adding a new tool to Codepackr, complete this sequential checklist:
 6. [ ] **Run Full Build & Sync**: Run `npm run build` (which automatically regenerates `sitemap.xml`, `toolMetadata.json`, `codepackr_social_media_promotions.csv`, prerenders HTML, and dispatches IndexNow pings).
 7. [ ] **Verify with `lint_applet` and `compile_applet`**: Ensure zero type errors and a clean build.
 8. [ ] **Add layman documentation**: Follow `.github/skills/update-tool-docs.md` to add a `TOOL_CONTENT` entry and regenerate `docs/tools/<category>/<tool-id>.md` via `python3 scripts/generate-tool-docs.py`.
+9. [ ] **Sync Wiki & README**: Run `npm run sync:wiki` and update `README.md` with any new tool links or category updates.
+
+---
+
+## 📖 GitHub Wiki & README Synchronization Directive
+
+- **Maintain GitHub Wiki (`scripts/sync-wiki.mjs`)**:
+  - CodePackr synchronizes all `docs/tools/**` guides, primers, and glossary to the flat GitHub Wiki (`https://github.com/coolnaveen99/codepackr.wiki.git`).
+  - Running `npm run sync:wiki` converts `docs/tools/README.md` to `Home.md`, generates `_Sidebar.md` with collapsible category navigation, generates `_Footer.md`, and flattens all 80+ tool guides with rewritten links.
+  - Automated updates are dispatched via `.github/workflows/sync-wiki.yml` on push to `main` or manual trigger.
+- **Maintain Root `README.md`**:
+  - Keep badges up to date (Live App, Finance Suite, Wiki Docs, Copyright © 2026).
+  - Categorized tool directory must link to live production tools on `codepackr.com`.
+  - Maintain the Team Guide link (`docs/TEAM_GUIDE.md`) and CI/CD architecture flowchart.
+- **Build Optimization (`vercel.json` & `ci.yml`)**:
+  - Do NOT trigger full preview or production builds for markdown, docs, or CSV updates.
+  - Keep `vercel.json`'s `ignoreCommand` under 256 characters (`git diff --quiet HEAD^ HEAD -- . ':!docs' ':!.github' ':!*.md' ':!*.csv' ':!LICENSE' ':!.git*' ':!.n*'`).
+  - Keep `ci.yml` `paths-ignore` configured to skip documentation commits.
 
 ---
 

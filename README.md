@@ -6,7 +6,7 @@
 [![Live Site](https://img.shields.io/badge/Live%20App-codepackr.com-0284c7?style=for-the-badge&logo=googlechrome&logoColor=white)](https://www.codepackr.com)
 [![Finance Suite](https://img.shields.io/badge/Finance%20Suite-finance.codepackr.com-10b981?style=for-the-badge&logo=googlepay&logoColor=white)](https://finance.codepackr.com)
 [![Wiki Docs](https://img.shields.io/badge/GitHub%20Wiki-Documentation-6366f1?style=for-the-badge&logo=github&logoColor=white)](https://github.com/coolnaveen99/codepackr/wiki)
-[![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg?style=for-the-badge)](LICENSE)
+[![Copyright](https://img.shields.io/badge/%C2%A9%202026-All%20Rights%20Reserved-slate.svg?style=for-the-badge)](https://www.codepackr.com)
 
 ---
 
@@ -236,9 +236,10 @@ CodePackr maintains an enterprise **AI-as-Code** structure under `.github/` to e
 
 ---
 
-## 📄 License & Community
+## ⚖️ Copyright & Terms
 
-* **License**: Open-source under the [MIT License](LICENSE).
+* **Copyright**: © 2026 [CodePackr](https://www.codepackr.com). All rights reserved.
 * **Author**: [Naveen Kumar](https://github.com/coolnaveen99)
+* **Privacy**: 100% client-side execution. Zero user data, files, or cryptographic keys are stored or transmitted.
 * **Finance Suite**: [finance.codepackr.com](https://finance.codepackr.com)
 * **Live Web App**: [codepackr.com](https://www.codepackr.com)
