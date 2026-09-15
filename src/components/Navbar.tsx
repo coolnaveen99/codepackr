@@ -56,8 +56,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   // Shared styles WITHOUT display utilities (avoid Tailwind conflict with hidden/sm:inline-flex)
+  // Option D — Dual-Tone Gradient Pill (emerald → teal)
   const financePillBase =
-    'items-center gap-1.5 rounded-full text-xs font-semibold border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all shadow-xs cursor-pointer group shrink-0';
+    'items-center gap-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0 shadow-sm hover:from-emerald-600 hover:to-teal-600 transition-all cursor-pointer group shrink-0';
 
   return (
     <header id="main-header" className="sticky top-0 z-40 w-full border-b backdrop-blur-md transition-colors border-[color:var(--border)] bg-[color:var(--surface)]/85">
@@ -111,7 +112,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               aria-label="Open Codepackr Finance"
               className={`inline-flex ${financePillBase} px-2.5 sm:px-3 py-1.5 ml-0.5`}
             >
-              <span className="text-emerald-600 dark:text-emerald-400">
+              <span className="text-white">
                 <FinanceIcon />
               </span>
               <span className="sm:hidden">Finance</span>
