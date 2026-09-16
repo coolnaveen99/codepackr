@@ -269,13 +269,7 @@ export const UtilitiesView: React.FC<UtilitiesViewProps> = ({
 
   return (
     <div>
-      <ToolHeader
-        tool={tool}
-        onBackToHome={onBackToHome}
-        onSelectRelated={onSelectRelated}
-        onResetOrClear={handleResetOrClear}
-        resetLabel={tool.id === 'slugify' ? 'Clear Workspace' : 'Reset to Defaults'}
-      />
+      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} onResetOrClear={handleResetOrClear} resetLabel={tool.id === 'slugify' ? 'Clear Workspace' : 'Reset to Defaults'} />
 
       {tool.id === 'uuid-generator' && (
         <div className="space-y-4 max-w-2xl mx-auto">
@@ -290,17 +284,13 @@ export const UtilitiesView: React.FC<UtilitiesViewProps> = ({
                 <label className="flex items-center gap-1.5 text-xs font-medium cursor-pointer"><input type="checkbox" checked={uuidUppercase} onChange={(e) => setUuidUppercase(e.target.checked)} className="rounded text-[var(--brand)]" /><span>Uppercase</span></label>
               </div>
             </div>
-            <button type="button" onClick={generateUuids} className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white shadow-sm hover:opacity-90" style={{ backgroundColor: 'var(--brand)' }}>
-              <RefreshCw className="w-3.5 h-3.5" /><span>Regenerate</span>
-            </button>
+            <button type="button" onClick={generateUuids} className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white shadow-sm hover:opacity-90" style={{ backgroundColor: 'var(--brand)' }}><RefreshCw className="w-3.5 h-3.5" /><span>Regenerate</span></button>
           </div>
           <div className="space-y-2">
             {uuids.map((u, i) => (
               <div key={i} className="p-3 rounded-xl border flex items-center justify-between shadow-sm font-mono text-xs sm:text-sm" style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}>
                 <span style={{ color: 'var(--ink)' }}>{u}</span>
-                <button type="button" onClick={() => copyToClipboard(u)} className="px-2.5 py-1 rounded-lg border text-xs hover:opacity-80 flex items-center gap-1" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}>
-                  <Copy className="w-3 h-3" /><span>Copy</span>
-                </button>
+                <button type="button" onClick={() => copyToClipboard(u)} className="px-2.5 py-1 rounded-lg border text-xs hover:opacity-80 flex items-center gap-1" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}><Copy className="w-3 h-3" /><span>Copy</span></button>
               </div>
             ))}
           </div>
@@ -313,32 +303,23 @@ export const UtilitiesView: React.FC<UtilitiesViewProps> = ({
             <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>TEXT OR URL TO ENCODE</label>
             <input type="text" value={qrText} onChange={(e) => setQrText(e.target.value)} placeholder="https://example.com or any text..." className="w-full p-3 font-mono text-sm rounded-xl border outline-none" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }} />
           </div>
-          <div className="flex flex-col items-center justify-center p-6 rounded-xl border bg-white shadow-inner">
-            <canvas ref={qrCanvasRef} className="rounded-lg shadow-sm" />
-          </div>
-          <button type="button" onClick={downloadQr} className="w-full py-2.5 rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-2 shadow-sm hover:opacity-90" style={{ backgroundColor: 'var(--brand)' }}>
-            <Download className="w-4 h-4" /><span>Download High-Res QR Code PNG</span>
-          </button>
+          <div className="flex flex-col items-center justify-center p-6 rounded-xl border bg-white shadow-inner"><canvas ref={qrCanvasRef} className="rounded-lg shadow-sm" /></div>
+          <button type="button" onClick={downloadQr} className="w-full py-2.5 rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-2 shadow-sm hover:opacity-90" style={{ backgroundColor: 'var(--brand)' }}><Download className="w-4 h-4" /><span>Download High-Res QR Code PNG</span></button>
         </div>
       )}
 
       {tool.id === 'password-generator' && (
         <div className="max-w-xl mx-auto p-6 rounded-2xl border shadow-md space-y-4" style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}>
           <div>
-            <div className="flex justify-between items-center text-xs font-semibold mb-1">
-              <span style={{ color: 'var(--muted)' }}>LENGTH: {pwLength} CHARACTERS</span>
-              <span className="text-emerald-500 font-bold">Strong Entropy</span>
-            </div>
+            <div className="flex justify-between items-center text-xs font-semibold mb-1"><span style={{ color: 'var(--muted)' }}>LENGTH: {pwLength} CHARACTERS</span><span className="text-emerald-500 font-bold">Strong Entropy</span></div>
             <input type="range" min={8} max={64} value={pwLength} onChange={(e) => setPwLength(Number(e.target.value))} className="w-full" />
           </div>
           <div className="flex flex-wrap gap-3 text-xs font-medium">
-            {[ [pwUpper, setPwUpper, 'Uppercase'], [pwLower, setPwLower, 'Lowercase'], [pwNumbers, setPwNumbers, 'Numbers'], [pwSymbols, setPwSymbols, 'Symbols'] ] as const}.map(([val, set, label], idx) => (
-              <label key={idx} className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" checked={val as boolean} onChange={(e) => (set as any)(e.target.checked)} className="rounded text-[var(--brand)]" /><span>{label}</span></label>
+            {([[pwUpper, setPwUpper, 'Uppercase'], [pwLower, setPwLower, 'Lowercase'], [pwNumbers, setPwNumbers, 'Numbers'], [pwSymbols, setPwSymbols, 'Symbols']] as const).map(([val, set, label], idx) => (
+              <label key={idx} className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" checked={val} onChange={(e) => set(e.target.checked)} className="rounded text-[var(--brand)]" /><span>{label}</span></label>
             ))}
           </div>
-          <button type="button" onClick={generatePasswords} className="w-full py-2 rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-2" style={{ backgroundColor: 'var(--brand)' }}>
-            <RefreshCw className="w-3.5 h-3.5" /><span>Regenerate Passwords</span>
-          </button>
+          <button type="button" onClick={generatePasswords} className="w-full py-2 rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-2" style={{ backgroundColor: 'var(--brand)' }}><RefreshCw className="w-3.5 h-3.5" /><span>Regenerate Passwords</span></button>
           <div className="space-y-2">
             {passwords.map((pw, i) => (
               <div key={i} className="p-3 rounded-xl border flex items-center justify-between font-mono text-xs" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}>
@@ -356,9 +337,7 @@ export const UtilitiesView: React.FC<UtilitiesViewProps> = ({
             <div>
               <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>TYPE</label>
               <select value={loremType} onChange={(e) => setLoremType(e.target.value as any)} className="p-2 rounded-xl border text-sm" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}>
-                <option value="paragraphs">Paragraphs</option>
-                <option value="sentences">Sentences</option>
-                <option value="words">Words</option>
+                <option value="paragraphs">Paragraphs</option><option value="sentences">Sentences</option><option value="words">Words</option>
               </select>
             </div>
             <div>
@@ -366,9 +345,7 @@ export const UtilitiesView: React.FC<UtilitiesViewProps> = ({
               <input type="number" min={1} max={50} value={loremCount} onChange={(e) => setLoremCount(Math.max(1, Number(e.target.value)))} className="w-20 p-2 rounded-xl border text-sm" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }} />
             </div>
             <button type="button" onClick={() => generateLorem(loremCount, loremType)} className="px-4 py-2 rounded-xl text-xs font-semibold text-white" style={{ backgroundColor: 'var(--brand)' }}>Generate</button>
-            <button type="button" onClick={() => copyToClipboard(loremOutput)} className="px-4 py-2 rounded-xl text-xs font-semibold border flex items-center gap-1" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}>
-              {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}{copied ? 'Copied!' : 'Copy'}
-            </button>
+            <button type="button" onClick={() => copyToClipboard(loremOutput)} className="px-4 py-2 rounded-xl text-xs font-semibold border flex items-center gap-1" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}>{copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}{copied ? 'Copied!' : 'Copy'}</button>
           </div>
           <textarea readOnly value={loremOutput} className="w-full h-64 p-4 rounded-2xl border font-mono text-sm" style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }} />
         </div>
@@ -406,13 +383,7 @@ export const UtilitiesView: React.FC<UtilitiesViewProps> = ({
       )}
 
       {tool.id === 'cron-expression' && (
-        <CronVisualizer
-          cronMin={cronMin} setCronMin={setCronMin}
-          cronHour={cronHour} setCronHour={setCronHour}
-          cronDom={cronDom} setCronDom={setCronDom}
-          cronMonth={cronMonth} setCronMonth={setCronMonth}
-          cronDow={cronDow} setCronDow={setCronDow}
-        />
+        <CronVisualizer initialExpression={`${cronMin} ${cronHour} ${cronDom} ${cronMonth} ${cronDow}`} />
       )}
 
       {tool.id === 'slugify' && (
@@ -453,37 +424,17 @@ export const UtilitiesView: React.FC<UtilitiesViewProps> = ({
               <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>MARKDOWN EDITOR</span>
               <span className="text-[11px]" style={{ color: 'var(--muted)' }}>{mdContent.split(/\s+/).filter(Boolean).length} words · {mdContent.length} chars</span>
             </div>
-            <textarea
-              value={mdContent}
-              onChange={(e) => setMdContent(e.target.value)}
-              className="w-full flex-1 min-h-[420px] p-4 rounded-xl border font-mono text-xs sm:text-sm outline-none resize-y"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-              spellCheck={false}
-            />
+            <textarea value={mdContent} onChange={(e) => setMdContent(e.target.value)} className="w-full flex-1 min-h-[420px] p-4 rounded-xl border font-mono text-xs sm:text-sm outline-none resize-y" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }} spellCheck={false} />
           </div>
           <div className="p-4 rounded-2xl border shadow-sm flex flex-col" style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}>
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>LIVE RENDERED PREVIEW</span>
-              <button
-                type="button"
-                onClick={() => copyToClipboard(mdContent)}
-                className="px-2.5 py-1 text-xs font-semibold rounded-lg border flex items-center gap-1 shadow-sm transition-colors"
-                style={{
-                  backgroundColor: copied ? 'var(--brand)' : 'var(--surface-2)',
-                  borderColor: copied ? 'var(--brand)' : 'var(--line)',
-                  color: copied ? '#fff' : undefined,
-                }}
-                aria-label={copied ? 'Markdown copied' : 'Copy Markdown source'}
-              >
+              <button type="button" onClick={() => copyToClipboard(mdContent)} className="px-2.5 py-1 text-xs font-semibold rounded-lg border flex items-center gap-1 shadow-sm transition-colors" style={{ backgroundColor: copied ? 'var(--brand)' : 'var(--surface-2)', borderColor: copied ? 'var(--brand)' : 'var(--line)', color: copied ? '#fff' : undefined }} aria-label={copied ? 'Markdown copied' : 'Copy Markdown source'}>
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copied ? 'Copied!' : 'Copy Markdown'}</span>
               </button>
             </div>
-            <div
-              className="w-full flex-1 p-4 rounded-xl border overflow-y-auto max-h-[420px] text-xs sm:text-sm prose dark:prose-invert"
-              style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-              dangerouslySetInnerHTML={{ __html: renderMarkdownHtml(mdContent) }}
-            />
+            <div className="w-full flex-1 p-4 rounded-xl border overflow-y-auto max-h-[420px] text-xs sm:text-sm prose dark:prose-invert" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }} dangerouslySetInnerHTML={{ __html: renderMarkdownHtml(mdContent) }} />
           </div>
         </div>
       )}
