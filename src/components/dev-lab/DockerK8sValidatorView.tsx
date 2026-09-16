@@ -3,6 +3,8 @@ import { Server, CheckCircle, AlertTriangle, Box, Layers, Container } from 'luci
 import yaml from 'js-yaml';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
+import { downloadContentAsFile } from '../../lib/fileIO';
+import { EditorPaneHeader } from '../common/EditorPaneHeader';
 
 interface DockerK8sValidatorViewProps {
   tool: ToolDef;
@@ -157,33 +159,38 @@ export const DockerK8sValidatorView: React.FC<DockerK8sValidatorViewProps> = ({
           className="p-5 rounded-2xl border space-y-3 shadow-xs"
           style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
         >
-          <div className="flex items-center justify-between">
-            <label className="block text-xs font-bold uppercase tracking-wider text-[var(--muted)]">
-              Docker Compose / Kubernetes YAML Manifest
-            </label>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleLoadK8s}
-                className="text-xs font-semibold text-[var(--muted)] hover:text-[var(--ink)] cursor-pointer"
-              >
-                Sample K8s
-              </button>
-              <span className="text-[var(--line)]">|</span>
-              <button
-                onClick={handleLoadDocker}
-                className="text-xs font-semibold text-[var(--muted)] hover:text-[var(--ink)] cursor-pointer"
-              >
-                Sample Docker
-              </button>
-              <span className="text-[var(--line)]">|</span>
-              <button
-                onClick={handleClear}
-                className="text-xs font-semibold text-[var(--muted)] hover:text-[var(--ink)] cursor-pointer"
-              >
-                Clear
-              </button>
-            </div>
-          </div>
+          <EditorPaneHeader
+            idPrefix="k8s-docker-manifest"
+            title="Manifest Spec"
+            charCount={yamlInput.length}
+            lineCount={yamlInput ? yamlInput.split('\n').length : 0}
+            accept=".yaml,.yml,.json,.txt"
+            onImport={(val) => {
+              setYamlInput(val);
+              validateYaml(val);
+            }}
+            onExport={yamlInput ? () => downloadContentAsFile(yamlInput, 'manifest.yaml') : undefined}
+            onClear={handleClear}
+            copyContent={yamlInput}
+            extraActions={
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={handleLoadK8s}
+                  type="button"
+                  className="px-2 py-1 rounded-lg text-xs font-semibold border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] hover:text-[color:var(--brand)] hover:border-[color:var(--brand)] transition-colors cursor-pointer"
+                >
+                  K8s Sample
+                </button>
+                <button
+                  onClick={handleLoadDocker}
+                  type="button"
+                  className="px-2 py-1 rounded-lg text-xs font-semibold border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] hover:text-[color:var(--brand)] hover:border-[color:var(--brand)] transition-colors cursor-pointer"
+                >
+                  Docker Sample
+                </button>
+              </div>
+            }
+          />
           <textarea
             value={yamlInput}
             onChange={(e) => {

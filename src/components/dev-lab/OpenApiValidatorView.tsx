@@ -3,6 +3,8 @@ import { FileCode, CheckCircle, AlertTriangle, Layers, Server, Globe, Tag } from
 import yaml from 'js-yaml';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
+import { downloadContentAsFile } from '../../lib/fileIO';
+import { EditorPaneHeader } from '../common/EditorPaneHeader';
 
 interface OpenApiValidatorViewProps {
   tool: ToolDef;
@@ -153,26 +155,21 @@ export const OpenApiValidatorView: React.FC<OpenApiValidatorViewProps> = ({
           className="p-5 rounded-2xl border space-y-3 shadow-xs"
           style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
         >
-          <div className="flex items-center justify-between">
-            <label className="block text-xs font-bold uppercase tracking-wider text-[var(--muted)]">
-              OpenAPI 3.0 / Swagger YAML or JSON Spec
-            </label>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleReset}
-                className="text-xs font-semibold text-[var(--muted)] hover:text-[var(--ink)] cursor-pointer"
-              >
-                Sample
-              </button>
-              <span className="text-[var(--line)]">|</span>
-              <button
-                onClick={handleClear}
-                className="text-xs font-semibold text-[var(--muted)] hover:text-[var(--ink)] cursor-pointer"
-              >
-                Clear
-              </button>
-            </div>
-          </div>
+          <EditorPaneHeader
+            idPrefix="openapi-spec"
+            title="OpenAPI / Swagger Spec"
+            charCount={specInput.length}
+            lineCount={specInput ? specInput.split('\n').length : 0}
+            accept=".yaml,.yml,.json,.txt"
+            onImport={(val) => {
+              setSpecInput(val);
+              validateSpec(val);
+            }}
+            onExport={specInput ? () => downloadContentAsFile(specInput, 'openapi.yaml') : undefined}
+            onSample={handleReset}
+            onClear={handleClear}
+            copyContent={specInput}
+          />
           <textarea
             value={specInput}
             onChange={(e) => {

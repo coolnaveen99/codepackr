@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Moon, Sun, Terminal, Star, Menu, Shield } from 'lucide-react';
+import { Search, Moon, Sun, Terminal, Star, Menu, Shield, Bug } from 'lucide-react';
 import { CategoryFilter } from '../types';
 import { useBookmarks } from '../lib/bookmarks';
 
@@ -15,6 +15,7 @@ interface NavbarProps {
   onToggleSidebar?: () => void;
   isAdmin?: boolean;
   onGoAdmin?: () => void;
+  onOpenBugReport?: () => void;
 }
 
 const FinanceIcon = ({ className = 'w-3.5 h-3.5' }: { className?: string }) => (
@@ -32,10 +33,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   selectedCategory = 'all',
   onSelectCategory,
   onGoHome,
+  onGoContact,
   onGoBookmarks,
   onToggleSidebar,
   isAdmin = false,
   onGoAdmin,
+  onOpenBugReport,
 }) => {
   const darkMode = theme === 'dark';
   const { count: bookmarkCount } = useBookmarks();
@@ -175,6 +178,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <Shield className="w-4 h-4 text-amber-500" />
                 <span>Admin Console</span>
+              </button>
+            )}
+
+            {onOpenBugReport && (
+              <button
+                id="nav-bug-report-btn"
+                onClick={onOpenBugReport}
+                className="p-2 rounded-xl border border-rose-500/30 bg-rose-500/5 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15 hover:border-rose-500/50 hover:scale-[1.05] active:scale-95 transition-all duration-200 cursor-pointer shadow-xs"
+                title="Report a Bug (Automatic Diagnostics)"
+                aria-label="Report a Bug"
+              >
+                <Bug className="w-5 h-5" />
               </button>
             )}
 

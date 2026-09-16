@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Copy, Check, RotateCcw, Play, AlertTriangle, CheckCircle2, Trash2, Save, Clock, Loader2, Cpu } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { Copy, Check, RotateCcw, Play, AlertTriangle, CheckCircle2, Trash2, Save, Clock, Loader2, Cpu, Upload, Download, Sparkles } from 'lucide-react';
 import { format as formatSQL } from 'sql-formatter';
 import yaml from 'js-yaml';
 import { ToolDef } from '../../types';
@@ -7,6 +7,8 @@ import { ToolHeader } from '../ToolHeader';
 import { CodeEditor, SupportedLanguage } from '../CodeEditor';
 import { useWorkspace } from '../../lib/workspace';
 import { executeAsyncTransform, formatJsonInWorker, WorkerTaskResult } from '../../lib/workerBridge';
+import { readUploadedFile, downloadContentAsFile } from '../../lib/fileIO';
+import { EditorPaneHeader } from '../common/EditorPaneHeader';
 
 interface FormattersViewProps {
   tool: ToolDef;
@@ -223,6 +225,41 @@ export const FormattersView: React.FC<FormattersViewProps> = ({
     }
   }, [tool.id, initialInput]);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const getFileExtension = () => {
+    switch (tool.id) {
+      case 'json-formatter': return 'json';
+      case 'html-formatter': return 'html';
+      case 'css-formatter': return 'css';
+      case 'sql-formatter': return 'sql';
+      case 'xml-formatter': return 'xml';
+      case 'yaml-formatter': return 'yaml';
+      case 'js-minifier': return 'js';
+      default: return 'txt';
+    }
+  };
+
+  const handleDownloadOutput = () => {
+    const textToDownload = output || input;
+    if (!textToDownload) return;
+    const ext = getFileExtension();
+    downloadContentAsFile(textToDownload, `formatted-${tool.id.replace('-formatter', '')}.${ext}`);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const { content } = await readUploadedFile(file);
+      setInput(content);
+      executeFormatting(content);
+    } catch (err: any) {
+      setError(err?.message || 'Failed to read file');
+    }
+    if (e.target) e.target.value = '';
+  };
+
   const handleCopy = () => {
     if (!output) return;
     navigator.clipboard.writeText(output);
@@ -252,101 +289,150 @@ export const FormattersView: React.FC<FormattersViewProps> = ({
         onSelectRelated={onSelectRelated}
         onResetOrClear={handleClearWorkspace}
         resetLabel="Clear Workspace"
+        onUploadFile={(content) => {
+          setInput(content);
+          executeFormatting(content);
+        }}
+        downloadContent={output || input}
+        inputContent={input}
+        outputContent={output}
+        hideFileActions={true}
       />
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] shadow-sm">
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            onClick={() => executeFormatting(input)}
-            disabled={isProcessing}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white bg-[color:var(--brand)] hover:bg-[color:var(--brand-hover)] transition-colors shadow-sm cursor-pointer disabled:opacity-50"
-          >
-            {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 fill-current" />}
-            Format Code
-          </button>
-
-          {['json-formatter', 'css-formatter', 'js-minifier'].includes(tool.id) && (
+      <div className="p-3.5 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] shadow-xs space-y-3">
+        {/* Row 1: Code Formatting Actions & Configurations */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={() => executeFormatting(input, true)}
+              onClick={() => executeFormatting(input)}
               disabled={isProcessing}
-              className="px-4 py-2.5 rounded-xl font-bold border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink)] hover:border-[color:var(--brand)] transition-colors cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[color:var(--brand)] hover:bg-[color:var(--brand-hover)] transition-colors shadow-xs cursor-pointer disabled:opacity-50"
             >
-              Minify
+              {isProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+              <span>Format Code</span>
             </button>
-          )}
 
-          {tool.id !== 'js-minifier' && (
-            <div className="flex items-center gap-1 p-1 border border-[color:var(--border)] rounded-xl bg-[color:var(--surface-elevated)] ml-1">
-              <span className="px-2.5 text-xs font-semibold text-[color:var(--ink-muted)]">Indent:</span>
-              {[2, 4, 'tab'].map((val) => (
-                <button
-                  key={val}
-                  onClick={() => {
-                    setIndent(val as any);
-                    setTimeout(() => executeFormatting(input), 0);
-                  }}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    indent === val
-                      ? 'bg-[color:var(--surface)] text-[color:var(--brand)] shadow-xs'
-                      : 'text-[color:var(--ink-muted)] hover:text-[color:var(--ink)]'
-                  }`}
-                >
-                  {val === 'tab' ? 'Tab' : `${val} Spaces`}
-                </button>
-              ))}
-            </div>
-          )}
+            {['json-formatter', 'css-formatter', 'js-minifier'].includes(tool.id) && (
+              <button
+                onClick={() => executeFormatting(input, true)}
+                disabled={isProcessing}
+                className="px-3 py-2 rounded-xl text-xs font-bold border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink)] hover:border-[color:var(--brand)] transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Minify
+              </button>
+            )}
 
-          <button
-            onClick={handleResetSample}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink-muted)] hover:text-[color:var(--brand)] hover:border-[color:var(--brand)] transition-colors cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" /> Reset Sample
-          </button>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Local Workspace Status */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[color:var(--surface-elevated)] text-[11px] font-medium text-[color:var(--ink-muted)] border border-[color:var(--border)]">
-            <Save className="w-3 h-3 text-[color:var(--brand)]" />
-            <span>{isSavedLocally ? 'Workspace Saved' : 'Auto-Saving'}</span>
+            {tool.id !== 'js-minifier' && (
+              <div className="flex items-center gap-1 p-0.5 border border-[color:var(--border)] rounded-xl bg-[color:var(--surface-elevated)]">
+                <span className="px-2 text-xs font-semibold text-[color:var(--ink-muted)]">Indent:</span>
+                {[2, 4, 'tab'].map((val) => (
+                  <button
+                    key={val}
+                    onClick={() => {
+                      setIndent(val as any);
+                      setTimeout(() => executeFormatting(input), 0);
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      indent === val
+                        ? 'bg-[color:var(--surface)] text-[color:var(--brand)] shadow-xs'
+                        : 'text-[color:var(--ink-muted)] hover:text-[color:var(--ink)]'
+                    }`}
+                  >
+                    {val === 'tab' ? 'Tab' : `${val} Spaces`}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {tool.id === 'json-formatter' && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[color:var(--surface-elevated)] text-[11px] font-medium text-[color:var(--brand)] border border-[color:var(--border)]">
-              <Cpu className="w-3 h-3" />
-              <span>Web Worker</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[color:var(--surface-elevated)] text-[11px] font-medium text-[color:var(--ink-muted)] border border-[color:var(--border)]">
+              <Save className="w-3 h-3 text-[color:var(--brand)]" />
+              <span>{isSavedLocally ? 'Workspace Saved' : 'Auto-Saving'}</span>
             </div>
-          )}
 
-          {execTimeMs !== null && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[color:var(--surface-elevated)] text-[11px] font-mono text-[color:var(--ink-muted)] border border-[color:var(--border)]">
-              <Clock className="w-3 h-3 text-[color:var(--warning)]" />
-              <span>{execTimeMs}ms</span>
-            </div>
-          )}
+            {tool.id === 'json-formatter' && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[color:var(--surface-elevated)] text-[11px] font-medium text-[color:var(--brand)] border border-[color:var(--border)]">
+                <Cpu className="w-3 h-3" />
+                <span>Web Worker</span>
+              </div>
+            )}
+          </div>
+        </div>
 
-          <button
-            onClick={handleClearWorkspace}
-            title="Clear tool workspace and local cache"
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--danger)] hover:border-[color:var(--danger)] hover:bg-[color:var(--danger)]/5 transition-colors cursor-pointer"
-          >
-            <Trash2 className="w-3.5 h-3.5" /> Clear Workspace
-          </button>
+        {/* Row 2: File Import, Sample, Clear (Moved to Next Line) & Export / Copy */}
+        <div className="pt-2.5 border-t border-[color:var(--border)] flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Hidden File Input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept=".txt,.json,.xml,.sql,.yaml,.yml,.css,.html,.js,.ts"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink)] hover:text-[color:var(--brand)] hover:border-[color:var(--brand)] transition-colors cursor-pointer"
+              title="Import code from file"
+            >
+              <Upload className="w-3.5 h-3.5 text-[color:var(--brand)]" />
+              <span>Import File</span>
+            </button>
 
-          <button
-            onClick={handleCopy}
-            disabled={!output}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50 ${
-              copied
-                ? 'bg-[color:var(--success)] text-white border-transparent'
-                : 'bg-[color:var(--surface-elevated)] border border-[color:var(--border)] text-[color:var(--ink)] hover:border-[color:var(--brand)]'
-            }`}
-          >
-            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            {copied ? 'Copied' : 'Copy Output'}
-          </button>
+            <button
+              onClick={handleResetSample}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink-muted)] hover:text-[color:var(--brand)] hover:border-[color:var(--brand)] transition-colors cursor-pointer"
+              title="Reset to sample code"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>Sample</span>
+            </button>
+
+            {input && (
+              <button
+                onClick={handleClearWorkspace}
+                title="Clear input and formatted output"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink-muted)] hover:text-rose-500 hover:border-rose-500/40 transition-colors cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Clear</span>
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {execTimeMs !== null && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[color:var(--surface-elevated)] text-[11px] font-mono text-[color:var(--ink-muted)] border border-[color:var(--border)]">
+                <Clock className="w-3 h-3 text-[color:var(--warning)]" />
+                <span>{execTimeMs}ms</span>
+              </div>
+            )}
+
+            <button
+              onClick={handleDownloadOutput}
+              disabled={!output && !input}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl text-white shadow-xs disabled:opacity-40 cursor-pointer bg-[color:var(--brand)] hover:bg-[color:var(--brand-hover)] transition-colors"
+              title="Export formatted output"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export Output</span>
+            </button>
+
+            <button
+              onClick={handleCopy}
+              disabled={!output}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-40 ${
+                copied
+                  ? 'bg-emerald-500 text-white border border-emerald-500'
+                  : 'bg-[color:var(--surface-elevated)] border border-[color:var(--border)] text-[color:var(--ink)] hover:border-[color:var(--brand)]'
+              }`}
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copied ? 'Copied' : 'Copy Output'}</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -364,16 +450,14 @@ export const FormattersView: React.FC<FormattersViewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Input CodeEditor */}
         <div className="flex flex-col rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] overflow-hidden shadow-xs focus-within:border-[color:var(--brand)] transition-colors">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-[color:var(--border)] bg-[color:var(--surface-elevated)]">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold tracking-wider text-[color:var(--ink-muted)] uppercase">Input</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[color:var(--surface-muted)] text-[color:var(--ink-muted)] uppercase">
-                {editorLang}
-              </span>
-            </div>
-            <span className="text-xs font-mono text-[color:var(--ink-muted)]">
-              {input.length.toLocaleString()} chars
-            </span>
+          <div className="px-4 py-2.5 border-b border-[color:var(--border)] bg-[color:var(--surface-elevated)]">
+            <EditorPaneHeader
+              idPrefix="formatter-input"
+              title="INPUT"
+              badge={editorLang}
+              charCount={input.length}
+              lineCount={input ? input.split('\n').length : 0}
+            />
           </div>
 
           <div className="min-h-[500px] h-[550px] bg-transparent">
@@ -394,14 +478,14 @@ export const FormattersView: React.FC<FormattersViewProps> = ({
 
         {/* Output CodeEditor */}
         <div className="flex flex-col rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] overflow-hidden shadow-xs">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-[color:var(--border)] bg-[color:var(--surface-elevated)]">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold tracking-wider text-[color:var(--ink-muted)] uppercase">Output</span>
-              {output && !error && <CheckCircle2 className="w-4 h-4 text-[color:var(--success)]" />}
-            </div>
-            <span className="text-xs font-mono text-[color:var(--ink-muted)]">
-              {output.length.toLocaleString()} chars
-            </span>
+          <div className="px-4 py-2.5 border-b border-[color:var(--border)] bg-[color:var(--surface-elevated)]">
+            <EditorPaneHeader
+              idPrefix="formatter-output"
+              title="FORMATTED OUTPUT"
+              badge={editorLang}
+              charCount={output.length}
+              lineCount={output ? output.split('\n').length : 0}
+            />
           </div>
 
           <div className="min-h-[500px] h-[550px] bg-[color:var(--surface-elevated)]/30">

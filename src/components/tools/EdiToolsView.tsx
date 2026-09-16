@@ -58,6 +58,7 @@ import {
 import { TOOLS } from '../../data/tools';
 import { popSmartPastePayload } from '../../lib/workspace';
 import { EdiVisualTreeInspector } from '../edi/EdiVisualTreeInspector';
+import { EditorPaneHeader } from '../common/EditorPaneHeader';
 
 const SEGMENT_NAMES: Record<string, string> = COMPREHENSIVE_SEGMENT_DICTIONARY;
 
@@ -1768,6 +1769,12 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
         onSelectRelated={onSelectRelated}
         onResetOrClear={handleClearWorkspace}
         resetLabel="Clear Workspace"
+        onUploadFile={(content) => {
+          setInput(content);
+        }}
+        downloadContent={input}
+        inputContent={input}
+        hideFileActions={true}
       />
 
       {/* 2. Sub-tools Navigation Tabs */}
@@ -2333,30 +2340,26 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
             className="p-5 rounded-2xl border space-y-3"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <div className="flex items-center justify-between text-xs">
-              <div>
-                <span className="font-bold text-sm" style={{ color: 'var(--ink)' }}>
-                  Live Document Editor
-                </span>
-                <span className="text-[var(--muted)] block mt-0.5">
-                  Type, edit, or paste your EDI ANSI X12 or EDIFACT string below. Validation results update instantly.
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setInput('')}
-                  disabled={!input}
-                  className="flex items-center gap-1 text-[var(--muted)] hover:opacity-80 disabled:opacity-40 text-xs cursor-pointer"
-                  title="Clear document"
-                >
-                  <Trash2 className="w-3.5 h-3.5 text-rose-500" />
-                  <span>Clear</span>
-                </button>
-                <span className="text-[var(--muted)] font-mono font-medium">
+            <EditorPaneHeader
+              idPrefix="edi-validator-editor"
+              title="Live Document Editor"
+              charCount={input.length}
+              lineCount={input ? input.split('\n').length : 0}
+              accept=".edi,.x12,.txt"
+              onImport={(content) => setInput(content)}
+              onExport={input ? () => handleDownload(input, 'document.edi') : undefined}
+              onClear={input ? () => setInput('') : undefined}
+              onCopy={input ? () => handleCopy(input) : undefined}
+              copyContent={input}
+              rightSlot={
+                <span className="text-xs font-mono font-medium" style={{ color: 'var(--muted)' }}>
                   {parsedSegments.length} Segments
                 </span>
-              </div>
-            </div>
+              }
+            />
+            <span className="text-xs text-[var(--muted)] block -mt-1">
+              Type, edit, or paste your EDI ANSI X12 or EDIFACT string below. Validation results update instantly.
+            </span>
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -2373,78 +2376,63 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
       {activeTab === 'edi-formatter' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div
-            className="p-4 rounded-2xl border flex flex-col space-y-3"
+            className="rounded-2xl border overflow-hidden shadow-sm flex flex-col"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold" style={{ color: 'var(--ink)' }}>
-                Raw EDI Input
-              </span>
-              <div className="flex items-center gap-2">
-                <label className="cursor-pointer hover:opacity-80 flex items-center gap-1 text-[var(--muted)]">
-                  <Upload className="w-3.5 h-3.5" />
-                  <span>Upload .edi/.txt</span>
-                  <input type="file" accept=".edi,.txt,.x12" onChange={handleFileUpload} className="hidden" />
-                </label>
-                <button onClick={() => setInput('')} className="hover:opacity-80 text-[var(--muted)]">
-                  Clear
-                </button>
-              </div>
+            <div className="px-4 py-2.5 border-b" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface-2)' }}>
+              <EditorPaneHeader
+                idPrefix="edi-format-input"
+                title="RAW EDI INPUT"
+                charCount={input.length}
+                lineCount={input ? input.split('\n').length : 0}
+                accept=".edi,.txt,.x12"
+                onImport={(content) => setInput(content)}
+                onSample={() => setInput(SAMPLE_850)}
+                onClear={input ? () => setInput('') : undefined}
+              />
             </div>
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Paste raw ANSI X12 or EDIFACT string here..."
               rows={16}
-              className="w-full p-3.5 rounded-xl font-mono text-xs outline-none resize-y border transition-colors"
-              style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              className="w-full p-4 font-mono text-xs outline-none resize-y border-none bg-transparent leading-relaxed"
+              style={{ color: 'var(--ink)' }}
             />
           </div>
 
           <div
-            className="p-4 rounded-2xl border flex flex-col space-y-3"
+            className="rounded-2xl border overflow-hidden shadow-sm flex flex-col"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-3">
-                <span className="font-semibold" style={{ color: 'var(--ink)' }}>
-                  Formatted EDI Output
-                </span>
-                <label className="flex items-center gap-1.5 cursor-pointer text-[var(--muted)]">
-                  <input
-                    type="checkbox"
-                    checked={indentOutput}
-                    onChange={(e) => setIndentOutput(e.target.checked)}
-                    className="rounded"
-                  />
-                  <span>Smart loop indent</span>
-                </label>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleCopy(output)}
-                  className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80 cursor-pointer"
-                  style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                >
-                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copied ? 'Copied' : 'Copy'}</span>
-                </button>
-                <button
-                  onClick={() => handleDownload(output, `formatted_${selectedSampleId}.edi`)}
-                  className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80 cursor-pointer"
-                  style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download</span>
-                </button>
-              </div>
+            <div className="px-4 py-2.5 border-b" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface-2)' }}>
+              <EditorPaneHeader
+                idPrefix="edi-format-output"
+                title="FORMATTED EDI OUTPUT"
+                charCount={output.length}
+                lineCount={output ? output.split('\n').length : 0}
+                onExport={output ? () => handleDownload(output, `formatted_${selectedSampleId}.edi`) : undefined}
+                onCopy={output ? () => handleCopy(output) : undefined}
+                copyContent={output}
+                rightSlot={
+                  <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold" style={{ color: 'var(--muted)' }}>
+                    <input
+                      type="checkbox"
+                      checked={indentOutput}
+                      onChange={(e) => setIndentOutput(e.target.checked)}
+                      className="rounded"
+                    />
+                    <span className="hidden sm:inline">Smart loop indent</span>
+                  </label>
+                }
+              />
             </div>
             <textarea
               readOnly
               value={output}
               rows={16}
-              className="w-full p-3.5 rounded-xl font-mono text-xs outline-none resize-y border"
-              style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+              className="w-full p-4 font-mono text-xs outline-none resize-y border-none bg-transparent leading-relaxed"
+              style={{ color: 'var(--ink)' }}
             />
           </div>
         </div>
@@ -2667,70 +2655,51 @@ export const EdiToolsView: React.FC<EdiToolsViewProps> = ({
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div
-              className="p-4 rounded-2xl border flex flex-col space-y-3"
+              className="rounded-2xl border overflow-hidden shadow-sm flex flex-col"
               style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
             >
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold" style={{ color: 'var(--ink)' }}>
-                  EDI ANSI X12 Input
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setInput('')}
-                    disabled={!input}
-                    className="flex items-center gap-1 hover:opacity-80 text-[var(--muted)] disabled:opacity-40 cursor-pointer"
-                    title="Clear EDI input payload"
-                  >
-                    <Trash2 className="w-3.5 h-3.5 text-rose-500" />
-                    <span>Clear</span>
-                  </button>
-                  <button onClick={() => setInput(SAMPLE_850)} className="hover:opacity-80 text-[var(--brand)] cursor-pointer">
-                    Reset Sample
-                  </button>
-                </div>
+              <div className="px-4 py-2.5 border-b" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface-2)' }}>
+                <EditorPaneHeader
+                  idPrefix="edi-to-json-input"
+                  title="EDI ANSI X12 INPUT"
+                  charCount={input.length}
+                  lineCount={input ? input.split('\n').length : 0}
+                  accept=".edi,.txt,.x12"
+                  onImport={(content) => setInput(content)}
+                  onSample={() => setInput(SAMPLE_850)}
+                  onClear={input ? () => setInput('') : undefined}
+                />
               </div>
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 rows={16}
-                className="w-full p-3.5 rounded-xl font-mono text-xs outline-none resize-y border"
-                style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                className="w-full p-4 font-mono text-xs outline-none resize-y border-none bg-transparent leading-relaxed"
+                style={{ color: 'var(--ink)' }}
               />
             </div>
 
             <div
-              className="p-4 rounded-2xl border flex flex-col space-y-3"
+              className="rounded-2xl border overflow-hidden shadow-sm flex flex-col"
               style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
             >
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold" style={{ color: 'var(--ink)' }}>
-                  Structured JSON Tree ({x12JsonSchemaMode})
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleCopy(output)}
-                    className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80 cursor-pointer"
-                    style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                  >
-                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copied ? 'Copied' : 'Copy'}</span>
-                  </button>
-                  <button
-                    onClick={() => handleDownload(output, `edi_parsed_${selectedSampleId}_${x12JsonSchemaMode}.json`)}
-                    className="px-2.5 py-1 rounded-lg border flex items-center gap-1 hover:opacity-80 cursor-pointer"
-                    style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Download JSON</span>
-                  </button>
-                </div>
+              <div className="px-4 py-2.5 border-b" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface-2)' }}>
+                <EditorPaneHeader
+                  idPrefix="edi-to-json-output"
+                  title={`STRUCTURED JSON (${x12JsonSchemaMode.toUpperCase()})`}
+                  charCount={output.length}
+                  lineCount={output ? output.split('\n').length : 0}
+                  onExport={output ? () => handleDownload(output, `edi_parsed_${selectedSampleId}_${x12JsonSchemaMode}.json`) : undefined}
+                  onCopy={output ? () => handleCopy(output) : undefined}
+                  copyContent={output}
+                />
               </div>
               <textarea
                 readOnly
                 value={output}
                 rows={16}
-                className="w-full p-3.5 rounded-xl font-mono text-xs outline-none resize-y border"
-                style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                className="w-full p-4 font-mono text-xs outline-none resize-y border-none bg-transparent leading-relaxed"
+                style={{ color: 'var(--ink)' }}
               />
             </div>
           </div>

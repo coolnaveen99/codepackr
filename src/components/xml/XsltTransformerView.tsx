@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Copy, Check, Download, RefreshCw, Play, AlertTriangle, CheckCircle2, FileCode2, Sparkles } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
+import { copyText } from '../../lib/clipboard';
+import { downloadContentAsFile } from '../../lib/fileIO';
+import { EditorPaneHeader } from '../common/EditorPaneHeader';
 
 interface XsltTransformerViewProps {
   tool: ToolDef;
@@ -341,6 +344,7 @@ export const XsltTransformerView: React.FC<XsltTransformerViewProps> = ({
         onSelectRelated={onSelectRelated}
         onResetOrClear={handleClearWorkspace}
         resetLabel="Clear Workspace"
+        hideFileActions={true}
       />
 
       {/* Preset Buttons Bar */}
@@ -459,12 +463,17 @@ export const XsltTransformerView: React.FC<XsltTransformerViewProps> = ({
           className="p-4 rounded-2xl border shadow-sm flex flex-col"
           style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-              1. SOURCE XML DOCUMENT
-            </span>
-            <span className="text-[11px] text-[var(--muted)]">Input Data</span>
-          </div>
+          <EditorPaneHeader
+            idPrefix="xslt-xml-src"
+            title="1. SOURCE XML DOCUMENT"
+            charCount={xmlSource.length}
+            lineCount={xmlSource ? xmlSource.split('\n').length : 0}
+            accept=".xml,.txt"
+            onImport={(c) => setXmlSource(c)}
+            onClear={xmlSource ? () => setXmlSource('') : undefined}
+            onCopy={xmlSource ? () => copyText(xmlSource) : undefined}
+            copyContent={xmlSource}
+          />
           <textarea
             value={xmlSource}
             onChange={(e) => setXmlSource(e.target.value)}
@@ -480,12 +489,17 @@ export const XsltTransformerView: React.FC<XsltTransformerViewProps> = ({
           className="p-4 rounded-2xl border shadow-sm flex flex-col"
           style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-              2. XSLT STYLESHEET (1.0 / 2.0)
-            </span>
-            <span className="text-[11px] text-[var(--muted)]">Transformation Rules</span>
-          </div>
+          <EditorPaneHeader
+            idPrefix="xslt-stylesheet"
+            title="2. XSLT STYLESHEET"
+            charCount={xsltSource.length}
+            lineCount={xsltSource ? xsltSource.split('\n').length : 0}
+            accept=".xsl,.xslt,.xml,.txt"
+            onImport={(c) => setXsltSource(c)}
+            onClear={xsltSource ? () => setXsltSource('') : undefined}
+            onCopy={xsltSource ? () => copyText(xsltSource) : undefined}
+            copyContent={xsltSource}
+          />
           <textarea
             value={xsltSource}
             onChange={(e) => setXsltSource(e.target.value)}
@@ -501,13 +515,15 @@ export const XsltTransformerView: React.FC<XsltTransformerViewProps> = ({
           className="p-4 rounded-2xl border shadow-sm flex flex-col"
           style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" />
-              3. TRANSFORMED RESULT
-            </span>
-            <span className="text-[11px] text-[var(--muted)]">Live Evaluated</span>
-          </div>
+          <EditorPaneHeader
+            idPrefix="xslt-output"
+            title="3. TRANSFORMED RESULT"
+            charCount={transformOutput.length}
+            lineCount={transformOutput ? transformOutput.split('\n').length : 0}
+            onExport={transformOutput ? () => downloadContentAsFile(transformOutput, 'transformed-output.xml') : undefined}
+            onCopy={transformOutput ? () => copyText(transformOutput) : undefined}
+            copyContent={transformOutput}
+          />
           {viewMode === 'preview' && (transformOutput.includes('<div') || transformOutput.includes('<table')) ? (
             <div
               className="w-full flex-1 p-3 rounded-xl border overflow-auto bg-white text-black"

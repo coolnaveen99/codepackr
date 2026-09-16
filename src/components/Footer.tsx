@@ -1,5 +1,5 @@
 import React from 'react';
-import { Terminal, Globe, Lock } from 'lucide-react';
+import { Terminal, Globe, Lock, Bug } from 'lucide-react';
 import { GithubIcon, XTwitterIcon, LinkedinIcon, YoutubeIcon, InstagramIcon } from './BrandIcons';
 
 interface FooterProps {
@@ -8,6 +8,7 @@ interface FooterProps {
   onGoPrivacy: (tab: 'privacy' | 'terms') => void;
   onOpenSitemap: () => void;
   onOpenAdminLogin?: () => void;
+  onOpenBugReport?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
@@ -16,6 +17,7 @@ export const Footer: React.FC<FooterProps> = ({
   onGoPrivacy,
   onOpenSitemap,
   onOpenAdminLogin,
+  onOpenBugReport,
 }) => {
   return (
     <footer id="main-footer" className="border-t border-[color:var(--border)] bg-[color:var(--surface)] py-10 mt-16">
@@ -35,6 +37,16 @@ export const Footer: React.FC<FooterProps> = ({
           <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-medium text-[color:var(--ink-muted)]">
             <button onClick={onGoHome} className="hover:text-[color:var(--brand)] transition-colors cursor-pointer">Tools</button>
             <button onClick={onGoContact} className="hover:text-[color:var(--brand)] transition-colors cursor-pointer">Contact</button>
+            {onOpenBugReport && (
+              <button
+                id="footer-report-bug-btn"
+                onClick={onOpenBugReport}
+                className="flex items-center gap-1 text-rose-600 dark:text-rose-400 hover:opacity-80 transition-opacity cursor-pointer font-semibold"
+                title="Report a bug or technical issue"
+              >
+                <Bug className="w-4 h-4" /> Report Bug
+              </button>
+            )}
             <button onClick={() => onGoPrivacy('privacy')} className="hover:text-[color:var(--brand)] transition-colors cursor-pointer">Privacy</button>
             <button onClick={() => onGoPrivacy('terms')} className="hover:text-[color:var(--brand)] transition-colors cursor-pointer">Terms</button>
             <button onClick={onOpenSitemap} className="flex items-center gap-1.5 hover:text-[color:var(--brand)] transition-colors cursor-pointer">

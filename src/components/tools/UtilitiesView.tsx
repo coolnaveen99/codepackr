@@ -5,6 +5,8 @@ import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
 import { CronVisualizer } from './CronVisualizer';
 import { copyText } from '../../lib/clipboard';
+import { downloadContentAsFile } from '../../lib/fileIO';
+import { EditorPaneHeader } from '../common/EditorPaneHeader';
 
 interface UtilitiesViewProps {
   tool: ToolDef;
@@ -269,7 +271,30 @@ export const UtilitiesView: React.FC<UtilitiesViewProps> = ({
 
   return (
     <div>
-      <ToolHeader tool={tool} onBackToHome={onBackToHome} onSelectRelated={onSelectRelated} onResetOrClear={handleResetOrClear} resetLabel={tool.id === 'slugify' ? 'Clear Workspace' : 'Reset to Defaults'} />
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleResetOrClear}
+        resetLabel={tool.id === 'slugify' ? 'Clear Workspace' : 'Reset to Defaults'}
+        onUploadFile={(content) => {
+          if (tool.id === 'markdown-preview') setMdContent(content);
+          else if (tool.id === 'slugify') { setSlugInput(content); updateSlug(content, slugSep); }
+          else if (tool.id === 'qr-code') setQrText(content);
+        }}
+        downloadContent={() => {
+          if (tool.id === 'markdown-preview') return mdContent;
+          if (tool.id === 'uuid-generator') return uuids.join('\n');
+          if (tool.id === 'password-generator') return passwords.join('\n');
+          if (tool.id === 'lorem-ipsum') return loremOutput;
+          if (tool.id === 'slugify') return slugOutput;
+          if (tool.id === 'cron-expression') return `${cronMin} ${cronHour} ${cronDom} ${cronMonth} ${cronDow}`;
+          return '';
+        }}
+        inputContent={mdContent || slugInput || qrText}
+        outputContent={slugOutput || loremOutput}
+        hideFileActions={tool.id === 'markdown-preview'}
+      />
 
       {tool.id === 'uuid-generator' && (
         <div className="space-y-4 max-w-2xl mx-auto">
@@ -419,22 +444,53 @@ export const UtilitiesView: React.FC<UtilitiesViewProps> = ({
 
       {tool.id === 'markdown-preview' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="p-4 rounded-2xl border shadow-sm flex flex-col" style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>MARKDOWN EDITOR</span>
-              <span className="text-[11px]" style={{ color: 'var(--muted)' }}>{mdContent.split(/\s+/).filter(Boolean).length} words · {mdContent.length} chars</span>
+          <div
+            className="rounded-2xl border overflow-hidden shadow-sm flex flex-col"
+            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+          >
+            <div className="px-4 py-2.5 border-b" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface-2)' }}>
+              <EditorPaneHeader
+                idPrefix="md-input"
+                title="MARKDOWN EDITOR"
+                charCount={mdContent.length}
+                lineCount={mdContent ? mdContent.split('\n').length : 0}
+                accept=".md,.markdown,.txt"
+                onImport={(content) => setMdContent(content)}
+                onSample={() =>
+                  setMdContent(
+                    `# Codepackr Markdown Preview\n\nCodepackr is a fast, **100% client-side** developer tool suite.\n\n## Features\n- **EDI Tools**: Formatter, segment viewer, JSON converter, and validator.\n- **Syntax Checkers**: JSON, XML, XSD, YAML, .env.\n- **Cryptography**: Hashes, HMAC, UUID v4, and JWT signatures.\n\n### Code Block\n\`\`\`javascript\nconst suite = "Codepackr";\nconsole.log(\`Running \${suite} securely in your browser.\`);\n\`\`\`\n\n> "All data remains on your machine. Zero network latency."`
+                  )
+                }
+                onClear={mdContent ? () => setMdContent('') : undefined}
+              />
             </div>
-            <textarea value={mdContent} onChange={(e) => setMdContent(e.target.value)} className="w-full flex-1 min-h-[420px] p-4 rounded-xl border font-mono text-xs sm:text-sm outline-none resize-y" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }} spellCheck={false} />
+            <textarea
+              value={mdContent}
+              onChange={(e) => setMdContent(e.target.value)}
+              className="w-full flex-1 min-h-[420px] p-4 bg-transparent border-none font-mono text-xs sm:text-sm outline-none resize-y leading-relaxed"
+              style={{ color: 'var(--ink)' }}
+              spellCheck={false}
+            />
           </div>
-          <div className="p-4 rounded-2xl border shadow-sm flex flex-col" style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>LIVE RENDERED PREVIEW</span>
-              <button type="button" onClick={() => copyToClipboard(mdContent)} className="px-2.5 py-1 text-xs font-semibold rounded-lg border flex items-center gap-1 shadow-sm transition-colors" style={{ backgroundColor: copied ? 'var(--brand)' : 'var(--surface-2)', borderColor: copied ? 'var(--brand)' : 'var(--line)', color: copied ? '#fff' : undefined }} aria-label={copied ? 'Markdown copied' : 'Copy Markdown source'}>
-                {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? 'Copied!' : 'Copy Markdown'}</span>
-              </button>
+
+          <div
+            className="rounded-2xl border overflow-hidden shadow-sm flex flex-col"
+            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
+          >
+            <div className="px-4 py-2.5 border-b" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface-2)' }}>
+              <EditorPaneHeader
+                idPrefix="md-output"
+                title="LIVE RENDERED PREVIEW"
+                onExport={mdContent ? () => downloadContentAsFile(mdContent, 'document.md') : undefined}
+                onCopy={mdContent ? () => copyToClipboard(mdContent) : undefined}
+                copyContent={mdContent}
+              />
             </div>
-            <div className="w-full flex-1 p-4 rounded-xl border overflow-y-auto max-h-[420px] text-xs sm:text-sm prose dark:prose-invert" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }} dangerouslySetInnerHTML={{ __html: renderMarkdownHtml(mdContent) }} />
+            <div
+              className="w-full flex-1 p-4 overflow-y-auto max-h-[500px] text-xs sm:text-sm prose dark:prose-invert"
+              style={{ backgroundColor: 'var(--surface-2)', color: 'var(--ink)' }}
+              dangerouslySetInnerHTML={{ __html: renderMarkdownHtml(mdContent) }}
+            />
           </div>
         </div>
       )}

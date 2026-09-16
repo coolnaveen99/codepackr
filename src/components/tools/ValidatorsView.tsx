@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Copy, Check, CheckCircle2, AlertTriangle, Search, Split, Table, Columns, AlignJustify, GitCompare, Edit3, ChevronDown, ChevronUp } from 'lucide-react';
+import { Copy, Check, CheckCircle2, AlertTriangle, Search, Split, Table, Columns, AlignJustify, GitCompare, Edit3, ChevronDown, ChevronUp, Download, Sparkles } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
 import { safeLocalStorage } from '../../lib/storage';
 import { diffLines, diffWordsWithSpace } from 'diff';
 import { CodeEditor } from '../CodeEditor';
 import { useWorkspace, popSmartPastePayload } from '../../lib/workspace';
+import { downloadContentAsFile } from '../../lib/fileIO';
+import { copyText } from '../../lib/clipboard';
+import { EditorPaneHeader } from '../common/EditorPaneHeader';
 
 interface ValidatorsViewProps {
   tool: ToolDef;
@@ -45,6 +48,38 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
   const handleViewModeChange = (mode: 'split' | 'unified') => {
     setDiffViewMode(mode);
     safeLocalStorage.setItem('codepackr_diff_view_mode', mode);
+  };
+
+  // Diff Checker sample loader
+  const handleLoadDiffSample = () => {
+    const sampleOriginal = `// User service configuration
+const config = {
+  port: 8080,
+  host: 'localhost',
+  timeout: 5000,
+  retries: 3,
+  debug: false
+};
+
+function startServer() {
+  console.log("Starting server on port", config.port);
+}`;
+    const sampleModified = `// User service configuration
+const config = {
+  port: 3000,
+  host: '0.0.0.0',
+  timeout: 10000,
+  retries: 5,
+  debug: true,
+  environment: 'production'
+};
+
+function startServer() {
+  console.log("Server listening at http://" + config.host + ":" + config.port);
+}`;
+    setLeftText(sampleOriginal);
+    setRightText(sampleModified);
+    computeDiff(sampleOriginal, sampleModified);
   };
 
   // Regex Tester
@@ -476,6 +511,41 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
     }
   };
 
+  const getActiveValidatorContent = () => {
+    if (tool.id === 'json-validator') return jsonInput;
+    if (tool.id === 'diff-checker' || tool.id === 'json-structural-diff') return rightText || leftText;
+    if (tool.id === 'csv-viewer') return csvText;
+    if (tool.id === 'dotenv-validator') return dotenvOutput || dotenvInput;
+    if (tool.id === 'regex-tester') return regexTestText;
+    if (tool.id === 'json-path-tester') return jsonPathOutput || jsonPathData;
+    return '';
+  };
+
+  const handleValidatorUpload = (content: string) => {
+    if (tool.id === 'json-validator') {
+      setJsonInput(content);
+      validateJSON(content);
+    } else if (tool.id === 'diff-checker') {
+      setLeftText(content);
+      computeDiff(content, rightText);
+    } else if (tool.id === 'json-structural-diff') {
+      setLeftText(content);
+      computeStructuralDiff(content, rightText);
+    } else if (tool.id === 'csv-viewer') {
+      setCsvText(content);
+      parseCSV(content);
+    } else if (tool.id === 'dotenv-validator') {
+      setDotenvInput(content);
+      formatDotenv(content);
+    } else if (tool.id === 'regex-tester') {
+      setRegexTestText(content);
+      evaluateRegex(regexPattern, regexFlags, content);
+    } else if (tool.id === 'json-path-tester') {
+      setJsonPathData(content);
+      evaluateJSONPath(content, jsonPathQuery);
+    }
+  };
+
   return (
     <div>
       <ToolHeader
@@ -484,6 +554,11 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
         onSelectRelated={onSelectRelated}
         onResetOrClear={handleResetToDefaults}
         resetLabel="Reset to Defaults"
+        onUploadFile={handleValidatorUpload}
+        downloadContent={getActiveValidatorContent}
+        inputContent={leftText || jsonInput || csvText || dotenvInput}
+        outputContent={rightText || dotenvOutput || jsonPathOutput}
+        hideFileActions={true}
       />
 
       {/* Diff Checker View */}
@@ -492,17 +567,24 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
           {/* Split View: show the two side-by-side textareas */}
           {diffViewMode === 'split' ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* ORIGINAL (LEFT) PANEL */}
               <div className="p-4 rounded-2xl border shadow-sm"
                 style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="block text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-                    ORIGINAL (LEFT)
-                  </span>
-                  <span className="text-[11px] font-mono" style={{ color: 'var(--muted)' }}>
-                    {leftText ? leftText.split('\n').length : 0} lines
-                  </span>
-                </div>
+                <EditorPaneHeader
+                  idPrefix="diff-left"
+                  title="ORIGINAL (LEFT)"
+                  lineCount={leftText ? leftText.split('\n').length : 0}
+                  accept=".txt,.json,.xml,.sql,.yaml,.yml,.css,.html,.js,.ts,.diff,.patch,.md"
+                  onImport={(content) => {
+                    setLeftText(content);
+                    computeDiff(content, rightText);
+                  }}
+                  onClear={leftText ? () => {
+                    setLeftText('');
+                    computeDiff('', rightText);
+                  } : undefined}
+                />
                 <CodeEditor
                   id="diff-checker-original-input"
                   value={leftText}
@@ -512,20 +594,28 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                   }}
                   height="220px"
                   language="text"
-                  placeholder="Paste or type original content here..."
+                  placeholder="Paste or type original content here, or click Import..."
                 />
               </div>
+
+              {/* MODIFIED (RIGHT) PANEL */}
               <div className="p-4 rounded-2xl border shadow-sm"
                 style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="block text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-                    MODIFIED (RIGHT)
-                  </span>
-                  <span className="text-[11px] font-mono" style={{ color: 'var(--muted)' }}>
-                    {rightText ? rightText.split('\n').length : 0} lines
-                  </span>
-                </div>
+                <EditorPaneHeader
+                  idPrefix="diff-right"
+                  title="MODIFIED (RIGHT)"
+                  lineCount={rightText ? rightText.split('\n').length : 0}
+                  accept=".txt,.json,.xml,.sql,.yaml,.yml,.css,.html,.js,.ts,.diff,.patch,.md"
+                  onImport={(content) => {
+                    setRightText(content);
+                    computeDiff(leftText, content);
+                  }}
+                  onClear={rightText ? () => {
+                    setRightText('');
+                    computeDiff(leftText, '');
+                  } : undefined}
+                />
                 <CodeEditor
                   id="diff-checker-modified-input"
                   value={rightText}
@@ -535,7 +625,7 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                   }}
                   height="220px"
                   language="text"
-                  placeholder="Paste or type modified content here..."
+                  placeholder="Paste or type modified content here, or click Import..."
                 />
               </div>
             </div>
@@ -546,14 +636,20 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                 <div className="p-4 rounded-2xl border shadow-sm"
                   style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="block text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-                      ORIGINAL (LEFT)
-                    </span>
-                    <span className="text-[11px] font-mono" style={{ color: 'var(--muted)' }}>
-                      {leftText ? leftText.split('\n').length : 0} lines
-                    </span>
-                  </div>
+                  <EditorPaneHeader
+                    idPrefix="diff-unified-left"
+                    title="ORIGINAL (LEFT)"
+                    lineCount={leftText ? leftText.split('\n').length : 0}
+                    accept=".txt,.json,.xml,.sql,.yaml,.yml,.css,.html,.js,.ts,.diff,.patch,.md"
+                    onImport={(content) => {
+                      setLeftText(content);
+                      computeDiff(content, rightText);
+                    }}
+                    onClear={leftText ? () => {
+                      setLeftText('');
+                      computeDiff('', rightText);
+                    } : undefined}
+                  />
                   <CodeEditor
                     id="diff-checker-unified-original-input"
                     value={leftText}
@@ -569,14 +665,20 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                 <div className="p-4 rounded-2xl border shadow-sm"
                   style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="block text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-                      MODIFIED (RIGHT)
-                    </span>
-                    <span className="text-[11px] font-mono" style={{ color: 'var(--muted)' }}>
-                      {rightText ? rightText.split('\n').length : 0} lines
-                    </span>
-                  </div>
+                  <EditorPaneHeader
+                    idPrefix="diff-unified-right"
+                    title="MODIFIED (RIGHT)"
+                    lineCount={rightText ? rightText.split('\n').length : 0}
+                    accept=".txt,.json,.xml,.sql,.yaml,.yml,.css,.html,.js,.ts,.diff,.patch,.md"
+                    onImport={(content) => {
+                      setRightText(content);
+                      computeDiff(leftText, content);
+                    }}
+                    onClear={rightText ? () => {
+                      setRightText('');
+                      computeDiff(leftText, '');
+                    } : undefined}
+                  />
                   <CodeEditor
                     id="diff-checker-unified-modified-input"
                     value={rightText}
@@ -631,13 +733,40 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                 )}
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={handleLoadDiffSample}
+                  className="px-2.5 py-1 rounded-md border text-[11px] font-medium flex items-center gap-1 hover:bg-[var(--surface)] text-amber-600 dark:text-amber-400 hover:border-amber-500/40 transition-colors cursor-pointer"
+                  style={{ borderColor: 'var(--line)' }}
+                  title="Load sample code with differences"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span>Sample</span>
+                </button>
+
+                <button
+                  id="diff-checker-export-btn"
+                  type="button"
+                  onClick={() => {
+                    const diffText = diffResults.map(d => `${d.type === 'add' ? '+' : d.type === 'del' ? '-' : ' '} ${d.text}`).join('\n');
+                    downloadContentAsFile(diffText, 'changes.diff');
+                  }}
+                  disabled={diffResults.length === 0}
+                  className="px-2.5 py-1 rounded-md border text-[11px] font-medium flex items-center gap-1 hover:bg-[var(--surface)] transition-colors cursor-pointer disabled:opacity-40"
+                  style={{ borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  title="Export diff as .diff patch file"
+                >
+                  <Download className="w-3 h-3 text-[var(--brand)]" />
+                  <span>Export Diff</span>
+                </button>
+
                 <button
                   id="diff-checker-copy-btn"
                   type="button"
                   onClick={copyDiffToClipboard}
-                  className="px-2 py-1 rounded-md border text-[11px] font-medium flex items-center gap-1 hover:bg-[var(--surface)] transition-colors"
-                  style={{ borderColor: 'var(--line)', color: 'var(--muted)' }}
+                  className="px-2.5 py-1 rounded-md border text-[11px] font-medium flex items-center gap-1 hover:bg-[var(--surface)] transition-colors cursor-pointer"
+                  style={{ borderColor: 'var(--line)', color: 'var(--ink)' }}
                   title="Copy diff to clipboard"
                 >
                   {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
@@ -920,9 +1049,23 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>
-                TEST STRING
-              </label>
+              <EditorPaneHeader
+                idPrefix="regex-test"
+                title="TEST STRING"
+                charCount={regexTestText.length}
+                lineCount={regexTestText ? regexTestText.split('\n').length : 0}
+                accept=".txt"
+                onImport={(val) => {
+                  setRegexTestText(val);
+                  evaluateRegex(regexPattern, regexFlags, val);
+                }}
+                onClear={regexTestText ? () => {
+                  setRegexTestText('');
+                  evaluateRegex(regexPattern, regexFlags, '');
+                } : undefined}
+                onCopy={regexTestText ? () => copyText(regexTestText) : undefined}
+                copyContent={regexTestText}
+              />
               <CodeEditor
                 id="regex-test-string"
                 value={regexTestText}
@@ -999,22 +1142,58 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
           <div className="p-4 rounded-2xl border shadow-sm"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-                JSON STRING TO VALIDATE
-              </label>
-              <div className="flex items-center gap-1.5">
-                {jsonValidationResult.valid ? (
-                  <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100/60 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Valid JSON
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-xs font-bold text-rose-600 bg-rose-100/60 dark:bg-rose-950/40 px-2.5 py-1 rounded-full">
-                    <AlertTriangle className="w-3.5 h-3.5" /> Invalid JSON
-                  </span>
-                )}
-              </div>
-            </div>
+            <EditorPaneHeader
+              idPrefix="json-val"
+              title="JSON STRING TO VALIDATE"
+              charCount={jsonInput.length}
+              lineCount={jsonInput ? jsonInput.split('\n').length : 0}
+              accept=".json,.txt"
+              onImport={(content) => {
+                setJsonInput(content);
+                validateJSON(content);
+              }}
+              onExport={jsonInput ? () => downloadContentAsFile(jsonInput, 'document.json') : undefined}
+              onClear={jsonInput ? () => {
+                setJsonInput('');
+                validateJSON('');
+              } : undefined}
+              onSample={() => {
+                const sample = JSON.stringify(
+                  {
+                    status: 'success',
+                    code: 200,
+                    data: {
+                      user: {
+                        id: 'usr_49210',
+                        name: 'Jane Doe',
+                        email: 'jane.doe@example.com',
+                        verified: true,
+                        roles: ['admin', 'developer']
+                      }
+                    }
+                  },
+                  null,
+                  2
+                );
+                setJsonInput(sample);
+                validateJSON(sample);
+              }}
+              onCopy={jsonInput ? () => copyText(jsonInput) : undefined}
+              copyContent={jsonInput}
+              rightSlot={
+                <div className="flex items-center gap-1.5">
+                  {jsonValidationResult.valid ? (
+                    <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100/60 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Valid JSON
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-xs font-bold text-rose-600 bg-rose-100/60 dark:bg-rose-950/40 px-2.5 py-1 rounded-full">
+                      <AlertTriangle className="w-3.5 h-3.5" /> Invalid JSON
+                    </span>
+                  )}
+                </div>
+              }
+            />
 
             <CodeEditor
               id="json-validator-input"
@@ -1065,9 +1244,23 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>
-                  JSON DATA
-                </label>
+                <EditorPaneHeader
+                  idPrefix="jsonpath-data"
+                  title="JSON DATA"
+                  charCount={jsonPathData.length}
+                  lineCount={jsonPathData ? jsonPathData.split('\n').length : 0}
+                  accept=".json,.txt"
+                  onImport={(val) => {
+                    setJsonPathData(val);
+                    evaluateJSONPath(val, jsonPathQuery);
+                  }}
+                  onClear={jsonPathData ? () => {
+                    setJsonPathData('');
+                    evaluateJSONPath('', jsonPathQuery);
+                  } : undefined}
+                  onCopy={jsonPathData ? () => copyText(jsonPathData) : undefined}
+                  copyContent={jsonPathData}
+                />
                 <CodeEditor
                   id="json-path-data-input"
                   value={jsonPathData}
@@ -1080,9 +1273,15 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>
-                  EVALUATION RESULT
-                </label>
+                <EditorPaneHeader
+                  idPrefix="jsonpath-result"
+                  title="EVALUATION RESULT"
+                  charCount={jsonPathOutput.length}
+                  lineCount={jsonPathOutput ? jsonPathOutput.split('\n').length : 0}
+                  onExport={jsonPathOutput ? () => downloadContentAsFile(jsonPathOutput, 'evaluation-result.json') : undefined}
+                  onCopy={jsonPathOutput ? () => copyText(jsonPathOutput) : undefined}
+                  copyContent={jsonPathOutput}
+                />
                 <CodeEditor
                   id="json-path-output"
                   readOnly
@@ -1102,9 +1301,24 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
           <div className="p-4 rounded-2xl border shadow-sm"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--muted)' }}>
-              RAW CSV INPUT
-            </label>
+            <EditorPaneHeader
+              idPrefix="csv-raw"
+              title="RAW CSV INPUT"
+              charCount={csvText.length}
+              lineCount={csvText ? csvText.split('\n').length : 0}
+              accept=".csv,.txt,.tsv"
+              onImport={(val) => {
+                setCsvText(val);
+                parseCSV(val);
+              }}
+              onExport={csvText ? () => downloadContentAsFile(csvText, 'data.csv') : undefined}
+              onClear={csvText ? () => {
+                setCsvText('');
+                parseCSV('');
+              } : undefined}
+              onCopy={csvText ? () => copyText(csvText) : undefined}
+              copyContent={csvText}
+            />
             <div className="mb-3">
               <CodeEditor
                 id="csv-raw-input"
@@ -1183,9 +1397,20 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
             <div className="p-4 rounded-2xl border shadow-sm"
               style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
             >
-              <span className="block text-xs font-semibold mb-2" style={{ color: 'var(--muted)' }}>
-                LEFT JSON OBJECT
-              </span>
+              <EditorPaneHeader
+                idPrefix="json-diff-left"
+                title="LEFT JSON OBJECT"
+                lineCount={leftText ? leftText.split('\n').length : 0}
+                accept=".json,.txt"
+                onImport={(content) => {
+                  setLeftText(content);
+                  computeStructuralDiff(content, rightText);
+                }}
+                onClear={leftText ? () => {
+                  setLeftText('');
+                  computeStructuralDiff('', rightText);
+                } : undefined}
+              />
               <CodeEditor
                 id="json-structural-diff-left"
                 value={leftText}
@@ -1200,9 +1425,21 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
             <div className="p-4 rounded-2xl border shadow-sm"
               style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
             >
-              <span className="block text-xs font-semibold mb-2" style={{ color: 'var(--muted)' }}>
-                RIGHT JSON OBJECT
-              </span>
+              <EditorPaneHeader
+                idPrefix="json-diff-right"
+                title="RIGHT JSON OBJECT"
+                lineCount={rightText ? rightText.split('\n').length : 0}
+                accept=".json,.txt"
+                onImport={(content) => {
+                  setRightText(content);
+                  computeStructuralDiff(leftText, content);
+                }}
+                onClear={rightText ? () => {
+                  setRightText('');
+                  computeDiff(leftText, '');
+                  computeStructuralDiff(leftText, '');
+                } : undefined}
+              />
               <CodeEditor
                 id="json-structural-diff-right"
                 value={rightText}
@@ -1219,9 +1456,13 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
           <div className="p-4 rounded-2xl border shadow-sm"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <span className="block text-xs font-semibold mb-2" style={{ color: 'var(--muted)' }}>
-              STRUCTURAL KEY DIFFERENCE REPORT
-            </span>
+            <EditorPaneHeader
+              idPrefix="json-diff-report"
+              title="STRUCTURAL KEY DIFFERENCE REPORT"
+              onExport={structuralDiff ? () => downloadContentAsFile(structuralDiff, 'json-structural-diff.txt') : undefined}
+              onCopy={structuralDiff ? () => copyToClipboard(structuralDiff) : undefined}
+              copyContent={structuralDiff}
+            />
             <pre className="p-3 rounded-xl font-mono text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap"
               style={{ backgroundColor: 'var(--surface-2)', color: 'var(--ink)' }}
             >
@@ -1237,9 +1478,20 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
           <div className="p-4 rounded-2xl border shadow-sm"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <span className="block text-xs font-semibold mb-2" style={{ color: 'var(--muted)' }}>
-              INPUT .ENV CONTENT
-            </span>
+            <EditorPaneHeader
+              idPrefix="dotenv-input"
+              title="INPUT .ENV CONTENT"
+              lineCount={dotenvInput ? dotenvInput.split('\n').length : 0}
+              accept=".env,.txt"
+              onImport={(content) => {
+                setDotenvInput(content);
+                formatDotenv(content);
+              }}
+              onClear={dotenvInput ? () => {
+                setDotenvInput('');
+                setDotenvOutput('');
+              } : undefined}
+            />
             <CodeEditor
               id="dotenv-input"
               value={dotenvInput}
@@ -1254,18 +1506,14 @@ export const ValidatorsView: React.FC<ValidatorsViewProps> = ({
           <div className="p-4 rounded-2xl border shadow-sm flex flex-col"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-                SORTED & CLEANED .ENV
-              </span>
-              <button
-                onClick={() => copyToClipboard(dotenvOutput)}
-                className="px-2.5 py-1 text-xs font-semibold rounded-lg border flex items-center gap-1"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-              >
-                <Copy className="w-3 h-3" /> Copy
-              </button>
-            </div>
+            <EditorPaneHeader
+              idPrefix="dotenv-output"
+              title="SORTED & CLEANED .ENV"
+              lineCount={dotenvOutput ? dotenvOutput.split('\n').length : 0}
+              onExport={dotenvOutput ? () => downloadContentAsFile(dotenvOutput, '.env') : undefined}
+              onCopy={dotenvOutput ? () => copyToClipboard(dotenvOutput) : undefined}
+              copyContent={dotenvOutput}
+            />
             <CodeEditor
               id="dotenv-output"
               readOnly

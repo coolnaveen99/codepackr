@@ -12,6 +12,9 @@ import {
 } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
+import { copyText } from '../../lib/clipboard';
+import { downloadContentAsFile } from '../../lib/fileIO';
+import { EditorPaneHeader } from '../common/EditorPaneHeader';
 
 interface XsdValidatorViewProps {
   tool: ToolDef;
@@ -397,6 +400,7 @@ export const XsdValidatorView: React.FC<XsdValidatorViewProps> = ({
         onSelectRelated={onSelectRelated}
         onResetOrClear={handleResetToDefaults}
         resetLabel="Reset to Defaults"
+        hideFileActions={true}
       />
 
       {/* Controls & Options Bar */}
@@ -537,14 +541,18 @@ export const XsdValidatorView: React.FC<XsdValidatorViewProps> = ({
           className="p-4 rounded-2xl border shadow-sm flex flex-col"
           style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-              XML INSTANCE DOCUMENT (.xml)
-            </span>
-            <span className="text-[11px] text-[var(--muted)] font-mono">
-              {xmlInput.split('\n').length} lines
-            </span>
-          </div>
+          <EditorPaneHeader
+            idPrefix="xsd-xml-inst"
+            title="XML INSTANCE DOCUMENT (.xml)"
+            charCount={xmlInput.length}
+            lineCount={xmlInput ? xmlInput.split('\n').length : 0}
+            accept=".xml,.txt"
+            onImport={(c) => setXmlInput(c)}
+            onExport={xmlInput ? () => downloadContentAsFile(xmlInput, 'document.xml') : undefined}
+            onClear={xmlInput ? () => setXmlInput('') : undefined}
+            onCopy={xmlInput ? () => copyText(xmlInput) : undefined}
+            copyContent={xmlInput}
+          />
           <textarea
             id="xsd-xml-instance-input"
             value={xmlInput}
@@ -562,14 +570,18 @@ export const XsdValidatorView: React.FC<XsdValidatorViewProps> = ({
           className="p-4 rounded-2xl border shadow-sm flex flex-col"
           style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-              XSD SCHEMA DEFINITION (.xsd)
-            </span>
-            <span className="text-[11px] text-[var(--muted)] font-mono">
-              {xsdInput.split('\n').length} lines
-            </span>
-          </div>
+          <EditorPaneHeader
+            idPrefix="xsd-schema-def"
+            title="XSD SCHEMA DEFINITION (.xsd)"
+            charCount={xsdInput.length}
+            lineCount={xsdInput ? xsdInput.split('\n').length : 0}
+            accept=".xsd,.xml,.txt"
+            onImport={(c) => setXsdInput(c)}
+            onExport={xsdInput ? () => downloadContentAsFile(xsdInput, 'schema.xsd') : undefined}
+            onClear={xsdInput ? () => setXsdInput('') : undefined}
+            onCopy={xsdInput ? () => copyText(xsdInput) : undefined}
+            copyContent={xsdInput}
+          />
           <textarea
             id="xsd-schema-definition-input"
             value={xsdInput}

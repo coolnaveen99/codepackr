@@ -7,6 +7,7 @@ import { CodeEditor, SupportedLanguage } from '../CodeEditor';
 import { useWorkspace, popSmartPastePayload } from '../../lib/workspace';
 import { downloadFile } from '../../lib/smartDownload';
 import { TOOLS } from '../../data/tools';
+import { EditorPaneHeader } from '../common/EditorPaneHeader';
 
 interface ConvertersViewProps {
   tool: ToolDef;
@@ -660,6 +661,17 @@ makeRequest();`);
         onSelectRelated={onSelectRelated}
         onResetOrClear={handleClearWorkspace}
         resetLabel="Clear Workspace"
+        onUploadFile={(content, name) => {
+          setInput(content);
+          setUploadedFileName(name);
+          setUploadedFileSize(content.length);
+          convert(content, direction);
+        }}
+        onDownloadFile={downloadOutputFile}
+        downloadFilename={getOutputFilename()}
+        inputContent={input}
+        outputContent={output}
+        hideFileActions={true}
       />
 
       {/* Case Converter layout */}
@@ -1270,14 +1282,16 @@ Timestamp: ${new Date().toISOString()}
         <div className="space-y-4">
           {/* Action Control Bar */}
           <div
-            className="p-3.5 rounded-2xl border flex flex-wrap items-center justify-between gap-3 shadow-sm"
+            className="p-3.5 rounded-2xl border space-y-3 shadow-sm"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            {/* Left Action Group */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold mr-1" style={{ color: 'var(--muted)' }}>
-                Mode:
-              </span>
+            {/* Row 1: Mode Selection & Status */}
+            <div className="flex flex-wrap items-center justify-between gap-3 w-full">
+              {/* Left Action Group */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-semibold mr-1" style={{ color: 'var(--muted)' }}>
+                  Mode:
+                </span>
               <button
                 onClick={() => {
                   const nextDir = direction === 'forward' ? 'reverse' : 'forward';
@@ -1304,50 +1318,67 @@ Timestamp: ${new Date().toISOString()}
                 </span>
               </button>
 
-              <div className="h-4 w-px bg-[var(--line)] mx-1 hidden sm:block" />
+              </div>
 
-              {/* Upload Button */}
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept={getInputAccept()}
-                onChange={handleFileInputChange}
-                className="hidden"
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                title="Upload file to convert"
-              >
-                <Upload className="w-3.5 h-3.5 text-[var(--brand)]" />
-                <span>Upload File</span>
-              </button>
-
-              {/* Sample Data */}
-              <button
-                onClick={loadSampleData}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
-                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
-                title="Load sample test data"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>Sample</span>
-              </button>
-
-              {/* Clear Input */}
-              {input && (
-                <button
-                  onClick={clearInput}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
-                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--muted)' }}
-                  title="Clear all data"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Clear</span>
-                </button>
-              )}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs border" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}>
+                <span style={{ color: 'var(--muted)' }}>Target:</span>
+                <strong className="font-semibold text-[var(--brand)]">
+                  {direction === 'forward'
+                    ? (tool.name.split('/')[1] || 'Output').trim()
+                    : (tool.name.split('/')[0] || 'Input').trim()}
+                </strong>
+              </div>
             </div>
+
+            {/* Row 2: File Import, Sample, Clear (Moved to Next Line) & Export / Copy */}
+            <div
+              className="pt-2.5 border-t flex flex-wrap items-center justify-between gap-3 w-full"
+              style={{ borderColor: 'var(--line)' }}
+            >
+              {/* Left Action Group */}
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Upload Button */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept={getInputAccept()}
+                  onChange={handleFileInputChange}
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
+                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  title="Import local file to convert"
+                >
+                  <Upload className="w-3.5 h-3.5 text-[var(--brand)]" />
+                  <span>Import File</span>
+                </button>
+
+                {/* Sample Data */}
+                <button
+                  onClick={loadSampleData}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
+                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                  title="Load sample test data"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Sample</span>
+                </button>
+
+                {/* Clear Input */}
+                {input && (
+                  <button
+                    onClick={clearInput}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
+                    style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--muted)' }}
+                    title="Clear all data"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Clear</span>
+                  </button>
+                )}
+              </div>
 
             {/* Right Action Group */}
             <div className="flex items-center gap-2">
@@ -1356,10 +1387,10 @@ Timestamp: ${new Date().toISOString()}
                 disabled={!output}
                 className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl text-white shadow-sm disabled:opacity-40 cursor-pointer"
                 style={{ backgroundColor: 'var(--brand)' }}
-                title={`Download converted ${getOutputFilename()}`}
+                title={`Export converted ${getOutputFilename()}`}
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Download {getOutputFilename()}</span>
+                <span>Export {getOutputFilename()}</span>
               </button>
 
               <button
@@ -1377,6 +1408,7 @@ Timestamp: ${new Date().toISOString()}
               </button>
             </div>
           </div>
+        </div>
 
           {/* Uploaded File Notification Banner */}
           {uploadedFileName && (
@@ -1427,28 +1459,13 @@ Timestamp: ${new Date().toISOString()}
                 if (file) handleFileUpload(file);
               }}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-                    SOURCE INPUT
-                  </span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded border uppercase font-mono" style={{ borderColor: 'var(--line)', color: 'var(--muted)' }}>
-                    {direction === 'forward' ? tool.name.split('/')[0] : tool.name.split('/')[1] || 'Input'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono" style={{ color: 'var(--muted)' }}>
-                    {input.length} chars • {input ? input.split('\n').length : 0} lines
-                  </span>
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="p-1 rounded text-[var(--muted)] hover:text-[var(--brand)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer"
-                    title="Upload file into editor"
-                  >
-                    <Upload className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
+              <EditorPaneHeader
+                idPrefix="converter-input"
+                title="SOURCE INPUT"
+                badge={direction === 'forward' ? tool.name.split('/')[0] : tool.name.split('/')[1] || 'Input'}
+                charCount={input.length}
+                lineCount={input ? input.split('\n').length : 0}
+              />
 
               {isDragging && (
                 <div className="absolute inset-0 bg-[var(--surface)]/90 backdrop-blur-xs rounded-2xl border-2 border-dashed border-[var(--brand)] z-10 flex flex-col items-center justify-center pointer-events-none">
@@ -1474,7 +1491,7 @@ Timestamp: ${new Date().toISOString()}
               </div>
 
               <div className="mt-2 flex items-center justify-between text-[11px]" style={{ color: 'var(--muted)' }}>
-                <span>Drag & drop files directly or click Upload</span>
+                <span>Drag & drop files directly or use Import</span>
                 {uploadedFileName && <span>Source: {uploadedFileName}</span>}
               </div>
             </div>
@@ -1484,37 +1501,13 @@ Timestamp: ${new Date().toISOString()}
               className="p-4 rounded-2xl border shadow-sm flex flex-col"
               style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-                    CONVERTED RESULT
-                  </span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded border uppercase font-mono" style={{ borderColor: 'var(--line)', color: 'var(--muted)' }}>
-                    {direction === 'forward' ? tool.name.split('/')[1] || 'Output' : tool.name.split('/')[0]}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono" style={{ color: 'var(--muted)' }}>
-                    {output.length} chars • {output ? output.split('\n').length : 0} lines
-                  </span>
-                  <button
-                    onClick={downloadOutputFile}
-                    disabled={!output}
-                    className="p-1 rounded text-[var(--muted)] hover:text-[var(--brand)] hover:bg-[var(--surface-2)] transition-colors disabled:opacity-30 cursor-pointer"
-                    title={`Download ${getOutputFilename()}`}
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => copyToClipboard(output)}
-                    disabled={!output}
-                    className="p-1 rounded text-[var(--muted)] hover:text-[var(--brand)] hover:bg-[var(--surface-2)] transition-colors disabled:opacity-30 cursor-pointer"
-                    title="Copy to clipboard"
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
+              <EditorPaneHeader
+                idPrefix="converter-output"
+                title="CONVERTED RESULT"
+                badge={direction === 'forward' ? tool.name.split('/')[1] || 'Output' : tool.name.split('/')[0]}
+                charCount={output.length}
+                lineCount={output ? output.split('\n').length : 0}
+              />
 
               <div className="rounded-xl overflow-hidden border border-[var(--line)] bg-[var(--surface-2)]">
                 <CodeEditor
@@ -1528,7 +1521,7 @@ Timestamp: ${new Date().toISOString()}
               </div>
 
               <div className="mt-2 flex items-center justify-between text-[11px]" style={{ color: 'var(--muted)' }}>
-                <span>Ready to download or copy</span>
+                <span>Ready to export or copy</span>
                 <span className="font-mono font-medium text-[var(--brand)]">{getOutputFilename()}</span>
               </div>
             </div>

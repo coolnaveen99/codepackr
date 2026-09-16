@@ -23,6 +23,7 @@ import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
 import { CodeEditor, SupportedLanguage } from '../CodeEditor';
 import { executeAsyncTransform } from '../../lib/workerBridge';
+import { EditorPaneHeader } from '../common/EditorPaneHeader';
 
 export type MockFieldType =
   | 'uuid'
@@ -451,6 +452,7 @@ export const MockDataGeneratorView: React.FC<MockDataGeneratorViewProps> = ({
         onSelectRelated={onSelectRelated}
         onResetOrClear={handleResetToDefaults}
         resetLabel="Reset to Defaults"
+        hideFileActions={true}
       />
 
       {/* Preset Quick Selectors */}
@@ -658,35 +660,33 @@ export const MockDataGeneratorView: React.FC<MockDataGeneratorViewProps> = ({
             className="p-4 rounded-2xl border shadow-sm space-y-3 flex flex-col"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[color:var(--ink-muted)]">
-                  Generated {exportFormat.toUpperCase()} Payload
-                </span>
-                <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[color:var(--surface-2)] border text-[color:var(--ink-muted)]" style={{ borderColor: 'var(--line)' }}>
-                  {rowCount.toLocaleString()} records · {Math.round(generatedOutput.length / 1024)} KB
-                </span>
-              </div>
+            <EditorPaneHeader
+              idPrefix="mock-data-output"
+              title={`GENERATED ${exportFormat.toUpperCase()} PAYLOAD`}
+              badge={`${rowCount.toLocaleString()} records`}
+              charCount={generatedOutput.length}
+              lineCount={generatedOutput ? generatedOutput.split('\n').length : 0}
+              rightSlot={
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleCopy}
+                    className="px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer hover:border-[color:var(--brand)]"
+                    style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copied ? 'Copied' : 'Copy'}</span>
+                  </button>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleCopy}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer hover:border-[color:var(--brand)]"
-                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}
-                >
-                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copied ? 'Copied' : 'Copy'}</span>
-                </button>
-
-                <button
-                  onClick={handleDownload}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[color:var(--brand)] text-white flex items-center gap-1.5 shadow-xs transition-opacity hover:opacity-90 cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download .{exportFormat === 'json' ? 'json' : exportFormat === 'csv' ? 'csv' : 'sql'}</span>
-                </button>
-              </div>
-            </div>
+                  <button
+                    onClick={handleDownload}
+                    className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[color:var(--brand)] text-white flex items-center gap-1.5 shadow-xs transition-opacity hover:opacity-90 cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download .{exportFormat === 'json' ? 'json' : exportFormat === 'csv' ? 'csv' : 'sql'}</span>
+                  </button>
+                </div>
+              }
+            />
 
             {/* Code Mirror Viewer */}
             <div className="rounded-xl overflow-hidden border" style={{ borderColor: 'var(--line)' }}>

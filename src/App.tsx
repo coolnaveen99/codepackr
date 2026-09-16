@@ -28,6 +28,7 @@ import { EdiToolsView } from './components/tools/EdiToolsView';
 import { XmlToolsView } from './components/xml/XmlToolsView';
 import { AdminPortal } from './components/admin/AdminPortal';
 import { AdminLoginModal } from './components/admin/AdminLoginModal';
+import { BugReportModal } from './components/BugReportModal';
 import { GlobalBanner } from './components/GlobalBanner';
 import { useToolGovernance } from './lib/useToolGovernance';
 import { useAdminAuth } from './lib/useAdminAuth';
@@ -72,6 +73,7 @@ export const App: React.FC = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSitemapModalOpen, setIsSitemapModalOpen] = useState(false);
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
+  const [isBugModalOpen, setIsBugModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [smartPasteInput, setSmartPasteInput] = useState<string>('');
@@ -363,6 +365,7 @@ export const App: React.FC = () => {
           onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
           isAdmin={isAuthenticated}
           onGoAdmin={() => { setActivePage('admin'); setActiveTool(null); window.history.pushState({}, '', '/admin'); }}
+          onOpenBugReport={() => setIsBugModalOpen(true)}
         />
         <GlobalBanner />
         <div className="flex-1 flex w-full max-w-[1600px] mx-auto">
@@ -406,10 +409,12 @@ export const App: React.FC = () => {
               window.scrollTo({ top: 0, behavior: 'smooth' });
             } else setIsAdminLoginOpen(true);
           }}
+          onOpenBugReport={() => setIsBugModalOpen(true)}
         />
         <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} onSelectTool={navigateToTool} />
         <SitemapModal isOpen={isSitemapModalOpen} onClose={() => setIsSitemapModalOpen(false)} onSelectTool={navigateToTool} onNavigateAdmin={() => { setActivePage('admin'); setActiveTool(null); window.history.pushState({}, '', '/admin'); }} />
         <AdminLoginModal isOpen={isAdminLoginOpen} onClose={() => setIsAdminLoginOpen(false)} onSuccess={() => { setIsAdminLoginOpen(false); setActivePage('admin'); setActiveTool(null); window.history.pushState({}, '', '/admin'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+        <BugReportModal isOpen={isBugModalOpen} onClose={() => setIsBugModalOpen(false)} tool={activeTool} onNavigateContact={navigateToContact} />
       </div>
     </CurrencyProvider>
   );

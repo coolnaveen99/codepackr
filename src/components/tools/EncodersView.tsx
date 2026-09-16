@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Copy, Check, RotateCcw, ArrowDownUp, Shield, KeyRound, Image as ImageIcon, CheckCircle2, Loader2, Cpu } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Copy, Check, RotateCcw, ArrowDownUp, Shield, KeyRound, Image as ImageIcon, CheckCircle2, Loader2, Cpu, Upload, Download, Sparkles, Trash2 } from 'lucide-react';
 import { ToolDef } from '../../types';
 import { ToolHeader } from '../ToolHeader';
 import { JwtDebugger } from './JwtDebugger';
 import { popSmartPastePayload } from '../../lib/workspace';
 import { computeHashesInWorker, simpleMd5 } from '../../lib/workerBridge';
+import { downloadContentAsFile } from '../../lib/fileIO';
+import { EditorPaneHeader } from '../common/EditorPaneHeader';
 
 interface EncodersViewProps {
   tool: ToolDef;
@@ -214,6 +216,51 @@ export const EncodersView: React.FC<EncodersViewProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLoadSample = () => {
+    const sample =
+      tool.id === 'base64'
+        ? mode === 'encode'
+          ? 'Hello from CodePackr developer suite!'
+          : 'SGVsbG8gZnJvbSBDb2RlUGFja3IgZGV2ZWxvcGVyIHN1aXRlIQ=='
+        : tool.id === 'url-encode'
+        ? mode === 'encode'
+          ? 'https://www.codepackr.com/search?q=developer tools & privacy=100%'
+          : 'https%3A%2F%2Fwww.codepackr.com%2Fsearch%3Fq%3Ddeveloper%20tools%20%26%20privacy%3D100%25'
+        : tool.id === 'html-entity'
+        ? mode === 'encode'
+          ? '<div class="alert">"Warning" & \'Info\' © 2026</div>'
+          : '&lt;div class=&quot;alert&quot;&gt;&quot;Warning&quot; &amp; &#39;Info&#39; &copy; 2026&lt;/div&gt;'
+        : 'Sample text';
+    setInput(sample);
+    processInput(sample, mode);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const content = (ev.target?.result as string) || '';
+      setInput(content);
+      processInput(content, mode);
+    };
+    reader.readAsText(file);
+    if (e.target) e.target.value = '';
+  };
+
+  const handleDownloadOutput = () => {
+    if (!output) return;
+    downloadContentAsFile(output, `${tool.id}-${mode}.txt`);
+  };
+
+  const handleClear = () => {
+    setInput('');
+    setOutput('');
+    setError(null);
+  };
+
   const handleClearWorkspace = () => {
     setInput('');
     setOutput('');
@@ -233,38 +280,138 @@ export const EncodersView: React.FC<EncodersViewProps> = ({
         onSelectRelated={onSelectRelated}
         onResetOrClear={handleClearWorkspace}
         resetLabel="Clear Workspace"
+        onUploadFile={(content) => {
+          setInput(content);
+          processInput(content, mode);
+        }}
+        downloadContent={output || input}
+        inputContent={input}
+        outputContent={output}
+        hideFileActions={true}
       />
 
-      {/* Mode Bar */}
+      {/* Mode & Action Toolbar for 2-column encoders */}
       {(tool.id === 'base64' || tool.id === 'url-encode' || tool.id === 'html-entity') && (
-        <div className="flex items-center gap-2 p-2 rounded-xl border mb-4 shadow-sm"
+        <div
+          className="p-3.5 rounded-2xl border space-y-3 shadow-xs mb-4"
           style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
         >
-          <button
-            onClick={() => {
-              setMode('encode');
-              processInput(input, 'encode');
-            }}
-            className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              mode === 'encode' ? 'bg-[var(--brand)] text-white shadow-sm' : 'hover:opacity-80'
-            }`}
+          {/* Row 1: Mode Selection & Status */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold mr-1" style={{ color: 'var(--muted)' }}>
+                Mode:
+              </span>
+              <button
+                onClick={() => {
+                  setMode('encode');
+                  processInput(input, 'encode');
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  mode === 'encode'
+                    ? 'bg-[var(--brand)] text-white shadow-xs'
+                    : 'border border-[var(--line)] bg-[var(--surface-2)] text-[var(--ink)] hover:opacity-80'
+                }`}
+              >
+                Encode
+              </button>
+              <button
+                onClick={() => {
+                  setMode('decode');
+                  processInput(input, 'decode');
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  mode === 'decode'
+                    ? 'bg-[var(--brand)] text-white shadow-xs'
+                    : 'border border-[var(--line)] bg-[var(--surface-2)] text-[var(--ink)] hover:opacity-80'
+                }`}
+              >
+                Decode
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs border" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)' }}>
+              <span style={{ color: 'var(--muted)' }}>Active Mode:</span>
+              <strong className="capitalize font-semibold text-[var(--brand)]">{mode}</strong>
+            </div>
+          </div>
+
+          {/* Row 2: File Import, Sample, Clear (Moved to Next Line) & Export / Copy */}
+          <div
+            className="pt-2.5 border-t flex flex-wrap items-center justify-between gap-3"
+            style={{ borderColor: 'var(--line)' }}
           >
-            Encode
-          </button>
-          <button
-            onClick={() => {
-              setMode('decode');
-              processInput(input, 'decode');
-            }}
-            className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              mode === 'decode' ? 'bg-[var(--brand)] text-white shadow-sm' : 'hover:opacity-80'
-            }`}
-          >
-            Decode
-          </button>
-          <span className="text-xs ml-auto pr-2" style={{ color: 'var(--muted)' }}>
-            Mode: <strong className="capitalize">{mode}</strong>
-          </span>
+            {/* Left Action Group */}
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Hidden File Input */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept=".txt,.json,.xml,.html,.md"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
+                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                title="Import file to encode/decode"
+              >
+                <Upload className="w-3.5 h-3.5 text-[var(--brand)]" />
+                <span>Import File</span>
+              </button>
+
+              <button
+                onClick={handleLoadSample}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
+                style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--ink)' }}
+                title="Load sample test data"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>Sample</span>
+              </button>
+
+              {input && (
+                <button
+                  onClick={handleClear}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity cursor-pointer"
+                  style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--line)', color: 'var(--muted)' }}
+                  title="Clear input and output"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Clear</span>
+                </button>
+              )}
+            </div>
+
+            {/* Right Action Group */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleDownloadOutput}
+                disabled={!output}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl text-white shadow-xs disabled:opacity-40 cursor-pointer"
+                style={{ backgroundColor: 'var(--brand)' }}
+                title={`Export converted result as ${tool.id}-${mode}.txt`}
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Export {tool.id}-{mode}.txt</span>
+              </button>
+
+              <button
+                onClick={() => copyToClipboard(output)}
+                disabled={!output}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl border disabled:opacity-40 cursor-pointer"
+                style={{
+                  backgroundColor: copied ? 'var(--ok, #10b981)' : 'var(--surface-2)',
+                  color: copied ? '#ffffff' : 'var(--ink)',
+                  borderColor: copied ? 'var(--ok, #10b981)' : 'var(--line)',
+                }}
+              >
+                {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copied ? 'Copied' : 'Copy Output'}</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -417,16 +564,14 @@ export const EncodersView: React.FC<EncodersViewProps> = ({
           <div className="flex flex-col rounded-2xl border overflow-hidden shadow-sm"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <div className="flex items-center justify-between px-4 py-2.5 border-b text-xs font-semibold"
-              style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface-2)', color: 'var(--muted)' }}
-            >
-              <span>INPUT</span>
-              <button
-                onClick={() => { setInput(''); setOutput(''); }}
-                className="text-[11px] hover:underline"
-              >
-                Clear
-              </button>
+            <div className="px-4 py-2.5 border-b" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface-2)' }}>
+              <EditorPaneHeader
+                idPrefix="encoder-input"
+                title="INPUT"
+                badge={mode === 'encode' ? 'PLAIN' : 'ENCODED'}
+                charCount={input.length}
+                lineCount={input ? input.split('\n').length : 0}
+              />
             </div>
             <textarea
               value={input}
@@ -444,19 +589,14 @@ export const EncodersView: React.FC<EncodersViewProps> = ({
           <div className="flex flex-col rounded-2xl border overflow-hidden shadow-sm"
             style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <div className="flex items-center justify-between px-4 py-2.5 border-b text-xs font-semibold"
-              style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface-2)', color: 'var(--muted)' }}
-            >
-              <span>RESULT ({mode.toUpperCase()})</span>
-              <button
-                onClick={() => copyToClipboard(output)}
-                disabled={!output}
-                className="flex items-center gap-1 text-[11px] font-semibold hover:underline disabled:opacity-40"
-                style={{ color: 'var(--brand)' }}
-              >
-                <Copy className="w-3 h-3" />
-                <span>Copy</span>
-              </button>
+            <div className="px-4 py-2.5 border-b" style={{ borderColor: 'var(--line)', backgroundColor: 'var(--surface-2)' }}>
+              <EditorPaneHeader
+                idPrefix="encoder-output"
+                title={`RESULT (${mode.toUpperCase()})`}
+                badge={mode === 'encode' ? 'ENCODED' : 'DECODED'}
+                charCount={output.length}
+                lineCount={output ? output.split('\n').length : 0}
+              />
             </div>
             <textarea
               readOnly
