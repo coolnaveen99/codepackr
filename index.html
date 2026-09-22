@@ -47,12 +47,20 @@
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#5B52E8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Theme initialization: Enforces light mode across the entire application and clears any legacy dark mode settings. -->
+    <script>
+      try {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('codepackr_theme', 'light');
+      } catch (e) {}
+    </script>
     <title>Codepackr - Free Online Developer Tools</title>
     <meta name="description" content="Free online developer tools for formatting, validating, encoding, converting, and inspecting data locally in your browser." />
     <meta name="keywords" content="developer tools, edi tools, x12, edifact, edi 997 generator, json to edi, xsd generator, xslt transformer, xpath tester, xml tools, json formatter, base64 encoder, diff checker, regex tester, jwt decoder, sql formatter" />
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
 
+    <!-- Google AdSense: Monetization tag used to display non-intrusive developer-focused advertisements. Publisher Account ID: ca-pub-7526363571565796. Loads asynchronously to avoid blocking page rendering. -->
     <meta name="google-adsense-account" content="ca-pub-7526363571565796" />
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7526363571565796"
      crossorigin="anonymous"></script>
