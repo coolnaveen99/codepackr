@@ -1,5 +1,5 @@
 // src/components/CodepackrFamilyBar.tsx
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChevronDown, ExternalLink, Code2, BookOpen, Scale, TrendingUp, Sparkles } from "lucide-react";
 import { CODEPACKR_FAMILY, CURRENT_PRODUCT, FamilyProductId } from "../lib/codepackr-family";
 
