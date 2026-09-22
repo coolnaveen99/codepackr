@@ -1,11 +1,11 @@
 import React from 'react';
-import { Search, Moon, Sun, Terminal, Star, Menu, Shield, Bug } from 'lucide-react';
+import { Search, Terminal, Star, Menu, Shield, Bug } from 'lucide-react';
 import { CategoryFilter } from '../types';
 import { useBookmarks } from '../lib/bookmarks';
 
 interface NavbarProps {
-  theme: 'light' | 'dark';
-  onToggleTheme: () => void;
+  theme?: 'light' | 'dark';
+  onToggleTheme?: () => void;
   onOpenSearch: () => void;
   selectedCategory?: CategoryFilter;
   onSelectCategory?: (cat: CategoryFilter) => void;
@@ -40,7 +40,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onGoAdmin,
   onOpenBugReport,
 }) => {
-  const darkMode = theme === 'dark';
   const { count: bookmarkCount } = useBookmarks();
   const [isMac, setIsMac] = React.useState(false);
 
@@ -192,19 +191,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <Bug className="w-5 h-5" />
               </button>
             )}
-
-            <button
-              id="theme-toggle-btn"
-              onClick={onToggleTheme}
-              className="group p-2 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:border-[color:var(--brand)]/40 hover:bg-[color:var(--surface-elevated)] hover:scale-[1.05] active:scale-95 transition-all duration-200 cursor-pointer shadow-xs"
-              aria-label="Toggle Theme"
-            >
-              {darkMode ? (
-                <Sun className="w-5 h-5 text-amber-400 transition-transform duration-500 group-hover:rotate-90" />
-              ) : (
-                <Moon className="w-5 h-5 text-blue-500 transition-transform duration-500 group-hover:-rotate-45" />
-              )}
-            </button>
           </div>
         </div>
       </div>
