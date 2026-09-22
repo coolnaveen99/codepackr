@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TOOLS } from './data/tools';
 import { ToolDef, CategoryFilter } from './types';
+import { CodepackrFamilyBar } from './components/CodepackrFamilyBar';
 import { Navbar } from './components/Navbar';
 import { SearchModal } from './components/SearchModal';
 import { HomeDashboard } from './components/HomeDashboard';
@@ -48,16 +49,11 @@ interface HistorySnapshot {
 }
 
 export const App: React.FC = () => {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    const saved = safeLocalStorage.getItem('codepackr_theme');
-    if (saved === 'dark' || saved === 'light') return saved;
-    try {
-      if (typeof window !== 'undefined' && window.matchMedia) {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      }
-    } catch {}
-    return 'dark';
-  });
+  // Always enforce light theme
+  useEffect(() => {
+    document.documentElement.classList.remove('dark');
+    safeLocalStorage.setItem('codepackr_theme', 'light');
+  }, []);
 
   const [initialRoute] = useState(() => resolveCurrentRoute());
   const [activeTool, setActiveTool] = useState<ToolDef | null>(() => initialRoute.tool);
@@ -81,12 +77,6 @@ export const App: React.FC = () => {
   const { isAuthenticated } = useAdminAuth();
 
   const inAppHistoryRef = useRef<HistorySnapshot[]>([]);
-
-  useEffect(() => {
-    if (theme === 'dark') document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
-    safeLocalStorage.setItem('codepackr_theme', theme);
-  }, [theme]);
 
   useEffect(() => {
     const rawSlug = typeof window !== 'undefined'
@@ -353,9 +343,9 @@ export const App: React.FC = () => {
   return (
     <CurrencyProvider>
       <div className="min-h-screen flex flex-col font-sans selection:bg-[color:var(--brand)] selection:text-white bg-[color:var(--bg)] text-[color:var(--ink)]">
+        <CodepackrFamilyBar />
         <Navbar
-          theme={theme}
-          onToggleTheme={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+          theme="light"
           onOpenSearch={() => setIsSearchOpen(true)}
           selectedCategory={selectedCategory}
           onSelectCategory={handleSelectCategory}
