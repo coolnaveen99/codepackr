@@ -18,13 +18,7 @@ interface NavbarProps {
   onOpenBugReport?: () => void;
 }
 
-const FinanceIcon = ({ className = 'w-3.5 h-3.5' }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <line x1="18" y1="20" x2="18" y2="10" />
-    <line x1="12" y1="20" x2="12" y2="4" />
-    <line x1="6" y1="20" x2="6" y2="14" />
-  </svg>
-);
+
 
 export const Navbar: React.FC<NavbarProps> = ({
   theme,
@@ -57,18 +51,13 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
-  // Shared styles WITHOUT display utilities (avoid Tailwind conflict with hidden/sm:inline-flex)
-  // Option D — Dual-Tone Gradient Pill (emerald → teal)
-  const financePillBase =
-    'items-center gap-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0 shadow-sm hover:from-emerald-600 hover:to-teal-600 transition-all cursor-pointer group shrink-0';
-
   return (
-    <header id="main-header" className="sticky top-0 z-40 w-full border-b backdrop-blur-md transition-colors border-[color:var(--border)] bg-[color:var(--surface)]/85">
+    <header id="main-header" className="sticky top-0 z-40 w-full border-b backdrop-blur-md transition-colors border-[color:var(--border)] bg-[color:var(--surface)]/90">
       <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-2 sm:gap-3 min-w-0">
 
-          {/* Left: Menu + Brand + Finance link */}
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          {/* Left: Menu + Brand */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {onToggleSidebar && (
               <button
                 id="sidebar-toggle-btn"
@@ -91,34 +80,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="flex items-center gap-2 group text-left cursor-pointer focus:outline-none min-w-0 shrink"
               aria-label="CodePackr home"
             >
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-sm bg-[color:var(--brand)] transition-transform group-hover:scale-105 shrink-0">
+              <div className="size-9 rounded-xl flex items-center justify-center font-bold text-white shadow-sm bg-gradient-to-br from-blue-600 to-indigo-600 transition-transform group-hover:scale-105 shrink-0 ring-1 ring-blue-500/20">
                 <Terminal className="w-5 h-5" />
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="font-bold text-base sm:text-lg leading-tight tracking-tight text-[color:var(--ink)] truncate">
                   CodePackr
                 </span>
-                <span className="hidden sm:block text-[10px] font-mono font-medium tracking-wider text-[color:var(--ink-muted)] uppercase">
-                  Enterprise
+                <span className="hidden sm:block text-[10px] font-mono font-medium tracking-wider text-blue-600 dark:text-blue-400 uppercase">
+                  Dev Suite
                 </span>
               </div>
-            </a>
-
-            {/* Single Finance cross-link — short on mobile, full on sm+ */}
-            <a
-              id="nav-codepackr-finance-link"
-              href="https://finance.codepackr.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Codepackr Finance — Calculators & Planning"
-              aria-label="Open Codepackr Finance"
-              className={`inline-flex ${financePillBase} px-2.5 sm:px-3 py-1.5 ml-0.5`}
-            >
-              <span className="text-white">
-                <FinanceIcon />
-              </span>
-              <span className="sm:hidden">Finance</span>
-              <span className="hidden sm:inline">Codepackr Finance</span>
             </a>
           </div>
 
@@ -127,11 +99,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="search-trigger-btn"
               onClick={onOpenSearch}
-              className="w-full flex items-center justify-between px-4 py-2 text-sm rounded-xl border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink-muted)] hover:border-[color:var(--brand)] hover:ring-2 hover:ring-[color:var(--brand)]/15 focus:outline-none transition-all duration-200 hover:scale-[1.008] shadow-sm cursor-pointer group"
+              className="w-full flex items-center justify-between px-4 py-2 text-sm rounded-xl border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink-muted)] hover:border-[color:var(--brand)] hover:ring-2 hover:ring-[color:var(--brand)]/15 focus:outline-none transition-all duration-200 hover:scale-[1.005] shadow-xs cursor-pointer group"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <Search className="w-4 h-4 group-hover:text-[color:var(--brand)] transition-colors shrink-0" />
-                <span className="truncate group-hover:text-[color:var(--ink)] transition-colors">Search tools...</span>
+                <span className="truncate group-hover:text-[color:var(--ink)] transition-colors">Search tools & formatters...</span>
               </div>
               <kbd className="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono font-medium rounded-md border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--ink-muted)] group-hover:border-[color:var(--brand)]/40 transition-colors shrink-0">
                 <span className="text-[10px]">{isMac ? '⌘' : 'Ctrl'}</span>K
