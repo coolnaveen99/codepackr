@@ -1,4 +1,4 @@
-# ⚡ CodePackr
+# ⚡ CodePackr.
 
 > **100% Client-Side Developer Utilities, Privacy-First Cryptography & EDI Transaction Hub**  
 > Fast, distraction-free, zero-backend web utilities running entirely within your browser.
