@@ -337,6 +337,145 @@ code, pre, kbd, samp, .font-mono {
   }
 }
 
+
+/* ==========================================================================
+   Mobile App Shell
+   ========================================================================== */
+html {
+  min-width: 320px;
+  background: var(--bg);
+  overscroll-behavior-x: none;
+}
+
+body {
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+@media (max-width: 767px) {
+  #main-header {
+    height: 60px;
+  }
+
+  #main-header > div > div {
+    height: 60px;
+  }
+
+  #main-header .mobile-hide-label {
+    display: none;
+  }
+
+  #home-dashboard {
+    gap: 1.25rem;
+    padding-bottom: 1rem;
+  }
+
+  #home-dashboard > div:first-child {
+    padding: 1.5rem 1rem;
+    border-radius: 1.25rem;
+  }
+
+  #home-dashboard > div:first-child h1 {
+    font-size: clamp(1.8rem, 8vw, 2.35rem);
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+  }
+
+  #home-dashboard > div:first-child p {
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  #home-dashboard > div:first-child .flex.flex-wrap {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  #home-dashboard > div:first-child .flex.flex-wrap > button {
+    width: 100%;
+    min-height: 48px;
+    justify-content: center;
+  }
+
+  #tool-grid {
+    top: 60px;
+    margin-inline: -0.75rem;
+    padding: 0.65rem 0.75rem;
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+    backdrop-filter: blur(14px);
+  }
+
+  #tool-grid h2 {
+    font-size: 1rem;
+  }
+
+  #home-dashboard .grid {
+    gap: 0.75rem;
+  }
+
+  #home-dashboard .grid > div {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  #home-dashboard .grid > div:hover {
+    transform: none;
+    scale: 1;
+    box-shadow: none;
+  }
+
+  #home-dashboard .grid > div:active {
+    transform: scale(0.985);
+  }
+
+  .mobile-app-nav {
+    box-shadow: 0 -8px 30px rgba(15, 23, 42, 0.08);
+  }
+
+  #app-sidebar {
+    width: min(88vw, 340px);
+    height: calc(100dvh - 60px);
+    top: 60px;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  #app-sidebar > div:last-child {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+
+  #main-footer {
+    margin-top: 2rem;
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+  }
+
+  /* Prevent wide editor/tool layouts from creating horizontal page scroll. */
+  .cm-editor,
+  pre,
+  code,
+  table {
+    max-width: 100%;
+  }
+
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1279px) {
+  #home-dashboard > div:first-child {
+    padding-inline: 2rem;
+  }
+}
+
 /* ==========================================================================
    CodePackr Print & PDF Engine (A4 Portrait & Specialized Media)
    ========================================================================== */
