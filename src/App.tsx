@@ -37,6 +37,8 @@ import { resolveCurrentRoute, getToolPath } from './lib/urls';
 import { updateDocumentMetadata } from './lib/seo';
 import { CurrencyProvider } from './lib/CurrencyContext';
 import { safeLocalStorage } from './lib/storage';
+import { useBookmarks } from './lib/bookmarks';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { popSmartPastePayload } from './lib/workspace';
 import { AlertTriangle, Lock, Shield } from 'lucide-react';
 
@@ -74,6 +76,7 @@ export const App: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [smartPasteInput, setSmartPasteInput] = useState<string>('');
   const { getToolStatus, isToolVisible } = useToolGovernance();
+  const { count: bookmarkCount } = useBookmarks();
   const { isAuthenticated } = useAdminAuth();
 
   const inAppHistoryRef = useRef<HistorySnapshot[]>([]);
@@ -342,7 +345,7 @@ export const App: React.FC = () => {
 
   return (
     <CurrencyProvider>
-      <div className="min-h-screen flex flex-col font-sans selection:bg-[color:var(--brand)] selection:text-white bg-[color:var(--bg)] text-[color:var(--ink)]">
+      <div className="min-h-screen flex flex-col font-sans selection:bg-[color:var(--brand)] selection:text-white bg-[color:var(--bg)] text-[color:var(--ink)] pb-14 lg:pb-0">
         <CodepackrFamilyBar />
         <Navbar
           theme="light"
@@ -372,7 +375,7 @@ export const App: React.FC = () => {
             onGoPrivacy={() => navigateToPrivacy('privacy')}
             onGoTerms={() => navigateToPrivacy('terms')}
           />
-          <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-10 py-8 lg:py-10">
+          <main className="flex-1 min-w-0 px-3 sm:px-6 lg:px-10 py-5 sm:py-8 lg:py-10">
             {activePage === 'admin' ? (
               <AdminPortal onBack={navigateBack} />
             ) : activePage === 'contact' ? (
@@ -388,6 +391,14 @@ export const App: React.FC = () => {
             )}
           </main>
         </div>
+        <MobileBottomNav
+          active={activeTool ? 'home' : isSearchOpen ? 'search' : selectedCategory === 'bookmarks' ? 'favorites' : isSidebarOpen ? 'menu' : 'home'}
+          onHome={() => { setIsSidebarOpen(false); navigateToHome(); }}
+          onSearch={() => { setIsSidebarOpen(false); setIsSearchOpen(true); }}
+          onFavorites={() => { setIsSidebarOpen(false); handleSelectCategory('bookmarks'); }}
+          onMenu={() => setIsSidebarOpen(true)}
+          favoriteCount={bookmarkCount}
+        />
         <Footer
           onGoHome={navigateToHome}
           onGoContact={navigateToContact}
