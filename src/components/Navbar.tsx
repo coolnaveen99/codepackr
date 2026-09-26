@@ -54,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header id="main-header" className="sticky top-0 z-40 w-full border-b backdrop-blur-md transition-colors border-[color:var(--border)] bg-[color:var(--surface)]/90">
       <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-2 sm:gap-3 min-w-0">
+        <div className="flex items-center justify-between h-14 sm:h-16 gap-2 sm:gap-3 min-w-0">
 
           {/* Left: Menu + Brand */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -62,7 +62,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="sidebar-toggle-btn"
                 onClick={onToggleSidebar}
-                className="p-2 rounded-xl border border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)] transition-colors cursor-pointer shrink-0"
+                className="p-2 rounded-xl border border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)] transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                 aria-label="Toggle navigation sidebar"
               >
                 <Menu className="w-5 h-5" />
@@ -115,7 +115,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={onOpenSearch}
-              className="md:hidden p-2 rounded-xl border border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)] active:scale-95 transition-all cursor-pointer"
+              className="md:hidden p-2 rounded-xl border border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:bg-[color:var(--surface-elevated)] active:scale-95 transition-all cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Search tools"
             >
               <Search className="w-5 h-5" />
@@ -124,7 +124,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="nav-bookmarks-btn"
               onClick={handleSelectBookmarks}
-              className={`px-2 sm:px-3 py-1.5 text-sm font-medium rounded-xl border transition-all duration-200 hover:scale-[1.03] active:scale-[0.98] flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm ${
+              className={`px-2 sm:px-3 py-1.5 text-sm font-medium rounded-xl border transition-all duration-200 hover:scale-[1.03] active:scale-[0.98] flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm min-h-[44px] ${
                 selectedCategory === 'bookmarks'
                   ? 'bg-[color:var(--warning)] text-white border-[color:var(--warning)] shadow-md'
                   : 'bg-[color:var(--surface)] border-[color:var(--border)] text-[color:var(--ink-muted)] hover:text-[color:var(--ink)] hover:border-[color:var(--border-hover)]'
@@ -156,7 +156,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="nav-bug-report-btn"
                 onClick={onOpenBugReport}
-                className="p-2 rounded-xl border border-rose-500/30 bg-rose-500/5 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15 hover:border-rose-500/50 hover:scale-[1.05] active:scale-95 transition-all duration-200 cursor-pointer shadow-xs"
+                className="p-2 rounded-xl border border-rose-500/30 bg-rose-500/5 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15 hover:border-rose-500/50 hover:scale-[1.05] active:scale-95 transition-all duration-200 cursor-pointer shadow-xs min-h-[44px] min-w-[44px] flex items-center justify-center"
                 title="Report a Bug (Automatic Diagnostics)"
                 aria-label="Report a Bug"
               >

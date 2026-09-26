@@ -3,6 +3,8 @@ import { TOOLS } from './data/tools';
 import { ToolDef, CategoryFilter } from './types';
 import { CodepackrFamilyBar } from './components/CodepackrFamilyBar';
 import { Navbar } from './components/Navbar';
+import { MobileBottomNav, MobileTab } from './components/MobileBottomNav';
+import { useBookmarks } from './lib/bookmarks';
 import { SearchModal } from './components/SearchModal';
 import { HomeDashboard } from './components/HomeDashboard';
 import { Sidebar } from './components/Sidebar';
@@ -72,6 +74,8 @@ export const App: React.FC = () => {
   const [isBugModalOpen, setIsBugModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [mobileTab, setMobileTab] = useState<MobileTab>('home');
+  const { count: bookmarkCount } = useBookmarks();
   const [smartPasteInput, setSmartPasteInput] = useState<string>('');
   const { getToolStatus, isToolVisible } = useToolGovernance();
   const { isAuthenticated } = useAdminAuth();
@@ -122,7 +126,6 @@ export const App: React.FC = () => {
         setActivePage('home');
       }
 
-      // Keep in-app history synchronized when browser forward/back is used
       if (typeof window !== 'undefined') {
         const currentUrl = window.location.pathname + window.location.search;
         const matchIdx = inAppHistoryRef.current.findIndex((e) => e.url === currentUrl);
@@ -169,7 +172,6 @@ export const App: React.FC = () => {
   const navigateBack = () => {
     const currentUrl = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/';
 
-    // Pop any trailing entry that matches current URL
     while (
       inAppHistoryRef.current.length > 0 &&
       inAppHistoryRef.current[inAppHistoryRef.current.length - 1].url === currentUrl
@@ -190,13 +192,11 @@ export const App: React.FC = () => {
       return;
     }
 
-    // If browser session has history, navigate back
     if (typeof window !== 'undefined' && window.history.state?.appIndex > 0) {
       window.history.back();
       return;
     }
 
-    // Safe fallback when landing directly on a tool with no prior history in this tab
     if (activeTool) {
       const toolCategory = (activeTool.category as CategoryFilter) || 'all';
       setSelectedCategory(toolCategory);
@@ -226,6 +226,7 @@ export const App: React.FC = () => {
     setActiveTool(null);
     setSmartPasteInput('');
     setActivePage('home');
+    setMobileTab('home');
     const nextIndex = ((typeof window !== 'undefined' && window.history.state?.appIndex) || 0) + 1;
     window.history.pushState({ appIndex: nextIndex }, '', '/');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -255,6 +256,8 @@ export const App: React.FC = () => {
     setSelectedCategory(cat);
     setActiveTool(null);
     setActivePage('home');
+    if (cat === 'bookmarks') setMobileTab('saved');
+    else if (cat === 'all') setMobileTab('tools');
     const catUrl = cat !== 'all' ? `/?cat=${cat}` : '/';
     const nextIndex = ((typeof window !== 'undefined' && window.history.state?.appIndex) || 0) + 1;
     window.history.pushState({ appIndex: nextIndex }, '', catUrl);
@@ -267,6 +270,22 @@ export const App: React.FC = () => {
         }
       }, 50);
     } else window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleMobileTab = (tab: MobileTab) => {
+    setMobileTab(tab);
+    if (tab === 'home') {
+      navigateToHome();
+    } else if (tab === 'tools') {
+      handleSelectCategory('all');
+      setIsSidebarOpen(true);
+    } else if (tab === 'search') {
+      setIsSearchOpen(true);
+    } else if (tab === 'saved') {
+      handleSelectCategory('bookmarks');
+    } else if (tab === 'more') {
+      setIsSidebarOpen(true);
+    }
   };
 
   const renderTool = (tool: ToolDef) => {
@@ -372,7 +391,7 @@ export const App: React.FC = () => {
             onGoPrivacy={() => navigateToPrivacy('privacy')}
             onGoTerms={() => navigateToPrivacy('terms')}
           />
-          <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-10 py-8 lg:py-10">
+          <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-10 py-8 lg:py-10 cp-mobile-main-pad cp-page">
             {activePage === 'admin' ? (
               <AdminPortal onBack={navigateBack} />
             ) : activePage === 'contact' ? (
@@ -388,6 +407,11 @@ export const App: React.FC = () => {
             )}
           </main>
         </div>
+        <MobileBottomNav
+          activeTab={mobileTab}
+          onSelectTab={handleMobileTab}
+          bookmarkCount={bookmarkCount}
+        />
         <Footer
           onGoHome={navigateToHome}
           onGoContact={navigateToContact}

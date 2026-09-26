@@ -59,6 +59,41 @@
   --cat-security: #f43f5e;
   --cat-data: #14b8a6;
   --cat-finance: #10b981;
+
+  /* ==========================================================================
+     CodePackr Shared Mobile Design System (spec §04)
+     Consumed by all five products; only accent differs per brand.
+     ========================================================================== */
+  --cp-space-1: 4px;
+  --cp-space-2: 8px;
+  --cp-space-3: 12px;
+  --cp-space-4: 16px;
+  --cp-space-5: 20px;
+  --cp-space-6: 24px;
+  --cp-space-7: 32px;
+  --cp-space-8: 40px;
+  --cp-space-9: 48px;
+  --cp-space-10: 64px;
+
+  --cp-radius-sm: 10px;
+  --cp-radius-md: 14px;
+  --cp-radius-lg: 20px;
+  --cp-radius-xl: 24px;
+
+  --cp-touch-target: 44px;
+  --cp-mobile-padding: 16px;
+  --cp-header-height: 56px;
+  --cp-bottom-nav-height: 56px;
+
+  /* Elevation (shared, not invented per site) */
+  --cp-shadow-rest: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --cp-shadow-raised: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --cp-shadow-overlay: 0 12px 40px rgba(15, 23, 42, 0.14);
+
+  /* Motion (spec §17) */
+  --cp-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --cp-duration-micro: 150ms;
+  --cp-duration-sheet: 250ms;
 }
 
 .dark {
@@ -88,6 +123,10 @@
   --brand-2: var(--accent);
   --ok: var(--success);
   --warn: var(--danger);
+
+  --cp-shadow-rest: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --cp-shadow-raised: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --cp-shadow-overlay: 0 12px 40px rgba(0, 0, 0, 0.55);
 }
 
 body {
@@ -96,12 +135,55 @@ body {
   color: var(--ink);
   background-color: var(--bg);
   min-height: 100vh;
+  min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code, pre, kbd, samp, .font-mono {
   font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* ==========================================================================
+   Mobile foundation utilities (spec §06, §07, §22)
+   ========================================================================== */
+
+/* No unintentional horizontal scroll on normal content */
+.cp-no-h-scroll,
+.cp-page {
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.cp-break-anywhere {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Reserve space for fixed bottom nav on mobile */
+.cp-mobile-main-pad {
+  padding-bottom: calc(var(--cp-bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 12px);
+}
+
+@media (min-width: 1024px) {
+  .cp-mobile-main-pad {
+    padding-bottom: 0;
+  }
+}
+
+/* Minimum comfortable touch target */
+.cp-touch {
+  min-height: var(--cp-touch-target);
+  min-width: var(--cp-touch-target);
+}
+
+/* Safe-area helpers */
+.cp-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.cp-safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 /* Scrollbar Modernization */
@@ -368,6 +450,7 @@ code, pre, kbd, samp, .font-mono {
   #main-footer,
   #sidebar-toggle-btn,
   #global-banner,
+  #mobile-bottom-nav,
   .print\:hidden,
   button:not(.print-allow),
   input:not(.print-allow),
