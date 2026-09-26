@@ -70,7 +70,6 @@ export const App: React.FC = () => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const handler = (e: MediaQueryListEvent) => {
       const stored = safeLocalStorage.getItem('codepackr_theme');
-      // Only follow system if user has not explicitly chosen
       if (stored !== 'light' && stored !== 'dark') {
         setTheme(e.matches ? 'dark' : 'light');
       }
@@ -410,8 +409,8 @@ export const App: React.FC = () => {
             onToggleCollapse={() => setIsSidebarCollapsed((p) => !p)}
             selectedCategory={selectedCategory}
             onSelectCategory={handleSelectCategory}
-            onSelectTool={navigateToTool}
             onGoHome={navigateToHome}
+            onGoBookmarks={() => handleSelectCategory('bookmarks')}
             onGoContact={navigateToContact}
             onGoPrivacy={() => navigateToPrivacy('privacy')}
             onGoTerms={() => navigateToPrivacy('terms')}
