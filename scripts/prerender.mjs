@@ -106,6 +106,14 @@ for (const slug of pages) {
     /<meta property="og:url" content="[^"]*"/i,
     `<meta property="og:url" content="${canonicalUrl}"`
   );
+  html = html.replace(
+    /<meta property="og:image:alt" content="[^"]*"/i,
+    `<meta property="og:image:alt" content="${title}"`
+  );
+  html = html.replace(
+    /<meta name="twitter:image:alt" content="[^"]*"/i,
+    `<meta name="twitter:image:alt" content="${title}"`
+  );
 
   // Replace Twitter Card Tags
   html = html.replace(
