@@ -2,15 +2,15 @@ import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { initializeFirestore, getFirestore, setLogLevel, Firestore } from 'firebase/firestore';
 
-// Codepackr Firebase Production Configuration
+// Client Firebase config — values come from Vercel / .env.local
 export const firebaseConfig = {
-  apiKey: "AIzaSyARUk9QZbmUSWPT4oHIwm7ho6l0trjrem8",
-  authDomain: "codepackr-cf6b1.firebaseapp.com",
-  projectId: "codepackr-cf6b1",
-  storageBucket: "codepackr-cf6b1.firebasestorage.app",
-  messagingSenderId: "779918234930",
-  appId: "1:779918234930:web:a94837a6204de9026a732b",
-  measurementId: "G-TC54P43M6G",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 let app: FirebaseApp | undefined;
