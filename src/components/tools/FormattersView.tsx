@@ -1,1 +1,608 @@
-PLACEHOLDER_WILL_FAIL
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { Copy, Check, RotateCcw, Play, AlertTriangle, CheckCircle2, Trash2, Save, Clock, Loader2, Cpu, Upload, Download, Sparkles } from 'lucide-react';
+import { format as formatSQL } from 'sql-formatter';
+import yaml from 'js-yaml';
+import { ToolDef } from '../../types';
+import { ToolHeader } from '../ToolHeader';
+import { CodeEditor, SupportedLanguage } from '../CodeEditor';
+import { useWorkspace } from '../../lib/workspace';
+import { executeAsyncTransform, formatJsonInWorker, WorkerTaskResult } from '../../lib/workerBridge';
+import { readUploadedFile, downloadContentAsFile } from '../../lib/fileIO';
+import { EditorPaneHeader } from '../common/EditorPaneHeader';
+
+interface FormattersViewProps {
+  tool: ToolDef;
+  onBackToHome?: () => void;
+  onSelectRelated?: (t: ToolDef) => void;
+  initialInput?: string;
+}
+
+export const FormattersView: React.FC<FormattersViewProps> = ({
+  tool,
+  onBackToHome,
+  onSelectRelated,
+  initialInput = '',
+}) => {
+  const getDefaultSample = useCallback((): string => {
+    switch (tool.id) {
+      case 'json-formatter':
+        return '{"title":"CodePackr","tools":["json","jwt"],"rating":5,"active":true,"meta":{"offline":true,"version":"2026.1"}}';
+      case 'html-formatter':
+        return '<div class="container"><header><h1>Welcome</h1></header><main><p>Enterprise Utilities.</p></main></div>';
+      case 'css-formatter':
+        return '.card{background-color:#ffffff;border:1px solid #d8e0eb;border-radius:12px;padding:16px}.card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.08)}';
+      case 'sql-formatter':
+        return 'select u.id, u.name, count(o.id) as total from users u left join orders o on u.id = o.user_id where u.active = 1 group by u.id order by total desc limit 10;';
+      case 'xml-formatter':
+        return '<?xml version="1.0" encoding="UTF-8"?>\n<project name="codepackr"><version>1.0.0</version><features><feature>local-first</feature><feature>privacy</feature></features></project>';
+      case 'yaml-formatter':
+        return 'server:\n  host: 0.0.0.0\n  port: 3000\ntools:\n  - name: json\n    enabled: true\n  - name: sql\n    enabled: true';
+      case 'js-minifier':
+        return 'function calculateDiscount(price, percentage) {\n  // Apply discount\n  return price * (1 - (percentage / 100));\n}';
+      default:
+        return '';
+    }
+  }, [tool.id]);
+
+  const {
+    content: input,
+    setContent: setInput,
+    clearWorkspace,
+    resetToSample,
+    isSavedLocally,
+  } = useWorkspace(tool.id, initialInput || getDefaultSample());
+
+  const [output, setOutput] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [errorLine, setErrorLine] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [indent, setIndent] = useState<2 | 4 | 'tab'>(2);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [execTimeMs, setExecTimeMs] = useState<number | null>(null);
+  const [sortKeys, setSortKeys] = useState(false);
+  const [sqlDialect, setSqlDialect] = useState<'sql' | 'mysql' | 'postgresql' | 'tsql' | 'sqlite'>('sql');
+  const [sqlKeywordCase, setSqlKeywordCase] = useState<'upper' | 'lower' | 'preserve'>('upper');
+
+  // Determine language mode for CodeMirror
+  const editorLang = useMemo<SupportedLanguage>(() => {
+    switch (tool.id) {
+      case 'json-formatter':
+        return 'json';
+      case 'html-formatter':
+        return 'html';
+      case 'css-formatter':
+        return 'css';
+      case 'sql-formatter':
+        return 'sql';
+      case 'xml-formatter':
+        return 'xml';
+      case 'js-minifier':
+        return 'javascript';
+      case 'yaml-formatter':
+        return 'text';
+      default:
+        return 'text';
+    }
+  }, [tool.id]);
+
+  // Execute formatting with Worker / Async offloading
+  const executeFormatting = useCallback(
+    async (valToFormat: string, forceMinify = false) => {
+      setError(null);
+      setErrorLine(null);
+
+      if (!valToFormat.trim()) {
+        setOutput('');
+        setExecTimeMs(null);
+        return;
+      }
+
+      setIsProcessing(true);
+
+      let res: WorkerTaskResult<string>;
+
+      if (tool.id === 'json-formatter') {
+        // Strict Web Worker execution for native JSON parse & stringify
+        res = await formatJsonInWorker(valToFormat, indent, forceMinify);
+        // Optional key sorting after successful format
+        if (res.success && res.data !== undefined && sortKeys && !forceMinify) {
+          try {
+            const parsed = JSON.parse(res.data);
+            const space = indent === 'tab' ? '\t' : (indent as number);
+            const sortDeep = (obj: any): any => {
+              if (Array.isArray(obj)) return obj.map(sortDeep);
+              if (obj && typeof obj === 'object') {
+                return Object.keys(obj)
+                  .sort()
+                  .reduce((acc: any, k) => {
+                    acc[k] = sortDeep(obj[k]);
+                    return acc;
+                  }, {});
+              }
+              return obj;
+            };
+            res = { ...res, data: JSON.stringify(sortDeep(parsed), null, space) };
+          } catch {
+            /* keep original formatted output */
+          }
+        }
+      } else if (tool.id === 'sql-formatter') {
+        // SQL formatting with async yielding pattern to prevent UI freeze
+        res = await executeAsyncTransform(
+          () =>
+            formatSQL(valToFormat, {
+              language: sqlDialect,
+              tabWidth: indent === 'tab' ? 2 : (indent as number),
+              keywordCase: sqlKeywordCase,
+            }),
+          { payloadLength: valToFormat.length }
+        );
+      } else {
+        res = await executeAsyncTransform(
+          () => {
+            if (tool.id === 'html-formatter') {
+              if (forceMinify) {
+                return valToFormat
+                  .replace(/<!--[\s\S]*?-->/g, '')
+                  .replace(/>\s+</g, '><')
+                  .replace(/\s+/g, ' ')
+                  .trim();
+              }
+              let formatted = '';
+              const reg = /(>)(<)(\/*)/g;
+              let xmlStr = valToFormat.replace(reg, '$1\r\n$2$3');
+              let pad = 0;
+              const indentStr = indent === 'tab' ? '\t' : ' '.repeat(indent);
+              xmlStr.split('\r\n').forEach((node) => {
+                let indentLevel = 0;
+                if (node.match(/.+<\/\w[^>]*>$/)) {
+                  indentLevel = 0;
+                } else if (node.match(/^<\/\w/)) {
+                  if (pad !== 0) pad -= 1;
+                } else if (node.match(/^<\w[^>]*[^\/]>.*$/)) {
+                  indentLevel = 1;
+                } else {
+                  indentLevel = 0;
+                }
+                let padding = '';
+                for (let i = 0; i < pad; i++) padding += indentStr;
+                formatted += padding + node.trim() + '\r\n';
+                pad += indentLevel;
+              });
+              return formatted.trim();
+            } else if (tool.id === 'css-formatter') {
+              if (forceMinify) {
+                return valToFormat
+                  .replace(/\/\*[\s\S]*?\*\//g, '')
+                  .replace(/\s+/g, ' ')
+                  .replace(/\s*([\{\};:,])\s*/g, '$1')
+                  .replace(/;}/g, '}')
+                  .trim();
+              } else {
+                return valToFormat
+                  .replace(/\s+/g, ' ')
+                  .replace(/\{\s*/g, ' {\n  ')
+                  .replace(/;\s*/g, ';\n  ')
+                  .replace(/\s*\}\s*/g, '\n}\n\n')
+                  .replace(/\n\s*\n\s*\}/g, '\n}')
+                  .trim();
+              }
+            } else if (tool.id === 'xml-formatter') {
+              if (forceMinify) {
+                return valToFormat
+                  .replace(/<!--[\s\S]*?-->/g, '')
+                  .replace(/>\s+</g, '><')
+                  .replace(/\s+/g, ' ')
+                  .trim();
+              }
+              const PADDING = indent === 'tab' ? '\t' : ' '.repeat(indent);
+              const reg = /(>)(<)(\/*)/g;
+              let formatted = '';
+              let pad = 0;
+              const xmlStr = valToFormat.replace(reg, '$1\r\n$2$3');
+              xmlStr.split('\r\n').forEach((node) => {
+                let indentLevel = 0;
+                if (node.match(/.+<\/\w[^>]*>$/)) {
+                  indentLevel = 0;
+                } else if (node.match(/^<\/\w/)) {
+                  if (pad !== 0) pad -= 1;
+                } else if (node.match(/^<\w[^>]*[^\/]>.*$/)) {
+                  indentLevel = 1;
+                } else {
+                  indentLevel = 0;
+                }
+                let padding = '';
+                for (let i = 0; i < pad; i++) padding += PADDING;
+                formatted += padding + node.trim() + '\r\n';
+                pad += indentLevel;
+              });
+              return formatted.trim();
+            } else if (tool.id === 'yaml-formatter') {
+              const parsed = yaml.load(valToFormat);
+              if (forceMinify) {
+                return yaml.dump(parsed, { flowLevel: 0, lineWidth: -1 }).replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+              }
+              return yaml.dump(parsed, {
+                indent: indent === 'tab' ? 2 : (indent as number),
+                sortKeys: sortKeys,
+              });
+            } else if (tool.id === 'js-minifier') {
+              return valToFormat
+                .replace(/\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm, '')
+                .replace(/\s+/g, ' ')
+                .replace(/\s*([=\{\}\(\);,:<>\+\-\*\/])\s*/g, '$1')
+                .trim();
+            }
+            return valToFormat;
+          },
+          { payloadLength: valToFormat.length }
+        );
+      }
+
+      setIsProcessing(false);
+      setExecTimeMs(res.durationMs);
+
+      if (res.success && res.data !== undefined) {
+        setOutput(res.data);
+      } else {
+        const errMsg = res.error || 'Formatting error';
+        setError(errMsg);
+
+        // Try extracting line number from syntax errors
+        const lineMatch = errMsg.match(/line\s+(\d+)/i) || errMsg.match(/position\s+(\d+)/i);
+        if (lineMatch) {
+          setErrorLine(parseInt(lineMatch[1], 10));
+        }
+      }
+    },
+    [tool.id, indent, sortKeys, sqlDialect, sqlKeywordCase]
+  );
+
+  // Initial formatting execution & initialInput synchronization
+  useEffect(() => {
+    if (initialInput && initialInput !== input) {
+      setInput(initialInput);
+      executeFormatting(initialInput);
+    } else if (input) {
+      executeFormatting(input);
+    }
+  }, [tool.id, initialInput]);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const getFileExtension = () => {
+    switch (tool.id) {
+      case 'json-formatter': return 'json';
+      case 'html-formatter': return 'html';
+      case 'css-formatter': return 'css';
+      case 'sql-formatter': return 'sql';
+      case 'xml-formatter': return 'xml';
+      case 'yaml-formatter': return 'yaml';
+      case 'js-minifier': return 'js';
+      default: return 'txt';
+    }
+  };
+
+  const handleDownloadOutput = () => {
+    const textToDownload = output || input;
+    if (!textToDownload) return;
+    const ext = getFileExtension();
+    downloadContentAsFile(textToDownload, `formatted-${tool.id.replace('-formatter', '')}.${ext}`);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const { content } = await readUploadedFile(file);
+      setInput(content);
+      executeFormatting(content);
+    } catch (err: any) {
+      setError(err?.message || 'Failed to read file');
+    }
+    if (e.target) e.target.value = '';
+  };
+
+  const handleCopy = () => {
+    if (!output) return;
+    navigator.clipboard.writeText(output);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleClearWorkspace = () => {
+    clearWorkspace('');
+    setOutput('');
+    setError(null);
+    setErrorLine(null);
+    setExecTimeMs(null);
+  };
+
+  const handleResetSample = () => {
+    const sample = getDefaultSample();
+    resetToSample(sample);
+    executeFormatting(sample);
+  };
+
+  return (
+    <div className="animate-fade-in space-y-6">
+      <ToolHeader
+        tool={tool}
+        onBackToHome={onBackToHome}
+        onSelectRelated={onSelectRelated}
+        onResetOrClear={handleClearWorkspace}
+        resetLabel="Clear Workspace"
+        onUploadFile={(content) => {
+          setInput(content);
+          executeFormatting(content);
+        }}
+        downloadContent={output || input}
+        inputContent={input}
+        outputContent={output}
+        hideFileActions={true}
+      />
+
+      {/* Toolbar */}
+      <div className="p-3.5 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] shadow-xs space-y-3">
+        {/* Row 1: Code Formatting Actions & Configurations */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => executeFormatting(input)}
+              disabled={isProcessing}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[color:var(--brand)] hover:bg-[color:var(--brand-hover)] transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+            >
+              {isProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+              <span>Format Code</span>
+            </button>
+
+            {['json-formatter', 'css-formatter', 'js-minifier', 'html-formatter', 'xml-formatter', 'yaml-formatter'].includes(tool.id) && (
+              <button
+                onClick={() => executeFormatting(input, true)}
+                disabled={isProcessing}
+                className="px-3 py-2 rounded-xl text-xs font-bold border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink)] hover:border-[color:var(--brand)] transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Minify
+              </button>
+            )}
+
+            {['json-formatter', 'yaml-formatter'].includes(tool.id) && (
+              <label className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink)] cursor-pointer select-none hover:border-[color:var(--brand)] transition-colors">
+                <input
+                  type="checkbox"
+                  checked={sortKeys}
+                  onChange={(e) => {
+                    setSortKeys(e.target.checked);
+                    setTimeout(() => executeFormatting(input), 0);
+                  }}
+                  className="rounded border-gray-300"
+                />
+                Sort keys
+              </label>
+            )}
+
+            {tool.id !== 'js-minifier' && (
+              <div className="flex items-center gap-1 p-0.5 border border-[color:var(--border)] rounded-xl bg-[color:var(--surface-elevated)]">
+                <span className="px-2 text-xs font-semibold text-[color:var(--ink-muted)]">Indent:</span>
+                {[2, 4, 'tab'].map((val) => (
+                  <button
+                    key={val}
+                    onClick={() => {
+                      setIndent(val as any);
+                      setTimeout(() => executeFormatting(input), 0);
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      indent === val
+                        ? 'bg-[color:var(--surface)] text-[color:var(--brand)] shadow-xs'
+                        : 'text-[color:var(--ink-muted)] hover:text-[color:var(--ink)]'
+                    }`}
+                  >
+                    {val === 'tab' ? 'Tab' : `${val} Spaces`}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {tool.id === 'sql-formatter' && (
+              <>
+                <select
+                  value={sqlDialect}
+                  onChange={(e) => {
+                    setSqlDialect(e.target.value as any);
+                    setTimeout(() => executeFormatting(input), 0);
+                  }}
+                  className="px-2.5 py-2 rounded-xl text-xs font-bold border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink)] cursor-pointer"
+                  title="SQL dialect"
+                >
+                  <option value="sql">Standard SQL</option>
+                  <option value="mysql">MySQL</option>
+                  <option value="postgresql">PostgreSQL</option>
+                  <option value="tsql">T-SQL (SQL Server)</option>
+                  <option value="sqlite">SQLite</option>
+                </select>
+                <select
+                  value={sqlKeywordCase}
+                  onChange={(e) => {
+                    setSqlKeywordCase(e.target.value as any);
+                    setTimeout(() => executeFormatting(input), 0);
+                  }}
+                  className="px-2.5 py-2 rounded-xl text-xs font-bold border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink)] cursor-pointer"
+                  title="Keyword case"
+                >
+                  <option value="upper">UPPER keywords</option>
+                  <option value="lower">lower keywords</option>
+                  <option value="preserve">Preserve case</option>
+                </select>
+              </>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[color:var(--surface-elevated)] text-[11px] font-medium text-[color:var(--ink-muted)] border border-[color:var(--border)]">
+              <Save className="w-3 h-3 text-[color:var(--brand)]" />
+              <span>{isSavedLocally ? 'Workspace Saved' : 'Auto-Saving'}</span>
+            </div>
+
+            {tool.id === 'json-formatter' && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[color:var(--surface-elevated)] text-[11px] font-medium text-[color:var(--brand)] border border-[color:var(--border)]">
+                <Cpu className="w-3 h-3" />
+                <span>Web Worker</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Row 2: File Import, Sample, Clear (Moved to Next Line) & Export / Copy */}
+        <div className="pt-2.5 border-t border-[color:var(--border)] flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Hidden File Input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept=".txt,.json,.xml,.sql,.yaml,.yml,.css,.html,.js,.ts"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink)] hover:text-[color:var(--brand)] hover:border-[color:var(--brand)] transition-colors cursor-pointer"
+              title="Import code from file"
+            >
+              <Upload className="w-3.5 h-3.5 text-[color:var(--brand)]" />
+              <span>Import File</span>
+            </button>
+
+            <button
+              onClick={handleResetSample}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink-muted)] hover:text-[color:var(--brand)] hover:border-[color:var(--brand)] transition-colors cursor-pointer"
+              title="Reset to sample code"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>Sample</span>
+            </button>
+
+            {input && (
+              <button
+                onClick={handleClearWorkspace}
+                title="Clear input and formatted output"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-[color:var(--border)] bg-[color:var(--surface-elevated)] text-[color:var(--ink-muted)] hover:text-rose-500 hover:border-rose-500/40 transition-colors cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Clear</span>
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {execTimeMs !== null && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[color:var(--surface-elevated)] text-[11px] font-mono text-[color:var(--ink-muted)] border border-[color:var(--border)]">
+                <Clock className="w-3 h-3 text-[color:var(--warning)]" />
+                <span>{execTimeMs}ms</span>
+              </div>
+            )}
+
+            {input && output && !error && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[color:var(--surface-elevated)] text-[11px] font-mono text-[color:var(--ink-muted)] border border-[color:var(--border)]" title="Input → Output size">
+                <span>{new Blob([input]).size} → {new Blob([output]).size} B</span>
+                {new Blob([output]).size < new Blob([input]).size && (
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                    −{Math.round((1 - new Blob([output]).size / new Blob([input]).size) * 100)}%
+                  </span>
+                )}
+                {new Blob([output]).size > new Blob([input]).size && (
+                  <span className="text-sky-600 dark:text-sky-400 font-bold">
+                    +{Math.round((new Blob([output]).size / new Blob([input]).size - 1) * 100)}%
+                  </span>
+                )}
+              </div>
+            )}
+
+            {output && !error && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50">
+                <CheckCircle2 className="w-3 h-3" />
+                <span>Valid</span>
+              </div>
+            )}
+
+            <button
+              onClick={handleDownloadOutput}
+              disabled={!output && !input}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl text-white shadow-xs disabled:opacity-40 cursor-pointer bg-[color:var(--brand)] hover:bg-[color:var(--brand-hover)] transition-colors"
+              title="Export formatted output"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export Output</span>
+            </button>
+
+            <button
+              onClick={handleCopy}
+              disabled={!output}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-40 ${
+                copied
+                  ? 'bg-emerald-500 text-white border border-emerald-500'
+                  : 'bg-[color:var(--surface-elevated)] border border-[color:var(--border)] text-[color:var(--ink)] hover:border-[color:var(--brand)]'
+              }`}
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copied ? 'Copied' : 'Copy Output'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {error && (
+        <div className="p-4 rounded-2xl border border-[color:var(--danger)]/30 bg-[color:var(--danger)]/10 text-[color:var(--danger)] flex items-start gap-3 animate-fade-in">
+          <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <div className="font-bold text-xs uppercase tracking-wider">Syntax Validation Failed</div>
+            <div className="font-mono text-xs sm:text-sm leading-relaxed">{error}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Editor Split */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Input CodeEditor */}
+        <div className="flex flex-col rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] overflow-hidden shadow-xs">
+          <EditorPaneHeader
+            idPrefix="formatter-input"
+            title="INPUT"
+            language={editorLang}
+            lineCount={input ? input.split('\n').length : 0}
+            charCount={input ? input.length : 0}
+          />
+          <CodeEditor
+            id={`formatter-input-${tool.id}`}
+            value={input}
+            onChange={(val) => {
+              setInput(val);
+            }}
+            language={editorLang}
+            height="420px"
+          />
+        </div>
+
+        {/* Output CodeEditor */}
+        <div className="flex flex-col rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] overflow-hidden shadow-xs">
+          <EditorPaneHeader
+            idPrefix="formatter-output"
+            title="FORMATTED OUTPUT"
+            language={editorLang}
+            lineCount={output ? output.split('\n').length : 0}
+            charCount={output ? output.length : 0}
+            onCopy={output ? handleCopy : undefined}
+            copyContent={output}
+            onExport={output ? handleDownloadOutput : undefined}
+          />
+          <CodeEditor
+            id={`formatter-output-${tool.id}`}
+            value={output}
+            readOnly
+            language={editorLang}
+            height="420px"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
