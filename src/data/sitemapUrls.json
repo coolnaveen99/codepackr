@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-09-12",
+  "updatedAt": "2026-09-29",
   "host": "www.codepackr.com",
   "baseUrl": "https://www.codepackr.com",
-  "totalUrls": 123,
+  "totalUrls": 124,
   "urls": [
     {
       "loc": "https://www.codepackr.com/",
@@ -24,6 +24,14 @@
       "loc": "https://www.codepackr.com/edi-tools",
       "path": "/edi-tools",
       "name": "EDI Tools & Business Transaction Suite",
+      "priority": "0.9",
+      "changefreq": "weekly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-integration-hub",
+      "path": "/edi-integration-hub",
+      "name": "EDI Integration Hub & Enterprise Gateway Suite",
       "priority": "0.9",
       "changefreq": "weekly",
       "category": "edi"
@@ -59,22 +67,6 @@
       "priority": "0.9",
       "changefreq": "weekly",
       "category": "converters"
-    },
-    {
-      "loc": "https://www.codepackr.com/financial-calculators",
-      "path": "/financial-calculators",
-      "name": "Financial & Retirement Calculators Suite",
-      "priority": "0.9",
-      "changefreq": "weekly",
-      "category": "financial-calculators"
-    },
-    {
-      "loc": "https://www.codepackr.com/calculators",
-      "path": "/calculators",
-      "name": "Financial, Loan & Math Calculators",
-      "priority": "0.9",
-      "changefreq": "weekly",
-      "category": "calculators"
     },
     {
       "loc": "https://www.codepackr.com/utilities",
@@ -437,9 +429,41 @@
       "category": "image"
     },
     {
+      "loc": "https://www.codepackr.com/edi-csv-converter",
+      "path": "/edi-csv-converter",
+      "name": "EDI to CSV & CSV to EDI Converter",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-hipaa-sanitizer",
+      "path": "/edi-hipaa-sanitizer",
+      "name": "EDI HIPAA De-Identifier & PHI Sanitizer",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-batch-splitter",
+      "path": "/edi-batch-splitter",
+      "name": "EDI Batch Splitter & Joiner",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-diff-compare",
+      "path": "/edi-diff-compare",
+      "name": "EDI Semantic Diff & Compare",
+      "priority": "0.8",
+      "changefreq": "monthly",
+      "category": "edi"
+    },
+    {
       "loc": "https://www.codepackr.com/edi-message-gateway",
       "path": "/edi-message-gateway",
-      "name": "EDI Message Gateway & Analyzer",
+      "name": "EDI Inbound & Outbound Integration Gateway",
       "priority": "0.8",
       "changefreq": "monthly",
       "category": "edi"
@@ -581,38 +605,6 @@
       "category": "xml"
     },
     {
-      "loc": "https://www.codepackr.com/financial-planner",
-      "path": "/financial-planner",
-      "name": "Retirement & Financial Planning Calculator",
-      "priority": "0.8",
-      "changefreq": "monthly",
-      "category": "financial-calculators"
-    },
-    {
-      "loc": "https://www.codepackr.com/loan-calculator",
-      "path": "/loan-calculator",
-      "name": "Loan & EMI Calculator",
-      "priority": "0.8",
-      "changefreq": "monthly",
-      "category": "financial-calculators"
-    },
-    {
-      "loc": "https://www.codepackr.com/sip-calculator",
-      "path": "/sip-calculator",
-      "name": "SIP Calculator",
-      "priority": "0.8",
-      "changefreq": "monthly",
-      "category": "financial-calculators"
-    },
-    {
-      "loc": "https://www.codepackr.com/investment-calculator",
-      "path": "/investment-calculator",
-      "name": "Investment Calculator",
-      "priority": "0.8",
-      "changefreq": "monthly",
-      "category": "financial-calculators"
-    },
-    {
       "loc": "https://www.codepackr.com/uuid-generator",
       "path": "/uuid-generator",
       "name": "UUID Generator",
@@ -701,6 +693,46 @@
       "category": "utilities"
     },
     {
+      "loc": "https://www.codepackr.com/edi-to-csv",
+      "path": "/edi-to-csv",
+      "name": "EDI to CSV Spreadsheet Converter",
+      "priority": "0.85",
+      "changefreq": "weekly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/csv-to-edi",
+      "path": "/csv-to-edi",
+      "name": "CSV to EDI X12 Generator",
+      "priority": "0.85",
+      "changefreq": "weekly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-splitter",
+      "path": "/edi-splitter",
+      "name": "EDI Multi-Transaction Splitter",
+      "priority": "0.85",
+      "changefreq": "weekly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-diff",
+      "path": "/edi-diff",
+      "name": "EDI X12 & EDIFACT Diff Tool",
+      "priority": "0.85",
+      "changefreq": "weekly",
+      "category": "edi"
+    },
+    {
+      "loc": "https://www.codepackr.com/edi-inbound-outbound-gateway",
+      "path": "/edi-inbound-outbound-gateway",
+      "name": "EDI Inbound & Outbound Integration Gateway",
+      "priority": "0.85",
+      "changefreq": "weekly",
+      "category": "edi"
+    },
+    {
       "loc": "https://www.codepackr.com/edi-gateway-analyzer",
       "path": "/edi-gateway-analyzer",
       "name": "EDI Message Gateway & Analyzer",
@@ -787,30 +819,6 @@
       "priority": "0.8",
       "changefreq": "monthly",
       "category": "encoders"
-    },
-    {
-      "loc": "https://www.codepackr.com/retirement-calculator",
-      "path": "/retirement-calculator",
-      "name": "Retirement & Financial Planning Calculator",
-      "priority": "0.9",
-      "changefreq": "weekly",
-      "category": "financial-calculators"
-    },
-    {
-      "loc": "https://www.codepackr.com/compound-investment-calculator",
-      "path": "/compound-investment-calculator",
-      "name": "Compound Investment Calculator",
-      "priority": "0.8",
-      "changefreq": "monthly",
-      "category": "financial-calculators"
-    },
-    {
-      "loc": "https://www.codepackr.com/compound-interest-calculator",
-      "path": "/compound-interest-calculator",
-      "name": "Compound Interest Calculator",
-      "priority": "0.8",
-      "changefreq": "monthly",
-      "category": "financial-calculators"
     },
     {
       "loc": "https://www.codepackr.com/json-to-definition",

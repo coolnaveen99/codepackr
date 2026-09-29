@@ -7,6 +7,8 @@ export interface EditorPaneHeaderProps {
   title: string;
   /** Optional language badge or mode indicator (e.g. "JSON", "SQL") */
   badge?: string;
+  /** Optional language alias for badge */
+  language?: string;
   /** Line count to display alongside title */
   lineCount?: number;
   /** Character count to display alongside title */
@@ -38,6 +40,7 @@ export interface EditorPaneHeaderProps {
 export const EditorPaneHeader: React.FC<EditorPaneHeaderProps> = ({
   title,
   badge,
+  language,
   lineCount,
   charCount,
   accept = '.txt,.json,.xml,.sql,.yaml,.yml,.css,.html,.js,.ts,.diff,.patch,.md,.env',
@@ -110,9 +113,9 @@ export const EditorPaneHeader: React.FC<EditorPaneHeaderProps> = ({
         <span className="block text-xs font-bold tracking-wider text-[color:var(--ink-muted)] uppercase">
           {title}
         </span>
-        {badge && (
+        {(badge || language) && (
           <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[color:var(--surface-muted)] text-[color:var(--ink-muted)] uppercase">
-            {badge}
+            {badge || language}
           </span>
         )}
         {typeof lineCount === 'number' && (

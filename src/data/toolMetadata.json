@@ -77,6 +77,44 @@
       }
     ]
   },
+  "edi-integration-hub": {
+    "name": "Edi Integration Hub",
+    "title": "Edi Integration Hub - Codepackr",
+    "description": "Free online edi integration hub tool for developers. Fast, client-side, and private.",
+    "canonicalPath": "/edi-integration-hub",
+    "canonicalUrl": "https://www.codepackr.com/edi-integration-hub",
+    "category": "utilities",
+    "features": [
+      "Fast, responsive browser utility for Edi Integration Hub with intuitive controls.",
+      "Modern developer-first UI optimized for dark and light themes.",
+      "Runs offline and locally without sending telemetry on your inputs.",
+      "Instant output generation with convenient one-click copying.",
+      "Keyboard shortcuts and clean ergonomics for high-productivity development."
+    ],
+    "howToUse": [
+      "Enter or adjust the input parameters in the tool control panel.",
+      "View real-time updates and calculation or generation results instantly.",
+      "Copy the result to your clipboard or customize settings as needed."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Edi Integration Hub?",
+        "answer": "No. All operations in Edi Integration Hub execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Edi Integration Hub offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Edi Integration Hub offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Edi Integration Hub handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
   "formatters": {
     "name": "Code & Data Formatters Suite",
     "title": "Code & Data Formatters Suite - Codepackr",
@@ -229,82 +267,6 @@
       },
       {
         "question": "How does Data & File Format Converters handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
-  "financial-calculators": {
-    "name": "Financial & Retirement Calculators Suite",
-    "title": "Financial & Retirement Calculators Suite - Codepackr",
-    "description": "Calculate retirement corpus, loan EMIs, SIP compounding, investments, and inflation-adjusted financial independence strategies.",
-    "canonicalPath": "/financial-calculators",
-    "canonicalUrl": "https://www.codepackr.com/financial-calculators",
-    "category": "financial-calculators",
-    "features": [
-      "Accurate mathematical calculations with instant reactive updates for Financial & Retirement Calculators Suite.",
-      "Detailed breakdown tables with visual graphs and itemized summaries.",
-      "Customizable interest rates, compounding frequencies, and terms.",
-      "Completely private: financial figures and inputs remain on your device.",
-      "Export calculation reports and shareable configurations."
-    ],
-    "howToUse": [
-      "Enter or adjust the input parameters in the tool control panel.",
-      "View real-time updates and calculation or generation results instantly.",
-      "Copy the result to your clipboard or customize settings as needed."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using Financial & Retirement Calculators Suite?",
-        "answer": "No. All operations in Financial & Retirement Calculators Suite execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use Financial & Retirement Calculators Suite offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Financial & Retirement Calculators Suite offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does Financial & Retirement Calculators Suite handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
-  "calculators": {
-    "name": "Financial & Math Calculators Suite",
-    "title": "Financial & Math Calculators Suite - Codepackr",
-    "description": "Calculate loans, monthly EMIs, amortization schedules, SIP returns, percentages, and gratuity tips with multi-currency support.",
-    "canonicalPath": "/calculators",
-    "canonicalUrl": "https://www.codepackr.com/calculators",
-    "category": "financial-calculators",
-    "features": [
-      "Accurate mathematical calculations with instant reactive updates for Financial & Math Calculators Suite.",
-      "Detailed breakdown tables with visual graphs and itemized summaries.",
-      "Customizable interest rates, compounding frequencies, and terms.",
-      "Completely private: financial figures and inputs remain on your device.",
-      "Export calculation reports and shareable configurations."
-    ],
-    "howToUse": [
-      "Enter or adjust the input parameters in the tool control panel.",
-      "View real-time updates and calculation or generation results instantly.",
-      "Copy the result to your clipboard or customize settings as needed."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using Financial & Math Calculators Suite?",
-        "answer": "No. All operations in Financial & Math Calculators Suite execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use Financial & Math Calculators Suite offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Financial & Math Calculators Suite offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does Financial & Math Calculators Suite handle large files or sensitive data?",
         "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
       }
     ]
@@ -2061,6 +2023,201 @@
       }
     ]
   },
+  "edi-csv-converter": {
+    "name": "EDI to CSV & CSV to EDI Converter",
+    "title": "EDI to CSV & CSV to EDI Converter - Codepackr",
+    "description": "Convert ANSI X12 and EDIFACT messages into flattened CSV or Excel spreadsheets, or generate compliant EDI 850/810 documents directly from spreadsheet tables.",
+    "canonicalPath": "/edi-csv-converter",
+    "canonicalUrl": "https://www.codepackr.com/edi-csv-converter",
+    "category": "edi",
+    "features": [
+      "Specialized parsing for ANSI ASC X12 and EDIFACT standard transactions.",
+      "Automatic detection of segment terminators (~, newline) and element separators (*).",
+      "Structured segment tree viewer for loops, headers, and trailers (ISA, GS, ST, SE, GE, IEA).",
+      "Zero server transmission — EDI payloads with sensitive PII/PHI remain strictly local.",
+      "Standard compliance checks and export options for integration workflows."
+    ],
+    "howToUse": [
+      "Paste your raw EDI transaction (e.g. 834, 837, 850, 855) into the EDI workspace.",
+      "The tool auto-detects segment delimiters (like ~ or newline) and element separators (*).",
+      "Inspect formatted segments, loop hierarchies, or generated JSON/997 outputs.",
+      "Copy or save your clean EDI output for testing and trading partner integration."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using EDI to CSV & CSV to EDI Converter?",
+        "answer": "No. All operations in EDI to CSV & CSV to EDI Converter execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use EDI to CSV & CSV to EDI Converter offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using EDI to CSV & CSV to EDI Converter offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does EDI to CSV & CSV to EDI Converter handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "edi-hipaa-sanitizer": {
+    "name": "EDI HIPAA De-Identifier & PHI Sanitizer",
+    "title": "EDI HIPAA De-Identifier & PHI Sanitizer - Codepackr",
+    "description": "100% client-side HIPAA Safe Harbor (45 CFR § 164.514(b)) de-identifier to mask patient names, SSNs, member IDs, DOBs, and addresses in 837/835/270 transactions with audit logging.",
+    "canonicalPath": "/edi-hipaa-sanitizer",
+    "canonicalUrl": "https://www.codepackr.com/edi-hipaa-sanitizer",
+    "category": "edi",
+    "features": [
+      "Specialized parsing for ANSI ASC X12 and EDIFACT standard transactions.",
+      "Automatic detection of segment terminators (~, newline) and element separators (*).",
+      "Structured segment tree viewer for loops, headers, and trailers (ISA, GS, ST, SE, GE, IEA).",
+      "Zero server transmission — EDI payloads with sensitive PII/PHI remain strictly local.",
+      "Standard compliance checks and export options for integration workflows."
+    ],
+    "howToUse": [
+      "Paste your raw EDI transaction (e.g. 834, 837, 850, 855) into the EDI workspace.",
+      "The tool auto-detects segment delimiters (like ~ or newline) and element separators (*).",
+      "Inspect formatted segments, loop hierarchies, or generated JSON/997 outputs.",
+      "Copy or save your clean EDI output for testing and trading partner integration."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using EDI HIPAA De-Identifier & PHI Sanitizer?",
+        "answer": "No. All operations in EDI HIPAA De-Identifier & PHI Sanitizer execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use EDI HIPAA De-Identifier & PHI Sanitizer offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using EDI HIPAA De-Identifier & PHI Sanitizer offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does EDI HIPAA De-Identifier & PHI Sanitizer handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "edi-batch-splitter": {
+    "name": "EDI Batch Splitter & Joiner",
+    "title": "EDI Batch Splitter & Joiner - Codepackr",
+    "description": "Split multi-transaction ANSI X12 and EDIFACT EDI files by Functional Group (GS/GE), Transaction Set (ST/SE), or PO/Claim numbers, and merge files with auto-recalculated envelopes.",
+    "canonicalPath": "/edi-batch-splitter",
+    "canonicalUrl": "https://www.codepackr.com/edi-batch-splitter",
+    "category": "edi",
+    "features": [
+      "Specialized parsing for ANSI ASC X12 and EDIFACT standard transactions.",
+      "Automatic detection of segment terminators (~, newline) and element separators (*).",
+      "Structured segment tree viewer for loops, headers, and trailers (ISA, GS, ST, SE, GE, IEA).",
+      "Zero server transmission — EDI payloads with sensitive PII/PHI remain strictly local.",
+      "Standard compliance checks and export options for integration workflows."
+    ],
+    "howToUse": [
+      "Paste your raw EDI transaction (e.g. 834, 837, 850, 855) into the EDI workspace.",
+      "The tool auto-detects segment delimiters (like ~ or newline) and element separators (*).",
+      "Inspect formatted segments, loop hierarchies, or generated JSON/997 outputs.",
+      "Copy or save your clean EDI output for testing and trading partner integration."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using EDI Batch Splitter & Joiner?",
+        "answer": "No. All operations in EDI Batch Splitter & Joiner execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use EDI Batch Splitter & Joiner offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using EDI Batch Splitter & Joiner offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does EDI Batch Splitter & Joiner handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "edi-diff-compare": {
+    "name": "EDI Semantic Diff & Compare",
+    "title": "EDI Semantic Diff & Compare - Codepackr",
+    "description": "Compare two ANSI X12 or EDIFACT documents side-by-side or unified with loop alignment, element-level mutation highlights, and volatile envelope ignoring.",
+    "canonicalPath": "/edi-diff-compare",
+    "canonicalUrl": "https://www.codepackr.com/edi-diff-compare",
+    "category": "edi",
+    "features": [
+      "Specialized parsing for ANSI ASC X12 and EDIFACT standard transactions.",
+      "Automatic detection of segment terminators (~, newline) and element separators (*).",
+      "Structured segment tree viewer for loops, headers, and trailers (ISA, GS, ST, SE, GE, IEA).",
+      "Zero server transmission — EDI payloads with sensitive PII/PHI remain strictly local.",
+      "Standard compliance checks and export options for integration workflows."
+    ],
+    "howToUse": [
+      "Paste your raw EDI transaction (e.g. 834, 837, 850, 855) into the EDI workspace.",
+      "The tool auto-detects segment delimiters (like ~ or newline) and element separators (*).",
+      "Inspect formatted segments, loop hierarchies, or generated JSON/997 outputs.",
+      "Copy or save your clean EDI output for testing and trading partner integration."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using EDI Semantic Diff & Compare?",
+        "answer": "No. All operations in EDI Semantic Diff & Compare execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use EDI Semantic Diff & Compare offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using EDI Semantic Diff & Compare offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does EDI Semantic Diff & Compare handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "edi-message-gateway": {
+    "name": "EDI Message Gateway & Analyzer",
+    "title": "EDI Message Gateway & Analyzer - Codepackr",
+    "description": "Receive, analyze, decode, validate, transform, and generate EDI messages across inbound and outbound pipelines with user-provided schemas and canonical models.",
+    "canonicalPath": "/edi-message-gateway",
+    "canonicalUrl": "https://www.codepackr.com/edi-message-gateway",
+    "category": "edi",
+    "features": [
+      "Specialized parsing for ANSI ASC X12 and EDIFACT standard transactions.",
+      "Automatic detection of segment terminators (~, newline) and element separators (*).",
+      "Structured segment tree viewer for loops, headers, and trailers (ISA, GS, ST, SE, GE, IEA).",
+      "Zero server transmission — EDI payloads with sensitive PII/PHI remain strictly local.",
+      "Standard compliance checks and export options for integration workflows."
+    ],
+    "howToUse": [
+      "Paste your raw EDI transaction (e.g. 834, 837, 850, 855) into the EDI workspace.",
+      "The tool auto-detects segment delimiters (like ~ or newline) and element separators (*).",
+      "Inspect formatted segments, loop hierarchies, or generated JSON/997 outputs.",
+      "Copy or save your clean EDI output for testing and trading partner integration."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using EDI Message Gateway & Analyzer?",
+        "answer": "No. All operations in EDI Message Gateway & Analyzer execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use EDI Message Gateway & Analyzer offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using EDI Message Gateway & Analyzer offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does EDI Message Gateway & Analyzer handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
   "edi-formatter": {
     "name": "EDI X12 Formatter & Beautifier",
     "title": "EDI X12 Formatter & Beautifier - Codepackr",
@@ -2719,158 +2876,6 @@
       }
     ]
   },
-  "financial-planner": {
-    "name": "Retirement & Financial Planning Calculator",
-    "title": "Retirement & Financial Planning Calculator - Codepackr",
-    "description": "Calculate your retirement corpus, projected vs required savings, inflation impact, and get actionable financial independence strategies.",
-    "canonicalPath": "/financial-planner",
-    "canonicalUrl": "https://www.codepackr.com/financial-planner",
-    "category": "financial-calculators",
-    "features": [
-      "Accurate mathematical calculations with instant reactive updates for Retirement & Financial Planning Calculator.",
-      "Detailed breakdown tables with visual graphs and itemized summaries.",
-      "Customizable interest rates, compounding frequencies, and terms.",
-      "Completely private: financial figures and inputs remain on your device.",
-      "Export calculation reports and shareable configurations."
-    ],
-    "howToUse": [
-      "Enter or adjust the input parameters in the tool control panel.",
-      "View real-time updates and calculation or generation results instantly.",
-      "Copy the result to your clipboard or customize settings as needed."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using Retirement & Financial Planning Calculator?",
-        "answer": "No. All operations in Retirement & Financial Planning Calculator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use Retirement & Financial Planning Calculator offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Retirement & Financial Planning Calculator offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does Retirement & Financial Planning Calculator handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
-  "loan-calculator": {
-    "name": "Loan & EMI Calculator",
-    "title": "Loan & EMI Calculator - Codepackr",
-    "description": "Calculate monthly loan EMI, total interest, and comprehensive repayment timeline.",
-    "canonicalPath": "/loan-calculator",
-    "canonicalUrl": "https://www.codepackr.com/loan-calculator",
-    "category": "financial-calculators",
-    "features": [
-      "Accurate mathematical calculations with instant reactive updates for Loan & EMI Calculator.",
-      "Detailed breakdown tables with visual graphs and itemized summaries.",
-      "Customizable interest rates, compounding frequencies, and terms.",
-      "Completely private: financial figures and inputs remain on your device.",
-      "Export calculation reports and shareable configurations."
-    ],
-    "howToUse": [
-      "Enter or adjust the input parameters in the tool control panel.",
-      "View real-time updates and calculation or generation results instantly.",
-      "Copy the result to your clipboard or customize settings as needed."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using Loan & EMI Calculator?",
-        "answer": "No. All operations in Loan & EMI Calculator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use Loan & EMI Calculator offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Loan & EMI Calculator offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does Loan & EMI Calculator handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
-  "sip-calculator": {
-    "name": "SIP Calculator",
-    "title": "SIP Calculator - Codepackr",
-    "description": "Calculate future wealth and expected maturity values for Systematic Investment Plans (SIP) and mutual fund investments with compounding graphs.",
-    "canonicalPath": "/sip-calculator",
-    "canonicalUrl": "https://www.codepackr.com/sip-calculator",
-    "category": "financial-calculators",
-    "features": [
-      "Accurate mathematical calculations with instant reactive updates for SIP Calculator.",
-      "Detailed breakdown tables with visual graphs and itemized summaries.",
-      "Customizable interest rates, compounding frequencies, and terms.",
-      "Completely private: financial figures and inputs remain on your device.",
-      "Export calculation reports and shareable configurations."
-    ],
-    "howToUse": [
-      "Enter or adjust the input parameters in the tool control panel.",
-      "View real-time updates and calculation or generation results instantly.",
-      "Copy the result to your clipboard or customize settings as needed."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using SIP Calculator?",
-        "answer": "No. All operations in SIP Calculator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use SIP Calculator offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using SIP Calculator offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does SIP Calculator handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
-  "investment-calculator": {
-    "name": "Investment Calculator",
-    "title": "Investment Calculator - Codepackr",
-    "description": "Calculate long-term investment growth, future portfolio values, and compound interest earnings with customizable deposit schedules and interactive graphs.",
-    "canonicalPath": "/investment-calculator",
-    "canonicalUrl": "https://www.codepackr.com/investment-calculator",
-    "category": "calculators",
-    "features": [
-      "Accurate mathematical calculations with instant reactive updates for Investment Calculator.",
-      "Detailed breakdown tables with visual graphs and itemized summaries.",
-      "Customizable interest rates, compounding frequencies, and terms.",
-      "Completely private: financial figures and inputs remain on your device.",
-      "Export calculation reports and shareable configurations."
-    ],
-    "howToUse": [
-      "Enter or adjust the input parameters in the tool control panel.",
-      "View real-time updates and calculation or generation results instantly.",
-      "Copy the result to your clipboard or customize settings as needed."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using Investment Calculator?",
-        "answer": "No. All operations in Investment Calculator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use Investment Calculator offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Investment Calculator offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does Investment Calculator handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
   "uuid-generator": {
     "name": "UUID Generator",
     "title": "UUID Generator - Codepackr",
@@ -3289,6 +3294,239 @@
       }
     ]
   },
+  "edi-to-csv": {
+    "name": "EDI to CSV & CSV to EDI Converter",
+    "title": "EDI to CSV & CSV to EDI Converter - Codepackr",
+    "description": "Convert ANSI X12 and EDIFACT messages into flattened CSV or Excel spreadsheets, or generate compliant EDI 850/810 documents directly from spreadsheet tables.",
+    "canonicalPath": "/edi-to-csv",
+    "canonicalUrl": "https://www.codepackr.com/edi-to-csv",
+    "category": "edi",
+    "features": [
+      "Specialized parsing for ANSI ASC X12 and EDIFACT standard transactions.",
+      "Automatic detection of segment terminators (~, newline) and element separators (*).",
+      "Structured segment tree viewer for loops, headers, and trailers (ISA, GS, ST, SE, GE, IEA).",
+      "Zero server transmission — EDI payloads with sensitive PII/PHI remain strictly local.",
+      "Standard compliance checks and export options for integration workflows."
+    ],
+    "howToUse": [
+      "Paste your raw EDI transaction (e.g. 834, 837, 850, 855) into the EDI workspace.",
+      "The tool auto-detects segment delimiters (like ~ or newline) and element separators (*).",
+      "Inspect formatted segments, loop hierarchies, or generated JSON/997 outputs.",
+      "Copy or save your clean EDI output for testing and trading partner integration."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using EDI to CSV & CSV to EDI Converter?",
+        "answer": "No. All operations in EDI to CSV & CSV to EDI Converter execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use EDI to CSV & CSV to EDI Converter offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using EDI to CSV & CSV to EDI Converter offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does EDI to CSV & CSV to EDI Converter handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "csv-to-edi": {
+    "name": "CSV to EDI X12 Generator",
+    "title": "CSV to EDI X12 Generator - Codepackr",
+    "description": "Generate valid ANSI ASC X12 850 Purchase Order and 810 Invoice EDI files from CSV spreadsheets with automatic enveloping and control counts.",
+    "canonicalPath": "/csv-to-edi",
+    "canonicalUrl": "https://www.codepackr.com/csv-to-edi",
+    "category": "edi",
+    "features": [
+      "Specialized parsing for ANSI ASC X12 and EDIFACT standard transactions.",
+      "Automatic detection of segment terminators (~, newline) and element separators (*).",
+      "Structured segment tree viewer for loops, headers, and trailers (ISA, GS, ST, SE, GE, IEA).",
+      "Zero server transmission — EDI payloads with sensitive PII/PHI remain strictly local.",
+      "Standard compliance checks and export options for integration workflows."
+    ],
+    "howToUse": [
+      "Paste your raw EDI transaction (e.g. 834, 837, 850, 855) into the EDI workspace.",
+      "The tool auto-detects segment delimiters (like ~ or newline) and element separators (*).",
+      "Inspect formatted segments, loop hierarchies, or generated JSON/997 outputs.",
+      "Copy or save your clean EDI output for testing and trading partner integration."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using CSV to EDI X12 Generator?",
+        "answer": "No. All operations in CSV to EDI X12 Generator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use CSV to EDI X12 Generator offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using CSV to EDI X12 Generator offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does CSV to EDI X12 Generator handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "edi-splitter": {
+    "name": "EDI Batch Splitter & Joiner",
+    "title": "EDI Batch Splitter & Joiner - Codepackr",
+    "description": "Split multi-transaction ANSI X12 and EDIFACT EDI files by Functional Group (GS/GE), Transaction Set (ST/SE), or PO/Claim numbers, and merge files with auto-recalculated envelopes.",
+    "canonicalPath": "/edi-splitter",
+    "canonicalUrl": "https://www.codepackr.com/edi-splitter",
+    "category": "edi",
+    "features": [
+      "Specialized parsing for ANSI ASC X12 and EDIFACT standard transactions.",
+      "Automatic detection of segment terminators (~, newline) and element separators (*).",
+      "Structured segment tree viewer for loops, headers, and trailers (ISA, GS, ST, SE, GE, IEA).",
+      "Zero server transmission — EDI payloads with sensitive PII/PHI remain strictly local.",
+      "Standard compliance checks and export options for integration workflows."
+    ],
+    "howToUse": [
+      "Paste your raw EDI transaction (e.g. 834, 837, 850, 855) into the EDI workspace.",
+      "The tool auto-detects segment delimiters (like ~ or newline) and element separators (*).",
+      "Inspect formatted segments, loop hierarchies, or generated JSON/997 outputs.",
+      "Copy or save your clean EDI output for testing and trading partner integration."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using EDI Batch Splitter & Joiner?",
+        "answer": "No. All operations in EDI Batch Splitter & Joiner execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use EDI Batch Splitter & Joiner offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using EDI Batch Splitter & Joiner offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does EDI Batch Splitter & Joiner handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "edi-diff": {
+    "name": "EDI Semantic Diff & Compare",
+    "title": "EDI Semantic Diff & Compare - Codepackr",
+    "description": "Compare two ANSI X12 or EDIFACT documents side-by-side or unified with loop alignment, element-level mutation highlights, and volatile envelope ignoring.",
+    "canonicalPath": "/edi-diff",
+    "canonicalUrl": "https://www.codepackr.com/edi-diff",
+    "category": "edi",
+    "features": [
+      "Specialized parsing for ANSI ASC X12 and EDIFACT standard transactions.",
+      "Automatic detection of segment terminators (~, newline) and element separators (*).",
+      "Structured segment tree viewer for loops, headers, and trailers (ISA, GS, ST, SE, GE, IEA).",
+      "Zero server transmission — EDI payloads with sensitive PII/PHI remain strictly local.",
+      "Standard compliance checks and export options for integration workflows."
+    ],
+    "howToUse": [
+      "Paste your raw EDI transaction (e.g. 834, 837, 850, 855) into the EDI workspace.",
+      "The tool auto-detects segment delimiters (like ~ or newline) and element separators (*).",
+      "Inspect formatted segments, loop hierarchies, or generated JSON/997 outputs.",
+      "Copy or save your clean EDI output for testing and trading partner integration."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using EDI Semantic Diff & Compare?",
+        "answer": "No. All operations in EDI Semantic Diff & Compare execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use EDI Semantic Diff & Compare offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using EDI Semantic Diff & Compare offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does EDI Semantic Diff & Compare handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "edi-inbound-outbound-gateway": {
+    "name": "Edi Inbound Outbound Gateway",
+    "title": "Edi Inbound Outbound Gateway - Codepackr",
+    "description": "Free online edi inbound outbound gateway tool for developers. Fast, client-side, and private.",
+    "canonicalPath": "/edi-inbound-outbound-gateway",
+    "canonicalUrl": "https://www.codepackr.com/edi-inbound-outbound-gateway",
+    "category": "utilities",
+    "features": [
+      "Fast, responsive browser utility for Edi Inbound Outbound Gateway with intuitive controls.",
+      "Modern developer-first UI optimized for dark and light themes.",
+      "Runs offline and locally without sending telemetry on your inputs.",
+      "Instant output generation with convenient one-click copying.",
+      "Keyboard shortcuts and clean ergonomics for high-productivity development."
+    ],
+    "howToUse": [
+      "Enter or adjust the input parameters in the tool control panel.",
+      "View real-time updates and calculation or generation results instantly.",
+      "Copy the result to your clipboard or customize settings as needed."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using Edi Inbound Outbound Gateway?",
+        "answer": "No. All operations in Edi Inbound Outbound Gateway execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use Edi Inbound Outbound Gateway offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Edi Inbound Outbound Gateway offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does Edi Inbound Outbound Gateway handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
+  "edi-gateway-analyzer": {
+    "name": "EDI Message Gateway & Analyzer",
+    "title": "EDI Message Gateway & Analyzer - Codepackr",
+    "description": "Receive, analyze, decode, validate, transform, and generate EDI messages across inbound and outbound pipelines with user-provided schemas and canonical models.",
+    "canonicalPath": "/edi-gateway-analyzer",
+    "canonicalUrl": "https://www.codepackr.com/edi-gateway-analyzer",
+    "category": "edi",
+    "features": [
+      "Specialized parsing for ANSI ASC X12 and EDIFACT standard transactions.",
+      "Automatic detection of segment terminators (~, newline) and element separators (*).",
+      "Structured segment tree viewer for loops, headers, and trailers (ISA, GS, ST, SE, GE, IEA).",
+      "Zero server transmission — EDI payloads with sensitive PII/PHI remain strictly local.",
+      "Standard compliance checks and export options for integration workflows."
+    ],
+    "howToUse": [
+      "Paste your raw EDI transaction (e.g. 834, 837, 850, 855) into the EDI workspace.",
+      "The tool auto-detects segment delimiters (like ~ or newline) and element separators (*).",
+      "Inspect formatted segments, loop hierarchies, or generated JSON/997 outputs.",
+      "Copy or save your clean EDI output for testing and trading partner integration."
+    ],
+    "faqs": [
+      {
+        "question": "Is my data or code sent to an external server when using EDI Message Gateway & Analyzer?",
+        "answer": "No. All operations in EDI Message Gateway & Analyzer execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
+      },
+      {
+        "question": "Can I use EDI Message Gateway & Analyzer offline without an internet connection?",
+        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using EDI Message Gateway & Analyzer offline."
+      },
+      {
+        "question": "Are there any usage limits, fees, or account registrations required?",
+        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
+      },
+      {
+        "question": "How does EDI Message Gateway & Analyzer handle large files or sensitive data?",
+        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
+      }
+    ]
+  },
   "edi-x12-formatter": {
     "name": "EDI X12 Formatter & Beautifier",
     "title": "EDI X12 Formatter & Beautifier - Codepackr",
@@ -3675,120 +3913,6 @@
       },
       {
         "question": "How does HMAC Generator & Authenticator handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
-  "retirement-calculator": {
-    "name": "Retirement & Financial Planning Calculator",
-    "title": "Retirement & Financial Planning Calculator - Codepackr",
-    "description": "Calculate your retirement corpus, projected vs required savings, inflation impact, and get actionable financial independence strategies.",
-    "canonicalPath": "/retirement-calculator",
-    "canonicalUrl": "https://www.codepackr.com/retirement-calculator",
-    "category": "financial-calculators",
-    "features": [
-      "Accurate mathematical calculations with instant reactive updates for Retirement & Financial Planning Calculator.",
-      "Detailed breakdown tables with visual graphs and itemized summaries.",
-      "Customizable interest rates, compounding frequencies, and terms.",
-      "Completely private: financial figures and inputs remain on your device.",
-      "Export calculation reports and shareable configurations."
-    ],
-    "howToUse": [
-      "Enter or adjust the input parameters in the tool control panel.",
-      "View real-time updates and calculation or generation results instantly.",
-      "Copy the result to your clipboard or customize settings as needed."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using Retirement & Financial Planning Calculator?",
-        "answer": "No. All operations in Retirement & Financial Planning Calculator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use Retirement & Financial Planning Calculator offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Retirement & Financial Planning Calculator offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does Retirement & Financial Planning Calculator handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
-  "compound-investment-calculator": {
-    "name": "Compound Investment Calculator",
-    "title": "Compound Investment Calculator - Codepackr",
-    "description": "Calculate long-term compound growth, future investment values, and interest earnings with customizable deposit schedules and interactive graphs.",
-    "canonicalPath": "/compound-investment-calculator",
-    "canonicalUrl": "https://www.codepackr.com/compound-investment-calculator",
-    "category": "calculators",
-    "features": [
-      "Accurate mathematical calculations with instant reactive updates for Compound Investment Calculator.",
-      "Detailed breakdown tables with visual graphs and itemized summaries.",
-      "Customizable interest rates, compounding frequencies, and terms.",
-      "Completely private: financial figures and inputs remain on your device.",
-      "Export calculation reports and shareable configurations."
-    ],
-    "howToUse": [
-      "Enter or adjust the input parameters in the tool control panel.",
-      "View real-time updates and calculation or generation results instantly.",
-      "Copy the result to your clipboard or customize settings as needed."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using Compound Investment Calculator?",
-        "answer": "No. All operations in Compound Investment Calculator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use Compound Investment Calculator offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Compound Investment Calculator offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does Compound Investment Calculator handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
-  "compound-interest-calculator": {
-    "name": "Compound Interest Calculator",
-    "title": "Compound Interest Calculator - Codepackr",
-    "description": "Calculate future compound interest, effective annual rate, and portfolio appreciation over time with visual growth breakdown.",
-    "canonicalPath": "/compound-interest-calculator",
-    "canonicalUrl": "https://www.codepackr.com/compound-interest-calculator",
-    "category": "calculators",
-    "features": [
-      "Accurate mathematical calculations with instant reactive updates for Compound Interest Calculator.",
-      "Detailed breakdown tables with visual graphs and itemized summaries.",
-      "Customizable interest rates, compounding frequencies, and terms.",
-      "Completely private: financial figures and inputs remain on your device.",
-      "Export calculation reports and shareable configurations."
-    ],
-    "howToUse": [
-      "Enter or adjust the input parameters in the tool control panel.",
-      "View real-time updates and calculation or generation results instantly.",
-      "Copy the result to your clipboard or customize settings as needed."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using Compound Interest Calculator?",
-        "answer": "No. All operations in Compound Interest Calculator execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use Compound Interest Calculator offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using Compound Interest Calculator offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does Compound Interest Calculator handle large files or sensitive data?",
         "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
       }
     ]
@@ -4629,45 +4753,6 @@
       },
       {
         "question": "How does Terms and Conditions handle large files or sensitive data?",
-        "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
-      }
-    ]
-  },
-  "edi-message-gateway": {
-    "name": "EDI Message Gateway & Analyzer",
-    "title": "EDI Message Gateway & Analyzer - Codepackr",
-    "description": "Receive, analyze, decode, validate, transform, and generate EDI messages across inbound and outbound pipelines with user-provided schemas and canonical models.",
-    "canonicalPath": "/edi-message-gateway",
-    "canonicalUrl": "https://www.codepackr.com/edi-message-gateway",
-    "category": "edi",
-    "features": [
-      "Specialized parsing for ANSI ASC X12 and EDIFACT standard transactions.",
-      "Automatic detection of segment terminators (~, newline) and element separators (*).",
-      "Structured segment tree viewer for loops, headers, and trailers (ISA, GS, ST, SE, GE, IEA).",
-      "Zero server transmission — EDI payloads with sensitive PII/PHI remain strictly local.",
-      "Standard compliance checks and export options for integration workflows."
-    ],
-    "howToUse": [
-      "Paste your raw EDI transaction (e.g. 834, 837, 850, 855) into the EDI workspace.",
-      "The tool auto-detects segment delimiters (like ~ or newline) and element separators (*).",
-      "Inspect formatted segments, loop hierarchies, or generated JSON/997 outputs.",
-      "Copy or save your clean EDI output for testing and trading partner integration."
-    ],
-    "faqs": [
-      {
-        "question": "Is my data or code sent to an external server when using EDI Message Gateway & Analyzer?",
-        "answer": "No. All operations in EDI Message Gateway & Analyzer execute 100% client-side in your web browser. Your source code, tokens, queries, and files never leave your computer or get transmitted to any remote server."
-      },
-      {
-        "question": "Can I use EDI Message Gateway & Analyzer offline without an internet connection?",
-        "answer": "Yes. Codepackr is engineered as a Progressive Web App (PWA) with service-worker caching. Once loaded in your browser, you can continue using EDI Message Gateway & Analyzer offline."
-      },
-      {
-        "question": "Are there any usage limits, fees, or account registrations required?",
-        "answer": "No. All developer tools on Codepackr are 100% free to use. There are no daily quotas, paywalls, or account sign-up requirements."
-      },
-      {
-        "question": "How does EDI Message Gateway & Analyzer handle large files or sensitive data?",
         "answer": "Because execution happens locally in your browser using modern Web APIs and V8 JavaScript engine optimizations, you get maximum privacy and low latency without network transfer limits."
       }
     ]

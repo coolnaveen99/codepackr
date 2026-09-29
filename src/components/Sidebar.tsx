@@ -4,7 +4,7 @@ import {
   CheckCircle2, Binary, Wrench, Type, FileCode, ShieldCheck,
   ChevronLeft, ChevronRight, X, Image as ImageIcon, ExternalLink, Lock
 } from 'lucide-react';
-import { ToolCategory, CategoryFilter } from '../types';
+import { ToolCategory, CategoryFilter, ToolDef } from '../types';
 import { TOOLS, CATEGORIES } from '../data/tools';
 import { useBookmarks } from '../lib/bookmarks';
 
@@ -16,10 +16,11 @@ interface SidebarProps {
   selectedCategory: CategoryFilter;
   onSelectCategory: (cat: CategoryFilter) => void;
   onGoHome: () => void;
-  onGoBookmarks: () => void;
-  onGoContact: () => void;
-  onGoPrivacy: () => void;
-  onGoTerms: () => void;
+  onGoBookmarks?: () => void;
+  onGoContact?: () => void;
+  onGoPrivacy?: () => void;
+  onGoTerms?: () => void;
+  onSelectTool?: (tool: ToolDef, initialPayload?: string) => void;
 }
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {

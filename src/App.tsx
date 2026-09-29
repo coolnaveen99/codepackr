@@ -35,7 +35,7 @@ import { BugReportModal } from './components/BugReportModal';
 import { GlobalBanner } from './components/GlobalBanner';
 import { useToolGovernance } from './lib/useToolGovernance';
 import { useAdminAuth } from './lib/useAdminAuth';
-import { resolveCurrentRoute, getToolPath } from './lib/urls';
+import { resolveCurrentRoute, getToolPath, AppPage } from './lib/urls';
 import { updateDocumentMetadata } from './lib/seo';
 import { CurrencyProvider } from './lib/CurrencyContext';
 import { safeLocalStorage } from './lib/storage';
@@ -43,7 +43,7 @@ import { popSmartPastePayload } from './lib/workspace';
 import { AlertTriangle, Lock, Shield } from 'lucide-react';
 
 interface HistorySnapshot {
-  page: 'home' | 'contact' | 'privacy' | 'admin' | 'notFound';
+  page: AppPage;
   tool: ToolDef | null;
   category: CategoryFilter;
   legalTab?: 'privacy' | 'terms';
@@ -65,7 +65,7 @@ export const App: React.FC = () => {
 
   const [initialRoute] = useState(() => resolveCurrentRoute());
   const [activeTool, setActiveTool] = useState<ToolDef | null>(() => initialRoute.tool);
-  const [activePage, setActivePage] = useState<'home' | 'contact' | 'privacy' | 'admin' | 'notFound'>(() => initialRoute.page);
+  const [activePage, setActivePage] = useState<AppPage>(() => initialRoute.page);
   const [legalTab, setLegalTab] = useState<'privacy' | 'terms'>(() => {
     if (initialRoute.category === 'terms') return 'terms';
     if (typeof window !== 'undefined' && window.location.pathname.includes('terms')) return 'terms';

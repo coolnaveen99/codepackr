@@ -136,18 +136,33 @@ export const PrivacyPolicyView: React.FC<PrivacyPolicyViewProps> = ({
 
             <section className="space-y-3">
               <h2 className="text-base font-bold" style={{ color: 'var(--ink)' }}>
-                4. Information We Collect (Minimalist Analytics &amp; Contact Webhooks)
+                4. Google AdSense &amp; Third-Party Advertising Cookies
               </h2>
+              <p style={{ color: 'var(--muted)' }}>
+                We use Google AdSense (Publisher ID: <code>pub-7526363571565796</code>) to serve unobtrusive, developer-relevant advertising on Codepackr. In compliance with Google AdSense program policies, please note:
+              </p>
               <ul className="list-disc pl-5 space-y-1" style={{ color: 'var(--muted)' }}>
-                <li><strong>Anonymous Traffic Telemetry:</strong> via Google Analytics 4 and Microsoft Clarity.</li>
-                <li><strong>Feedback &amp; Inquiries:</strong> if you contact us voluntarily.</li>
-                <li><strong>Local Storage Preferences:</strong> theme and bookmarks, never synced to our servers.</li>
+                <li>Third-party vendors, including Google, use cookies to serve ads based on a user&apos;s prior visits to Codepackr or other websites on the Internet.</li>
+                <li>Google&apos;s use of advertising cookies enables it and its partners to serve targeted ads based on your visit to this site and/or other sites across the web.</li>
+                <li>Users may opt out of personalized advertising at any time by visiting <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer" className="underline font-semibold" style={{ color: 'var(--brand)' }}>Google Ads Settings</a>, <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" className="underline font-semibold" style={{ color: 'var(--brand)' }}>AboutAds.info</a>, or <a href="https://optout.networkadvertising.org/" target="_blank" rel="noopener noreferrer" className="underline font-semibold" style={{ color: 'var(--brand)' }}>Network Advertising Initiative</a>.</li>
+                <li>Our client-side processing guarantees that your raw code, JSON/XML data, and EDI test files are never visible to or analyzed by any advertising networks.</li>
               </ul>
             </section>
 
             <section className="space-y-3">
               <h2 className="text-base font-bold" style={{ color: 'var(--ink)' }}>
-                5. Statutory Safe Harbor Under Information Technology Act, 2000
+                5. Web Analytics &amp; Telemetry
+              </h2>
+              <ul className="list-disc pl-5 space-y-1" style={{ color: 'var(--muted)' }}>
+                <li><strong>Anonymous Traffic Telemetry:</strong> via Google Analytics 4 (G-623PS59FEY) and Microsoft Clarity (ya1n0vs9s5) to track aggregate site performance and usability.</li>
+                <li><strong>Feedback &amp; Inquiries:</strong> voluntary contact form submissions processed directly.</li>
+                <li><strong>Local Storage Preferences:</strong> theme and bookmarks stored purely on your local machine, never synced to any remote servers.</li>
+              </ul>
+            </section>
+
+            <section className="space-y-3">
+              <h2 className="text-base font-bold" style={{ color: 'var(--ink)' }}>
+                6. Statutory Safe Harbor Under Information Technology Act, 2000
               </h2>
               <p style={{ color: 'var(--muted)' }}>
                 Codepackr operates in compliance with Section 79 of the Information Technology Act, 2000 (India) and related intermediary guidelines.
