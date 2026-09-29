@@ -1038,14 +1038,14 @@ function startServer() {
                                   token.added ? null : (
                                     <span
                                       key={idx}
-                                      className={token.removed ? 'bg-rose-500/35 text-rose-950 dark:text-rose-100 font-semibold px-0.5 rounded line-through' : ''}
+                                      className={token.removed ? 'bg-rose-500/35 text-rose-950 dark:text-rose-100 font-semibold px-0.5 rounded' : ''}
                                     >
                                       {token.value}
                                     </span>
                                   )
                                 )
                               ) : (
-                                <span className={row.left.type === 'del' ? 'line-through decoration-rose-500/70' : ''}>
+                                <span>
                                   {row.left.text}
                                 </span>
                               )}
@@ -1143,7 +1143,7 @@ function startServer() {
                                   r.type === 'add' && token.added
                                     ? 'bg-emerald-500/35 text-emerald-950 dark:text-emerald-100 font-semibold px-0.5 rounded shadow-xs'
                                     : r.type === 'del' && token.removed
-                                    ? 'bg-rose-500/35 text-rose-950 dark:text-rose-100 font-semibold px-0.5 rounded line-through'
+                                    ? 'bg-rose-500/35 text-rose-950 dark:text-rose-100 font-semibold px-0.5 rounded'
                                     : ''
                                 }
                               >
@@ -1152,7 +1152,7 @@ function startServer() {
                             );
                           })
                         ) : (
-                          <span className={r.type === 'del' ? 'line-through decoration-rose-500/70' : ''}>
+                          <span>
                             {r.text}
                           </span>
                         )}
